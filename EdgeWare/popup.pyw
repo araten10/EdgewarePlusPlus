@@ -199,9 +199,16 @@ class GifLabel(tk.Label):
         self.image = Image.open(path)
         self.configure(background='black')
         self.frames:list[ImageTk.PhotoImage] = []
-        self.delay = delay
+        if 'duration' in self.image.info:
+            self.delay = int(self.image.info['duration'])
+        else:
+            self.delay = delay
+
+        if self.delay < delay:
+            self.delay = delay
+
         try:
-            for i in count(1):
+            for i in range(0, self.image.n_frames):
                 hold_image = self.image.resize((resized_width, resized_height), Image.BOX)
                 if back_image is not None:
                     hold_image, back_image = hold_image.convert('RGBA'), back_image.convert('RGBA')
@@ -288,7 +295,15 @@ def run():
         image = Image.new('RGB', (video_properties['width'], video_properties['height']))
 
 
-    gif_bool = item.split('.')[-1].lower() == 'gif'
+    animated_gif = False
+    # Check to see if the gif is animated or a normal gif file
+    if item.split('.')[-1].lower() == 'gif':
+        if image.n_frames > 1:
+            animated_gif = True
+            
+        else:
+            image = image.convert('RGBA')
+
     border_wid_const = 5
     monitor_data = monitor_areas()
 
@@ -320,7 +335,7 @@ def run():
     if SUBLIMINAL_MODE:
         check_subliminal()
 
-    if do_deny and not gif_bool:
+    if do_deny and not animated_gif:
         blur_modes = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20),
                       ImageFilter.BoxBlur(5),      ImageFilter.BoxBlur(10),       ImageFilter.BoxBlur(20)]
         rand.shuffle(blur_modes)
@@ -336,7 +351,7 @@ def run():
         label.load(path = video_path, resized_width = resized_image.width, resized_height = resized_image.height)
         label.pack()
         thread.Thread(target=lambda: label.play(), daemon=True).start()
-    elif gif_bool:
+    elif animated_gif:
         #gif mode
         label = GifLabel(root)
         label.load(path=os.path.abspath(f'{os.getcwd()}\\resource\\img\\{item}'), resized_width = resized_image.width, resized_height = resized_image.height)
@@ -398,7 +413,7 @@ def run():
 
     root.geometry(f'{resized_image.width + border_wid_const - 1}x{resized_image.height + border_wid_const - 1}+{locX}+{locY}')
 
-    if gif_bool:
+    if animated_gif:
         label.next_frame()
 
     if HAS_LIFESPAN or LOWKEY_MODE and not (HIBERNATE_TYPE == 'Pump-Scare' and HIBERNATE_MODE):
