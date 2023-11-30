@@ -191,6 +191,13 @@ except:
     pip_install('bs4')
     from bs4 import BeautifulSoup
 
+try:
+    import vlc
+except:
+    logging.warning('failed to import VLC module')
+    pip_install('python-vlc')
+    import vlc
+
 #end non-standard imports
 
 DESKTOP_PATH = os.path.join(os.environ['USERPROFILE'], 'Desktop') #desktop path for making shortcuts
@@ -268,14 +275,7 @@ PUMP_SCARE_OFFSET = int(settings['pumpScareOffset'])
 
 VLC_MODE = int(settings['vlcMode']) == 1
 
-#import VLC module if VLC mode is active. I do this rather than auto-importing to keep compatability up and confusion down.
-#if this messes something up put it back in the import block
-if VLC_MODE:
-    try:
-        import vlc
-    except:
-        pip_install('python-vlc')
-        import vlc
+MOOD_MODE = int(settings['toggleMoodSet']) == 1
 
 hiberWait = thread.Event()
 wallpaperWait = thread.Event()

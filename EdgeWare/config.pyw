@@ -1887,7 +1887,7 @@ def show_window():
     toggleLanczos = Checkbutton(troubleshootingFrame1, text='Use Lanczos instead of Antialias', variable=antiOrLanczosVar, cursor='question_arrow')
     toggleInternetSetting = Checkbutton(troubleshootingFrame2, text='Disable Connection to Github', variable=toggleInternetVar, cursor='question_arrow')
     toggleHibernateSkip = Checkbutton(troubleshootingFrame1, text='Toggle Tray Hibernate Skip', variable=toggleHibSkipVar, cursor='question_arrow')
-    toggleMoodSettings = Checkbutton(troubleshootingFrame2, text='Toggle Mood Settings', variable=toggleMoodSetVar, cursor='question_arrow')
+    toggleMoodSettings = Checkbutton(troubleshootingFrame2, text='Turn Off Mood Settings', variable=toggleMoodSetVar, cursor='question_arrow')
 
     troubleshootingHostFrame.pack(fill='x')
     troubleshootingFrame1.pack(fill='both', side='left', expand=1)

@@ -91,6 +91,10 @@ Suggestions I got from people who used the software and I thought would be inter
 
 •+0.2-0.1 to version number: very small update, usually just a bugfix, accessibility options, UI tweaks
 
+**Version 7.55**
+
+•*Bugfix on VLC Mode that wouldn't install VLC unless you had it enabled, causing errors in popups*
+
 **Version 7.5**
 
 Was given a potential solution for fixing video issues that people have been having since the original EdgeWare, and decided to take it. Releasing a short-but-hopefully-sweet update to patch it.
