@@ -546,7 +546,10 @@ def main():
     if os.path.exists(os.path.join(PATH, 'hid_time.dat')):
         thread.Thread(target=do_timer).start()
 
-    #max value handling creation/cleaning
+    #max value handling creation/cleaning    
+    if not os.path.exists(PATH + '\\data\\'):
+        os.mkdir(PATH + '\\data\\')
+                          
     try:
         with open(PATH + '\\data\\max_videos.dat', 'w') as f:
             f.write('0')
@@ -699,8 +702,14 @@ def checkWallpaperStatus():
                             break
 
 #just checking %chance of doing annoyance options
-def do_roll(mod:int) -> bool:
-    return mod > rand.randint(0, 100)
+def do_roll(mod:float) -> bool:
+    if mod >= 100:
+        return True
+    
+    if mod <= 0:
+        return False
+    
+    return mod > (rand.random() * 100)
 
 #booru handling class
 class BooruDownloader:

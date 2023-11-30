@@ -421,6 +421,7 @@ def show_window():
             pumpScareOffsetVar        = IntVar(root, value=int(settings['pumpScareOffset']))
 
             vlcModeVar                = BooleanVar(root, value=(int(settings['vlcMode'])==1))
+            mulitClickVar             = BooleanVar(root, value=(int(settings['multiClick'])==1))
 
             #grouping for sanity's sake later
             in_var_group = [delayVar, popupVar, webVar, audioVar, promptVar, fillVar,
@@ -438,7 +439,7 @@ def show_window():
                             antiOrLanczosVar, toggleInternetVar, buttonlessVar, hibernateTypeVar,
                             hibernateLengthVar, fixWallpaperVar, toggleHibSkipVar, toggleMoodSetVar,
                             corruptionModeVar, corruptionTimeVar, pumpScareOffsetVar, corruptionFadeTypeVar,
-                            vlcModeVar]
+                            vlcModeVar, mulitClickVar]
 
             in_var_names = ['delay', 'popupMod', 'webMod', 'audioMod', 'promptMod', 'fill',
                             'fill_delay', 'replace', 'replaceThresh', 'start_on_logon',
@@ -454,7 +455,7 @@ def show_window():
                             'maxVideos', 'subliminalsChance', 'maxSubliminals', 'safeMode', 'antiOrLanczos',
                             'toggleInternet', 'buttonless', 'hibernateType', 'hibernateLength', 'fixWallpaper',
                             'toggleHibSkip', 'toggleMoodSet', 'corruptionMode', 'corruptionTime', 'pumpScareOffset',
-                            'corruptionFadeType', 'vlcMode']
+                            'corruptionFadeType', 'vlcMode', 'multiClick']
             break
         except Exception as e:
             messagebox.showwarning(
@@ -799,6 +800,8 @@ def show_window():
     popupManualttp = CreateToolTip(popupManual, 'Whenever the timer is reached to spawn a new popup, this value is rolled to see if it spawns or not.\n\n'
                                     'Leave at 100 for a more consistent experience, and make it less for a more random one.')
 
+    toggleMultiClickButton = Checkbutton(popupFrame, text='Multi-Click popups', variable=mulitClickVar, cursor='question_arrow')
+
     mitosis_group.append(popupScale)
     mitosis_group.append(popupManual)
 
@@ -831,6 +834,7 @@ def show_window():
     buttonlessttp = CreateToolTip(toggleEasierButton, 'Disables the \"close button\" on popups and allows you to click anywhere on the popup to close it.\n\n'
                                     'IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!')
 
+
     timeoutToggle = Checkbutton(timeoutFrame, text='Popup Timeout', variable=timeoutPopupsVar, command=lambda: toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group))
     timeoutSlider = Scale(timeoutFrame, label='Time (sec)', from_=1, to=120, orient='horizontal', variable=popupTimeoutVar)
 
@@ -845,7 +849,8 @@ def show_window():
     popupHostFrame.pack(fill='x')
     popupScale.pack(fill='x')
     popupManual.pack(fill='x')
-    popupFrame.pack(fill='y', side='left')
+    toggleMultiClickButton.pack(fill='x')
+    popupFrame.pack(fill='y', side='left')    
     timeoutSlider.pack(fill='x')
     timeoutToggle.pack(fill='x')
     timeoutFrame.pack(fill='y', side='left')

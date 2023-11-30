@@ -10,10 +10,13 @@ import webbrowser
 import ctypes
 import threading as thread
 import logging
-from tkinter import messagebox, simpledialog, Tk, Frame, Label, Button, RAISED
+from tkinter import messagebox, simpledialog, Tk, Frame, Label, Button, RAISED, StringVar
 from itertools import count, cycle
 from PIL import Image, ImageTk, ImageFilter
+
 import vlc
+import glob
+
 
 SYS_ARGS = sys.argv.copy()
 SYS_ARGS.pop(0)
@@ -141,6 +144,8 @@ with open(PATH + '\\config.cfg', 'r') as cfg:
 
     HIBERNATE_MODE = check_setting('hibernateMode')
 
+    MULTI_CLICK = check_setting('multiClick')
+
     if HIBERNATE_MODE:
         if settings['hibernateType'] == 'Chaos':
             with open(PATH + '\\data\\chaos_type.dat', 'r') as ct:
@@ -184,14 +189,70 @@ if WEB_OPEN:
         with open(PATH + '\\resource\\web.json', 'r') as web_file:
             web_dict = json.loads(web_file.read())
 
+
+class prefix_data:
+    def __init__(self, name, captions = None, images = None, max = 1, chance = 100.0):
+        # The name of the prefix
+        self.name = name
+        
+        # Captions to use if different from the name of the prefix
+        if captions:
+            self.captions = captions
+        else:
+            self.captions = name
+
+        # Image file prefix
+        if images:
+            self.images = images
+        else:
+            self.images = name
+
+        # Max number of popups to display
+        self.max = max
+
+        # Chance of this prefix being used (% out of 100, and it's a float to allow < 1% chance)
+        self.chance = float(chance)
+
+prefixes = {}
+
 try:
     with open(PATH + '\\resource\\CAPTIONS.json', 'r') as caption_file:
-        CAPTIONS = json.loads(caption_file.read())
+        CAPTIONS = json.load(caption_file)
         try:
             SUBMISSION_TEXT = CAPTIONS['subtext']
         except:
             print('will use default submission text')
-except:
+
+    prefixes['default'] = prefix_data('default', images='', max=1, chance=100.0)
+
+    # Everything in the 'prefix' block gets the default values
+    for prefix in CAPTIONS.get('prefix', []):
+        prefixes[prefix] = prefix_data(prefix)
+        
+
+    for prefix in CAPTIONS.get('prefix_settings', []):
+        base = CAPTIONS['prefix_settings'][prefix]
+        caption = base.get('caption', prefix) 
+        images = base.get('images', prefix)
+        max_popup = base.get('max', 1)
+        chance = float(base.get('chance', 100.0))
+
+        if prefix in prefixes:
+            entry = prefixes[prefix]
+            entry.caption = caption
+            entry.chance = chance            
+
+            if prefix != 'default':
+                entry.images = images
+                entry.max = max_popup
+        else:
+            prefixes[prefix] = prefix_data(prefix, captions=caption, images=images, max=max_popup, chance=chance)
+
+    # Default has to have a reasonable chance of popping up
+    if prefixes['default'].chance <= 10:
+        prefixes['default'].chance = 10
+
+except Exception:
     print('no CAPTIONS.json')
 
 #gif label class
@@ -269,26 +330,109 @@ class VideoLabel(tk.Label):
                 self.time_offset_end = time.perf_counter()
                 time.sleep(max(0, self.delay - (self.time_offset_end - self.time_offset_start)))
 
+
+# def pick_resource_alt(basepath):
+#     while True:
+#         prefix = rand.choice(list(prefixes.values()))
+
+#         if not do_roll(prefix.chance):
+#             continue
+
+#         if prefix.name == 'default' and prefix.images == '':
+#             # Remove any files that match other prefixes from default, unless it has a custom image value
+#             # (this prevents images being displayed with the wrong caption)
+#             itemsset = set(glob.glob(os.path.join(basepath, prefix.images)))
+
+#             for altprefix in prefixes:
+#                 if altprefix == 'default':
+#                     continue
+
+#                 altitems = set(glob.glob(os.path.join(basepath, prefixes[altprefix].images)))
+#                 itemsset = itemsset - altitems                
+            
+#             items = list(itemsset)
+#         else:            
+#             items = glob.glob(os.path.join(basepath, prefix.images))
+
+#         if not items:
+#             print("No files found for prefix {}".format(prefix.name))
+#             exit()
+        
+#         item = rand.choice(items)
+        
+#         while item.split('.')[-1].lower() == 'ini':
+#             item = rand.choice(items)
+
+#         caption = ""
+
+#         if SHOW_CAPTIONS and CAPTIONS and prefix.captions:
+#             if prefix.captions in CAPTIONS:            
+#                 caption = rand.choice(CAPTIONS[prefix.captions])
+        
+#         print(prefix.name, item, caption, prefix.max)
+#         return item, caption, prefix.max
+
+
+def pick_resource(basepath):
+    items = os.listdir(basepath)
+ 
+    if not items:
+        return "", "", 0
+
+    while True:
+        item = rand.choice(items)
+        while item.split('.')[-1].lower() == 'ini':
+            item = rand.choice(items)
+        
+        matched = 'none'
+        for prefix_name in prefixes:
+            if item.startswith(prefixes[prefix_name].images):
+                matched = 'partial'
+                if do_roll(prefixes[prefix_name].chance):
+                    matched = 'matched'
+                    break
+            
+        if matched == 'none':
+            prefix_name = 'default'
+
+        # In the case where there was a match to a prefix, but didn't win the roll, we want to try again            
+        elif matched == 'partial':
+            continue
+
+        prefix = prefixes[prefix_name]
+        
+        caption = ""
+        max = 1
+
+        if SHOW_CAPTIONS and CAPTIONS:
+            if prefix.captions in CAPTIONS:
+                caption = rand.choice(CAPTIONS[prefix.captions])
+                if prefix.max > 1:
+                    max = rand.randrange(2, prefix.max) 
+
+        item = os.path.join(basepath, item)
+        print(prefix.name, item, caption, max)
+        return item, caption, max
+
+root = Tk()
+
 def run():
     #var things
-    arr = os.listdir(f'{os.path.abspath(os.getcwd())}\\resource\\img\\')
-    item = arr[rand.randrange(len(arr))]
     video_mode = False
-
-    while item.split('.')[-1].lower() == 'ini':
-        item = arr[rand.randrange(len(arr))]
-    if len(SYS_ARGS) >= 1 and SYS_ARGS[0] != '%RAND%':
-        item = rand.choice(os.listdir(os.path.join(PATH, 'resource', 'vid')))
+    resource_path = f'{os.path.abspath(os.getcwd())}\\resource\\img\\'
     if len(SYS_ARGS) >= 1 and SYS_ARGS[0] == '-video':
         video_mode = True
+        resource_path = f'{os.path.abspath(os.getcwd())}\\resource\\vid\\'
+
+    item, caption_text, root.click_count = pick_resource(resource_path)
 
     if not video_mode:
         while True:
             try:
-                image = Image.open(os.path.abspath(f'{os.getcwd()}\\resource\\img\\{item}'))
+                image = Image.open(os.path.abspath(item))
                 break
             except:
-                item = arr[rand.randrange(len(arr))]
+                item, caption_text, root.click_count = pick_resource(resource_path)
     else:
         from videoprops import get_video_properties
         video_path = os.path.join(PATH, 'resource', 'vid', item)
@@ -312,7 +456,6 @@ def run():
     screen_height = data_list[3] - data_list[1]
 
     #window start
-    root = Tk()
     root.bind('<KeyPress>', lambda key: panic(key))
     root.configure(bg='black')
     root.overrideredirect(1)
@@ -430,17 +573,24 @@ def run():
     if HAS_LIFESPAN or LOWKEY_MODE and not (HIBERNATE_TYPE == 'Pump-Scare' and HIBERNATE_MODE):
         thread.Thread(target=lambda: live_life(root, LIFESPAN if not LOWKEY_MODE else DELAY / 1000), daemon=True).start()
 
-    if SHOW_CAPTIONS and CAPTIONS:
-        caption_text = select_caption(item)
-        if caption_text is not None:
-            captionLabel = Label(root, text=caption_text, wraplength=resized_image.width - border_wid_const)
-            captionLabel.place(x=5, y=5)
+    if not MULTI_CLICK:
+        root.click_count = 1
+    
+    if caption_text:
+        root.caption_string = StringVar()
+        root.caption_text = caption_text
+        root.caption_string.set(root.caption_text)
+        captionLabel = Label(root, textvariable=root.caption_string, wraplength=resized_image.width - border_wid_const)
+        captionLabel.place(x=5, y=5)
 
     if BUTTONLESS:
-        label.bind("<ButtonRelease-1>", buttonless_die)
+        label.bind("<ButtonRelease-1>", buttonless_click)
     else:
-        submit_button = Button(root, text=SUBMISSION_TEXT, command=die)
-        submit_button.place(x=resized_image.width - 5 - submit_button.winfo_reqwidth(), y=resized_image.height - 5 - submit_button.winfo_reqheight())
+        root.button_string = StringVar()
+        root.button_text = SUBMISSION_TEXT
+        root.button_string.set(root.button_text)
+        submit_button = Button(root, textvariable=root.button_string, command=click)
+        submit_button.place(x=resized_image.width - 25 - submit_button.winfo_reqwidth(), y=resized_image.height - 5 - submit_button.winfo_reqheight())
 
     if HIBERNATE_MODE and check_setting('fixWallpaper'):
         with open(PATH + '\\data\\hibernate_handler.dat', 'r+') as f:
@@ -464,7 +614,10 @@ def check_subliminal():
             SUBLIMINAL_MODE = False
 
 def live_life(parent:tk, length:int):
-    time.sleep(length)
+    while root.click_count > 0:
+        time.sleep(length)
+        click(allow_die=False)
+
     for i in range(100-OPACITY, 100):
         parent.attributes('-alpha', 1-i/100)
         time.sleep(FADE_OUT_TIME / 100)
@@ -493,14 +646,47 @@ def live_life(parent:tk, length:int):
                 f.truncate()
     os.kill(os.getpid(), 9)
 
-def do_roll(mod:int):
-    return mod > rand.randint(0, 100)
+def do_roll(mod:float) -> bool:
+    if mod >= 100:
+        return True
+    
+    if mod <= 0:
+        return False
+    
+    return mod > (rand.random() * 100)
 
 def select_url(arg:str):
     return web_dict['urls'][arg] + web_dict['args'][arg].split(',')[rand.randrange(len(web_dict['args'][arg].split(',')))]
 
-def buttonless_die(event):
-    die()
+def buttonless_click(event):
+    click()
+
+def click(allow_die = True):
+    # global click_count, caption_string, button_string
+
+    root.click_count -= 1
+
+    if root.click_count > 0:       
+        if BUTTONLESS:
+            root.caption_string.set(root.caption_text + ' (' + str(root.click_count) + ')')
+
+        else:
+            root.button_string.set(root.button_text + ' (' + str(root.click_count) + ')')
+
+            # Bring to front
+            root.deiconify()
+
+    else:
+        if allow_die:
+            die()
+
+        else:
+            if BUTTONLESS:
+                root.caption_string.set(root.caption_text)
+
+            else:
+                root.button_string.set(root.button_text)
+
 
 def die():
     if WEB_OPEN and web_dict and do_roll((100-WEB_PROB) / 2) and not LOWKEY_MODE:
@@ -532,14 +718,6 @@ def die():
                 f.truncate()
     os.kill(os.getpid(), 9)
 
-def select_caption(filename:str) -> str:
-    for obj in CAPTIONS['prefix']:
-        if filename.startswith(obj):
-            ls = CAPTIONS[obj]
-            ls.extend(CAPTIONS['default'])
-            return ls[rand.randrange(0, len(CAPTIONS[obj]))]
-    return CAPTIONS['default'][rand.randrange(0, len(CAPTIONS['default']))] if (len(CAPTIONS['default']) > 0) else None
-
 def panic(key):
     key_condition = (key.keysym == PANIC_KEY or key.keycode == PANIC_KEY)
     if PANIC_REQUIRES_VALIDATION and key_condition:
@@ -568,7 +746,7 @@ def panic(key):
             os.startfile('panic.pyw')
 
 def pumpScare():
-    if HIBERNATE_TYPE == 'Pump-Scare' and HIBERNATE_MODE:
+    if HIBERNATE_MODE and HIBERNATE_TYPE == 'Pump-Scare':
         time.sleep(2.5)
         die()
 
