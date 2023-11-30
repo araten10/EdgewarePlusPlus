@@ -331,48 +331,6 @@ class VideoLabel(tk.Label):
                 time.sleep(max(0, self.delay - (self.time_offset_end - self.time_offset_start)))
 
 
-# def pick_resource_alt(basepath):
-#     while True:
-#         prefix = rand.choice(list(prefixes.values()))
-
-#         if not do_roll(prefix.chance):
-#             continue
-
-#         if prefix.name == 'default' and prefix.images == '':
-#             # Remove any files that match other prefixes from default, unless it has a custom image value
-#             # (this prevents images being displayed with the wrong caption)
-#             itemsset = set(glob.glob(os.path.join(basepath, prefix.images)))
-
-#             for altprefix in prefixes:
-#                 if altprefix == 'default':
-#                     continue
-
-#                 altitems = set(glob.glob(os.path.join(basepath, prefixes[altprefix].images)))
-#                 itemsset = itemsset - altitems                
-            
-#             items = list(itemsset)
-#         else:            
-#             items = glob.glob(os.path.join(basepath, prefix.images))
-
-#         if not items:
-#             print("No files found for prefix {}".format(prefix.name))
-#             exit()
-        
-#         item = rand.choice(items)
-        
-#         while item.split('.')[-1].lower() == 'ini':
-#             item = rand.choice(items)
-
-#         caption = ""
-
-#         if SHOW_CAPTIONS and CAPTIONS and prefix.captions:
-#             if prefix.captions in CAPTIONS:            
-#                 caption = rand.choice(CAPTIONS[prefix.captions])
-        
-#         print(prefix.name, item, caption, prefix.max)
-#         return item, caption, prefix.max
-
-
 def pick_resource(basepath):
     items = os.listdir(basepath)
  
@@ -411,7 +369,7 @@ def pick_resource(basepath):
                     max = rand.randrange(2, prefix.max) 
 
         item = os.path.join(basepath, item)
-        print(prefix.name, item, caption, max)
+        # print(prefix.name, item, caption, max)
         return item, caption, max
 
 root = Tk()
