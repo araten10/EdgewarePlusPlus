@@ -169,4 +169,5 @@ EdgeWare/pass.hash
 EdgeWare/data/
 EdgeWare/logs/
 EdgeWare/resource/
+EdgeWare/moods/*
 EdgeWare/moods/*/*.json

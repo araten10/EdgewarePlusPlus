@@ -497,9 +497,8 @@ def run():
             if deny_options is None or len(CAPTIONS['denial']) == 0:
                 deny_text = 'Not for you~'
             else:
-                rand.shuffle(CAPTIONS['denial'])
-                deny_text = CAPTIONS['denial'].pop()
-            denyLabel = Label(label, text=deny_text)
+                deny_text = rand.choice(CAPTIONS['denial'])
+            denyLabel = Label(label, text=deny_text, wraplength=resized_image.width - border_wid_const)
             denyLabel.place(x=int(resized_image.width / 2) - int(denyLabel.winfo_reqwidth() / 2),
                             y=int(resized_image.height / 2) - int(denyLabel.winfo_reqheight() / 2))
 
@@ -534,9 +533,10 @@ def run():
     if not MULTI_CLICK:
         root.click_count = 1
     
+    root.caption_text = caption_text
+    
     if caption_text:
         root.caption_string = StringVar()
-        root.caption_text = caption_text
         root.caption_string.set(root.caption_text)
         captionLabel = Label(root, textvariable=root.caption_string, wraplength=resized_image.width - border_wid_const)
         captionLabel.place(x=5, y=5)
@@ -626,7 +626,8 @@ def click(allow_die = True):
 
     if root.click_count > 0:       
         if BUTTONLESS:
-            root.caption_string.set(root.caption_text + ' (' + str(root.click_count) + ')')
+            if root.caption_text:
+                root.caption_string.set(root.caption_text + ' (' + str(root.click_count) + ')')
 
         else:
             root.button_string.set(root.button_text + ' (' + str(root.click_count) + ')')
