@@ -15,7 +15,6 @@ from itertools import count, cycle
 from PIL import Image, ImageTk, ImageFilter
 
 import vlc
-import glob
 
 
 SYS_ARGS = sys.argv.copy()
@@ -362,7 +361,7 @@ def pick_resource(basepath):
         caption = ""
         max = 1
 
-        if SHOW_CAPTIONS and CAPTIONS:
+        if SHOW_CAPTIONS and CAPTIONS and prefix.captions:
             if prefix.captions in CAPTIONS:
                 caption = rand.choice(CAPTIONS[prefix.captions])
                 if prefix.max > 1:
@@ -641,7 +640,8 @@ def click(allow_die = True):
 
         else:
             if BUTTONLESS:
-                root.caption_string.set(root.caption_text)
+                if root.caption_text:
+                    root.caption_string.set(root.caption_text)
 
             else:
                 root.button_string.set(root.button_text)
