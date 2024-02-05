@@ -10,11 +10,17 @@ EdgeWare is a fetish-designed program (so 18+ only!!!) that essentially spawns p
 
 PetitTournesol (EdgeWare's original creator) more or less took a hiatus and hasn't updated EdgeWare since 2022, which is totally valid. That being said, I felt like there were lots of things I personally wanted to see in the program. Inspired mostly by being mildly frustrated at deleting those dang desktop icons every time, I decided to start learning python and share the changes i've made. Thus EdgeWare++ was born, and as of writing this "new and improved" intro, there's over 10 new features to play around with. Some are quality of life updates, some are more fun things to tease yourself with. I'm generally trying to be as minimally intrusive to the original program as possible- my goal is complete both-ways pack compatibility with the old version of EdgeWare. I also don't want to remove any features (unless they were literally defunct), but I have moved some stuff around in the config menu to try and make more space.
 
-"So how do I start using this darn thing?" Click the big ol' "code" button in the top right, then "download zip". Save and extract it somewhere, then run "EdgewareSetup.bat". This will install python 3.10 for you, if you don't already have it. After that it will give you instructions for further use, and open up "config.pyw" in the EdgeWare subfolder. From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original EdgeWare page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and i'm hoping to make a few myself to showcase the new features this extension can do.
-
 **Any damage you do to your computer with EdgeWare is your own responsibility! Please read the "About" tab in the config window and make backups if you're planning on using the advanced, dangerous settings!**
 
 The EdgeWare++ Pack Editor is now live [here](https://github.com/araten10/EdgewareEditor-PlusPlus).
+
+## So how do I start using this darn thing?
+
+Click the big ol' "code" button in the top right, then "download zip". Save and extract it somewhere, then, if you're using Windows, run "EdgewareSetup.bat". This will install python 3.10 for you, if you don't already have it. After that it will give you instructions for further use, and open up "config.pyw" in the EdgeWare subfolder.
+
+If you're using Linux, first you need to install Python 3 and pip yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip`. Once you have Python and pip installed, download and extract EdgeWare as a ZIP or clone the repository, then install the dependencies by opening a terminal window in the `EdgewarePlusPlus` direcory and running `pip3 install -r requirements.txt` or `python3 -m pip requirements.txt`. Now you can run EdgeWare by starting `config.pyw` or `start.pyw` with Python: `python3 path/to/file.pyw`. `config.pyw` allows you to configure EdgeWare, and `start.pyw` will start EdgeWare itself.
+
+From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original EdgeWare page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and i'm hoping to make a few myself to showcase the new features this extension can do.
 
 ## New Features In Edgeware++:
 
@@ -57,6 +63,8 @@ The EdgeWare++ Pack Editor is now live [here](https://github.com/araten10/Edgewa
 •*Different graphical themes, including dark mode (and a few other fun ones!)*
 
 •*Allowing creation of a per-pack config setup, to help pack creators show off their "intended" settings*
+
+•*Linux compatibility*
 
 ## Planned Additions:
 
