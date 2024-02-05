@@ -6,6 +6,7 @@ import random as rand
 import tkinter as tk
 from tkinter import messagebox, font
 from tkinter import *
+from utils import utils
 
 SYS_ARGS = sys.argv.copy()
 SYS_ARGS.pop(0)
@@ -22,7 +23,7 @@ PATH = str(pathlib.Path(__file__).parent.absolute())
 os.chdir(PATH)
 
 
-with open(PATH + '\\config.cfg') as settings:
+with open(os.path.join(PATH, 'config.cfg')) as settings:
     jsondata = json.loads(settings.read())
     maxMistakes = int(jsondata['promptMistakes'])
     THEME = jsondata['themeType']
@@ -32,16 +33,16 @@ if len(SYS_ARGS) >= 1 and SYS_ARGS[0] != '0':
     MOOD_ID = SYS_ARGS[0].strip('-')
 
 if MOOD_ID != '0':
-    if os.path.exists(PATH + f'\\moods\\{MOOD_ID}.json'):
-        with open(PATH + f'\\moods\\{MOOD_ID}.json', 'r') as f:
+    if os.path.exists(os.path.join(PATH, 'moods', f'{MOOD_ID}.json')):
+        with open(os.path.join(PATH, 'moods', f'{MOOD_ID}.json'), 'r') as f:
             moodData = json.loads(f.read())
-    elif os.path.exists(PATH + f'\\moods\\unnamed\\{MOOD_ID}.json'):
-        with open(PATH + f'\\moods\\unnamed\\{MOOD_ID}.json', 'r') as f:
+    elif os.path.exists(os.path.join(PATH, 'moods', 'unnamed', f'{MOOD_ID}.json')):
+        with open(os.path.join(PATH, 'moods', 'unnamed', f'{MOOD_ID}.json'), 'r') as f:
             moodData = json.loads(f.read())
 
-if os.path.exists(PATH + '\\resource\\prompt.json'):
+if os.path.exists(os.path.join(PATH, 'resource', 'prompt.json')):
     hasData = True
-    with open(PATH + '\\resource\\prompt.json', 'r') as f:
+    with open(os.path.join(PATH, 'resource', 'prompt.json'), 'r') as f:
         textData = json.loads(f.read())
         try:
             submission_text = textData['subtext']
@@ -102,18 +103,20 @@ def unborderedWindow():
 
     txt = buildText()
 
-    wid = root.winfo_screenwidth() / 4
-    hgt = root.winfo_screenheight() / 2
+    monitor_data = utils.monitor_areas()
+    area = rand.choice(monitor_data) # TODO: Only on primary monitor?
+    wid = area.width / 4
+    hgt = area.height / 2
 
     textLabel = Label(root, text=txt, wraplength=wid, bg=back, fg=fore)
     textLabel.pack()
 
-    root.geometry('%dx%d+%d+%d' % (wid, hgt, 2*wid - wid / 2, hgt - hgt / 2))
+    root.geometry('%dx%d+%d+%d' % (wid, hgt, area.x + 2*wid - wid / 2, area.y + hgt - hgt / 2))
 
-    root.overrideredirect(1)
     root.frame = Frame(root, borderwidth=2, relief=RAISED, bg=back)
     root.frame.pack_propagate(True)
     root.wm_attributes('-topmost', 1)
+    utils.set_borderless(root)
 
     inputBox = Text(root, bg=textb, fg=textf)
     inputBox.pack()

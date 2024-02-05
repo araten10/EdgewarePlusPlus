@@ -1,22 +1,24 @@
 import ctypes
 import os
 import pathlib
-PATH = str(pathlib.Path(__file__).parent.absolute())
+from pathlib import Path
+from utils import utils
+
+PATH = Path(__file__).parent
 
 timeObjPath = os.path.join(PATH, 'hid_time.dat')
-HIDDEN_ATTR = 0x02
-SHOWN_ATTR  = 0x08
+
 #checking timer
 try:
-    ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, SHOWN_ATTR)
+    utils.show_file(timeObjPath)
 except:
     ''
 if os.path.exists(os.path.join(PATH, 'hid_time.dat')):
-    ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, HIDDEN_ATTR)
+    utils.hide_file(timeObjPath)
     #sudoku if timer after hiding file again
     os.kill(os.getpid(), 9)
 else:
     #continue if no timer
-    ctypes.windll.user32.SystemParametersInfoW(20, 0, PATH + '\\default_assets\\default_win10.jpg', 0)
+    utils.set_wallpaper(os.path.join(PATH, 'default_assets', 'default_win10.jpg'))
 
-os.startfile('panic.bat')
+utils.panic_script()

@@ -14,10 +14,13 @@ import logging
 import time
 import textwrap
 import random as rand
+import getpass
 from tkinter import Tk, ttk, simpledialog, messagebox, filedialog, IntVar, BooleanVar, StringVar, Frame, Checkbutton, Button, Scale, Label, Toplevel, Entry, OptionMenu, Listbox, SINGLE, DISABLED, GROOVE, RAISED, Text, END, Scrollbar, VERTICAL, font, CENTER
 from tk_ToolTip_class101 import CreateToolTip
+from pathlib import Path
+from utils import utils
 
-PATH = f'{str(pathlib.Path(__file__).parent.absolute())}\\'
+PATH = Path(__file__).parent
 os.chdir(PATH)
 
 #starting logging
@@ -28,13 +31,14 @@ logging.basicConfig(filename=os.path.join(PATH, 'logs', LOG_TIME + '-dbg.txt'), 
 logging.info('Started config logging successfully.')
 
 def pip_install(packageName:str):
-    try:
-        logging.info(f'attempting to install {packageName}')
-        subprocess.call(f'py -m pip install {packageName}')
-    except:
-        logging.warning(f'failed to install {packageName} using py -m pip, trying raw pip request')
-        subprocess.call(f'pip install {packageName}')
-        logging.warning(f'{packageName} should be installed, fatal errors will occur if install failed.')
+    if utils.is_windows():
+        try:
+            logging.info(f'attempting to install {packageName}')
+            subprocess.call(f'py -m pip install {packageName}')
+        except:
+            logging.warning(f'failed to install {packageName} using py -m pip, trying raw pip request')
+            subprocess.call(f'pip install {packageName}')
+            logging.warning(f'{packageName} should be installed, fatal errors will occur if install failed.')
 
 try:
     import requests
@@ -111,6 +115,7 @@ PLUSPLUS_TEXT           = 'Thanks for taking the time to check out this extensio
 PACKINFO_TEXT          = 'The pack info section contains an overview for whatever pack is currently loaded.\n\nThe \"Stats\" tab allows you to see what features are included in the current pack (or if a pack is even loaded at all), but keep in mind all of these features have default fallbacks if they aren\'t included. It also lets you see a lot of fun stats relating to the pack, including almost everything you\'ll encounter while using EdgeWare. Keep in mind that certain things having \"0\" as a stat doesn\'t mean you can\'t use it, for example, having 0 subliminals uses the default spiral and having 0 images displays a very un-sexy circle.\n\nThe \"Information\" tab gets info on the pack from //resource//info.json, which is a new addition to EdgeWare++. This feature was added to allow pack creators to give the pack a formal name and description without having to worry about details being lost if transferred from person to person. Think of it like a readme. Also included in this section is the discord status info, which gives what your discord status will be set to if that setting is turned on, along with the image. As of time of writing (or if I forget to update this later), the image cannot be previewed as it is \"hard coded\" into EdgeWare\'s discord application and accessed through the API. As I am not the original creator of EdgeWare, and am not sure how to contact them, the best I could do is low-res screenshots or the name of each image. I chose the latter. Because of this hard-coding, the only person i\'ve run into so far who use these images is PetitTournesol themselves, but it should be noted that anyone can use them as long as they know what to add to the discord.dat file. This is partially the reason I left this information in.\n\nThe \"Moods\" tab is where you can access mood settings and previews for the current pack. The left table shows information for media (linking moods to images, videos, etc), captions, and prompts, while the \"Corruption Path\" area shows how these moods correlate to corruption levels.'
 FILE_TEXT              = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the \"total logs in folder\" stat will always display as \"1\".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a \"moods json file\", which is tapped into when selecting what moods you want to see in the \"Pack Info\" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want EdgeWare++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.\n\n When manually editing mood config jsons, you don\'t need to worry about how the unique ID is generated- the file tab will tell you what to look for. If you are curious though, here is the exact formula:\n\nnum_images + num_audio + num_video + wallpaper(y/n) + loading_splash(y/n) + discord_status(y/n) + icon(y/n) + corruption(y/n)\n\nFor example:\nA pack with 268 images, 7 audio, 6 videos, has a wallpaper, doesn\'t have a custom loading splash, has a discord status, doesn\'t have a custom icon, and doesn\'t have a corruption file, would generate \"26876wxdxx.json\" in //moods//unnamed (mood files go in unnamed when using unique IDs)'
 
+BUTTON_FACE = 'SystemButtonFace' if os.name == 'nt' else 'gray90'
 
 errors_list = []
 
@@ -127,10 +132,10 @@ INFO_CREATOR_DEFAULT = 'Anonymous'
 INFO_VERSION_DEFAULT = '0'
 INFO_DISCORD_DEFAULT = ['[No pack loaded, or the pack does not have a \'discord.dat\' file.]', 'default']
 
-if os.path.isfile(PATH + '\\resource\\info.json'):
+if os.path.isfile(os.path.join(PATH, 'resource', 'info.json')):
     try:
         info_dict = ''
-        with open(f'{PATH}\\resource\\info.json') as r:
+        with open(os.path.join(PATH, 'resource', 'info.json')) as r:
             info_dict = json.loads(r.read())
         info_name = info_dict['name'] if info_dict['name'] else 'Unnamed Pack'
         info_description = info_dict['description'] if info_dict['description'] else 'No description set.'
@@ -158,36 +163,32 @@ else:
 
 #get loading splash
 try:
-    if os.path.isfile(PATH + '\\resource\\loading_splash.png'):
-        LOADING_PATH = '\\resource\\loading_splash.png'
-    elif os.path.isfile(PATH + '\\resource\\loading_splash.gif'):
-        LOADING_PATH = '\\resource\\loading_splash.gif'
-    elif os.path.isfile(PATH + '\\resource\\loading_splash.jpg'):
-        LOADING_PATH = '\\resource\\loading_splash.jpg'
-    elif os.path.isfile(PATH + '\\resource\\loading_splash.jpeg'):
-        LOADING_PATH = '\\resource\\loading_splash.jpeg'
-    elif os.path.isfile(PATH + '\\resource\\loading_splash.bmp'):
-        LOADING_PATH = '\\resource\\loading_splash.bmp'
-    else:
-        LOADING_PATH = '\\default_assets\\loading_splash.png'
+    LOADING_PATH = None
+    for file_format in ['png', 'gif', 'jpg', 'jpeg', 'bmp']:
+        if os.path.isfile(os.path.join(PATH, 'resource', f'loading_splash.{file_format}')):
+            LOADING_PATH = os.path.join('resource', f'loading_splash.{file_format}')
+            break
+
+    if not LOADING_PATH:
+        LOADING_PATH = os.path.join('default_assets', 'loading_splash.png')
 except:
-    LOADING_PATH = '\\default_assets\\loading_splash.png'
+    LOADING_PATH = os.path.join('default_assets', 'loading_splash.png')
 
 UNIQUE_ID = '0'
 
 #creating a semi-parseable unique ID for the pack to make mood saving work, if the pack doesn't have an info.json file.
 #probably could have made it so the user manually has to save/load and not worried about this, but here we are
-if info_id == '0' and os.path.exists(PATH + '\\resource\\'):
+if info_id == '0' and os.path.exists(os.path.join(PATH, 'resource')):
     try:
         #already done the brunt of the work for getting these values in the pack info page, so i'm just using those again here. If this needs to be replaced, look there too
-        im = str(len(os.listdir(PATH + '\\resource\\img\\'))) if os.path.exists(PATH + '\\resource\\img\\') else '0'
-        au = str(len(os.listdir(PATH + '\\resource\\aud\\'))) if os.path.exists(PATH + '\\resource\\aud\\') else '0'
-        vi = str(len(os.listdir(PATH + '\\resource\\vid\\'))) if os.path.exists(PATH + '\\resource\\vid\\') else '0'
-        wa = 'w' if os.path.isfile(PATH + '\\resource\\wallpaper.png') else 'x'
-        sp = 's' if LOADING_PATH != '\\default_assets\\loading_splash.png' else 'x'
-        di = 'd' if os.path.isfile(PATH + '\\resource\\discord.dat') else 'x'
-        ic = 'i' if os.path.isfile(PATH + '\\resource\\icon.ico') else 'x'
-        co = 'c' if os.path.isfile(PATH + '\\resource\\corruption.json') else 'x'
+        im = str(len(os.listdir(os.path.join(PATH, 'resource', 'img')))) if os.path.exists(os.path.join(PATH, 'resource', 'img')) else '0'
+        au = str(len(os.listdir(os.path.join(PATH, 'resource', 'aud')))) if os.path.exists(os.path.join(PATH, 'resource', 'aud')) else '0'
+        vi = str(len(os.listdir(os.path.join(PATH, 'resource', 'vid')))) if os.path.exists(os.path.join(PATH, 'resource', 'vid')) else '0'
+        wa = 'w' if os.path.isfile(os.path.join(PATH, 'resource', 'wallpaper.png')) else 'x'
+        sp = 's' if LOADING_PATH != os.path.join('default_assets', 'loading_splash.png') else 'x'
+        di = 'd' if os.path.isfile(os.path.join(PATH, 'resource', 'discord.dat')) else 'x'
+        ic = 'i' if os.path.isfile(os.path.join(PATH, 'resource', 'icon.ico')) else 'x'
+        co = 'c' if os.path.isfile(os.path.join(PATH, 'resource', 'corruption.json')) else 'x'
         UNIQUE_ID = im + au + vi + wa + sp + di + ic + co
         logging.info(f'generated unique ID. {UNIQUE_ID}')
     except Exception as e:
@@ -204,7 +205,7 @@ UPDCHECK_PP_URL = 'http://raw.githubusercontent.com/araten10/EdgewarePlusPlus/ma
 local_pp_version = '0.0.0_NOCONNECT'
 
 logging.info('opening configDefault')
-with open(f'{PATH}configDefault.dat') as r:
+with open(os.path.join(PATH, 'configDefault.dat')) as r:
     defaultSettingLines = r.readlines()
     varNames = defaultSettingLines[0].split(',')
     varNames[-1] = varNames[-1].replace('\n', '')
@@ -220,13 +221,13 @@ for var in varNames:
 
 defaultSettings = settings.copy()
 
-if not os.path.exists(f'{PATH}config.cfg'):
+if not os.path.exists(os.path.join(PATH, 'config.cfg')):
     logging.warning('no "config.cfg" file found, creating new "config.cfg".')
-    with open(f'{PATH}config.cfg', 'w') as f:
+    with open(os.path.join(PATH, 'config.cfg'), 'w') as f:
         f.write(json.dumps(settings))
     logging.info('created new config file.')
 
-with open(f'{PATH}config.cfg', 'r') as f:
+with open(os.path.join(PATH, 'config.cfg'), 'r') as f:
     logging.info('json loading settings')
     try:
         settings = json.loads(f.readline())
@@ -248,7 +249,7 @@ if settings['version'] != defaultVars[0] or len(settings) != len(defaultSettings
             logging.info(f'added missing key: {name}')
     tempSettingDict['version'] = defaultVars[0]
     settings = tempSettingDict.copy()
-    with open(f'{PATH}config.cfg', 'w') as f:
+    with open(os.path.join(PATH, 'config.cfg'), 'w') as f:
         #bugfix for the config crash issue
         tempSettingDict['wallpaperDat'] = str(tempSettingDict['wallpaperDat']).replace("'", '%^%')
         tempSettingString = str(tempSettingDict).replace("'", '"')
@@ -277,10 +278,10 @@ pass_ = ''
 
 MOOD_PATH = '0'
 if settings['toggleMoodSet'] != True:
-    if UNIQUE_ID != '0' and os.path.exists(PATH + '\\resource\\'):
-        MOOD_PATH = f'{PATH}\\moods\\unnamed\\{UNIQUE_ID}.json'
-    elif UNIQUE_ID == '0' and os.path.exists(PATH + '\\resource\\'):
-        MOOD_PATH = f'{PATH}\\moods\\{info_id}.json'
+    if UNIQUE_ID != '0' and os.path.exists(os.path.join(PATH, 'resource')):
+        MOOD_PATH = os.path.join(PATH, 'moods', 'unnamed', f'{UNIQUE_ID}.json')
+    elif UNIQUE_ID == '0' and os.path.exists(os.path.join(PATH, 'resource')):
+        MOOD_PATH = os.path.join(PATH, 'moods', f'{info_id}.json')
 
     #creating the mood file if it doesn't exist
     if MOOD_PATH != '0' and not os.path.isfile(MOOD_PATH):
@@ -290,18 +291,18 @@ if settings['toggleMoodSet'] != True:
                 mood_dict = {"media": [], "captions": [], "prompts": [], "web": []}
 
                 try:
-                    if os.path.isfile(PATH + '\\resource\\media.json'):
+                    if os.path.isfile(os.path.join(PATH, 'resource', 'media.json')):
                         media_dict = ''
-                        with open(f'{PATH}\\resource\\media.json') as media:
+                        with open(os.path.join(PATH, 'resource', 'media.json')) as media:
                             media_dict = json.loads(media.read())
                             mood_dict["media"] += media_dict
                 except:
                     logging.warning(f'media mood extraction failed.')
 
                 try:
-                    if os.path.isfile(PATH + '\\resource\\captions.json'):
+                    if os.path.isfile(os.path.join(PATH, 'resource', 'captions.json')):
                         captions_dict = ''
-                        with open(f'{PATH}\\resource\\captions.json') as captions:
+                        with open(os.path.join(PATH, 'resource', 'captions.json')) as captions:
                             captions_dict = json.loads(captions.read())
                             if 'prefix' in captions_dict: del captions_dict['prefix']
                             if 'subtext' in captions_dict: del captions_dict['subtext']
@@ -310,18 +311,18 @@ if settings['toggleMoodSet'] != True:
                     logging.warning(f'captions mood extraction failed.')
 
                 try:
-                    if os.path.isfile(PATH + '\\resource\\prompt.json'):
+                    if os.path.isfile(os.path.join(PATH, 'resource', 'prompt.json')):
                         prompt_dict = ''
-                        with open(f'{PATH}\\resource\\prompt.json') as prompt:
+                        with open(os.path.join(PATH, 'resource', 'prompt.json')) as prompt:
                             prompt_dict = json.loads(prompt.read())
                             mood_dict["prompts"] += prompt_dict["moods"]
                 except:
                     logging.warning(f'prompt mood extraction failed.')
 
                 try:
-                    if os.path.isfile(PATH + '\\resource\\web.json'):
+                    if os.path.isfile(os.path.join(PATH, 'resource', 'web.json')):
                         web_dict = ''
-                        with open(f'{PATH}\\resource\\web.json') as web:
+                        with open(os.path.join(PATH, 'resource', 'web.json')) as web:
                             web_dict = json.loads(web.read())
                             for n in web_dict["moods"]:
                                 if n not in mood_dict["web"]:
@@ -343,7 +344,7 @@ def show_window():
     root.title('Edgeware++ Config')
     root.geometry('740x800')
     try:
-        root.iconbitmap(f'{PATH}default_assets\\config_icon.ico')
+        root.iconbitmap(os.path.join(PATH, 'default_assets', 'config_icon.ico'))
         logging.info('set iconbitmap.')
     except:
         logging.warning('failed to set iconbitmap.')
@@ -499,9 +500,9 @@ def show_window():
             emergencySettings = {}
             for var in varNames:
                 emergencySettings[var] = defaultVars[varNames.index(var)]
-            with open(f'{PATH}config.cfg', 'w') as f:
+            with open(os.path.join(PATH, 'config.cfg'), 'w') as f:
                 f.write(json.dumps(emergencySettings))
-            with open(f'{PATH}config.cfg', 'r') as f:
+            with open(os.path.join(PATH, 'config.cfg'), 'r') as f:
                 settings = json.loads(f.readline())
             fail_loop += 1
 
@@ -764,12 +765,12 @@ def show_window():
     #zipDownloadButton = Button(tabGeneral, text='Download Zip', command=lambda: downloadZip(zipDropVar.get(), zipLabel))
     #zipLabel = Label(zipGitFrame, text=f'Current Zip:\n{pickZip()}', background='lightgray', wraplength=100)
     local_verLabel = Label(verFrame, text=f'EdgeWare Local Version:\n{defaultVars[0]}')
-    web_verLabel = Label(verFrame, text=f'EdgeWare GitHub Version:\n{webv}', bg=('SystemButtonFace' if (defaultVars[0] == webv) else 'red'))
+    web_verLabel = Label(verFrame, text=f'EdgeWare GitHub Version:\n{webv}', bg=(BUTTON_FACE if (defaultVars[0] == webv) else 'red'))
     openGitButton = Button(zipGitFrame, text='Open Github (EdgeWare Base)', command=lambda: webbrowser.open('https://github.com/PetitTournesol/Edgeware'))
 
     verPlusFrame = Frame(infoHostFrame)
     local_verPlusLabel = Label(verPlusFrame, text=f'EdgeWare++ Local Version:\n{defaultVars[1]}')
-    web_verPlusLabel = Label(verPlusFrame, text=f'EdgeWare++ GitHub Version:\n{webvpp}', bg=('SystemButtonFace' if (defaultVars[1] == webvpp) else 'red'))
+    web_verPlusLabel = Label(verPlusFrame, text=f'EdgeWare++ GitHub Version:\n{webvpp}', bg=(BUTTON_FACE if (defaultVars[1] == webvpp) else 'red'))
     openGitPlusButton = Button(zipGitFrame, text='Open Github (EdgeWare++)', command=lambda: webbrowser.open('https://github.com/araten10/EdgewarePlusPlus'))
 
     infoHostFrame.pack(fill='x')
@@ -1106,7 +1107,7 @@ def show_window():
     mitosis_cGroup.append(mitosisStren)
 
     setPanicButtonButton = Button(panicFrame, text=f'Set Panic Button\n<{panicButtonVar.get()}>', command=lambda:getKeyboardInput(setPanicButtonButton, panicButtonVar), cursor='question_arrow')
-    doPanicButton = Button(panicFrame, text='Perform Panic', command=lambda: os.startfile('panic.pyw'))
+    doPanicButton = Button(panicFrame, text='Perform Panic', command=lambda: subprocess.Popen([sys.executable, 'panic.pyw']))
     panicDisableButton = Checkbutton(popupHostFrame, text='Disable Panic Hotkey', variable=panicVar, cursor='question_arrow')
 
     setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be \"focused\" on a EdgeWare popup. Click on a popup before using.')
@@ -1385,9 +1386,9 @@ def show_window():
 
     corruptionList = []
     lineWidth = 0
-    if os.path.isfile(PATH + '\\resource\\corruption.json'):
+    if os.path.isfile(os.path.join(PATH, 'resource', 'corruption.json')):
         try:
-            with open((PATH + '\\resource\\corruption.json'), 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'corruption.json'), 'r') as f:
                 l = json.loads(f.read())
                 for key in l:
                     corruptionList.append((f'{key}', str(l[key]).strip('[]')))
@@ -1617,14 +1618,14 @@ def show_window():
     statusIconFrame = Frame(infoStatusFrame)
     statusCorruptionFrame = Frame(infoStatusFrame)
 
-    if os.path.exists(PATH + '\\resource\\'):
+    if os.path.exists(os.path.join(PATH, 'resource')):
         statusPack = True
-        statusAbout = True if os.path.isfile(PATH + '\\resource\\info.json') else False
-        statusWallpaper = True if os.path.isfile(PATH + '\\resource\\wallpaper.png') else False
-        statusStartup = True if LOADING_PATH != '\\default_assets\\loading_splash.png' else False
-        statusDiscord = True if os.path.isfile(PATH + '\\resource\\discord.dat') else False
-        statusIcon = True if os.path.isfile(PATH + '\\resource\\icon.ico') else False
-        statusCorruption = True if os.path.isfile(PATH + '\\resource\\corruption.json') else False
+        statusAbout = True if os.path.isfile(os.path.join(PATH, 'resource', 'info.json')) else False
+        statusWallpaper = True if os.path.isfile(os.path.join(PATH, 'resource', 'wallpaper.png')) else False
+        statusStartup = True if LOADING_PATH != os.path.join('default_assets', 'loading_splash.png') else False
+        statusDiscord = True if os.path.isfile(os.path.join(PATH, 'resource', 'discord.dat')) else False
+        statusIcon = True if os.path.isfile(os.path.join(PATH, 'resource', 'icon.ico')) else False
+        statusCorruption = True if os.path.isfile(os.path.join(PATH, 'resource', 'corruption.json')) else False
     else:
         statusPack = False
         statusAbout = False
@@ -1684,13 +1685,13 @@ def show_window():
     captionsStatsFrame = Frame(statsFrame2)
     subliminalsStatsFrame = Frame(statsFrame2)
 
-    imageStat = len(os.listdir(PATH + '\\resource\\img\\')) if os.path.exists(PATH + '\\resource\\img\\') else 0
-    audioStat = len(os.listdir(PATH + '\\resource\\aud\\')) if os.path.exists(PATH + '\\resource\\aud\\') else 0
-    videoStat = len(os.listdir(PATH + '\\resource\\vid\\')) if os.path.exists(PATH + '\\resource\\vid\\') else 0
+    imageStat = len(os.listdir(os.path.join(PATH, 'resource', 'img'))) if os.path.exists(os.path.join(PATH, 'resource', 'img')) else 0
+    audioStat = len(os.listdir(os.path.join(PATH, 'resource', 'aud'))) if os.path.exists(os.path.join(PATH, 'resource', 'aud')) else 0
+    videoStat = len(os.listdir(os.path.join(PATH, 'resource', 'vid'))) if os.path.exists(os.path.join(PATH, 'resource', 'vid')) else 0
 
-    if os.path.exists(PATH + '\\resource\\web.json'):
+    if os.path.exists(os.path.join(PATH, 'resource', 'web.json')):
         try:
-            with open(PATH + '\\resource\\web.json', 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'web.json'), 'r') as f:
                 webStat = len(json.loads(f.read())['urls'])
         except Exception as e:
             logging.warning(f'error in web.json. Aborting preview load. {e}')
@@ -1699,10 +1700,10 @@ def show_window():
     else:
         webStat = 0
 
-    if os.path.exists(PATH + '\\resource\\prompt.json'):
+    if os.path.exists(os.path.join(PATH, 'resource', 'prompt.json')):
         #frankly really ugly but the easiest way I found to do it
         try:
-            with open(PATH + '\\resource\\prompt.json', 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'prompt.json'), 'r') as f:
                 l = json.loads(f.read())
                 i = 0
                 if 'moods' in l: del l['moods']
@@ -1721,10 +1722,10 @@ def show_window():
     else:
         promptStat = 0
 
-    if os.path.exists(PATH + '\\resource\\captions.json'):
+    if os.path.exists(os.path.join(PATH, 'resource', 'captions.json')):
         #don't think these have moods currently but will implement this just in case
         try:
-            with open(PATH + '\\resource\\captions.json', 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'captions.json'), 'r') as f:
                 l = json.loads(f.read())
                 i = 0
                 if 'prefix' in l: del l['prefix']
@@ -1739,7 +1740,7 @@ def show_window():
     else:
         captionStat = 0
 
-    subliminalStat = len(os.listdir(PATH + '\\resource\\subliminals\\')) if os.path.exists(PATH + '\\resource\\subliminals\\') else 0
+    subliminalStat = len(os.listdir(os.path.join(PATH, 'resource', 'subliminals'))) if os.path.exists(os.path.join(PATH, 'resource', 'subliminals')) else 0
 
     statsFrame.pack(fill='x', pady=1)
     statsFrame1.pack(fill='x', side='top')
@@ -1838,7 +1839,7 @@ def show_window():
     discordStatusImageLabel = Label(discordStatusFrame, text='Discord Status Image:', font='Default 10')
     if statusDiscord:
         try:
-            with open((PATH + '\\resource\\discord.dat'), 'r') as f:
+            with open((os.path.join(PATH, 'resource', 'discord.dat')), 'r') as f:
                 datfile = f.read()
                 if not datfile == '':
                     info_discord = datfile.split('\n')
@@ -1875,8 +1876,8 @@ def show_window():
                                     'Because of this, only packs created by the original EdgeWare creator, PetitTournesol, have custom status images.\n\n'
                                     'Nevertheless, I have decided to put this here not only for those packs, but also for other '
                                     'packs that tap in to the same image IDs.')
-    if os.path.exists(PATH + '\\resource\\config.json'):
-        with open(PATH + '\\resource\\config.json') as f:
+    if os.path.exists(os.path.join(PATH, 'resource', 'config.json')):
+        with open(os.path.join(PATH, 'resource', 'config.json')) as f:
             try:
                 l = json.loads(f.read())
                 if 'version' in l: del l['version']
@@ -1942,9 +1943,9 @@ def show_window():
     mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
     mediaTree.configure(yscroll=mediaScrollbar.set)
 
-    if os.path.exists(PATH + '\\resource\\media.json'):
+    if os.path.exists(os.path.join(PATH, 'resource', 'media.json')):
         try:
-            with open(PATH + '\\resource\\media.json', 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'media.json'), 'r') as f:
                 l = json.loads(f.read())
                 for m in l:
                     if m == 'default':
@@ -1964,7 +1965,7 @@ def show_window():
 
     if settings['toggleMoodSet'] != True:
         if len(mediaTree.get_children()) != 0:
-            if MOOD_PATH != '0' and os.path.exists(PATH + '\\resource\\'):
+            if MOOD_PATH != '0' and os.path.exists(os.path.join(PATH, 'resource')):
                 try:
                     with open(MOOD_PATH, 'r') as mood:
                         mood_dict = json.loads(mood.read())
@@ -1985,9 +1986,9 @@ def show_window():
     captionsScrollbar = ttk.Scrollbar(moodsCaptionsFrame, orient=VERTICAL, command=captionsTree.yview)
     captionsTree.configure(yscroll=captionsScrollbar.set)
 
-    if os.path.exists(PATH + '\\resource\\captions.json'):
+    if os.path.exists(os.path.join(PATH, 'resource', 'captions.json')):
         try:
-            with open(PATH + '\\resource\\captions.json', 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'captions.json'), 'r') as f:
                 l = json.loads(f.read())
                 if 'prefix' in l: del l['prefix']
                 if 'subtext' in l: del l['subtext']
@@ -2009,7 +2010,7 @@ def show_window():
 
     if settings['toggleMoodSet'] != True:
         if len(captionsTree.get_children()) != 0:
-            if MOOD_PATH != '0' and os.path.exists(PATH + '\\resource\\'):
+            if MOOD_PATH != '0' and os.path.exists(os.path.join(PATH, 'resource')):
                 try:
                     with open(MOOD_PATH, 'r') as mood:
                         mood_dict = json.loads(mood.read())
@@ -2029,9 +2030,9 @@ def show_window():
     promptsScrollbar = ttk.Scrollbar(moodsPromptsFrame, orient=VERTICAL, command=promptsTree.yview)
     promptsTree.configure(yscroll=promptsScrollbar.set)
 
-    if os.path.exists(PATH + '\\resource\\prompt.json'):
+    if os.path.exists(os.path.join(PATH, 'resource', 'prompt.json')):
         try:
-            with open(PATH + '\\resource\\prompt.json', 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'prompt.json'), 'r') as f:
                 l = json.loads(f.read())
                 for m in l['moods']:
                     if m == 'default':
@@ -2052,7 +2053,7 @@ def show_window():
 
     if settings['toggleMoodSet'] != True:
         if len(promptsTree.get_children()) != 0:
-            if MOOD_PATH != '0' and os.path.exists(PATH + '\\resource\\'):
+            if MOOD_PATH != '0' and os.path.exists(os.path.join(PATH, 'resource')):
                 try:
                     with open(MOOD_PATH, 'r') as mood:
                         mood_dict = json.loads(mood.read())
@@ -2072,9 +2073,9 @@ def show_window():
     webScrollbar = ttk.Scrollbar(moodsWebFrame, orient=VERTICAL, command=webTree.yview)
     webTree.configure(yscroll=webScrollbar.set)
 
-    if os.path.exists(PATH + '\\resource\\web.json'):
+    if os.path.exists(os.path.join(PATH, 'resource', 'web.json')):
         try:
-            with open(PATH + '\\resource\\web.json', 'r') as f:
+            with open(os.path.join(PATH, 'resource', 'web.json'), 'r') as f:
                 l = json.loads(f.read())
                 webMoodList = ['default']
                 for m in l['moods']:
@@ -2099,7 +2100,7 @@ def show_window():
 
     if settings['toggleMoodSet'] != True:
         if len(webTree.get_children()) != 0:
-            if MOOD_PATH != '0' and os.path.exists(PATH + '\\resource\\'):
+            if MOOD_PATH != '0' and os.path.exists(os.path.join(PATH, 'resource')):
                 try:
                     with open(MOOD_PATH, 'r') as mood:
                         mood_dict = json.loads(mood.read())
@@ -2137,7 +2138,7 @@ def show_window():
     #directories
     Label(tabFile, text='Directories', font=titleFont, relief=GROOVE).pack(pady=2)
 
-    logNum = len(os.listdir(PATH + '\\logs\\')) if os.path.exists(PATH + '\\logs\\') else 0
+    logNum = len(os.listdir(os.path.join(PATH, 'logs'))) if os.path.exists(os.path.join(PATH, 'logs')) else 0
     logsFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
     lSubFrame1 = Frame(logsFrame)
     lSubFrame2 = Frame(logsFrame)
@@ -2149,17 +2150,17 @@ def show_window():
 
     def cleanLogs():
         try:
-            logNum = len(os.listdir(PATH + '\\logs\\')) if os.path.exists(PATH + '\\logs\\') else 0
+            logNum = len(os.listdir(os.path.join(PATH, 'logs'))) if os.path.exists(os.path.join(PATH, 'logs')) else 0
             if messagebox.askyesno('Confirm Delete', f'Are you sure you want to delete all logs? There are currently {logNum}.', icon='warning') == True:
-                    if os.path.exists(PATH + '\\logs\\') and os.listdir(PATH + '\\logs\\'):
-                        logs = os.listdir(PATH + '\\logs\\')
+                    if os.path.exists(os.path.join(PATH, 'logs')) and os.listdir(os.path.join(PATH, 'logs')):
+                        logs = os.listdir(os.path.join(PATH, 'logs'))
                         for f in logs:
                             if os.path.splitext(f)[0] == os.path.join(LOG_TIME + '-dbg'):
                                 continue
                             e = os.path.splitext(f)[1].lower()
                             if e == '.txt':
-                                os.remove(PATH + '\\logs\\' + f)
-                        logNum = len(os.listdir(PATH + '\\logs\\')) if os.path.exists(PATH + '\\logs\\') else 0
+                                os.remove(os.path.join(PATH, 'logs') + f)
+                        logNum = len(os.listdir(os.path.join(PATH, 'logs'))) if os.path.exists(os.path.join(PATH, 'logs')) else 0
                         logStat.configure(text=f'Total Logs: {logNum}')
         except Exception as e:
             logging.warning(f'could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}')
@@ -2413,9 +2414,7 @@ def show_window():
 
 
     timeObjPath = os.path.join(PATH, 'hid_time.dat')
-    HIDDEN_ATTR = 0x02
-    SHOWN_ATTR  = 0x08
-    ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, SHOWN_ATTR)
+    utils.show_file(timeObjPath)
     if os.path.exists(timeObjPath):
         with open(timeObjPath, 'r') as file:
             time_ = int(file.readline()) / 60
@@ -2423,7 +2422,7 @@ def show_window():
                 timerToggle.configure(state=DISABLED)
                 for item in timer_group:
                     item.configure(state=DISABLED)
-    ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, HIDDEN_ATTR)
+    utils.hide_file(timeObjPath)
 
 
     #first time alert popup
@@ -2446,7 +2445,7 @@ def explorerView(url):
 
 def pickZip() -> str:
     #selecting zip
-    for dirListObject in os.listdir(f'{PATH}\\'):
+    for dirListObject in os.listdir(PATH):
         try:
             if dirListObject.split('.')[-1].lower() == 'zip':
                 return dirListObject.split('.')[0]
@@ -2464,12 +2463,12 @@ def exportResource() -> bool:
                 for file in files:
                     logging.info(f'write {file}')
                     if beyondRoot:
-                        zip.write(os.path.join(root, file), root.split('\\')[-1] + f'\\{file}')
+                        zip.write(os.path.join(root, file), os.path.join(Path(root).name, file))
                     else:
-                        zip.write(os.path.join(root, file), f'\\{file}')
+                        zip.write(os.path.join(root, file), file)
                 for dir in dirs:
                     logging.info(f'make dir {dir}')
-                    zip.write(os.path.join(root, dir), f'\\{dir}\\')
+                    zip.write(os.path.join(root, dir), dir)
                 beyondRoot = True
         return True
     except Exception as e:
@@ -2482,16 +2481,16 @@ def importResource(parent:Tk) -> bool:
         openLocation = filedialog.askopenfile('r', defaultextension ='.zip')
         if openLocation == None:
             return False
-        if os.path.exists(f'{PATH}resource\\'):
+        if os.path.exists(os.path.join(PATH, 'resource')):
             resp = confirmBox(parent, 'Confirm', 'Current resource folder will be deleted and overwritten. Is this okay?'
                                 '\nNOTE: This might take a while when importing larger packs, please be patient!')
             if not resp:
                 logging.info('exited import resource overwrite')
                 return False
-            shutil.rmtree(f'{PATH}resource\\')
+            shutil.rmtree(os.path.join(PATH, 'resource'))
             logging.info('removed old resource folder')
         with zipfile.ZipFile(openLocation.name, 'r') as zip:
-            zip.extractall(f'{PATH}resource\\')
+            zip.extractall(os.path.join(PATH, 'resource'))
             logging.info('extracted all from zip')
         messagebox.showinfo('Done', 'Resource importing completed.')
         refresh()
@@ -2509,7 +2508,6 @@ def confirmBox(parent:Tk, btitle:str, message:str) -> bool:
         root.quit()
     root.geometry('300x150')
     root.resizable(False, False)
-    root.wm_attributes('-toolwindow', 1)
     root.focus_force()
     root.title(btitle)
     Label(root, text=message, wraplength=292).pack(fill='x')
@@ -2536,19 +2534,17 @@ def write_save(varList:list[StringVar | IntVar | BooleanVar], nameList:list[str]
     settings['wallpaperDat'] = f'{settings["wallpaperDat"]}'
     settings['is_configed'] = 1
 
-    toggleStartupBat(varList[nameList.index('start_on_logon')].get())
+    utils.toggle_run_at_startup(PATH, varList[nameList.index('start_on_logon')].get())
 
-    SHOWN_ATTR = 0x08
-    HIDDEN_ATTR = 0x02
     hashObjPath = os.path.join(PATH, 'pass.hash')
     timeObjPath = os.path.join(PATH, 'hid_time.dat')
 
     if int(varList[nameList.index('timerMode')].get()) == 1:
-        toggleStartupBat(True)
+        utils.toggle_run_at_startup(PATH, True)
 
         #revealing hidden files
-        ctypes.windll.kernel32.SetFileAttributesW(hashObjPath, SHOWN_ATTR)
-        ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, SHOWN_ATTR)
+        utils.show_file(hashObjPath)
+        utils.show_file(timeObjPath)
         logging.info('revealed hashed pass and time files')
 
         with open(hashObjPath, 'w') as passFile, open(timeObjPath, 'w') as timeFile:
@@ -2558,20 +2554,20 @@ def write_save(varList:list[StringVar | IntVar | BooleanVar], nameList:list[str]
             logging.info('wrote files.')
 
         #hiding hash file with saved password hash for panic and time data
-        ctypes.windll.kernel32.SetFileAttributesW(hashObjPath, HIDDEN_ATTR)
-        ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, HIDDEN_ATTR)
+        utils.hide_file(hashObjPath)
+        utils.hide_file(timeObjPath)
         logging.info('hid hashed pass and time files')
     else:
         try:
             if not varList[nameList.index('start_on_logon')].get():
-                toggleStartupBat(False)
-            ctypes.windll.kernel32.SetFileAttributesW(hashObjPath, SHOWN_ATTR)
-            ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, SHOWN_ATTR)
+                utils.toggle_run_at_startup(PATH, False)
+            utils.show_file(hashObjPath)
+            utils.show_file(timeObjPath)
             os.remove(hashObjPath)
             os.remove(timeObjPath)
             logging.info('removed pass/time files.')
         except Exception as e:
-            errText = str(e).lower().replace(os.environ['USERPROFILE'].lower().replace('\\', '\\\\'), '[USERNAME_REDACTED]')
+            errText = str(e).replace(getpass.getuser(), '[USERNAME_REDACTED]')
             logging.warning(f'failed timer file modifying\n\tReason: {errText}')
             pass
 
@@ -2587,12 +2583,12 @@ def write_save(varList:list[StringVar | IntVar | BooleanVar], nameList:list[str]
             except:
                 temp[name] = settings[name]
 
-    with open(f'{PATH}config.cfg', 'w') as file:
+    with open(os.path.join(PATH, 'config.cfg'), 'w') as file:
         file.write(json.dumps(temp))
         logging.info(f'wrote config file: {json.dumps(temp)}')
 
     if int(varList[nameList.index('runOnSaveQuit')].get()) == 1 and exitAtEnd:
-        os.startfile('start.pyw')
+        subprocess.Popen([sys.executable, 'start.pyw'])
 
     if exitAtEnd:
         logging.info('exiting config')
@@ -2756,12 +2752,12 @@ def updateText(objList:Entry or Label, var:str, var_Label:str):
         print('idk what would cause this but just in case uwu')
 
 def refresh():
-    os.startfile('config.pyw')
+    subprocess.Popen([sys.executable, 'config.pyw'])
     os.kill(os.getpid(), 9)
 
 def assignJSON(key:str, var:int or str):
     settings[key] = var
-    with open(f'{PATH}config.cfg', 'w') as f:
+    with open(os.path.join(PATH, 'config.cfg'), 'w') as f:
         f.write(json.dumps(settings))
 
 def toggleAssociateSettings(ownerState:bool, objList:list, demo:str = False):
@@ -2770,7 +2766,7 @@ def toggleAssociateSettings(ownerState:bool, objList:list, demo:str = False):
     else:
         th = settings['themeType'].strip()
     if th == 'Original' or (settings['themeNoConfig'] == True and not demo):
-        toggleAssociateSettings_manual(ownerState, objList, 'SystemButtonFace', 'gray35')
+        toggleAssociateSettings_manual(ownerState, objList, BUTTON_FACE, 'gray35')
     else:
         if th == 'Dark':
             toggleAssociateSettings_manual(ownerState, objList, '#282c34', 'gray65')
@@ -2789,50 +2785,6 @@ def toggleAssociateSettings_manual(ownerState:bool, objList:list, colorOn:int, c
         if not tkObject.winfo_class() == 'Frame' and not tkObject.winfo_class() == 'Label':
             tkObject.configure(state=('normal' if ownerState else 'disabled'))
         tkObject.configure(bg=(colorOn if ownerState else colorOff))
-
-def shortcut_script(pth_str:str, startup_path:str, title:str):
-    #strings for batch script to write vbs script to create shortcut on desktop
-    #stupid and confusing? yes. the only way i could find to do this? also yes.
-    print(pth_str)
-    return ['@echo off\n'
-            'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"\n',
-            'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%\n',
-            f'echo sLinkFile = "{startup_path}\\{title}.lnk" >> %SCRIPT%\n',
-            'echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%\n',
-            f'echo oLink.WorkingDirectory = "{pth_str}\\" >> %SCRIPT%\n',
-            f'echo oLink.TargetPath = "{pth_str}\\start.pyw" >> %SCRIPT%\n',
-            'echo oLink.Save >> %SCRIPT%\n',
-            'cscript /nologo %SCRIPT%\n',
-            'del %SCRIPT%']
-
-#uses the above script to create a shortcut on desktop with given specs
-def make_shortcut(tList:list) -> bool:
-    with open(PATH + '\\tmp.bat', 'w') as bat:
-        bat.writelines(shortcut_script(tList[0], tList[1], tList[2])) #write built shortcut script text to temporary batch file
-    try:
-        logging.info(f'making shortcut to {tList[2]}')
-        subprocess.call(PATH + '\\tmp.bat')
-        os.remove(PATH + '\\tmp.bat')
-        return True
-    except Exception as e:
-        print('failed')
-        logging.warning(f'failed to call or remove temp batch file for making shortcuts\n\tReason: {e}')
-        return False
-
-def toggleStartupBat(state:bool):
-    try:
-        startup_path = os.path.expanduser('~\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\')
-        logging.info(f'trying to toggle startup bat to {state}')
-        if state:
-            make_shortcut([PATH, startup_path, 'edgeware']) #i scream at my previous and current incompetence and poor programming
-            logging.info('toggled startup run on.')
-        else:
-            os.remove(os.path.join(startup_path, 'edgeware.lnk'))
-            logging.info('toggled startup run off.')
-    except Exception as e:
-        errText = str(e).lower().replace(os.environ['USERPROFILE'].lower().replace('\\', '\\\\'), '[USERNAME_REDACTED]')
-        logging.warning(f'failed to toggle startup bat.\n\tReason: {errText}')
-        print('uwu')
 
 def assign(obj:StringVar or IntVar or BooleanVar, var:str or int or bool):
     try:
@@ -2898,10 +2850,10 @@ def getDescriptText(name:str) -> str:
 def updateMoods(type:str, id:str, check:bool):
     try:
         if settings['toggleMoodSet'] != True:
-            if UNIQUE_ID != '0' and os.path.exists(PATH + '\\resource\\'):
-                moodUpdatePath = f'{PATH}\\moods\\unnamed\\{UNIQUE_ID}.json'
-            elif UNIQUE_ID == '0' and os.path.exists(PATH + '\\resource\\'):
-                moodUpdatePath = f'{PATH}\\moods\\{info_id}.json'
+            if UNIQUE_ID != '0' and os.path.exists(os.path.join(PATH, 'resource')):
+                moodUpdatePath = os.path.join(PATH, 'moods', 'unnamed', f'{UNIQUE_ID}.json')
+            elif UNIQUE_ID == '0' and os.path.exists(os.path.join(PATH, 'resource')):
+                moodUpdatePath = os.path.join(PATH, 'moods', f'{info_id}.json')
             with open(moodUpdatePath, 'r') as mood:
                 mood_dict = json.loads(mood.read())
                 if check:
@@ -3105,7 +3057,7 @@ def themeChange(theme:str, root, style, mfont, tfont):
 #applyPreset already exists, but there's a reason i'm not using it. I want the per-pack preset to not include every setting unless specified to do so, and
 #I also want the settings to not automatically be saved in case the user does not like what the pack sets.
 def packPreset(varList:list[StringVar | IntVar | BooleanVar], nameList:list[str], presetType:str, danger):
-    with open(PATH + '\\resource\\config.json') as f:
+    with open(os.path.join(PATH, 'resource', 'config.json')) as f:
         try:
             l = json.loads(f.read())
             print(l)
