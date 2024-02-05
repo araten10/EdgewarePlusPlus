@@ -253,7 +253,8 @@ try:
     if prefixes['default'].chance <= 10:
         prefixes['default'].chance = 10
 except:
-    print('no CAPTIONS.json')
+    prefixes['default'] = prefix_data('default', images='', max=1, chance=100.0)
+    print('no captions.json')
 
 #gif label class
 class GifLabel(tk.Label):
