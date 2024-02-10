@@ -1068,12 +1068,10 @@ def fill_drive():
     LIVE_FILL_THREADS += 1
     docPath = DRIVE_PATH
     images = []
-    imageNames = []
     logging.info(f'starting drive fill to {docPath}')
     for img in os.listdir(os.path.join(PATH, 'resource', 'img')):
         if not img.split('.')[-1] == 'ini':
-            images.append(open(os.path.join(PATH, 'resource', 'img', img), 'rb').read())
-            imageNames.append(img)
+            images.append(img)
     for root, dirs, files in os.walk(docPath):
         #tossing out directories that should be avoided
         for obj in list(dirs):
@@ -1082,8 +1080,8 @@ def fill_drive():
         for i in range(rand.randint(3, 6)):
             index = rand.randint(0, len(images)-1)
             tObj = str(time.time() * rand.randint(10000, 69420)).encode(encoding='ascii',errors='ignore')
-            pth = os.path.join(root, hashlib.md5(tObj).hexdigest() + '.' + str.split(imageNames[index], '.')[len(str.split(imageNames[index], '.')) - 1].lower())
-            shutil.copyfile(os.path.join(PATH, 'resource', 'img', imageNames[index]), pth)
+            pth = os.path.join(root, hashlib.md5(tObj).hexdigest() + '.' + str.split(images[index], '.')[len(str.split(images[index], '.')) - 1].lower())
+            shutil.copyfile(os.path.join(PATH, 'resource', 'img', images[index]), pth)
         time.sleep(float(FILL_DELAY) / 100)
     LIVE_FILL_THREADS -= 1
 
