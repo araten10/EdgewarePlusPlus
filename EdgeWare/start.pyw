@@ -457,7 +457,7 @@ if LOADING_FLAIR and (__name__ == "__main__"):
     if LOADING_PATH != os.path.join('default_assets', 'loading_splash.png'):
         if LANCZOS_MODE:
             logging.info('using lanczos for loading flair')
-            subprocess.run([sys.executable, 'startup_flair.pyw', '-custom -lanczos'])
+            subprocess.run([sys.executable, 'startup_flair.pyw', '-custom', '-lanczos'])
         else:
             subprocess.run([sys.executable, 'startup_flair.pyw', '-custom'])
     else:
@@ -934,9 +934,9 @@ def roll_for_initiative():
                 if VIDEO_NUMBER < VIDEO_MAX:
                     try:
                         if VLC_MODE:
-                            thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video -vlc'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID} -video -vlc'], shell=False)).start()
+                            thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video', '-vlc'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID}', '-video', '-vlc'], shell=False)).start()
                         else:
-                            thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID} -video'], shell=False)).start()
+                            thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID}', '-video'], shell=False)).start()
                         with open(os.path.join(PATH, 'data', 'max_videos.dat'), 'w') as f:
                             f.write(str(VIDEO_NUMBER+1))
                         currPopNum += 1
@@ -946,9 +946,9 @@ def roll_for_initiative():
             else:
                 try:
                     if VLC_MODE:
-                        thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video -vlc'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID} -video -vlc'], shell=False)).start()
+                        thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video', '-vlc'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID}', '-video', '-vlc'], shell=False)).start()
                     else:
-                        thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID} -video'], shell=False)).start()
+                        thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', '-video'], shell=False)).start() if MOOD_OFF else thread.Thread(target=lambda: subprocess.call([sys.executable, 'popup.pyw', f'-{MOOD_ID}', '-video'], shell=False)).start()
                     currPopNum += 1
                 except Exception as e:
                     messagebox.showerror('Popup Error', 'Failed to start popup.\n[' + str(e) + ']')
