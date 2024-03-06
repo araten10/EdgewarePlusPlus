@@ -12,7 +12,7 @@ from utils.area import Area
 import subprocess
 
 def panic_script():
-    subprocess.run('/bin/sh panic.sh', shell=True)
+    subprocess.run('for pid in $(ps -u $USER -ef | grep -E "python.* *+.pyw" | awk \'{print $2}\'); do echo $pid; kill -9 $pid; done', shell=True)
 
 def set_borderless(root):
     root.wm_attributes('-type', 'splash')

@@ -5,12 +5,15 @@ echo 1: Start.pyw (Edgeware)
 echo 2: Popup.pyw (Popup only)
 echo 2a: Popup.pyw (Video only)
 echo 3: Config.pyw (Config)
+echo =EdgeWare++=
+echo 4: Sublabel.pyw (Subliminal Message)
 set /p usrSelect=Select number:
 if %usrSelect%==1 goto startLbl
 if %usrSelect%==2 goto popupLbl
 if %usrSelect%==2a goto popup2Lbl
 if %usrSelect%==3 goto configLbl
-echo Must enter selection number (1, 2, 3)
+if %usrSelect%==4 goto subLbl
+echo Must enter selection number (1, 2, 3, 4)
 pause
 goto top
 :startLbl
@@ -31,8 +34,14 @@ py popup.pyw -video
 echo Done.
 pause
 goto quitLbl
+:subLbl
+echo Running sublabel.pyw...
+py sublabel.pyw
+echo Done.
+pause
+goto quitLbl
 :configLbl
-echo Running config.pyw
+echo Running config.pyw...
 py config.pyw
 echo Done.
 pause

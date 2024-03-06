@@ -108,6 +108,10 @@ MOOD_OFF = True
 MOOD_FILENAME = True
 MULTI_CLICK = False
 THEME = 'Original'
+MOVING_SPEED = 5
+MOVING_CHANCE = 0
+MOVING_STATUS = False
+MOVING_RANDOM = False
 
 with open(os.path.join(PATH, 'config.cfg'), 'r') as cfg:
     settings = json.loads(cfg.read())
@@ -155,6 +159,14 @@ with open(os.path.join(PATH, 'config.cfg'), 'r') as cfg:
         MOOD_OFF = check_setting('toggleMoodSet')
 
     MOOD_FILENAME = check_setting('captionFilename')
+
+    MOVING_CHANCE = int(settings['movingChance'])
+    MOVING_SPEED = int(settings['movingSpeed'])
+    MOVING_RANDOM = check_setting('movingRandom')
+
+if MOVING_CHANCE >= rand.randint(1,100):
+    BUTTONLESS = True
+    MOVING_STATUS = True
 
 #take out first arg and make it into the mood ID
 MOOD_ID = '0'
@@ -330,6 +342,45 @@ class VideoLabel(tk.Label):
                 self.image = self.video_frame_image
                 self.time_offset_end = time.perf_counter()
                 time.sleep(max(0, self.delay - (self.time_offset_end - self.time_offset_start)))
+
+#moving window originally provided very generously by u/basicmo!
+mspd = rand.randint(-MOVING_SPEED,MOVING_SPEED)
+while mspd == 0:
+    mspd = rand.randint(-MOVING_SPEED,MOVING_SPEED)
+
+def move_window(master, resized_height:int, resized_width:int, xlocation:int, ylocation:int):
+    width = resized_width
+    height = resized_height
+    if MOVING_RANDOM:
+        move_speedX = rand.randint(-MOVING_SPEED,MOVING_SPEED)
+        move_speedY = rand.randint(-MOVING_SPEED,MOVING_SPEED)
+        while (move_speedX == 0) and (move_speedY == 0):
+            move_speedX = rand.randint(-MOVING_SPEED,MOVING_SPEED)
+            move_speedY = rand.randint(-MOVING_SPEED,MOVING_SPEED)
+    else:
+        move_speedX = mspd
+        move_speedY = mspd
+
+    dx = move_speedX
+    dy = move_speedY
+
+    x, y = xlocation, ylocation  # Initial position
+    while True:
+        x += dx
+        y += dy
+
+        if x + width >= master.winfo_screenwidth():
+            dx = -abs(move_speedX)
+        elif x <= 0:
+            dx = abs(move_speedX)
+        if y + height >= master.winfo_screenheight():
+            dy = -abs(move_speedY)
+        elif y <= 0:
+            dy = abs(move_speedY)
+
+        master.geometry(f"{width}x{height}+{x}+{y}")
+        master.update()
+        master.after(10)
 
 def pick_resource(basepath, vidYes:bool):
     if MOOD_ID != '0' and os.path.exists(os.path.join(PATH, 'resource', 'media.json')):
@@ -598,6 +649,10 @@ def run():
             f.truncate()
 
     root.attributes('-alpha', OPACITY / 100)
+
+    if MOVING_STATUS:
+        move_window(root,resized_image.height,resized_image.width,locX,locY)
+        
     root.mainloop()
 
 def startVLC(vid, label):

@@ -10,17 +10,16 @@ EdgeWare is a fetish-designed program (so 18+ only!!!) that essentially spawns p
 
 PetitTournesol (EdgeWare's original creator) more or less took a hiatus and hasn't updated EdgeWare since 2022, which is totally valid. That being said, I felt like there were lots of things I personally wanted to see in the program. Inspired mostly by being mildly frustrated at deleting those dang desktop icons every time, I decided to start learning python and share the changes i've made. Thus EdgeWare++ was born, and as of writing this "new and improved" intro, there's over 10 new features to play around with. Some are quality of life updates, some are more fun things to tease yourself with. I'm generally trying to be as minimally intrusive to the original program as possible- my goal is complete both-ways pack compatibility with the old version of EdgeWare. I also don't want to remove any features (unless they were literally defunct), but I have moved some stuff around in the config menu to try and make more space.
 
+## Usage Instructions
+"So how do I start using this darn thing?" Click the big ol' "code" button in the top right, then "download zip". Save and extract it somewhere, then run "EdgewareSetup.bat". This will install python 3.10 for you, if you don't already have it. After that it will give you instructions for further use, and open up "config.pyw" in the EdgeWare subfolder.
+
+**If you're using Linux**, first you need to install Python 3 and pip yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip`. Once you have Python and pip installed, download and extract EdgeWare as a ZIP or clone the repository, then install the dependencies by opening a terminal window in the `EdgewarePlusPlus` direcory and running `pip3 install -r requirements.txt` or `python3 -m pip install -r requirements.txt`. Now you can run EdgeWare by starting `config.pyw` or `start.pyw` with Python: `python3 path/to/file.pyw`. `config.pyw` allows you to configure EdgeWare, and `start.pyw` will start EdgeWare itself. **Please note that my primary OS is windows!** I have gotten endless help from LewdDevelopment, who also used some [pre-existing code from a old EdgeWare pull request](https://github.com/PetitTournesol/Edgeware/pull/41) to help make it happen. So if any bugs on Linux start from my own incompetence, I will consult with them and try to fix it- but know that I will not know until people tell me or them!
+
+From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original EdgeWare page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and i'm hoping to make a few myself to showcase the new features this extension can do.
+
 **Any damage you do to your computer with EdgeWare is your own responsibility! Please read the "About" tab in the config window and make backups if you're planning on using the advanced, dangerous settings!**
 
 The EdgeWare++ Pack Editor is now live [here](https://github.com/araten10/EdgewareEditor-PlusPlus).
-
-## So how do I start using this darn thing?
-
-Click the big ol' "code" button in the top right, then "download zip". Save and extract it somewhere, then, if you're using Windows, run "EdgewareSetup.bat". This will install python 3.10 for you, if you don't already have it. After that it will give you instructions for further use, and open up "config.pyw" in the EdgeWare subfolder.
-
-If you're using Linux, first you need to install Python 3 and pip yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip`. Once you have Python and pip installed, download and extract EdgeWare as a ZIP or clone the repository, then install the dependencies by opening a terminal window in the `EdgewarePlusPlus` direcory and running `pip3 install -r requirements.txt` or `python3 -m pip install -r requirements.txt`. Now you can run EdgeWare by starting `config.pyw` or `start.pyw` with Python: `python3 path/to/file.pyw`. `config.pyw` allows you to configure EdgeWare, and `start.pyw` will start EdgeWare itself.
-
-From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original EdgeWare page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and i'm hoping to make a few myself to showcase the new features this extension can do.
 
 ## New Features In Edgeware++:
 
@@ -64,7 +63,11 @@ From there you'll need an actual pack, which can be downloaded online or made yo
 
 •*Allowing creation of a per-pack config setup, to help pack creators show off their "intended" settings*
 
-•*Linux compatibility*
+•*Moving Popups, which bounce around the screen [like some other infamous programs](https://www.youtube.com/watch?v=LSgk7ctw1HY)*
+
+•*Subliminal Message popups, which use the captions file to flash short mantras up randomly*
+
+•*Experimental Linux support that may or may not break in the future (read the section above!)*
 
 ## Planned Additions:
 
@@ -86,13 +89,9 @@ I'm also wanting to add features to the pack editor, will probably do that when 
 
 Suggestions I got from people who used the software and I thought would be interesting enough to try. Lower priority than my own planned additions, but still something I hope to add (or attempt to) in the future!
 
-•*New type of popup: full screen text, taken from caption file. Like subliminals but briefly flashing on full screen.*
-
 •*Randomized settings button*
 
 •*Support for confining edgeware to a single monitor, which actually sounds like a really good idea but i'd want to test it on a few monitor setups and it sounds fairly technical*
-
-•*More "classic virus"-y popup options, like [moving popups](https://www.youtube.com/watch?v=LSgk7ctw1HY)*
 
 •*Windows "stealing focus", forcing you to do things like enter prompts before you're allowed to do anything else*
 
@@ -111,7 +110,7 @@ A test pack featuring a sampler of all (finished) features found in EdgeWare++, 
 
 I understand i'm pretty elusive and don't talk much, so I apologize if it's difficult to contact me. If you are looking to report a bug, I don't fully know how to use github but I do know a bug report feature works, so we can figure it out together... I also recently made a [twitter account](https://twitter.com/ara10ten) (finally) and post both random ramblings and frequent development updates/screenshots there. I also have a reddit account I use to answer tech support questions and browse for new packs occasionally on /r/edgingware (of which I have no official affiliation with).
 
-1/31/2024: I have been suspended from twitter due to a mass suspension for reasons that don't make sense and are likely a bug. I am not sure if I will get my account back. I am leaving the link up in case I do, otherwise I will find another way to talk with you guys...
+My twitter account seems to love getting shadowbanned for no reason other than twitter automoderation thinks I'm a spambot, so if my account disappears for a day or replies don't send notifications, that's why. If it gets bad enough I might make a bluesky account, but for the time being it's tolerable enough I'll stay on the platform with more people.
 
 ## EdgeWare++ Patch Notes
 **If you see that there's a new update and are somebody (like me) who is lazy and doesn't like installing every single update if unnecessary, here is how I do versioning:**
@@ -121,6 +120,47 @@ I understand i'm pretty elusive and don't talk much, so I apologize if it's diff
 •+0.5-0.25 to version number: new feature, but a smaller one or something not as essential, or lots of bugfixes
 
 •+0.2-0.1 to version number: very small update, usually just a bugfix, accessibility options, UI tweaks
+
+**Version 10a**
+Another month, another long story~! So I got roughly halfway through working on corruption, and was going to ship a small version, likely 9.5 or 9.6, then was sent a DM with some interesting new features. I decided heck, since they're already programmed and were things I wanted to do anyways, i'll add them in. Then when I was about done with them, I got sent another DM with fatal bugs that definitely should be fixed sooner than later. While looking into potential causes and ruminating it on twitter, I got sent another DM from somebody who submitted a pull request for Linux compatibility, saying they already potentially fixed the bug since they noticed some things that were wrong. So then I went and merged the linux pull request and did some bugfixes while talking with the person who submitted it to iron some things out. Eventually I just said "screw it", and decided this was large enough to be a full new version. Theoretically I could name it 9.9 to keep my promise of corruption being finished by version 10, however I think i'd rather stick to more consistent versioning rules (as consistent as I get with them, at least) than try and make a loophole for my own problems.
+
+Anyways, this is probably one of the largest updates EdgeWare++ has ever had. Because of that i'm cautiously appending an "alpha" label onto it, in case the weight of it causes more bugs than usual. As always, if this catastrophically doesn't work, I will try my best to fix it ASAP!
+
+•*Actually fixed the bug "hotfixed" with 9.3a properly this time, making the pack config preset button deactivate when no config.json is loaded*
+
+•*Removed "prefix_settings" from the captions mood treeview as it's something that slipped past me and I guarantee disabling it would break everything*
+
+•*Stopped Timer Mode automatically adding a startup script, as I feel like it doing so was a hidden quirk that isn't totally obvious to new users. Instead, enabling Timer Mode now automatically enables Run on Startup, which is visible in the config window and can be turned off if the user desires.*
+>In practice, this should work exactly the same as it used to, with the main difference being that users can now tell Timer Mode also enables Run on Startup. They also can uncheck Run on Startup if they just want Timer Mode without it enabling every time they restart their PC.
+
+•*Turned off "Show on Discord" for default config setting*
+>Listen, i'm all for retaining as much of the original edgeware as possible but after having this almost cause an accident on my work account and also hearing somebody not know it was a feature after running edgeware for ten minutes i'm inclined to turn it off for your first launch
+
+•*A ton more frontend work on corruption*
+>Most, if not all of the corruption settings I plan to ship version 11 (or whatever it will end up being at this point) with are now in view on the corruption tab, the backend is still not there yet but that will be done over the following patches
+
+•*Fixed some minor issues with prefix_settings in the config window, for the 2 packs that have managed to implement multi-click popups without the pack editor update*
+
+•*New popup type: Subliminal Messages!, originally by /u/basicmo!*
+>These can be found in a new sub-section in the annoyance window, and use the captions.json file to flash short messages up at you. Their appearance is based on the theme you've chosen, and can use a new mood called "subliminal" to specifically label shorter captions (like "OBEY", or "GOON") that won't show up on popups.
+
+•*New popup type: Moving Popups!, originally by /u/basicmo!*
+>This will make popups have a chance to start bouncing around all over your screen, like an old DVD player screensaver. There are multiple slider settings for this in "annoyance". To make it not impossible to close these popups, anything that turns into a moving popup enables the "labeless" property.
+
+•*Basic linux compatibility may or may not work now!*
+>Please read the above "Usage Instructions" section for more info on this! This is a huge reason why this update is labelled as an "alpha", so please note it might not fully work! Bug reports are appreciated!
+
+•*Fixed a huge issue with audio error checking that could cause the whole program to not load, and captions.json causing crashes when undefined*
+
+KNOWN ISSUES:
+
+•*I have noticed that Timer Mode in itself is very buggy- something that I haven't really touched much before. For me on Windows 11, it appears that it is hard to consistently panic, tray panic doesn't seem to work at all, sometimes the command window pops up and sometimes it doesn't. I haven't really touched it and theoretically nothing I added should affect how it functions, so I am not sure if it was this buggy with original edgeware or if it is indeed my fault. Alternatively, it could be compatibility problems with my setup. I will try to bugfix it to the best of my ability but for the time being know that I'm aware of it's odd behaviour.*
+
+•*In some cases, packs that worked with old EdgeWare no longer work in ++. I have only seen this happen with two packs, and have yet to completely figure out why, but it might have something to do with how their captions are set up. I'm going to continue looking into this over time and seeing if I can get full 100% compatibility with old packs, even if they're so old or basic that they are structured very differently to everything else.*
+
+•*If you don't launch the config window at least once, the mood feature absolutely explodes since it hasn't generated moods. I understand nobody's probably using moods yet, but for the time being... if you're moving all your files in the resource folder to a new install or update, make sure to launch the config window once! This should be one of the simpler things to fix, and will be pushed sometime soon*
+
+•*The default theme for subliminal popups is black text, which means that on a lot of "ahegao wallpapers" that are black and white it might have troubles with visibility. Currently brainstorming ways to fix this, between either an outline or just allowing users to set their own colour*
 
 **Version 9.3**
 
@@ -133,7 +173,7 @@ I'm kind of frustrated as this is the second account i've had suspended in a wee
 •*Also axed the corruption path "fancy text", since it didn't play well with most themes, and was overly code heavy for what it was*
 
 •*Added a "Pack Config Preset" setting in the "Pack Info" tab, which allows for pack creators to make settings presets for their packs. These are not automatically saved, and the user can view the changes before deciding to save themselves or simply exit the program.*
->To make one of these for your pack, create a "config.json" file in your pack resource zip. This follows the exact same formatting as a regular config file, but doesn't need all of the arguments to run properly. For example, if you just wanted to change popup delay to 5 seconds, you could just create a config.json file with the contents {"delay": 1000}. Alternatively, you could also just save your config.cfg, and copy it over to this json file, whatever is easier.
+>To make one of these for your pack, create a "config.json" file in your pack resource zip. This follows the exact same formatting as a regular config file, but doesn't need all of the arguments to run properly. For example, if you just wanted to change popup delay to 5 seconds, you could just create a config.json file with the contents {"delay": 5000}. Alternatively, you could also just save your config.cfg, and copy it over to this json file, whatever is easier.
 
 *Added a few more backend things to the corruption tab, progressing it's status from "unimplemented" to "still unimplemented, but closer to completion".*
 

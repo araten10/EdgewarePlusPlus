@@ -9,6 +9,16 @@ import logging
 
 user = ctypes.windll.user32
 
+class RECT(ctypes.Structure): #rect class for containing monitor info
+    _fields_ = [
+        ('left', ctypes.c_long),
+        ('top', ctypes.c_long),
+        ('right', ctypes.c_long),
+        ('bottom', ctypes.c_long)
+        ]
+    def dump(self):
+        return map(int, (self.left, self.top, self.right, self.bottom))
+
 def panic_script():
     os.startfile('panic.bat')
 
@@ -38,15 +48,13 @@ class MONITORINFO(ctypes.Structure): #unneeded for this, but i don't want to rew
 
 def monitor_areas():
     areas: list[Area] = []
-    monitors = get_monitors()
-    for hMonitor, _ in monitors:
-        data = [hMonitor]
+    for hMonitor, _ in get_monitors():
         mi = MONITORINFO()
         mi.cbSize = ctypes.sizeof(MONITORINFO)
         mi.rcMonitor = RECT()
         mi.rcWork = RECT()
         _ = user.GetMonitorInfoA(hMonitor, ctypes.byref(mi))
-        work_area = mi.rcWork.dump()
+        work_area = list(mi.rcWork.dump())
         x, y = work_area[0], work_area[1]
         areas.append(Area(x, y, work_area[2] - x, work_area[3] - y))
 

@@ -246,6 +246,7 @@ AUDIO_CHANCE = int(settings['audioMod'])
 PROMPT_CHANCE = int(settings['promptMod'])
 VIDEO_CHANCE = int(settings['vidMod'])
 WEB_CHANCE = int(settings['webMod'])
+CAP_POP_CHANCE = int(settings['capPopChance'])
 
 VIDEOS_ONLY = int(settings['onlyVid']) == 1
 
@@ -428,9 +429,11 @@ try:
     for aud in os.listdir(os.path.join(PATH, 'resource', 'aud')):
         AUDIO.append(os.path.join(PATH, 'resource', 'aud', aud))
     logging.info('audio resources found')
-except:
+except Exception as e:
     logging.warning(f'no audio resource folder found\n\tReason: {e}')
     print('no audio folder found')
+
+CAPTIONS = os.path.exists(os.path.join(PATH, 'resource', 'captions.json'))
 
 HAS_WEB = WEB_JSON_FOUND and len(WEB_DICT['urls']) > 0
 #end of checking resource presence
@@ -897,14 +900,14 @@ def roll_for_initiative():
                         try:
                             thread.Thread(target=play_audio).start()
                             pumpScareAudio.wait()
-                        except:
+                        except Exception as e:
                             messagebox.showerror('Audio Error', 'Failed to play audio.\n[' + str(e) + ']')
                             logging.critical(f'failed to play audio\n\tReason: {e}')
                 else:
                     try:
                         thread.Thread(target=play_audio).start()
                         pumpScareAudio.wait()
-                    except:
+                    except Exception as e:
                         messagebox.showerror('Audio Error', 'Failed to play audio.\n[' + str(e) + ']')
                         logging.critical(f'failed to play audio\n\tReason: {e}')
             try:
@@ -959,21 +962,29 @@ def roll_for_initiative():
                     try:
                         thread.Thread(target=play_audio).start()
                         currPopNum += 1
-                    except:
+                    except Exception as e:
                         messagebox.showerror('Audio Error', 'Failed to play audio.\n[' + str(e) + ']')
                         logging.critical(f'failed to play audio\n\tReason: {e}')
             else:
                 try:
                     thread.Thread(target=play_audio).start()
                     currPopNum += 1
-                except:
+                except Exception as e:
                     messagebox.showerror('Audio Error', 'Failed to play audio.\n[' + str(e) + ']')
                     logging.critical(f'failed to play audio\n\tReason: {e}')
+        if do_roll(CAP_POP_CHANCE) and CAPTIONS and currPopNum < maxPopNum:
+            try:
+                subprocess.call([sys.executable, 'sublabel.pyw', f'-{MOOD_ID}']) if not MOOD_OFF else subprocess.call([sys.executable, 'sublabel.pyw'])
+                currPopNum += 1
+            except Exception as e:
+                messagebox.showerror('Caption Popup Error', 'Could not start caption popup.\n[' + str(e) + ']')
+                logging.critical(f'failed to start sublabel.pyw\n\tReason: {e}')
+
         if do_roll(PROMPT_CHANCE) and HAS_PROMPTS and currPopNum < maxPopNum:
             try:
                 subprocess.call([sys.executable, 'prompt.pyw', f'-{MOOD_ID}']) if not MOOD_OFF else subprocess.call([sys.executable, 'prompt.pyw'])
                 currPopNum += 1
-            except:
+            except Exception as e:
                 messagebox.showerror('Prompt Error', 'Could not start prompt.\n[' + str(e) + ']')
                 logging.critical(f'failed to start prompt.pyw\n\tReason: {e}')
         if (not (MITOSIS_MODE or LOWKEY_MODE)) and do_roll(POPUP_CHANCE) and HAS_IMAGES and currPopNum < maxPopNum:
@@ -1125,7 +1136,7 @@ def update_media():
                 #logging.info(f'moodData {moodData}')
         with open(os.path.join(PATH, 'resource', 'media.json'), 'r') as f:
             mediaData = json.loads(f.read())
-            #logging.info(f'mediaData {mediaData}')
+            #print(f'mediaData {mediaData}')
         #if CORRUPTION_MODE:
             #for
         try:

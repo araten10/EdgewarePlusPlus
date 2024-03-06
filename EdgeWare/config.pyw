@@ -111,13 +111,16 @@ CORRUPTION_TEXT         = 'This is a feature not currently implemented in the re
 ADVANCED_TEXT           = 'The "Debug Config Edit" section is also something previously only accessible by directly editing the config.cfg file. It offers full and complete customization of all setting values without any limitations outside of variable typing.\n\n\nPlease use this feature with discretion, as any erroneous values will result in a complete deletion and regeneration of the config file from the default, and certain value ranges are likely to result in crashes or unexpected glitches in the program.\n\nOtherwise, the Troubleshooting tab is fairly self explanatory. All features here will hopefully help issues you might have while running EdgeWare. If you didn\'t already know, you can hover over any option that gives your cursor a "question mark sign" to get a more detailed description of what it does.'
 THANK_AND_ABOUT_TEXT    = '[NOTE: this is the thanks page from the original EdgeWare. I didn\'t want to replace/remove it and erase credit to the original creator! Sorry if this caused confusion!]\n\nThank you so much to all the fantastic artists who create and freely distribute the art that allows programs like this to exist, to all the people who helped me work through the various installation problems as we set the software up (especially early on), and honestly thank you to ALL of the people who are happily using Edgeware. \n\nIt truly makes me happy to know that my work is actually being put to good use by people who enjoy it. After all, at the end of the day that\'s really all I\'ve ever really wanted, but figured was beyond reach of a stupid degreeless neet.\nI love you all <3\n\n\n\nIf you like my work, please feel free to help support my neet lifestyle by donating to $PetitTournesol on Cashapp; by no means are you obligated or expected to, but any and all donations are greatly appreciated!'
 
-PLUSPLUS_TEXT           = 'Thanks for taking the time to check out this extension on EdgeWare! However you found it, I appreciate that it interested you enough to give it a download.\n\nI am not an expert programmer by any means, so apologies if there are any bugs or errors in this version. My goal is to not do anything crazy ambitious like rewrite the entire program or fix up the backend, but rather just add on functionality that I thought could improve the base version. Because of this, i\'m hoping that compatability between those who use normal EdgeWare and those who use this version stays relatively stable. If you were given this version directly without a download link and are curious about development updates, you can find updates and links to the github @ twitter @ara10ten.\n\n Current changes:\n\n•Added a option under "misc" to enable/disable desktop icon generation.\n•Added options to cap the number of audio popups and video popups.\n•Added a chance slider for subliminals, and a max subliminals slider.\n•Added feature to change Startup Graphic and Icon per pack. (name the file(s) \"loading_splash\" and/or \"icon.ico\" in the resource folder)\n•Added feature to enable warnings for \"Dangerous Settings\".\n•Added hover tooltips on some things to make the program easier to understand.\n•Added troubleshooting tab under \"advanced\" with some settings to fix things for certain users.\n•Added feature to click anywhere on popup to close.\n•Made the EdgewareSetup.bat more clear with easier to read text. Hopefully if you\'re seeing this it all worked out!\n•Moved the import/export resources button to be visible on every page, because honestly they\'re pretty important\n•Added the \"Pack Info\" tab with lots of fun goodies and stats so you know what you\'re getting into with each pack.\n•Added a simplified error console in the \"advanced\" tab.\n•Overhauled Hibernate with a bunch of new modes and features\n•Added file tab with multiple file management settings\n•Added feature to enable or disable moods (feature in regular edgeware that went unused afaik)\n•Added corruption. What is it? Dont worry about it.\n•Added support to playing videos in VLC, enabling faster loading.\n•Added advanced caption settings to captions.json.\n•Added theme support with multiple themes to switch between.\n•Pack creators can now create a config preset for their pack.'
+PLUSPLUS_TEXT           = 'Thanks for taking the time to check out this extension on EdgeWare! However you found it, I appreciate that it interested you enough to give it a download.\n\nI am not an expert programmer by any means, so apologies if there are any bugs or errors in this version. My goal is to not do anything crazy ambitious like rewrite the entire program or fix up the backend, but rather just add on functionality that I thought could improve the base version. Because of this, i\'m hoping that compatability between those who use normal EdgeWare and those who use this version stays relatively stable. If you were given this version directly without a download link and are curious about development updates, you can find updates and links to the github @ twitter @ara10ten.\n\n Current changes:\n\n•Added a option under "misc" to enable/disable desktop icon generation.\n•Added options to cap the number of audio popups and video popups.\n•Added a chance slider for subliminals, and a max subliminals slider.\n•Added feature to change Startup Graphic and Icon per pack. (name the file(s) \"loading_splash\" and/or \"icon.ico\" in the resource folder)\n•Added feature to enable warnings for \"Dangerous Settings\".\n•Added hover tooltips on some things to make the program easier to understand.\n•Added troubleshooting tab under \"advanced\" with some settings to fix things for certain users.\n•Added feature to click anywhere on popup to close.\n•Made the EdgewareSetup.bat more clear with easier to read text. Hopefully if you\'re seeing this it all worked out!\n•Moved the import/export resources button to be visible on every page, because honestly they\'re pretty important\n•Added the \"Pack Info\" tab with lots of fun goodies and stats so you know what you\'re getting into with each pack.\n•Added a simplified error console in the \"advanced\" tab.\n•Overhauled Hibernate with a bunch of new modes and features\n•Added file tab with multiple file management settings\n•Added feature to enable or disable moods (feature in regular edgeware that went unused afaik)\n•Added corruption. What is it? Dont worry about it.\n•Added support to playing videos in VLC, enabling faster loading.\n•Added advanced caption settings to captions.json.\n•Added theme support with multiple themes to switch between.\n•Pack creators can now create a config preset for their pack.\n•Two new popup types, Subliminal Messages and Moving Popups, with help from /u/basicmo!\n•Experimental Linux support!'
 PACKINFO_TEXT          = 'The pack info section contains an overview for whatever pack is currently loaded.\n\nThe \"Stats\" tab allows you to see what features are included in the current pack (or if a pack is even loaded at all), but keep in mind all of these features have default fallbacks if they aren\'t included. It also lets you see a lot of fun stats relating to the pack, including almost everything you\'ll encounter while using EdgeWare. Keep in mind that certain things having \"0\" as a stat doesn\'t mean you can\'t use it, for example, having 0 subliminals uses the default spiral and having 0 images displays a very un-sexy circle.\n\nThe \"Information\" tab gets info on the pack from //resource//info.json, which is a new addition to EdgeWare++. This feature was added to allow pack creators to give the pack a formal name and description without having to worry about details being lost if transferred from person to person. Think of it like a readme. Also included in this section is the discord status info, which gives what your discord status will be set to if that setting is turned on, along with the image. As of time of writing (or if I forget to update this later), the image cannot be previewed as it is \"hard coded\" into EdgeWare\'s discord application and accessed through the API. As I am not the original creator of EdgeWare, and am not sure how to contact them, the best I could do is low-res screenshots or the name of each image. I chose the latter. Because of this hard-coding, the only person i\'ve run into so far who use these images is PetitTournesol themselves, but it should be noted that anyone can use them as long as they know what to add to the discord.dat file. This is partially the reason I left this information in.\n\nThe \"Moods\" tab is where you can access mood settings and previews for the current pack. The left table shows information for media (linking moods to images, videos, etc), captions, and prompts, while the \"Corruption Path\" area shows how these moods correlate to corruption levels.'
 FILE_TEXT              = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the \"total logs in folder\" stat will always display as \"1\".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a \"moods json file\", which is tapped into when selecting what moods you want to see in the \"Pack Info\" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want EdgeWare++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.\n\n When manually editing mood config jsons, you don\'t need to worry about how the unique ID is generated- the file tab will tell you what to look for. If you are curious though, here is the exact formula:\n\nnum_images + num_audio + num_video + wallpaper(y/n) + loading_splash(y/n) + discord_status(y/n) + icon(y/n) + corruption(y/n)\n\nFor example:\nA pack with 268 images, 7 audio, 6 videos, has a wallpaper, doesn\'t have a custom loading splash, has a discord status, doesn\'t have a custom icon, and doesn\'t have a corruption file, would generate \"26876wxdxx.json\" in //moods//unnamed (mood files go in unnamed when using unique IDs)'
 
-BUTTON_FACE = 'SystemButtonFace' if os.name == 'nt' else 'gray90'
-
+#corruption tutorial text
+CINTRO_TEXT            = 'Welcome to the Corruption tab!\n\n Normally I\'d put tutorials and help like this elsewhere, but I realize that this is probably the most complex and in-depth feature to be added to EdgeWare. Don\'t worry, we\'ll work through it together!\n\nEach tab will go over a feature of corruption, while also highlighting where the settings are for reference. Any additional details not covered here can be found in the \"About\" tab!'
+CSTART_TEXT            = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a \"question mark\" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
+CTRANSITION_TEXT       = 'Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels.'
 errors_list = []
+BUTTON_FACE = 'SystemButtonFace' if os.name == 'nt' else 'gray90'
 
 #all booru consts
 BOORU_FLAG = '<BOORU_INSERT>'                                                      #flag to replace w/ booru name
@@ -306,6 +309,8 @@ if settings['toggleMoodSet'] != True:
                             captions_dict = json.loads(captions.read())
                             if 'prefix' in captions_dict: del captions_dict['prefix']
                             if 'subtext' in captions_dict: del captions_dict['subtext']
+                            if 'subliminal' in captions_dict: del captions_dict['subliminal']
+                            if 'prefix_settings' in captions_dict: del captions_dict['prefix_settings']
                             mood_dict["captions"] += captions_dict
                 except:
                     logging.warning(f'captions mood extraction failed.')
@@ -441,8 +446,16 @@ def show_window():
             singleModeVar       = BooleanVar(root, value=(int(settings['singleMode'])==1))
 
             corruptionModeVar         = BooleanVar(root, value=(int(settings['corruptionMode'])==1))
+            corruptionDevVar          = BooleanVar(root, value=(int(settings['corruptionDevMode'])==1))
+            corruptionFullPermVar     = BooleanVar(root, value=(int(settings['corruptionFullPerm'])==1))
             corruptionTimeVar         = IntVar(root, value=int(settings['corruptionTime']))
+            corruptionPopupsVar       = IntVar(root, value=int(settings['corruptionPopups']))
+            corruptionLaunchesVar     = IntVar(root, value=int(settings['corruptionLaunches']))
             corruptionFadeTypeVar     = StringVar(root, value=(settings['corruptionFadeType'].strip()))
+            corruptionTriggerVar      = StringVar(root, value=(settings['corruptionTrigger'].strip()))
+            corruptionWallpaperCycleVar = BooleanVar(root, value=(int(settings['corruptionWallpaperCycle'])==1))
+            corruptionThemeCycleVar     = BooleanVar(root, value=(int(settings['corruptionThemeCycle'])==1))
+            corruptionPurityModeVar     = BooleanVar(root, value=(int(settings['corruptionPurityMode'])==1))
 
             pumpScareOffsetVar        = IntVar(root, value=int(settings['pumpScareOffset']))
 
@@ -453,6 +466,19 @@ def show_window():
             themeNoConfigVar          = BooleanVar(root, value=(int(settings['themeNoConfig'])==1))
 
             presetsDangerVar          = BooleanVar(root, value=(int(settings['presetsDanger'])==1))
+
+            sMessageChanceVar         = IntVar(root, value=int(settings['sMessageChance']))
+            sMessageDurationVar       = IntVar(root, value=int(settings['sMessageDuration']))
+            sMessageTransparencyVar   = IntVar(root, value=int(settings['sMessageTransparency']))
+
+            movingChanceVar           = IntVar(root, value=int(settings['movingChance']))
+            movingSpeedVar            = IntVar(root, value=int(settings['movingSpeed']))
+            movingRandomVar           = BooleanVar(root, value=(int(settings['movingRandom'])==1))
+
+            capPopChanceVar           = IntVar(root, value=int(settings['capPopChance']))
+            capPopOpacityVar          = IntVar(root, value=int(settings['capPopOpacity']))
+            capPopTimerVar            = IntVar(root, value=int(settings['capPopTimer']))
+            capPopMoodVar             = BooleanVar(root, value=(int(settings['capPopMood'])==1))
 
 
             #grouping for sanity's sake later
@@ -472,7 +498,12 @@ def show_window():
                             hibernateLengthVar, fixWallpaperVar, toggleHibSkipVar, toggleMoodSetVar,
                             corruptionModeVar, corruptionTimeVar, pumpScareOffsetVar, corruptionFadeTypeVar,
                             vlcModeVar, captionFilenameVar, singleModeVar, multiClickVar, themeTypeVar,
-                            themeNoConfigVar, presetsDangerVar]
+                            themeNoConfigVar, presetsDangerVar, corruptionTriggerVar, corruptionPopupsVar,
+                            corruptionLaunchesVar, corruptionDevVar, corruptionWallpaperCycleVar,
+                            corruptionThemeCycleVar, corruptionPurityModeVar, corruptionFullPermVar,
+                            sMessageChanceVar, sMessageDurationVar, sMessageTransparencyVar,
+                            movingChanceVar, movingSpeedVar, movingRandomVar, capPopChanceVar,
+                            capPopOpacityVar, capPopTimerVar, capPopMoodVar]
 
             in_var_names = ['delay', 'popupMod', 'webMod', 'audioMod', 'promptMod', 'fill',
                             'fill_delay', 'replace', 'replaceThresh', 'start_on_logon',
@@ -489,7 +520,12 @@ def show_window():
                             'toggleInternet', 'buttonless', 'hibernateType', 'hibernateLength', 'fixWallpaper',
                             'toggleHibSkip', 'toggleMoodSet', 'corruptionMode', 'corruptionTime', 'pumpScareOffset',
                             'corruptionFadeType', 'vlcMode', 'captionFilename', 'singleMode', 'multiClick',
-                            'themeType', 'themeNoConfig', 'presetsDanger']
+                            'themeType', 'themeNoConfig', 'presetsDanger', 'corruptionTrigger',
+                            'corruptionPopups', 'corruptionLaunches', 'corruptionDevMode',
+                            'corruptionWallpaperCycle', 'corruptionThemeCycle', 'corruptionPurityMode',
+                            'corruptionFullPerm', 'sMessageChance', 'sMessageDuration', 'sMessageTransparency',
+                            'movingChance', 'movingSpeed', 'movingRandom', 'capPopChance', 'capPopOpacity',
+                            'capPopTimer', 'capPopMood']
             break
         except Exception as e:
             messagebox.showwarning(
@@ -534,6 +570,11 @@ def show_window():
     info_group     = []
     discord_group  = []
     test_group = []
+    ctime_group = []
+    cpopup_group = []
+    claunch_group = []
+    ctutorialstart_group = []
+    ctutorialtransition_group = []
 
     webv = getLiveVersion(UPDCHECK_URL, 0)
     webvpp = getLiveVersion(UPDCHECK_PP_URL, 1)
@@ -699,12 +740,21 @@ def show_window():
     Label(tabGeneral, text='Timer Settings', font=titleFont, relief=GROOVE).pack(pady=2)
     timerFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
 
-    timerToggle = Checkbutton(timerFrame, text='Timer Mode', variable=timerVar, command=lambda: toggleAssociateSettings(timerVar.get(), timer_group), cursor='question_arrow')
+    timerToggle = Checkbutton(timerFrame, text='Timer Mode', variable=timerVar, command=lambda: timerHelper(), cursor='question_arrow')
     timerSlider = Scale(timerFrame, label='Timer Time (mins)', from_=1, to=1440, orient='horizontal', variable=timerTimeVar)
     safewordFrame = Frame(timerFrame)
 
+    def timerHelper():
+        toggleAssociateSettings(timerVar.get(), timer_group)
+        if timerVar.get():
+            startLoginVar.set(True)
+        else:
+            startLoginVar.set(False)
+
     timerttp = CreateToolTip(timerToggle, 'Enables \"Run on Startup\" and disables the Panic function until the time limit is reached.\n\n'
-                                '\"Safeword\" allows you to set a password to re-enable Panic, if need be.')
+                                '\"Safeword\" allows you to set a password to re-enable Panic, if need be.\n\n'
+                                'Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause '
+                                'instability when running EdgeWare multiple times without changing config settings.')
 
     Label(safewordFrame, text='Emergency Safeword').pack()
     timerSafeword = Entry(safewordFrame, show='*', textvariable=safewordVar)
@@ -1085,6 +1135,8 @@ def show_window():
     mitosisFrame = Frame(popupHostFrame)
     panicFrame = Frame(popupHostFrame)
     denialFrame = Frame(popupHostFrame)
+    movingFrame = Frame(popupHostFrame)
+    speedFrame = Frame(popupHostFrame)
 
     popupScale = Scale(popupFrame, label='Popup Freq (%)', from_=0, to=100, orient='horizontal', variable=popupVar)
     popupManual = Button(popupFrame, text='Manual popup...', command=lambda: assign(popupVar, simpledialog.askinteger('Manual Popup', prompt='[0-100]: ')), cursor='question_arrow')
@@ -1106,16 +1158,11 @@ def show_window():
 
     mitosis_cGroup.append(mitosisStren)
 
-    setPanicButtonButton = Button(panicFrame, text=f'Set Panic Button\n<{panicButtonVar.get()}>', command=lambda:getKeyboardInput(setPanicButtonButton, panicButtonVar), cursor='question_arrow')
+    setPanicButtonButton = Button(panicFrame, text=f'Set Panic\nButton\n<{panicButtonVar.get()}>', command=lambda:getKeyboardInput(setPanicButtonButton, panicButtonVar), cursor='question_arrow')
     doPanicButton = Button(panicFrame, text='Perform Panic', command=lambda: subprocess.Popen([sys.executable, 'panic.pyw']))
-    panicDisableButton = Checkbutton(popupHostFrame, text='Disable Panic Hotkey', variable=panicVar, cursor='question_arrow')
 
     setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be \"focused\" on a EdgeWare popup. Click on a popup before using.')
-    disablePanicttp = CreateToolTip(panicDisableButton, 'This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n'
-                        'If you want to use Panic after this, you can still:\n'
-                        '•Directly run \"panic.pyw\"\n'
-                        '•Keep the config window open and press \"Perform Panic\"\n'
-                        '•Use the panic desktop icon (if you kept those enabled)')
+
 
     timeoutToggle = Checkbutton(timeoutFrame, text='Popup Timeout', variable=timeoutPopupsVar, command=lambda: toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group))
     timeoutSlider = Scale(timeoutFrame, label='Time (sec)', from_=1, to=120, orient='horizontal', variable=popupTimeoutVar)
@@ -1124,6 +1171,16 @@ def show_window():
 
     denialSlider = Scale(denialFrame, label='Denial Chance', orient='horizontal', variable=denialChance)
     denialToggle = Checkbutton(denialFrame, text='Denial Mode', variable=denialMode, command=lambda: toggleAssociateSettings(denialMode.get(), denial_group), cursor='question_arrow')
+
+    movingSlider = Scale(movingFrame, label='Moving Chance', orient='horizontal', variable=movingChanceVar, cursor='question_arrow')
+    movingRandToggle = Checkbutton(movingFrame, text='Rand. Direction', variable=movingRandomVar, cursor='question_arrow')
+
+    movingttp = CreateToolTip(movingSlider, 'Gives each popup a chance to move around the screen instead of staying still. The popup will have the \"Buttonless\" '
+    'property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.')
+    moverandomttp = CreateToolTip(movingRandToggle, 'Makes moving popups move in a random direction rather than the static diagonal one.')
+
+    movingSpeedSlider = Scale(speedFrame, label='Max Movespeed', from_=1, to=15, orient='horizontal', variable=movingSpeedVar)
+    manualSpeed = Button(speedFrame, text='Manual speed...', command=lambda: assign(movingSpeedVar, simpledialog.askinteger('Manual Speed', prompt='[1-15]: ')))
 
     denialttp = CreateToolTip(denialToggle, 'Adds a percentage chance to \"censor\" an image.')
     denial_group.append(denialSlider)
@@ -1141,10 +1198,15 @@ def show_window():
     denialFrame.pack(fill='y', side='left')
     denialSlider.pack(fill='x')
     denialToggle.pack(fill='x')
+    movingFrame.pack(fill='y', side='left')
+    movingSlider.pack(fill='x')
+    movingRandToggle.pack(fill='x')
+    speedFrame.pack(fill='y', side='left')
+    movingSpeedSlider.pack(fill='x')
+    manualSpeed.pack(fill='x')
     panicFrame.pack(fill='y', side='left')
-    setPanicButtonButton.pack(fill='x')
+    setPanicButtonButton.pack(fill='x', expand=1)
     doPanicButton.pack(fill='x')
-    panicDisableButton.pack(fill='x')
     #popup frame handle end
 
     #additional popup options, mostly edgeware++ stuff
@@ -1153,42 +1215,34 @@ def show_window():
     popupOptionsSubFrame2 = Frame(popupOptionsFrame)
     popupOptionsSubFrame3 = Frame(popupOptionsFrame)
 
-    toggleCaptionsButton = Checkbutton(popupOptionsSubFrame1, text='Popup Captions', variable=captionVar, cursor='question_arrow')
+    panicDisableButton = Checkbutton(popupOptionsSubFrame1, text='Disable Panic Hotkey', variable=panicVar, cursor='question_arrow')
     popupWebToggle= Checkbutton(popupOptionsSubFrame1, text='Popup close opens web page', variable=popupWebVar)
-    toggleFilenameButton = Checkbutton(popupOptionsSubFrame2, text='Use filename for caption moods', variable=captionFilenameVar, cursor='question_arrow')
     toggleEasierButton = Checkbutton(popupOptionsSubFrame2, text='Buttonless Closing Popups', variable=buttonlessVar, cursor='question_arrow')
     toggleSingleButton = Checkbutton(popupOptionsSubFrame3, text='Single Popup Mode', variable=singleModeVar, cursor='question_arrow')
     toggleMultiClickButton = Checkbutton(popupOptionsSubFrame3, text='Multi-Click popups', variable=multiClickVar, cursor='question_arrow')
 
-    captionttp =  CreateToolTip(toggleCaptionsButton, 'Enables captions on popups. These are short segments of text written by the pack creator that adorn the top of each popup.')
-    captionfilenamettp =  CreateToolTip(toggleFilenameButton, 'When enabled, captions will try and match the filename of the image they attach to.\n\n'
-                                    'This is done using the start of the filename. For example, a mood named \"goon\" would match captions of that mood to popups '
-                                    'of images named things like \"goon300242\", \"goon-love\", \"goon_ytur8843\", etc.\n\n'
-                                    'This is how EdgeWare processed captions before moods were implemented fully in EdgeWare++. The reason you\'d turn this off, however, '
-                                    'is that if the mood doesn\'t match the filename, it won\'t display at all.\n\n For example, if you had a mood named \"succubus\", but '
-                                    'no files started with \"succubus\", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
-                                    'the pack supports it.')
+    disablePanicttp = CreateToolTip(panicDisableButton, 'This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n'
+                        'If you want to use Panic after this, you can still:\n'
+                        '•Directly run \"panic.pyw\"\n'
+                        '•Keep the config window open and press \"Perform Panic\"\n'
+                        '•Use the panic desktop icon (if you kept those enabled)')
     buttonlessttp = CreateToolTip(toggleEasierButton, 'Disables the \"close button\" on popups and allows you to click anywhere on the popup to close it.\n\n'
                                     'IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!')
     singlettp = CreateToolTip(toggleSingleButton, 'The randomization in EdgeWare does not check to see if a previous \"roll\" succeeded or not when a popup is spawned.\n\n'
                                     'For example, if you have audio, videos, and prompts all turned on, there\'s a very real chance you will get all of them popping up at the same '
                                     'time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It '
                                     'delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: The roll order for popups are as follows:\n'
-                                    'Web -> Video -> Audio -> Prompt -> Image\nTherefore, if every type of popup is at the same rate of appearing (and single mode is turned on), '
+                                    'Web -> Video -> Audio -> Prompt -> Caption Popup -> Image\nTherefore, if every type of popup is at the same rate of appearing (and single mode is turned on), '
                                     'web links will be slightly more common than videos, and videos slightly more common than audio, etc...')
-    multiclickttp = CreateToolTip(toggleMultiClickButton, 'If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks '
-                                    'to close. This feature must be set-up beforehand and won\'t do anything if not supported.')
 
     popupOptionsFrame.pack(fill='x')
     popupOptionsSubFrame1.pack(fill='y', side='left', expand=1)
     popupOptionsSubFrame2.pack(fill='y', side='left', expand=1)
     popupOptionsSubFrame3.pack(fill='y', side='left', expand=1)
-    toggleCaptionsButton.pack(fill='x')
+    panicDisableButton.pack(fill='x')
     popupWebToggle.pack(fill='x')
-    toggleFilenameButton.pack(fill='x')
     toggleEasierButton.pack(fill='x')
     toggleSingleButton.pack(fill='x')
-    toggleMultiClickButton.pack(fill='x')
     #other start
     otherHostFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
 
@@ -1308,66 +1362,284 @@ def show_window():
     maxSubliminalsScale.pack(fill='x', padx=1, expand=1)
     maxSubliminalsManual.pack(fill='x')
 
+    captionsFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
+    captionsSubFrame1 = Frame(captionsFrame)
+    capPopFrame = Frame(captionsFrame)
+    capPopOpacityFrame = Frame(captionsFrame)
+    capPopTimerFrame = Frame(captionsFrame)
+
+    toggleCaptionsButton = Checkbutton(captionsSubFrame1, text='Popup Captions', variable=captionVar, cursor='question_arrow')
+    toggleFilenameButton = Checkbutton(captionsSubFrame1, text='Use filename for caption moods', variable=captionFilenameVar, cursor='question_arrow')
+    toggleMultiClickButton = Checkbutton(captionsSubFrame1, text='Multi-Click popups', variable=multiClickVar, cursor='question_arrow')
+    toggleCaptionMood = Checkbutton(captionsSubFrame1, text='Use Cap-Pop specific mood', variable=capPopMoodVar, cursor='question_arrow')
+
+    captionttp =  CreateToolTip(toggleCaptionsButton, 'Enables captions on popups. These are short segments of text written by the pack creator that adorn the top of each popup.')
+    multiclickttp = CreateToolTip(toggleMultiClickButton, 'If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks '
+                                    'to close. This feature must be set-up beforehand and won\'t do anything if not supported.')
+    captionfilenamettp =  CreateToolTip(toggleFilenameButton, 'When enabled, captions will try and match the filename of the image they attach to.\n\n'
+                                    'This is done using the start of the filename. For example, a mood named \"goon\" would match captions of that mood to popups '
+                                    'of images named things like \"goon300242\", \"goon-love\", \"goon_ytur8843\", etc.\n\n'
+                                    'This is how EdgeWare processed captions before moods were implemented fully in EdgeWare++. The reason you\'d turn this off, however, '
+                                    'is that if the mood doesn\'t match the filename, it won\'t display at all.\n\n For example, if you had a mood named \"succubus\", but '
+                                    'no files started with \"succubus\", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
+                                    'the pack supports it.')
+    capmoodttp = CreateToolTip(toggleCaptionMood, 'Caption Popups have the option to use a special mood in the captions.json file called \"subliminals\". This mood doesn\'t '
+                                    'normally appear like other captions, and is meant for short, fast messages that will blink at you very quickly.\n\nThis setting will '
+                                    'disable using the subliminals mood, and instead pull from all other valid captions. If your pack doesn\'t support subliminals, this '
+                                    'setting doesn\'t need to be disabled- it will automatically switch to using regular captions.')
+
+    captionsPopupSlider = Scale(capPopFrame, label='Cap-Pop Chance', from_=0, to=100, orient='horizontal', variable=capPopChanceVar)
+    captionsPopupManual = Button(capPopFrame, text='Manual Cap-Pop...', command=lambda: assign(capPopChanceVar, simpledialog.askinteger('Manual Caption Popup Chance (%)', prompt='[0-100]: ')), cursor='question_arrow')
+    capPopOpacitySlider = Scale(capPopOpacityFrame, label='Cap-Pop Opacity', from_=1, to=100, orient='horizontal', variable=capPopOpacityVar)
+    capPopOpacityManual = Button(capPopOpacityFrame, text='Manual Opacity...', command=lambda: assign(capPopOpacityVar, simpledialog.askinteger('Manual Caption Popup Opacity (%)', prompt='[1-100]: ')))
+    capPopTimerSlider = Scale(capPopTimerFrame, label='Cap-Pop Timer', from_=1, to=1000, orient='horizontal', variable=capPopTimerVar)
+    capPopTimerManual = Button(capPopTimerFrame, text='Manual Timer...', command=lambda: assign(capPopTimerVar, simpledialog.askinteger('Manual Caption Popup Timer (ms)', prompt='[1-1000]: ')))
+
+    cappopttp = CreateToolTip(captionsPopupManual, 'Caption Popups are short full-screen popups that flash up briefly before they disappear, similar to subliminal messages. They '
+                                'take from the pack\'s captions.json file, and can use a specific \"subliminals\" mood to have unique captions (if the setting to the left is toggled on).')
+
+    captionsFrame.pack(fill='x')
+    captionsSubFrame1.pack(fill='y', side='left')
+    toggleCaptionsButton.pack(fill='y', side='top')
+    toggleFilenameButton.pack(fill='y', side='top')
+    toggleMultiClickButton.pack(fill='y', side='top')
+    toggleCaptionMood.pack(fill='y', side='top')
+
+    capPopFrame.pack(fill='y', side='left')
+    captionsPopupSlider.pack(fill='x', padx=1, expand=1)
+    captionsPopupManual.pack(fill='x')
+    capPopOpacityFrame.pack(fill='y', side='left')
+    capPopOpacitySlider.pack(fill='x', padx=1, expand=1)
+    capPopOpacityManual.pack(fill='x')
+    capPopTimerFrame.pack(fill='y', side='left')
+    capPopTimerSlider.pack(fill='x', padx=1, expand=1)
+    capPopTimerManual.pack(fill='x')
+
     #===================={CORRUPTION}==============================#
     tabMaster.add(tabCorruption, text='Corruption')
 
-    corruptionFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
+    corruptionFrame = Frame(tabCorruption)
 
     corruptionSettingsFrame = Frame(corruptionFrame)
-    corruptionTypeFrame = Frame(corruptionFrame)
-    corruptionTimeFrame = Frame(corruptionFrame)
+    corruptionSubFrame1 = Frame(corruptionSettingsFrame)
 
-    corruptionToggle = Checkbutton(corruptionSettingsFrame, text='Turn on Corruption', variable=corruptionModeVar, cursor='question_arrow')
-    corruptionRecommendedToggle = Button(corruptionSettingsFrame, text='Recommended Settings', cursor='question_arrow', command=lambda: packPreset(in_var_group, in_var_names, 'corruption', presetsDangerVar.get()))
+    corruptionStartFrame = Frame(corruptionSubFrame1, borderwidth=5, relief=RAISED)
+
+    corruptionEnabled_group = []
+
+    corruptionToggle = Checkbutton(corruptionStartFrame, text='Turn on Corruption', variable=corruptionModeVar, cursor='question_arrow')
+    corruptionFullToggle = Checkbutton(corruptionStartFrame, text='Full Permissions Mode', variable=corruptionFullPermVar, cursor='question_arrow')
+    corruptionRecommendedToggle = Button(corruptionStartFrame, text='Recommended Settings', cursor='question_arrow', height=2,
+                        command=lambda: packPreset(in_var_group, in_var_names, 'corruption', presetsDangerVar.get()))
+    corruptionEnabled_group.append(corruptionToggle)
+    ctutorialstart_group.append(corruptionStartFrame)
+    ctutorialstart_group.append(corruptionToggle)
+    ctutorialstart_group.append(corruptionFullToggle)
+    ctutorialstart_group.append(corruptionRecommendedToggle)
 
     corruptionFrame.pack(fill='x')
+    corruptionSettingsFrame.pack(fill='x', side='left')
+    corruptionSubFrame1.pack(fill='both', side='top')
+    corruptionStartFrame.pack(fill='both', side='left')
 
-    corruptionSettingsFrame.pack(side='left')
-    corruptionTypeFrame.pack(side='left')
-    corruptionTimeFrame.pack(side='left')
-
-    corruptionToggle.pack(fill='x')
-    corruptionRecommendedToggle.pack(fill='x')
+    corruptionToggle.pack(fill='x', expand=1)
+    corruptionFullToggle.pack(fill='x', expand=1)
+    corruptionRecommendedToggle.pack(fill='x', padx=2, pady=2)
 
     corruptionmodettp = CreateToolTip(corruptionToggle, 'Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden'
                                         ' content. Or at least that\'s the idea, pack creators can do whatever they want with it.\n\n'
                                         'Corruption uses the \'mood\' feature, which must be supported with a corruption.json file in the resource'
                                         ' folder. Over time moods will \"unlock\", leading to new things you haven\'t seen before the longer you use'
                                         ' EdgeWare.\n\nFor more information, check out the \"About\" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!')
+    corruptionfullttp = CreateToolTip(corruptionFullToggle, 'This setting allows corruption mode to change config settings as it goes through corruption levels.')
     corruptionsettingsttp = CreateToolTip(corruptionRecommendedToggle, 'Pack creators can set \"default corruption settings\" for their pack, to give'
                                         ' users a more designed and consistent experience. This setting turns those on (if they exist).'
                                         '\n\nSidenote: this will load configurations similarly to the option in the \"Pack Info\" tab, however this one will only load corruption-specific settings.')
 
-    corruptionTimerButton = Button(corruptionTimeFrame, text='Manual time...', command=lambda: assign(corruptionTimeVar, simpledialog.askinteger('Manual Level Time (sec)', prompt='[5-1800]: ')))
-    corruptionTimerScale = Scale(corruptionTimeFrame, label='Level Time', variable=corruptionTimeVar, orient='horizontal', from_=5, to=1800)
-
-    corruptionTimerScale.pack(fill='y')
-    corruptionTimerButton.pack(fill='y')
-
-    corruptionFadeFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
+    corruptionFadeFrame = Frame(corruptionSubFrame1, borderwidth=5, relief=RAISED)
     fadeInfoFrame = Frame(corruptionFadeFrame)
-    fadeImageFrame = Frame(corruptionFadeFrame)
+    fadeSubInfo = Frame(fadeInfoFrame)
+    triggerInfoFrame = Frame(corruptionFadeFrame)
+    triggerSubInfo = Frame(triggerInfoFrame)
 
     fade_types = ['Normal', 'Abrupt', 'Noise']
-    fadeDropdown = OptionMenu(fadeInfoFrame, corruptionFadeTypeVar, *fade_types, command=lambda key: fadeHelper(key))
-    fadeDescription = Label(fadeInfoFrame, text='Error loading fade description!', borderwidth=2, relief=GROOVE, wraplength=175)
+    fadeDropdown = OptionMenu(fadeSubInfo, corruptionFadeTypeVar, *fade_types, command=lambda key: fadeHelper(key))
+    fadeDropdown.configure(width=9, highlightthickness = 0)
+    fadeDescription = Label(fadeInfoFrame, text='Error loading fade description!', borderwidth=2, relief=GROOVE, wraplength=150)
+    fadeDescription.configure(height=3, width=22)
     fadeImageNormal = ImageTk.PhotoImage(file=os.path.join(PATH, 'default_assets', 'corruption_defaultfade.png'))
-    fadeImageContainer = Label(fadeImageFrame, image=fadeImageNormal, borderwidth=2, relief=GROOVE)
+    fadeImageAbrupt = ImageTk.PhotoImage(file=os.path.join(PATH, 'default_assets', 'corruption_abruptfade.png'))
+    fadeImageNoise = ImageTk.PhotoImage(file=os.path.join(PATH, 'default_assets', 'corruption_noisefade.png'))
+    fadeImageContainer = Label(fadeSubInfo, image=fadeImageNormal, borderwidth=2, relief=GROOVE)
+    trigger_types = ['Timed', 'Popup', 'Launch']
+    triggerDropdown = OptionMenu(triggerSubInfo, corruptionTriggerVar, *trigger_types, command=lambda key: triggerHelper(key, False))
+    triggerDropdown.configure(width=9, highlightthickness = 0)
+    triggerDescription = Label(triggerInfoFrame, text='Error loading trigger description!', borderwidth=2, relief=GROOVE, wraplength=150)
+    triggerDescription.configure(height=3, width=22)
+
+    ctutorialtransition_group.append(corruptionFadeFrame)
+    ctutorialtransition_group.append(fadeInfoFrame)
+    ctutorialtransition_group.append(fadeSubInfo)
+    ctutorialtransition_group.append(triggerInfoFrame)
+    ctutorialtransition_group.append(triggerSubInfo)
+    ctutorialtransition_group.append(fadeDropdown)
+    ctutorialtransition_group.append(fadeDescription)
+    ctutorialtransition_group.append(triggerDropdown)
+    ctutorialtransition_group.append(triggerDescription)
+
+    corruptionFadeFrame.pack(fill='both', side='left')
+    fadeInfoFrame.pack(side='top', fill='both', pady=1)
+    fadeSubInfo.pack(side='left', fill='x')
+    fadeDropdown.pack(side='top')
+    fadeImageContainer.pack(side='top')
+    fadeDescription.pack(side='left', fill='y', padx=3, ipadx=2, ipady=2)
+    triggerInfoFrame.pack(side='top', fill='both', pady=1)
+    triggerSubInfo.pack(side='left', fill='x')
+    triggerDropdown.pack(side='top')
+    triggerDescription.pack(side='left', fill='y', padx=3, ipadx=2, ipady=2)
+
+    #-Timer-
+
+    corruptionTimeFrame = Frame(corruptionSettingsFrame)
+    corruptionTimeFrame.pack(fill='x', side='top')
+    cTimerFrame = Frame(corruptionTimeFrame)
+    corruptionTimerButton = Button(cTimerFrame, text='Manual time...', command=lambda: assign(corruptionTimeVar, simpledialog.askinteger('Manual Level Time (sec)', prompt='[5-1800]: ')))
+    corruptionTimerScale = Scale(cTimerFrame, label='Level Time', variable=corruptionTimeVar, orient='horizontal', from_=5, to=1800)
+    cPopupsFrame = Frame(corruptionTimeFrame)
+    corruptionPopupsButton = Button(cPopupsFrame, text='Manual popups...', command=lambda: assign(corruptionPopupsVar, simpledialog.askinteger('Manual Level Popups (per transition)', prompt='[3-100]: ')))
+    corruptionPopupsScale = Scale(cPopupsFrame, label='Level Popups', variable=corruptionPopupsVar, orient='horizontal', from_=3, to=100)
+    cLaunchesFrame = Frame(corruptionTimeFrame)
+    corruptionLaunchesButton = Button(cLaunchesFrame, text='Manual launches...', command=lambda: assign(corruptionLaunchesVar, simpledialog.askinteger('Manual Level Launches (per transition)', prompt='[2-31]: ')))
+    corruptionLaunchesScale = Scale(cLaunchesFrame, label='Level Launches', variable=corruptionLaunchesVar, orient='horizontal', from_=2, to=31)
+
+    ctutorialtransition_group.append(corruptionTimerButton)
+    ctutorialtransition_group.append(corruptionTimerScale)
+    ctutorialtransition_group.append(corruptionPopupsButton)
+    ctutorialtransition_group.append(corruptionPopupsScale)
+    ctutorialtransition_group.append(corruptionLaunchesButton)
+    ctutorialtransition_group.append(corruptionLaunchesScale)
+
+    cTimerFrame.pack(side='left', fill='x', padx=1, expand=1)
+    corruptionTimerScale.pack(fill='y')
+    corruptionTimerButton.pack(fill='y')
+    cPopupsFrame.pack(side='left', fill='x', padx=1, expand=1)
+    corruptionPopupsScale.pack(fill='y')
+    corruptionPopupsButton.pack(fill='y')
+    cLaunchesFrame.pack(side='left', fill='x', padx=1, expand=1)
+    corruptionLaunchesScale.pack(fill='y')
+    corruptionLaunchesButton.pack(fill='y')
+
+    ctime_group.append(corruptionTimerButton)
+    ctime_group.append(corruptionTimerScale)
+    cpopup_group.append(corruptionPopupsButton)
+    cpopup_group.append(corruptionPopupsScale)
+    claunch_group.append(corruptionLaunchesButton)
+    claunch_group.append(corruptionLaunchesScale)
 
     def fadeHelper(key):
         if key == 'Normal':
-            fadeDescription.configure(text='Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do')
+            fadeDescription.configure(text='Gradually transitions between corruption levels.')
             fadeImageContainer.configure(image=fadeImageNormal)
+        if key == 'Abrupt':
+            fadeDescription.configure(text='Immediately switches to new level upon timer completion.')
+            fadeImageContainer.configure(image=fadeImageAbrupt)
+        if key == 'Noise':
+            fadeDescription.configure(text='Scatters levels randomly across the time range.')
+            fadeImageContainer.configure(image=fadeImageNoise)
+    def triggerHelper(key, tutorialMode):
+        if key == 'Timed':
+            triggerDescription.configure(text='Transitions based on time elapsed in current session.')
+            if tutorialMode:
+                toggleAssociateSettings_manual(True, ctime_group, 'lime green', 'forest green')
+                toggleAssociateSettings_manual(False, cpopup_group, 'lime green', 'forest green')
+                toggleAssociateSettings_manual(False, claunch_group, 'lime green', 'forest green')
+            else:
+                toggleAssociateSettings(True, ctime_group)
+                toggleAssociateSettings(False, cpopup_group)
+                toggleAssociateSettings(False, claunch_group)
+        if key == 'Popup':
+            triggerDescription.configure(text='Transitions based on number of popups in current session.')
+            if tutorialMode:
+                toggleAssociateSettings_manual(False, ctime_group, 'lime green', 'forest green')
+                toggleAssociateSettings_manual(True, cpopup_group, 'lime green', 'forest green')
+                toggleAssociateSettings_manual(False, claunch_group, 'lime green', 'forest green')
+            else:
+                toggleAssociateSettings(False, ctime_group)
+                toggleAssociateSettings(True, cpopup_group)
+                toggleAssociateSettings(False, claunch_group)
+        if key == 'Launch':
+            triggerDescription.configure(text='Transitions based on number of EdgeWare launches.')
+            if tutorialMode:
+                toggleAssociateSettings_manual(False, ctime_group, 'lime green', 'forest green')
+                toggleAssociateSettings_manual(False, cpopup_group, 'lime green', 'forest green')
+                toggleAssociateSettings_manual(True, claunch_group, 'lime green', 'forest green')
+            else:
+                toggleAssociateSettings(False, ctime_group)
+                toggleAssociateSettings(False, cpopup_group)
+                toggleAssociateSettings(True, claunch_group)
 
-    corruptionFadeFrame.pack(fill='x')
-    fadeInfoFrame.pack(side='left', fill='both')
-    fadeDropdown.pack(side='left')
-    fadeDescription.pack(side='left', fill='y', padx=3, ipadx=2, ipady=2)
-    fadeImageFrame.pack(fill='both', expand=1)
-    fadeImageContainer.place(relx=.5, rely=.5, anchor=CENTER)
+    #-Tutorial-
 
-    fadeHelper(corruptionFadeTypeVar.get())
+    corruptionTutorialFrame = Frame(corruptionFrame)
+    corruptionTabMaster = ttk.Notebook(corruptionTutorialFrame)
+    cTabIntro = Frame(None)
+    cTabStart = Frame(None)
+    cTabTransitions = Frame(None)
+    corruptionTabMaster.add(cTabIntro, text='Intro')
+    corruptionTabMaster.add(cTabStart, text='Start')
+    corruptionTabMaster.add(cTabTransitions, text='Transitions')
 
+    corruptionTutorialFrame.pack(side='left', fill='both', expand=1)
+    corruptionTabMaster.pack(fill='both', expand=1)
+
+    corruptionIntroBody = Label(cTabIntro, text=CINTRO_TEXT, wraplength=300)
+    corruptionStartBody = Label(cTabStart, text=CSTART_TEXT, wraplength=300)
+    corruptionTransitionBody = Label(cTabTransitions, text=CTRANSITION_TEXT, wraplength=300)
+
+    corruptionIntroBody.pack(fill='both', padx=2, pady=2)
+    corruptionStartBody.pack(fill='both', padx=2, pady=2)
+    corruptionTransitionBody.pack(fill='both', padx=2, pady=2)
+
+    #-Additional Settings-
+
+    corruptionAdditionalFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
+    corruptionAddSub1 = Frame(corruptionAdditionalFrame)
+    corruptionAddSub2 = Frame(corruptionAdditionalFrame)
+    corruptionAddSub3 = Frame(corruptionAdditionalFrame)
+
+    corruptionWallpaperToggle = Checkbutton(corruptionAddSub1, text='Don\'t Cycle Wallpaper', variable=corruptionWallpaperCycleVar, cursor='question_arrow')
+    corruptionThemeToggle = Checkbutton(corruptionAddSub1, text='Don\'t Cycle Themes', variable=corruptionThemeCycleVar, cursor='question_arrow')
+    corruptionPurityToggle = Checkbutton(corruptionAddSub2, text='Purity Mode', variable=corruptionPurityModeVar, cursor='question_arrow')
+    corruptionDevToggle = Checkbutton(corruptionAddSub2, text='Corruption Dev View', variable=corruptionDevVar, cursor='question_arrow')
+
+    ctutorialstart_group.append(corruptionAdditionalFrame)
+    ctutorialstart_group.append(corruptionAddSub1)
+    ctutorialstart_group.append(corruptionAddSub2)
+    ctutorialstart_group.append(corruptionAddSub3)
+    ctutorialstart_group.append(corruptionWallpaperToggle)
+    ctutorialstart_group.append(corruptionThemeToggle)
+    ctutorialstart_group.append(corruptionPurityToggle)
+    ctutorialstart_group.append(corruptionDevToggle)
+
+    corruptionAdditionalFrame.pack(fill='x')
+    corruptionAddSub1.pack(fill='both', side='left', expand=1)
+    corruptionAddSub2.pack(fill='both', side='left', expand=1)
+    corruptionAddSub3.pack(fill='both', side='left', expand=1)
+
+    corruptionWallpaperToggle.pack(fill='x', side='top')
+    corruptionThemeToggle.pack(fill='x', side='top')
+    corruptionPurityToggle.pack(fill='x', side='top')
+    corruptionDevToggle.pack(fill='x', side='top')
+
+    corrwallpaperttp = CreateToolTip(corruptionWallpaperToggle, 'Prevents the wallpaper from cycling as you go through corruption levels, instead staying at '
+                                        'the first wallpaper set for corruption level 1.')
+    corrthemettp = CreateToolTip(corruptionThemeToggle, 'Prevents the theme from cycling as you go through corruption levels, instead staying as '
+                                        'the theme you set in the \"General\" tab of the config window.')
+    corrpurityttp = CreateToolTip(corruptionPurityToggle, 'Starts corruption mode at the highest corruption level, then works backwards to level 1. '
+                                        'Retains all of your other settings for this mode, if applicable.')
+    corruptiondevttp = CreateToolTip(corruptionDevToggle, '')
+
+    #-Info-
 
     corruptionPathFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
 
@@ -1414,6 +1686,22 @@ def show_window():
     pathScrollbarX.pack(side='bottom', fill='x')
     pathTree.pack(side='left', fill='both', expand=1)
     pathScrollbarY.pack(side='left', fill='y')
+
+    def corruptionTutorialHelper(event):
+        tab = event.widget.tab('current')['text']
+        th = settings['themeType'].strip()
+        if tab == 'Start':
+            toggleAssociateSettings_manual(True, ctutorialstart_group, 'lime green', 'forest green')
+            toggleAssociateSettings(True, ctutorialtransition_group)
+            triggerHelper(corruptionTriggerVar.get(), False)
+        elif tab == 'Transitions':
+            toggleAssociateSettings_manual(True, ctutorialtransition_group, 'lime green', 'forest green')
+            toggleAssociateSettings(True, ctutorialstart_group)
+            triggerHelper(corruptionTriggerVar.get(), True)
+        toggleAssociateSettings(os.path.isfile(os.path.join(PATH, 'resource', 'corruption.json')), corruptionEnabled_group)
+
+    corruptionTabMaster.bind('<<NotebookTabChanged>>', corruptionTutorialHelper)
+
     #===================={DRIVE}==============================#
     tabMaster.add(tabDrive, text='Drive')
 
@@ -1723,13 +2011,14 @@ def show_window():
         promptStat = 0
 
     if os.path.exists(os.path.join(PATH, 'resource', 'captions.json')):
-        #don't think these have moods currently but will implement this just in case
         try:
             with open(os.path.join(PATH, 'resource', 'captions.json'), 'r') as f:
                 l = json.loads(f.read())
                 i = 0
                 if 'prefix' in l: del l['prefix']
                 if 'subtext' in l: del l['subtext']
+                if 'subliminal' in l: del l['subliminal']
+                if 'prefix_settings' in l: del l['prefix_settings']
                 for x in l:
                     i += len(l[x])
                 captionStat = i
@@ -1876,6 +2165,14 @@ def show_window():
                                     'Because of this, only packs created by the original EdgeWare creator, PetitTournesol, have custom status images.\n\n'
                                     'Nevertheless, I have decided to put this here not only for those packs, but also for other '
                                     'packs that tap in to the same image IDs.')
+
+    packConfigPresets = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
+    configPresetsSub1 = Frame(packConfigPresets)
+    configPresetsSub2 = Frame(packConfigPresets)
+    configPresetsButton = Button(configPresetsSub2, text='Load Pack Configuration', cursor='question_arrow', command=lambda: packPreset(in_var_group, in_var_names, 'full', presetsDangerVar.get()))
+    #put the group here instead of with the rest since it's just a single button
+    configpresets_group = []
+    configpresets_group.append(configPresetsButton)
     if os.path.exists(os.path.join(PATH, 'resource', 'config.json')):
         with open(os.path.join(PATH, 'resource', 'config.json')) as f:
             try:
@@ -1885,17 +2182,13 @@ def show_window():
                 configNum = len(l)
             except Exception as e:
                 logging.warning(f'could not load pack suggested settings. Reason: {e}')
-                configNum = "N/A"
-                #toggleAssociateSettings(False, configPresetsButton)
+                configNum = 0
+                toggleAssociateSettings(False, configpresets_group)
     else:
-        configNum = "N/A"
-        #toggleAssociateSettings(False, configPresetsButton)
-    packConfigPresets = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
-    configPresetsSub1 = Frame(packConfigPresets)
-    configPresetsSub2 = Frame(packConfigPresets)
+        configNum = 0
+        toggleAssociateSettings(False, configpresets_group)
     configPresetsLabel = Label(configPresetsSub1, text=f'Number of suggested config settings: {configNum}')
     presetsDangerToggle = Checkbutton(configPresetsSub1, text='Toggle on warning failsafes', variable=presetsDangerVar, cursor='question_arrow')
-    configPresetsButton = Button(configPresetsSub2, text='Load Pack Configuration', cursor='question_arrow', command=lambda: packPreset(in_var_group, in_var_names, 'full', presetsDangerVar.get()))
 
     presetdangerttp = CreateToolTip(presetsDangerToggle, 'Toggles on the \"Warn if \"Dangerous\" Settings Active\" setting after loading the '
                         'pack configuration file, regardless if it was toggled on or off in those settings.\n\nWhile downloading and loading '
@@ -1992,6 +2285,8 @@ def show_window():
                 l = json.loads(f.read())
                 if 'prefix' in l: del l['prefix']
                 if 'subtext' in l: del l['subtext']
+                if 'subliminal' in l: del l['subliminal']
+                if 'prefix_settings' in l: del l['prefix_settings']
                 for m in l:
                     if m == 'default':
                         continue
@@ -2390,6 +2685,9 @@ def show_window():
 
     themeChange(settings['themeType'].strip(), root, style, windowFont, titleFont)
 
+    #==========={TOGGLE ASSOCIATE SETTINGS}===========#
+    #all toggleAssociateSettings goes here, because it is rendered after the appropriate theme change
+
     toggleAssociateSettings(fillVar.get(), fill_group)
     toggleAssociateSettings(replaceVar.get(), replace_group)
     toggleAssociateSettings(rotateWallpaperVar.get(), wallpaper_group)
@@ -2404,6 +2702,9 @@ def show_window():
     toggleAssociateSettings(maxVToggleVar.get(), maxVideo_group)
     toggleAssociateSettings(popupSublim.get(), subliminals_group)
     hibernateHelper(hibernateTypeVar.get())
+    fadeHelper(corruptionFadeTypeVar.get())
+    triggerHelper(corruptionTriggerVar.get(), False)
+    toggleAssociateSettings(os.path.isfile(os.path.join(PATH, 'resource', 'corruption.json')), corruptionEnabled_group)
 
     tabMaster.pack(expand=1, fill='both')
     tabInfoExpound.pack(expand=1, fill='both')
@@ -2540,7 +2841,7 @@ def write_save(varList:list[StringVar | IntVar | BooleanVar], nameList:list[str]
     timeObjPath = os.path.join(PATH, 'hid_time.dat')
 
     if int(varList[nameList.index('timerMode')].get()) == 1:
-        utils.toggle_run_at_startup(PATH, True)
+        #utils.toggle_run_at_startup(PATH, True)
 
         #revealing hidden files
         utils.show_file(hashObjPath)
@@ -2612,7 +2913,7 @@ def safeCheck(varList:list[StringVar | IntVar | BooleanVar], nameList:list[str])
         dangersList.append('\n\nMajor:')
         if int(varList[nameList.index('start_on_logon')].get()) == 1:
             numDangers += 1
-            dangersList.append('\n•Launch on Startup is enabled! This will run EdgeWare when you start your computer!')
+            dangersList.append('\n•Launch on Startup is enabled! This will run EdgeWare when you start your computer! (Note: Timer mode enables this setting!)')
         if int(varList[nameList.index('fill')].get()) == 1:
             numDangers += 1
             dangersList.append('\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!')
@@ -2805,7 +3106,7 @@ def getKeyboardInput(button:Button, var:StringVar):
     child.mainloop()
 
 def assignKey(parent:Tk, button:Button, var:StringVar, key):
-    button.configure(text=f'Set Panic Button\n<{key.keysym}>')
+    button.configure(text=f'Set Panic\nButton\n<{key.keysym}>')
     var.set(str(key.keysym))
     parent.destroy()
 
