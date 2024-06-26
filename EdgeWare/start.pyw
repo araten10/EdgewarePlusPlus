@@ -532,7 +532,7 @@ def annoyance():
 
 
 # independently attempt to do all active settings with probability equal to their freq value
-def roll_for_initiative(corr_chance: float):
+def roll_for_initiative(corr_chance: float = 0.0): #TODO: Remove default value when corruption gets implemented
     if settings.CORRUPTION_MODE and settings.CORRUPTION_TRIGGER != "Launch":
         corr_chance = corruption_percent()
         if corr_chance > 1.0:
