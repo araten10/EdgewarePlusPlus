@@ -628,16 +628,32 @@ def show_window():
 
     # tab display code start
     tabMaster = ttk.Notebook(root)  # tab manager
-    tabGeneral = ttk.Frame(None)  # general tab, will have current settings
+    tabSubContainer = ttk.Frame(tabMaster)
+    tabSub = ttk.Notebook(tabSubContainer)
+
+    tabGeneral = ttk.Frame(None)  # general subtab, for basic info/settings
+    tabStart = ttk.Frame(None) # startup screen, info and presets
+    tabFile2 = ttk.Frame(None) # file management tab
+
+    tabAnnoyance = ttk.Frame(None)  # annoyance subtab, for runtime settings
+    tabPopups = ttk.Frame(None) # tab for popup settings
     tabWallpaper = ttk.Frame(None)  # tab for wallpaper rotation settings
-    tabAnnoyance = ttk.Frame(None)  # tab for popup settings
+
+    tabModes = ttk.Frame(None) # tab for mode settings
+    tabHibernate = ttk.Frame(None) # tab for hibernate mode
     tabCorruption = ttk.Frame(None)  # tab for popup settings
+    tabTimer = ttk.Frame(None) # tab for timer mode
+
     tabDrive = ttk.Frame(None)  # tab for drive settings
     tabJSON = ttk.Frame(None)  # tab for JSON editor (unused)
     tabAdvanced = ttk.Frame(None)  # advanced tab, will have settings pertaining to startup, hibernation mode settings
     tabInfo = ttk.Frame(None)  # info, github, version, about, etc.
     tabPackInfo = ttk.Frame(None)  # pack information
     tabFile = ttk.Frame(None)  # file management tab
+
+    # tabMaster.add(tabGeneral, text="General")
+    # tabMaster.add(tabAnnoyance, text="Annoyance")
+
 
     style = ttk.Style(root)  # style setting for left aligned tabs
 
@@ -686,237 +702,21 @@ def show_window():
     tab_packInfo = ttk.Frame(None)
     tab_file = ttk.Frame(None)
 
-    tabMaster.add(tabGeneral, text="General")
-    # ==========={IN HERE IS GENERAL TAB ITEM INITS}===========#
-    # init
-    hibernate_types = ["Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos"]
 
-    hibernateHostFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
-    hibernateTypeFrame = Frame(hibernateHostFrame)
-    hibernateTypeDescriptionFrame = Frame(hibernateHostFrame, borderwidth=2, relief=GROOVE)
-    hibernateFrame = Frame(hibernateHostFrame)
-    hibernateMinFrame = Frame(hibernateHostFrame)
-    hibernateMaxFrame = Frame(hibernateHostFrame)
-    hibernateActivityFrame = Frame(hibernateHostFrame)
-    hibernateLengthFrame = Frame(hibernateHostFrame)
+    # --------------------------------------------------------- #
+    # ========================================================= #
+    # ===================={BEGIN TABS HERE}==================== #
+    # ========================================================= #
+    # --------------------------------------------------------- #
 
-    toggleHibernateButton = Checkbutton(
-        hibernateTypeFrame, text="Hibernate Mode", variable=hibernateVar, command=lambda: hibernateHelper(hibernateTypeVar.get()), cursor="question_arrow"
-    )
-    fixWallpaperButton = Checkbutton(hibernateTypeFrame, text="Fix Wallpaper", variable=fixWallpaperVar, cursor="question_arrow")
-    hibernateTypeDropdown = OptionMenu(hibernateTypeFrame, hibernateTypeVar, *hibernate_types, command=lambda key: hibernateHelper(key))
-    hibernateTypeDescription = Label(hibernateTypeDescriptionFrame, text="Error loading Hibernate Description!", wraplength=175)
+    tabMaster.add(tabStart, text="Start")
+    # ==========={IN HERE IS START TAB ITEM INITS}===========#
 
-    def hibernateHelper(key: str):
-        if key == "Original":
-            hibernateTypeDescription.configure(text="Creates an immediate quantity of popups on wakeup based on the awaken activity.\n\n")
-            if hibernateVar.get():
-                toggleAssociateSettings(False, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Spaced":
-            hibernateTypeDescription.configure(text="Creates popups consistently over the hibernate length, based on popup delay.\n\n")
-            if hibernateVar.get():
-                toggleAssociateSettings(False, hactivity_group)
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Glitch":
-            hibernateTypeDescription.configure(
-                text="Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.\n"
-            )
-            if hibernateVar.get():
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Ramp":
-            hibernateTypeDescription.configure(
-                text="Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay."
-            )
-            if hibernateVar.get():
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Pump-Scare":
-            hibernateTypeDescription.configure(
-                text="Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?"
-            )
-            if hibernateVar.get():
-                toggleAssociateSettings(False, hlength_group)
-                toggleAssociateSettings(False, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Chaos":
-            hibernateTypeDescription.configure(text="Every time hibernate activates, a random type (other than chaos) is selected.\n\n")
-            if hibernateVar.get():
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if not hibernateVar.get():
-            toggleAssociateSettings(False, hlength_group)
-            toggleAssociateSettings(False, hactivity_group)
-            toggleAssociateSettings(False, hibernate_group)
-
-    hibernateHelper(hibernateTypeVar.get())
-
-    hibernateMinButton = Button(
-        hibernateMinFrame,
-        text="Manual min...",
-        command=lambda: assign(hibernateMinVar, simpledialog.askinteger("Manual Minimum Sleep (sec)", prompt="[1-7200]: ")),
-    )
-    hibernateMinScale = Scale(hibernateMinFrame, label="Min Sleep (sec)", variable=hibernateMinVar, orient="horizontal", from_=1, to=7200)
-    hibernateMaxButton = Button(
-        hibernateMaxFrame,
-        text="Manual max...",
-        command=lambda: assign(hibernateMaxVar, simpledialog.askinteger("Manual Maximum Sleep (sec)", prompt="[2-14400]: ")),
-    )
-    hibernateMaxScale = Scale(hibernateMaxFrame, label="Max Sleep (sec)", variable=hibernateMaxVar, orient="horizontal", from_=2, to=14400)
-    h_activityScale = Scale(hibernateActivityFrame, label="Awaken Activity", orient="horizontal", from_=1, to=50, variable=wakeupActivityVar)
-    h_activityButton = Button(
-        hibernateActivityFrame,
-        text="Manual act...",
-        command=lambda: assign(wakeupActivityVar, simpledialog.askinteger("Manual Wakeup Activity", prompt="[1-50]: ")),
-    )
-    hibernateLengthScale = Scale(hibernateLengthFrame, label="Max Length (sec)", variable=hibernateLengthVar, orient="horizontal", from_=5, to=300)
-    hibernateLengthButton = Button(
-        hibernateLengthFrame,
-        text="Manual length...",
-        command=lambda: assign(hibernateLengthVar, simpledialog.askinteger("Manual Hibernate Length", prompt="[5-300]: ")),
-    )
-
-    hibernatettp = CreateToolTip(
-        toggleHibernateButton,
-        "Runs EdgeWare silently without any popups.\n\n"
-        "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
-        'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
-        'Check the "About" tab for more detailed information on each hibernate type.',
-    )
-    fixwallpaperttp = CreateToolTip(
-        fixWallpaperButton,
-        '"fixes" your wallpaper after hibernate is finished by changing it to'
-        " your panic wallpaper. If left off, it will keep the pack's wallpaper on until you panic"
-        " or change it back yourself.",
-    )
-
-    hibernate_group.append(hibernateMinButton)
-    hibernate_group.append(hibernateMinScale)
-    hibernate_group.append(hibernateMaxButton)
-    hibernate_group.append(hibernateMaxScale)
-
-    hlength_group.append(hibernateLengthButton)
-    hlength_group.append(hibernateLengthScale)
-
-    hactivity_group.append(h_activityScale)
-    hactivity_group.append(h_activityButton)
-
-    Label(tabGeneral, text="Hibernate Settings", font=titleFont, relief=GROOVE).pack(pady=2)
-    hibernateHostFrame.pack(fill="x")
-    hibernateFrame.pack(fill="y", side="left")
-    hibernateTypeFrame.pack(fill="x", side="left")
-    toggleHibernateButton.pack(fill="x", side="top")
-    fixWallpaperButton.pack(fill="x", side="top")
-    hibernateTypeDropdown.pack(fill="x", side="top")
-    hibernateTypeDescriptionFrame.pack(fill="both", side="left", expand=1, padx=2, pady=2)
-    hibernateTypeDescription.pack(fill="y", pady=2)
-    hibernateMinScale.pack(fill="y")
-    hibernateMinButton.pack(fill="y")
-    hibernateMinFrame.pack(fill="x", side="left")
-    hibernateMaxScale.pack(fill="y")
-    hibernateMaxButton.pack(fill="y")
-    hibernateMaxFrame.pack(fill="x", side="left")
-    h_activityScale.pack(fill="y")
-    h_activityButton.pack(fill="y")
-    hibernateActivityFrame.pack(fill="x", side="left")
-    hibernateLengthScale.pack(fill="y")
-    hibernateLengthButton.pack(fill="y")
-    hibernateLengthFrame.pack(fill="x", side="left")
-
-    # timer settings
-    Label(tabGeneral, text="Timer Settings", font=titleFont, relief=GROOVE).pack(pady=2)
-    timerFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
-
-    timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=timerVar, command=lambda: timerHelper(), cursor="question_arrow")
-    timerSlider = Scale(timerFrame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=timerTimeVar)
-    safewordFrame = Frame(timerFrame)
-
-    def timerHelper():
-        toggleAssociateSettings(timerVar.get(), timer_group)
-        if timerVar.get():
-            startLoginVar.set(True)
-        else:
-            startLoginVar.set(False)
-
-    timerttp = CreateToolTip(
-        timerToggle,
-        'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
-        '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
-        "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
-        "instability when running EdgeWare multiple times without changing config settings.",
-    )
-
-    Label(safewordFrame, text="Emergency Safeword").pack()
-    timerSafeword = Entry(safewordFrame, show="*", textvariable=safewordVar)
-    timerSafeword.pack(expand=1, fill="both")
-
-    timer_group.append(timerSafeword)
-    timer_group.append(timerSlider)
-
-    timerToggle.pack(side="left", fill="x", padx=5)
-    timerSlider.pack(side="left", fill="x", expand=1, padx=10)
-    safewordFrame.pack(side="right", fill="x", padx=5)
-
-    timerFrame.pack(fill="x")
-
-    # other
-    Label(tabGeneral, text="Other", font=titleFont, relief=GROOVE).pack(pady=2)
-    otherHostFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
-    toggleFrame1 = Frame(otherHostFrame)
-    toggleFrame2 = Frame(otherHostFrame)
-    toggleFrame3 = Frame(otherHostFrame)
-
-    toggleStartupButton = Checkbutton(toggleFrame1, text="Launch on Startup", variable=startLoginVar)
-    toggleDiscordButton = Checkbutton(toggleFrame1, text="Show on Discord", variable=discordVar, cursor="question_arrow")
-    toggleFlairButton = Checkbutton(toggleFrame2, text="Show Loading Flair", variable=startFlairVar, cursor="question_arrow")
-    toggleROSButton = Checkbutton(toggleFrame2, text="Run Edgeware on Save & Exit", variable=rosVar)
-    toggleDesktopButton = Checkbutton(toggleFrame3, text="Create Desktop Icons", variable=deskIconVar)
-    toggleSafeMode = Checkbutton(toggleFrame3, text='Warn if "Dangerous" Settings Active', variable=safeModeVar, cursor="question_arrow")
-
-    otherHostFrame.pack(fill="x")
-    toggleFrame1.pack(fill="both", side="left", expand=1)
-    toggleStartupButton.pack(fill="x")
-    toggleDiscordButton.pack(fill="x")
-    toggleFrame2.pack(fill="both", side="left", expand=1)
-    toggleFlairButton.pack(fill="x")
-    toggleROSButton.pack(fill="x")
-    toggleFrame3.pack(fill="both", side="left", expand=1)
-    toggleDesktopButton.pack(fill="x")
-    toggleSafeMode.pack(fill="x")
-
-    discordttp = CreateToolTip(
-        toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator."
-    )
-    loadingFlairttp = CreateToolTip(
-        toggleFlairButton, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.'
-    )
-    safeModettp = CreateToolTip(
-        toggleSafeMode,
-        "Asks you to confirm before saving if certain settings are enabled.\n"
-        "Things defined as Dangerous Settings:\n\n"
-        'Extreme (code red! code red! read the documentation in "about"!):\n'
-        "Replace Images\n\n"
-        "Major (very dangerous, can affect your computer):\n"
-        "Launch on Startup, Fill Drive\n\n"
-        "Medium (can lead to embarassment or reduced control over EdgeWare):\n"
-        "Timer Mode, Show on Discord, short hibernate cooldown\n\n"
-        "Minor (low risk but could lead to unwanted interactions):\n"
-        "Disable Panic Hotkey, Run on Save & Exit",
-    )
-
-    Label(tabGeneral, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
-    infoHostFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
+    #version information
+    Label(tabStart, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
+    infoHostFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
     zipGitFrame = Frame(infoHostFrame)
     verFrame = Frame(infoHostFrame)
-    # zipDropdown = OptionMenu(tabGeneral, zipDropVar, *DOWNLOAD_STRINGS)
-    # zipDownloadButton = Button(tabGeneral, text='Download Zip', command=lambda: downloadZip(zipDropVar.get(), zipLabel))
-    # zipLabel = Label(zipGitFrame, text=f'Current Zip:\n{pickZip()}', background='lightgray', wraplength=100)
     local_verLabel = Label(verFrame, text=f'EdgeWare Local Version:\n{settings.default["version"]}')
     web_verLabel = Label(verFrame, text=f"EdgeWare GitHub Version:\n{webv}", bg=(BUTTON_FACE if (settings.default["version"] == webv) else "red"))
     openGitButton = Button(zipGitFrame, text="Open Github (EdgeWare Base)", command=lambda: webbrowser.open("https://github.com/PetitTournesol/Edgeware"))
@@ -930,7 +730,6 @@ def show_window():
 
     infoHostFrame.pack(fill="x")
     zipGitFrame.pack(fill="both", side="left", expand=1)
-    # zipLabel.pack(fill='x')
     openGitButton.pack(fill="both", expand=1)
     verFrame.pack(fill="both", side="left", expand=1)
     local_verLabel.pack(fill="x")
@@ -941,18 +740,70 @@ def show_window():
     web_verPlusLabel.pack(fill="x")
     openGitPlusButton.pack(fill="both", expand=1)
 
-    forceReload = Button(infoHostFrame, text="Force Reload", command=refresh)
-    optButton = Button(infoHostFrame, text="Test Func", command=lambda: getDescriptText("default"))
+    # mode presets
+    Label(tabStart, text="Mode Presets", font=titleFont, relief=GROOVE).pack(pady=2)
+    presetFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
+    dropdownSelectFrame = Frame(presetFrame)
 
-    resourceFrame = Frame(root)
-    exportResourcesButton = Button(resourceFrame, text="Export Resource Pack", command=exportResource)
-    importResourcesButton = Button(resourceFrame, text="Import Resource Pack", command=lambda: importResource(root))
-    saveExitButton = Button(root, text="Save & Exit", command=lambda: write_save(in_var_group, in_var_names, safewordVar, True))
+    style_list = [_.split(".")[0].capitalize() for _ in getPresets() if _.endswith(".cfg")]
+    logging.info(f"pulled style_list={style_list}")
+    styleStr = StringVar(root, style_list.pop(0))
+
+    styleDropDown = OptionMenu(dropdownSelectFrame, styleStr, styleStr.get(), *style_list, command=lambda key: changeDescriptText(key))
+
+    def changeDescriptText(key: str):
+        descriptNameLabel.configure(text=f"{key} Description")
+        descriptLabel.configure(text=presetDescriptionWrap.fill(text=getDescriptText(key)))
+
+    def updateHelperFunc(key: str):
+        styleStr.set(key)
+        changeDescriptText(key)
+
+    def doSave() -> bool:
+        name_ = simpledialog.askstring("Save Preset", "Preset name")
+        existed = os.path.exists(Data.PRESETS / f"{name_.lower()}.cfg")
+        if name_ != None and name != "":
+            write_save(in_var_group, in_var_names, safewordVar, False)
+            if existed:
+                if messagebox.askquestion("Overwrite", "A preset with this name already exists. Overwrite it?") == "no":
+                    return False
+        if savePreset(name_) and not existed:
+            style_list.insert(0, "Default")
+            style_list.append(name_.capitalize())
+            styleStr.set("Default")
+            styleDropDown["menu"].delete(0, "end")
+            for item in style_list:
+                styleDropDown["menu"].add_command(label=item, command=lambda x=item: updateHelperFunc(x))
+            styleStr.set(style_list[0])
+        return True
+
+    confirmStyleButton = Button(dropdownSelectFrame, text="Load Preset", command=lambda: applyPreset(styleStr.get()))
+    saveStyleButton = Button(dropdownSelectFrame, text="Save Preset", command=doSave)
+
+    presetDescriptFrame = Frame(presetFrame, borderwidth=2, relief=GROOVE)
+
+    descriptNameLabel = Label(presetDescriptFrame, text="Default Description", font="Default 15")
+    presetDescriptionWrap = textwrap.TextWrapper(width=100, max_lines=5)
+    descriptLabel = Label(presetDescriptFrame, text=presetDescriptionWrap.fill(text="Default Text Here"), relief=GROOVE)
+    changeDescriptText("Default")
+
+    dropdownSelectFrame.pack(side="left", fill="x", padx=6)
+    styleDropDown.pack(fill="x", expand=1)
+    confirmStyleButton.pack(fill="both", expand=1)
+    Label(dropdownSelectFrame).pack(fill="both", expand=1)
+    Label(dropdownSelectFrame).pack(fill="both", expand=1)
+    saveStyleButton.pack(fill="both", expand=1)
+
+    presetDescriptFrame.pack(side="right", fill="both", expand=1)
+    descriptNameLabel.pack(fill="y", pady=4)
+    descriptLabel.pack(fill="both", expand=1)
+
+    presetFrame.pack(fill="both", pady=2)
 
     theme_types = ["Original", "Dark", "The One", "Ransom", "Goth", "Bimbo"]
 
-    Label(tabGeneral, text="Theme", font=titleFont, relief=GROOVE).pack(pady=2)
-    themeFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
+    Label(tabStart, text="Theme", font=titleFont, relief=GROOVE).pack(pady=2)
+    themeFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
     subThemeFrame = Frame(themeFrame)
     testThemeFrame = Frame(themeFrame)
     testThemePopup = Frame(testThemeFrame)
@@ -1180,6 +1031,239 @@ def show_window():
     testScaleDeactivated.pack(fill="y", expand=1)
 
     themeHelper(themeTypeVar.get())
+
+    # other
+    Label(tabStart, text="Other", font=titleFont, relief=GROOVE).pack(pady=2)
+    otherHostFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
+    toggleFrame1 = Frame(otherHostFrame)
+    toggleFrame2 = Frame(otherHostFrame)
+    toggleFrame3 = Frame(otherHostFrame)
+
+    toggleStartupButton = Checkbutton(toggleFrame1, text="Launch on Startup", variable=startLoginVar)
+    toggleDiscordButton = Checkbutton(toggleFrame1, text="Show on Discord", variable=discordVar, cursor="question_arrow")
+    toggleFlairButton = Checkbutton(toggleFrame2, text="Show Loading Flair", variable=startFlairVar, cursor="question_arrow")
+    toggleROSButton = Checkbutton(toggleFrame2, text="Run Edgeware on Save & Exit", variable=rosVar)
+    toggleDesktopButton = Checkbutton(toggleFrame3, text="Create Desktop Icons", variable=deskIconVar)
+    toggleSafeMode = Checkbutton(toggleFrame3, text='Warn if "Dangerous" Settings Active', variable=safeModeVar, cursor="question_arrow")
+
+    otherHostFrame.pack(fill="x")
+    toggleFrame1.pack(fill="both", side="left", expand=1)
+    toggleStartupButton.pack(fill="x")
+    toggleDiscordButton.pack(fill="x")
+    toggleFrame2.pack(fill="both", side="left", expand=1)
+    toggleFlairButton.pack(fill="x")
+    toggleROSButton.pack(fill="x")
+    toggleFrame3.pack(fill="both", side="left", expand=1)
+    toggleDesktopButton.pack(fill="x")
+    toggleSafeMode.pack(fill="x")
+
+    discordttp = CreateToolTip(
+        toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator."
+    )
+    loadingFlairttp = CreateToolTip(
+        toggleFlairButton, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.'
+    )
+    safeModettp = CreateToolTip(
+        toggleSafeMode,
+        "Asks you to confirm before saving if certain settings are enabled.\n"
+        "Things defined as Dangerous Settings:\n\n"
+        'Extreme (code red! code red! read the documentation in "about"!):\n'
+        "Replace Images\n\n"
+        "Major (very dangerous, can affect your computer):\n"
+        "Launch on Startup, Fill Drive\n\n"
+        "Medium (can lead to embarassment or reduced control over EdgeWare):\n"
+        "Timer Mode, Show on Discord, short hibernate cooldown\n\n"
+        "Minor (low risk but could lead to unwanted interactions):\n"
+        "Disable Panic Hotkey, Run on Save & Exit",
+    )
+
+    tabMaster.add(tabGeneral, text="General")
+    # ==========={IN HERE IS GENERAL TAB ITEM INITS}===========#
+    # init
+    hibernate_types = ["Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos"]
+
+    hibernateHostFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
+    hibernateTypeFrame = Frame(hibernateHostFrame)
+    hibernateTypeDescriptionFrame = Frame(hibernateHostFrame, borderwidth=2, relief=GROOVE)
+    hibernateFrame = Frame(hibernateHostFrame)
+    hibernateMinFrame = Frame(hibernateHostFrame)
+    hibernateMaxFrame = Frame(hibernateHostFrame)
+    hibernateActivityFrame = Frame(hibernateHostFrame)
+    hibernateLengthFrame = Frame(hibernateHostFrame)
+
+    toggleHibernateButton = Checkbutton(
+        hibernateTypeFrame, text="Hibernate Mode", variable=hibernateVar, command=lambda: hibernateHelper(hibernateTypeVar.get()), cursor="question_arrow"
+    )
+    fixWallpaperButton = Checkbutton(hibernateTypeFrame, text="Fix Wallpaper", variable=fixWallpaperVar, cursor="question_arrow")
+    hibernateTypeDropdown = OptionMenu(hibernateTypeFrame, hibernateTypeVar, *hibernate_types, command=lambda key: hibernateHelper(key))
+    hibernateTypeDescription = Label(hibernateTypeDescriptionFrame, text="Error loading Hibernate Description!", wraplength=175)
+
+    def hibernateHelper(key: str):
+        if key == "Original":
+            hibernateTypeDescription.configure(text="Creates an immediate quantity of popups on wakeup based on the awaken activity.\n\n")
+            if hibernateVar.get():
+                toggleAssociateSettings(False, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Spaced":
+            hibernateTypeDescription.configure(text="Creates popups consistently over the hibernate length, based on popup delay.\n\n")
+            if hibernateVar.get():
+                toggleAssociateSettings(False, hactivity_group)
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Glitch":
+            hibernateTypeDescription.configure(
+                text="Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.\n"
+            )
+            if hibernateVar.get():
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Ramp":
+            hibernateTypeDescription.configure(
+                text="Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay."
+            )
+            if hibernateVar.get():
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Pump-Scare":
+            hibernateTypeDescription.configure(
+                text="Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?"
+            )
+            if hibernateVar.get():
+                toggleAssociateSettings(False, hlength_group)
+                toggleAssociateSettings(False, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Chaos":
+            hibernateTypeDescription.configure(text="Every time hibernate activates, a random type (other than chaos) is selected.\n\n")
+            if hibernateVar.get():
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if not hibernateVar.get():
+            toggleAssociateSettings(False, hlength_group)
+            toggleAssociateSettings(False, hactivity_group)
+            toggleAssociateSettings(False, hibernate_group)
+
+    hibernateHelper(hibernateTypeVar.get())
+
+    hibernateMinButton = Button(
+        hibernateMinFrame,
+        text="Manual min...",
+        command=lambda: assign(hibernateMinVar, simpledialog.askinteger("Manual Minimum Sleep (sec)", prompt="[1-7200]: ")),
+    )
+    hibernateMinScale = Scale(hibernateMinFrame, label="Min Sleep (sec)", variable=hibernateMinVar, orient="horizontal", from_=1, to=7200)
+    hibernateMaxButton = Button(
+        hibernateMaxFrame,
+        text="Manual max...",
+        command=lambda: assign(hibernateMaxVar, simpledialog.askinteger("Manual Maximum Sleep (sec)", prompt="[2-14400]: ")),
+    )
+    hibernateMaxScale = Scale(hibernateMaxFrame, label="Max Sleep (sec)", variable=hibernateMaxVar, orient="horizontal", from_=2, to=14400)
+    h_activityScale = Scale(hibernateActivityFrame, label="Awaken Activity", orient="horizontal", from_=1, to=50, variable=wakeupActivityVar)
+    h_activityButton = Button(
+        hibernateActivityFrame,
+        text="Manual act...",
+        command=lambda: assign(wakeupActivityVar, simpledialog.askinteger("Manual Wakeup Activity", prompt="[1-50]: ")),
+    )
+    hibernateLengthScale = Scale(hibernateLengthFrame, label="Max Length (sec)", variable=hibernateLengthVar, orient="horizontal", from_=5, to=300)
+    hibernateLengthButton = Button(
+        hibernateLengthFrame,
+        text="Manual length...",
+        command=lambda: assign(hibernateLengthVar, simpledialog.askinteger("Manual Hibernate Length", prompt="[5-300]: ")),
+    )
+
+    hibernatettp = CreateToolTip(
+        toggleHibernateButton,
+        "Runs EdgeWare silently without any popups.\n\n"
+        "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
+        'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
+        'Check the "About" tab for more detailed information on each hibernate type.',
+    )
+    fixwallpaperttp = CreateToolTip(
+        fixWallpaperButton,
+        '"fixes" your wallpaper after hibernate is finished by changing it to'
+        " your panic wallpaper. If left off, it will keep the pack's wallpaper on until you panic"
+        " or change it back yourself.",
+    )
+
+    hibernate_group.append(hibernateMinButton)
+    hibernate_group.append(hibernateMinScale)
+    hibernate_group.append(hibernateMaxButton)
+    hibernate_group.append(hibernateMaxScale)
+
+    hlength_group.append(hibernateLengthButton)
+    hlength_group.append(hibernateLengthScale)
+
+    hactivity_group.append(h_activityScale)
+    hactivity_group.append(h_activityButton)
+
+    Label(tabGeneral, text="Hibernate Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+    hibernateHostFrame.pack(fill="x")
+    hibernateFrame.pack(fill="y", side="left")
+    hibernateTypeFrame.pack(fill="x", side="left")
+    toggleHibernateButton.pack(fill="x", side="top")
+    fixWallpaperButton.pack(fill="x", side="top")
+    hibernateTypeDropdown.pack(fill="x", side="top")
+    hibernateTypeDescriptionFrame.pack(fill="both", side="left", expand=1, padx=2, pady=2)
+    hibernateTypeDescription.pack(fill="y", pady=2)
+    hibernateMinScale.pack(fill="y")
+    hibernateMinButton.pack(fill="y")
+    hibernateMinFrame.pack(fill="x", side="left")
+    hibernateMaxScale.pack(fill="y")
+    hibernateMaxButton.pack(fill="y")
+    hibernateMaxFrame.pack(fill="x", side="left")
+    h_activityScale.pack(fill="y")
+    h_activityButton.pack(fill="y")
+    hibernateActivityFrame.pack(fill="x", side="left")
+    hibernateLengthScale.pack(fill="y")
+    hibernateLengthButton.pack(fill="y")
+    hibernateLengthFrame.pack(fill="x", side="left")
+
+    # timer settings
+    Label(tabGeneral, text="Timer Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+    timerFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
+
+    timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=timerVar, command=lambda: timerHelper(), cursor="question_arrow")
+    timerSlider = Scale(timerFrame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=timerTimeVar)
+    safewordFrame = Frame(timerFrame)
+
+    def timerHelper():
+        toggleAssociateSettings(timerVar.get(), timer_group)
+        if timerVar.get():
+            startLoginVar.set(True)
+        else:
+            startLoginVar.set(False)
+
+    timerttp = CreateToolTip(
+        timerToggle,
+        'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
+        '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
+        "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
+        "instability when running EdgeWare multiple times without changing config settings.",
+    )
+
+    Label(safewordFrame, text="Emergency Safeword").pack()
+    timerSafeword = Entry(safewordFrame, show="*", textvariable=safewordVar)
+    timerSafeword.pack(expand=1, fill="both")
+
+    timer_group.append(timerSafeword)
+    timer_group.append(timerSlider)
+
+    timerToggle.pack(side="left", fill="x", padx=5)
+    timerSlider.pack(side="left", fill="x", expand=1, padx=10)
+    safewordFrame.pack(side="right", fill="x", padx=5)
+
+    timerFrame.pack(fill="x")
+
+    forceReload = Button(infoHostFrame, text="Force Reload", command=refresh)
+    optButton = Button(infoHostFrame, text="Test Func", command=lambda: getDescriptText("default"))
+
+    resourceFrame = Frame(root)
+    exportResourcesButton = Button(resourceFrame, text="Export Resource Pack", command=exportResource)
+    importResourcesButton = Button(resourceFrame, text="Import Resource Pack", command=lambda: importResource(root))
+    saveExitButton = Button(root, text="Save & Exit", command=lambda: write_save(in_var_group, in_var_names, safewordVar, True))
+
 
     # force reload button for debugging, only appears on DEV versions
     if local_version.endswith("DEV"):
@@ -2820,66 +2904,6 @@ def show_window():
 
     openResourcesButton = Button(tabFile, height=2, text="Open Resources Folder", command=lambda: explorerView(Resource.ROOT))
     openResourcesButton.pack(fill="x", pady=2)
-
-    # mode presets
-    Label(tabFile, text="Mode Presets", font=titleFont, relief=GROOVE).pack(pady=2)
-    presetFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-    dropdownSelectFrame = Frame(presetFrame)
-
-    style_list = [_.split(".")[0].capitalize() for _ in getPresets() if _.endswith(".cfg")]
-    logging.info(f"pulled style_list={style_list}")
-    styleStr = StringVar(root, style_list.pop(0))
-
-    styleDropDown = OptionMenu(dropdownSelectFrame, styleStr, styleStr.get(), *style_list, command=lambda key: changeDescriptText(key))
-
-    def changeDescriptText(key: str):
-        descriptNameLabel.configure(text=f"{key} Description")
-        descriptLabel.configure(text=presetDescriptionWrap.fill(text=getDescriptText(key)))
-
-    def updateHelperFunc(key: str):
-        styleStr.set(key)
-        changeDescriptText(key)
-
-    def doSave() -> bool:
-        name_ = simpledialog.askstring("Save Preset", "Preset name")
-        existed = os.path.exists(Data.PRESETS / f"{name_.lower()}.cfg")
-        if name_ != None and name != "":
-            write_save(in_var_group, in_var_names, safewordVar, False)
-            if existed:
-                if messagebox.askquestion("Overwrite", "A preset with this name already exists. Overwrite it?") == "no":
-                    return False
-        if savePreset(name_) and not existed:
-            style_list.insert(0, "Default")
-            style_list.append(name_.capitalize())
-            styleStr.set("Default")
-            styleDropDown["menu"].delete(0, "end")
-            for item in style_list:
-                styleDropDown["menu"].add_command(label=item, command=lambda x=item: updateHelperFunc(x))
-            styleStr.set(style_list[0])
-        return True
-
-    confirmStyleButton = Button(dropdownSelectFrame, text="Load Preset", command=lambda: applyPreset(styleStr.get()))
-    saveStyleButton = Button(dropdownSelectFrame, text="Save Preset", command=doSave)
-
-    presetDescriptFrame = Frame(presetFrame, borderwidth=2, relief=GROOVE)
-
-    descriptNameLabel = Label(presetDescriptFrame, text="Default Description", font="Default 15")
-    presetDescriptionWrap = textwrap.TextWrapper(width=100, max_lines=5)
-    descriptLabel = Label(presetDescriptFrame, text=presetDescriptionWrap.fill(text="Default Text Here"), relief=GROOVE)
-    changeDescriptText("Default")
-
-    dropdownSelectFrame.pack(side="left", fill="x", padx=6)
-    styleDropDown.pack(fill="x", expand=1)
-    confirmStyleButton.pack(fill="both", expand=1)
-    Label(dropdownSelectFrame).pack(fill="both", expand=1)
-    Label(dropdownSelectFrame).pack(fill="both", expand=1)
-    saveStyleButton.pack(fill="both", expand=1)
-
-    presetDescriptFrame.pack(side="right", fill="both", expand=1)
-    descriptNameLabel.pack(fill="y", pady=4)
-    descriptLabel.pack(fill="both", expand=1)
-
-    presetFrame.pack(fill="both", pady=2)
 
     # ==========={IN HERE IS ADVANCED TAB ITEM INITS}===========#
     tabMaster.add(tabAdvanced, text="Troubleshooting")
