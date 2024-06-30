@@ -181,13 +181,22 @@ def set_wallpaper(wallpaper_path: Path | str):
             subprocess.Popen(args, shell=True)
         elif desktop_env in ["i3", "awesome", "dwm", "xmonad", "bspwm"]:
             _wm_set_background(wallpaper_path)        
-        elif desktop_env == "Hyprland":
+        elif desktop_env == "hyprland":
             if not shutil.which("hyprctl"):
                 if first_run:
                     sys.stderr.write("hyprpaper requires hyprctl.")
                 return False
-            args = "hyprctl hyprpaper wallpaper \",%s\"" % wallpaper_path
-            subprocess.Popen(args, shell=True)
+            preloaded = False
+            s = subprocess.Popen("hyprctl hyprpaper listloaded", shell=True, stdout=subprocess.PIPE)
+            if s.stdout:
+                for line in s.stdout.readlines():
+                    if re.search(wallpaper_path, line.decode().strip()):
+                        preloaded = True
+            if not preloaded:
+                args1 = "hyprctl hyprpaper preload \"%s\"" % wallpaper_path
+                subprocess.Popen(args1, shell=True)
+            args2 = "hyprctl hyprpaper wallpaper \",%s\"" % wallpaper_path
+            subprocess.Popen(args2, shell=True)
         elif desktop_env == "sway":
             args = "swaybg -o \"*\" -i %s -m fill" % wallpaper_path
             subprocess.Popen(args, shell=True)
@@ -309,8 +318,8 @@ def _is_running(process):
     # From http://www.bloggerpolis.com/2011/05/how-to-check-if-a-process-is-running-using-python/
     s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
     if s.stdout:
-        for x in s.stdout:
-            if re.search(process, x):
+        for x in s.stdout.readlines():
+            if re.search(process, x.decode('ascii').strip()):
                 return True
     return False
 
@@ -321,8 +330,10 @@ def _get_desktop_environment():
     # and http://ubuntuforums.org/showthread.php?t=652320
     # and http://ubuntuforums.org/showthread.php?t=652320
     # and http://ubuntuforums.org/showthread.php?t=1139057
-    desktop_session = os.environ.get("DESKTOP_SESSION")
-    if desktop_session is not None:
+    desktop_session = os.environ.get("XDG_CURRENT_DESKTOP")
+    if not desktop_session:
+        desktop_session = os.environ.get("DESKTOP_SESSION")
+    if desktop_session:
         # easier to match if we doesn't have to deal with character cases
         desktop_session = desktop_session.lower()
         if desktop_session in [
@@ -342,7 +353,7 @@ def _get_desktop_environment():
             "kde",
             "i3",
             "awesome",
-            "Hyprland",
+            "hyprland",
             "dwm",
             "xmonad",
             "bspwm",
