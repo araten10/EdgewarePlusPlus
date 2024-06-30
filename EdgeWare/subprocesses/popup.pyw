@@ -569,17 +569,26 @@ def run():
     root.mainloop()
 
 
-def start_vlc(vid, label):
+def start_vlc(vid, label: Label):
     # word of advice: if you go messing around with python-vlc there's almost no documentation for it
     # this is a hack that will repeat the video 999,999 times, because I tried to find something less terrible for hours but couldn't
     instance = vlc.Instance("--input-repeat=999999")
     media_player = instance.media_player_new()
-    media_player.set_hwnd(label.winfo_id())
+    # setting winfo_id is os dependent, see https://wiki.videolan.org/LibVLC_Tutorial/
+    match os.name:
+        case "nt":
+            media_player.set_hwnd(label.winfo_id())
+        case "posix":
+            media_player.set_xwindow(label.winfo_id())
+        case "darwin":  # untested, not sure if works.
+            media_player.set_nsobject(label.winfo_id())
+        case _:  # just guess it's running x11 if it's not windows, linux, or mac
+            media_player.set_xwindow(label.winfo_id())
     media_player.video_set_mouse_input(False)
     media_player.video_set_key_input(False)
     media_player.audio_set_volume(int(settings.VIDEO_VOLUME * 100))
 
-    media = instance.media_new(vid)
+    media = vlc.Media(Path(vid))
     media_player.set_media(media)
     media_player.play()
 

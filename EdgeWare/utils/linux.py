@@ -8,12 +8,13 @@ import subprocess
 import sys
 from configparser import ConfigParser
 from pathlib import Path
+import shutil
 
 from utils.paths import Defaults, Process
 
 
 def panic_script():
-    subprocess.run("for pid in $(ps -u $USER -ef | grep -E \"python.* *+.pyw\" | awk '{print $2}'); do echo $pid; kill -9 $pid; done", shell=True)
+    subprocess.run("pkill -u $USER -fi -9 \"python.* *+.pyw\"", shell=True)
 
 
 def set_borderless(root):
@@ -22,6 +23,8 @@ def set_borderless(root):
 
 def set_wallpaper(wallpaper_path: Path | str):
     global first_run
+    if not 'first_run' in globals():
+        first_run = True
     if isinstance(wallpaper_path, Path):
         wallpaper_path = str(wallpaper_path.absolute())
 
@@ -176,6 +179,27 @@ def set_wallpaper(wallpaper_path: Path | str):
             # From http://www.commandlinefu.com/commands/view/3857/set-wallpaper-on-windowmaker-in-one-line
             args = "wmsetbg -s -u %s" % wallpaper_path
             subprocess.Popen(args, shell=True)
+        elif desktop_env in ["i3", "awesome", "dwm", "xmonad", "bspwm"]:
+            _wm_set_background(wallpaper_path)        
+        elif desktop_env == "hyprland":
+            if not shutil.which("hyprctl"):
+                if first_run:
+                    sys.stderr.write("hyprpaper requires hyprctl.")
+                return False
+            preloaded = False
+            s = subprocess.Popen("hyprctl hyprpaper listloaded", shell=True, stdout=subprocess.PIPE)
+            if s.stdout:
+                for line in s.stdout.readlines():
+                    if re.search(wallpaper_path, line.decode().strip()):
+                        preloaded = True
+            if not preloaded:
+                args1 = "hyprctl hyprpaper preload \"%s\"" % wallpaper_path
+                subprocess.Popen(args1, shell=True)
+            args2 = "hyprctl hyprpaper wallpaper \",%s\"" % wallpaper_path
+            subprocess.Popen(args2, shell=True)
+        elif desktop_env == "sway":
+            args = "swaybg -o \"*\" -i %s -m fill" % wallpaper_path
+            subprocess.Popen(args, shell=True)
         ## NOT TESTED BELOW - don't want to mess things up ##
         # elif desktop_env=='enlightenment': # I have not been able to make it work on e17. On e16 it would have been something in this direction
         #    args = 'enlightenment_remote -desktop-bg-add 0 0 0 0 %s' % wallpaper_path
@@ -294,8 +318,8 @@ def _is_running(process):
     # From http://www.bloggerpolis.com/2011/05/how-to-check-if-a-process-is-running-using-python/
     s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
     if s.stdout:
-        for x in s.stdout:
-            if re.search(process, x):
+        for x in s.stdout.readlines():
+            if re.search(process, x.decode().strip()):
                 return True
     return False
 
@@ -306,8 +330,10 @@ def _get_desktop_environment():
     # and http://ubuntuforums.org/showthread.php?t=652320
     # and http://ubuntuforums.org/showthread.php?t=652320
     # and http://ubuntuforums.org/showthread.php?t=1139057
-    desktop_session = os.environ.get("DESKTOP_SESSION")
-    if desktop_session is not None:
+    desktop_session = os.environ.get("XDG_CURRENT_DESKTOP")
+    if not desktop_session:
+        desktop_session = os.environ.get("DESKTOP_SESSION")
+    if desktop_session:
         # easier to match if we doesn't have to deal with character cases
         desktop_session = desktop_session.lower()
         if desktop_session in [
@@ -325,6 +351,13 @@ def _get_desktop_environment():
             "afterstep",
             "trinity",
             "kde",
+            "i3",
+            "awesome",
+            "hyprland",
+            "dwm",
+            "xmonad",
+            "bspwm",
+            "sway"
         ]:
             return desktop_session
         ## Special cases ##
@@ -357,3 +390,119 @@ def _get_desktop_environment():
     elif _is_running("ksmserver"):
         return "kde"
     return "unknown"
+
+def _wm_set_background(wallpaper_path: Path | str):
+    ## window manager set background
+    # awesome window manager has a nice wrapper script to set the background using many different programs
+    # https://github.com/paul/awesome/blob/master/utils/awsetbg
+    global first_run
+
+    # check if the session is x11 or wayland so we can pick which wallpaper
+    # setters to use. otherwise may run into issues trying to use x11 wallpaper
+    # utilities on wayland and vice-versa
+    session = os.environ["XDG_SESSION_TYPE"]  # "x11" or "wayland"
+    if session == "x11":
+        wallpaper_setters = [
+            "nitrogen",
+            "feh",
+            "habak",  # not tested
+            "hsetroot", # not tested
+            "chbg", # not tested
+            "qiv", # not tested
+            "xv", # not tested
+            "xsri", # not tested
+            "xli", # not tested
+            "xsetbg", # not tested
+            "fvwm-root", # not tested
+            "wmsetbg", # not tested
+            "Esetroot", # not tested
+            "display", # not tested
+            #"xsetroot", # only solid colors
+        ]
+    # may not need this actually
+    elif session == "wayland":
+        wallpaper_setters = []
+    else:
+        sys.stderr.write("Unknown session: %s" % session)
+    # perform commands based on the wallpaper setter
+    args = ""
+    for setter in wallpaper_setters:
+        if shutil.which(setter):
+            match setter:
+                case "nitrogen":
+                    # nitrogen can only set the wallpaper per-display, so get a list of the display IDs and use multiple commands
+                    s = subprocess.Popen("xrandr --listmonitors | grep -Eo '[0-9]:' | tr -d ':'", shell=True, stdout=subprocess.PIPE)
+                    # error if no displays
+                    if not s.stdout:
+                        if first_run:
+                            sys.stderr.write("Couldn't find any x11 displays")
+                        return
+                    for x in s.stdout.readlines():
+                        display = x.decode().strip()
+                        args += "nitrogen --head=%s --set-zoom-fill %s && " % (display, wallpaper_path)
+                    args += ":"  # bash no-op
+                    break
+                case "feh":
+                    args = "feh --bg-scale %s" % wallpaper_path
+                    break
+                case "habak":
+                    args = "habak -ms %s" % wallpaper_path
+                    break
+                case "hsetroot":
+                    args = "hsetroot -fill %s" % wallpaper_path
+                    break
+                case "chbg":
+                    args = "chbg -once -mode maximize %s" % wallpaper_path
+                    break
+                case "qiv":
+                    args = "qiv --root_s %s" % wallpaper_path
+                    break
+                case "xv":
+                    args = "xv -max -smooth -root -quit %s" % wallpaper_path
+                    break
+                case "xsri":
+                    args = "xsri --center-x --center-y --scale-width=100 --scale-height=100 %s" % wallpaper_path
+                    break
+                case "xli":
+                    args = "xli -fullscreen -onroot -quiet -border black %s" % wallpaper_path
+                    break
+                case "xsetbg":
+                    args = "xsetbg -fullscreen -border black %s" % wallpaper_path
+                    break
+                case "fvwm-root":
+                    args = "fvwm-root -r %s" % wallpaper_path
+                    break
+                case "wmsetbg":
+                    args = "wmsetbg -s -S %s" % wallpaper_path
+                    break
+                case "Esetroot":
+                    # Esetroot needs libImlib
+                    s = subprocess.Popen(["ldd", "Esetroot"], stdout=subprocess.PIPE)
+                    if not s.stdout:
+                        if first_run:
+                            sys.stderr.write("There was a problem running ldd on Esetroot.")
+                            return
+                    for x in s.stdout:
+                        if not re.search("libImlib", x):
+                            # only show the error once
+                            if first_run:
+                                sys.stderr.write("No wallpaper support for Esetroot: missing libImlib.")
+                            return
+                        args = "Esetroot -scale %s" % wallpaper_path
+                        break
+                case "display":
+                    # display needs xwininfo
+                    if not shutil.which("xwininfo"):
+                        if first_run:
+                            sys.stderr.write("display needs xwininfo to query the size of the root window.")
+                        return
+                    args = "display -sample `xwininfo -root 2> /dev/null|awk '/geom/{print $2}'` -window root"
+                    break
+                case _:
+                    sys.stderr.write("Tell the developer they \"forgot to add a case for %s\"" % setter)
+                    return
+    if not args:
+        if first_run:
+            sys.stderr.write("Couldn't set background.")
+        return
+    subprocess.run(args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
