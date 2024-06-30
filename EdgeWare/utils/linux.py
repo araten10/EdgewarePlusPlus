@@ -415,7 +415,7 @@ def _wm_set_background(wallpaper_path: Path | str):
                     args = ""
                     for x in s.stdout.readlines():
                         display = x.decode('ascii').strip()
-                        args += "nitrogen --head=%s --set-auto %s && " % (display, wallpaper_path)
+                        args += "nitrogen --head=%s --set-zoom-fill %s && " % (display, wallpaper_path)
                     args += ":"  # bash no-op
                     break
                 case "feh":
