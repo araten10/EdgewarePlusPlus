@@ -414,6 +414,7 @@ def _wm_set_background(wallpaper_path: Path | str):
     else:
         sys.stderr.write("Unknown session: %s" % session)
     # perform commands based on the wallpaper setter
+    args = ""
     for setter in wallpaper_setters:
         if shutil.which(setter):
             match setter:
@@ -425,7 +426,6 @@ def _wm_set_background(wallpaper_path: Path | str):
                         if first_run:
                             sys.stderr.write("Couldn't find any x11 displays")
                         return
-                    args = ""
                     for x in s.stdout.readlines():
                         display = x.decode('ascii').strip()
                         args += "nitrogen --head=%s --set-zoom-fill %s && " % (display, wallpaper_path)
@@ -490,4 +490,8 @@ def _wm_set_background(wallpaper_path: Path | str):
                 case _:
                     sys.stderr.write("Tell the developer they \"forgot to add a case for %s\"" % setter)
                     return
+    if not args:
+        if first_run:
+            sys.stderr.write("Couldn't set background.")
+        return
     subprocess.run(args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
