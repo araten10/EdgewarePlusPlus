@@ -319,7 +319,7 @@ def _is_running(process):
     s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
     if s.stdout:
         for x in s.stdout.readlines():
-            if re.search(process, x.decode('ascii').strip()):
+            if re.search(process, x.decode().strip()):
                 return True
     return False
 
@@ -438,7 +438,7 @@ def _wm_set_background(wallpaper_path: Path | str):
                             sys.stderr.write("Couldn't find any x11 displays")
                         return
                     for x in s.stdout.readlines():
-                        display = x.decode('ascii').strip()
+                        display = x.decode().strip()
                         args += "nitrogen --head=%s --set-zoom-fill %s && " % (display, wallpaper_path)
                     args += ":"  # bash no-op
                     break
