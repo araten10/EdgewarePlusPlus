@@ -179,8 +179,18 @@ def set_wallpaper(wallpaper_path: Path | str):
             # From http://www.commandlinefu.com/commands/view/3857/set-wallpaper-on-windowmaker-in-one-line
             args = "wmsetbg -s -u %s" % wallpaper_path
             subprocess.Popen(args, shell=True)
-        elif desktop_env in ["i3", "awesome", "hyprland"]:
+        elif desktop_env in ["i3", "awesome", "dwm", "xmonad", "bspwm"]:
             _wm_set_background(wallpaper_path)        
+        elif desktop_env == "Hyprland":
+            if not shutil.which("hyprctl"):
+                if first_run:
+                    sys.stderr.write("hyprpaper requires hyprctl.")
+                return False
+            args = "hyprctl hyprpaper wallpaper \",%s\"" % wallpaper_path
+            subprocess.Popen(args, shell=True)
+        elif desktop_env == "sway":
+            args = "swaybg -o \"*\" -i %s -m fill" % wallpaper_path
+            subprocess.Popen(args, shell=True)
         ## NOT TESTED BELOW - don't want to mess things up ##
         # elif desktop_env=='enlightenment': # I have not been able to make it work on e17. On e16 it would have been something in this direction
         #    args = 'enlightenment_remote -desktop-bg-add 0 0 0 0 %s' % wallpaper_path
@@ -398,11 +408,9 @@ def _wm_set_background(wallpaper_path: Path | str):
             "display", # not tested
             #"xsetroot", # only solid colors
         ]
+    # may not need this actually
     elif session == "wayland":
-        wallpaper_setters = [
-            "hyprpaper",
-            "swaybg"  # not tested
-        ]
+        wallpaper_setters = []
     else:
         sys.stderr.write("Unknown session: %s" % session)
     # perform commands based on the wallpaper setter
@@ -478,16 +486,6 @@ def _wm_set_background(wallpaper_path: Path | str):
                             sys.stderr.write("display needs xwininfo to query the size of the root window.")
                         return
                     args = "display -sample `xwininfo -root 2> /dev/null|awk '/geom/{print $2}'` -window root"
-                    break
-                case "hyprpaper":
-                    if not shutil.which("hyprctl"):
-                        if first_run:
-                            sys.stderr.write("hyprpaper requires hyprctl.")
-                        return
-                    args = "hyprctl hyprpaper wallpaper \",%s\"" % wallpaper_path
-                    break
-                case "swaybg":
-                    args = "swaybg -o \"*\" -i %s -m fill" % wallpaper_path
                     break
                 case _:
                     sys.stderr.write("Tell the developer they \"forgot to add a case for %s\"" % setter)
