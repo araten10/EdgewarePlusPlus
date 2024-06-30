@@ -22,6 +22,8 @@ def set_borderless(root):
 
 def set_wallpaper(wallpaper_path: Path | str):
     global first_run
+    if not 'first_run' in globals():
+        first_run = True
     if isinstance(wallpaper_path, Path):
         wallpaper_path = str(wallpaper_path.absolute())
 
