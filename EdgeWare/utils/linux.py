@@ -8,6 +8,7 @@ import subprocess
 import sys
 from configparser import ConfigParser
 from pathlib import Path
+import shutil
 
 from utils.paths import Defaults, Process
 
@@ -178,6 +179,8 @@ def set_wallpaper(wallpaper_path: Path | str):
             # From http://www.commandlinefu.com/commands/view/3857/set-wallpaper-on-windowmaker-in-one-line
             args = "wmsetbg -s -u %s" % wallpaper_path
             subprocess.Popen(args, shell=True)
+        elif desktop_env in ["i3", "awesome", "hyprland"]:
+            _wm_set_background(wallpaper_path)        
         ## NOT TESTED BELOW - don't want to mess things up ##
         # elif desktop_env=='enlightenment': # I have not been able to make it work on e17. On e16 it would have been something in this direction
         #    args = 'enlightenment_remote -desktop-bg-add 0 0 0 0 %s' % wallpaper_path
@@ -327,6 +330,9 @@ def _get_desktop_environment():
             "afterstep",
             "trinity",
             "kde",
+            "i3",
+            "awesome",
+            "hyprland"
         ]:
             return desktop_session
         ## Special cases ##
@@ -359,3 +365,123 @@ def _get_desktop_environment():
     elif _is_running("ksmserver"):
         return "kde"
     return "unknown"
+
+def _wm_set_background(wallpaper_path: Path | str):
+    ## window manager set background
+    # awesome window manager has a nice wrapper script to set the background using many different programs
+    # https://github.com/paul/awesome/blob/master/utils/awsetbg
+    global first_run
+
+    # check if the session is x11 or wayland so we can pick which wallpaper
+    # setters to use. otherwise may run into issues trying to use x11 wallpaper
+    # utilities on wayland and vice-versa
+    session = os.environ["XDG_SESSION_TYPE"]  # "x11" or "wayland"
+    if session == "x11":
+        wallpaper_setters = [
+            "nitrogen",
+            "feh",
+            "habak",  # not tested
+            "hsetroot", # not tested
+            "chbg", # not tested
+            "qiv", # not tested
+            "xv", # not tested
+            "xsri", # not tested
+            "xli", # not tested
+            "xsetbg", # not tested
+            "fvwm-root", # not tested
+            "wmsetbg", # not tested
+            "Esetroot", # not tested
+            "display", # not tested
+            #"xsetroot", # only solid colors
+        ]
+    elif session == "wayland":
+        wallpaper_setters = [
+            "hyprpaper",
+        ]
+    else:
+        sys.stderr.write("Unknown session: %s" % session)
+    # perform commands based on the wallpaper setter
+    for setter in wallpaper_setters:
+        if shutil.which(setter):
+            match setter:
+                case "nitrogen":
+                    # nitrogen can only set the wallpaper per-display, so get a list of the display IDs and use multiple commands
+                    s = subprocess.Popen("xrandr --listmonitors | grep -Eo '[0-9]:' | tr -d ':'", shell=True, stdout=subprocess.PIPE)
+                    # error if no displays
+                    if not s.stdout:
+                        if first_run:
+                            sys.stderr.write("Couldn't find any x11 displays")
+                        return
+                    args = ""
+                    for x in s.stdout.readlines():
+                        display = x.decode('ascii').strip()
+                        args += "nitrogen --head=%s --set-auto %s && " % (display, wallpaper_path)
+                    args += ":"  # bash no-op
+                    break
+                case "feh":
+                    args = "feh --bg-scale %s" % wallpaper_path
+                    break
+                case "habak":
+                    args = "habak -ms %s" % wallpaper_path
+                    break
+                case "hsetroot":
+                    args = "hsetroot -fill %s" % wallpaper_path
+                    break
+                case "chbg":
+                    args = "chbg -once -mode maximize %s" % wallpaper_path
+                    break
+                case "qiv":
+                    args = "qiv --root_s %s" % wallpaper_path
+                    break
+                case "xv":
+                    args = "xv -max -smooth -root -quit %s" % wallpaper_path
+                    break
+                case "xsri":
+                    args = "xsri --center-x --center-y --scale-width=100 --scale-height=100 %s" % wallpaper_path
+                    break
+                case "xli":
+                    args = "xli -fullscreen -onroot -quiet -border black %s" % wallpaper_path
+                    break
+                case "xsetbg":
+                    args = "xsetbg -fullscreen -border black %s" % wallpaper_path
+                    break
+                case "fvwm-root":
+                    args = "fvwm-root -r %s" % wallpaper_path
+                    break
+                case "wmsetbg":
+                    args = "wmsetbg -s -S %s" % wallpaper_path
+                    break
+                case "Esetroot":
+                    # Esetroot needs libImlib
+                    s = subprocess.Popen(["ldd", "Esetroot"], stdout=subprocess.PIPE)
+                    if not s.stdout:
+                        if first_run:
+                            sys.stderr.write("There was a problem running ldd on Esetroot.")
+                            return
+                    for x in s.stdout:
+                        if not re.search("libImlib", x):
+                            # only show the error once
+                            if first_run:
+                                sys.stderr.write("No wallpaper support for Esetroot: missing libImlib.")
+                            return
+                        args = "Esetroot -scale %s" % wallpaper_path
+                        break
+                case "display":
+                    # display needs xwininfo
+                    if not shutil.which("xwininfo"):
+                        if first_run:
+                            sys.stderr.write("display needs xwininfo to query the size of the root window.")
+                        return
+                    args = "display -sample `xwininfo -root 2> /dev/null|awk '/geom/{print $2}'` -window root"
+                    break
+                case "hyprpaper":
+                    if not shutil.which("hyprctl"):
+                        if first_run:
+                            sys.stderr.write("hyprpaper requires hyprctl.")
+                        return
+                    args = "hyprctl hyprpaper wallpaper \",%s\"" % wallpaper_path
+                    break
+                case _:
+                    sys.stderr.write("Tell the developer they \"forgot to add a case for %s\"" % setter)
+                    return
+    subprocess.run(args, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
