@@ -332,7 +332,11 @@ def _get_desktop_environment():
             "kde",
             "i3",
             "awesome",
-            "hyprland"
+            "Hyprland",
+            "dwm",
+            "xmonad",
+            "bspwm",
+            "sway"
         ]:
             return desktop_session
         ## Special cases ##
@@ -397,6 +401,7 @@ def _wm_set_background(wallpaper_path: Path | str):
     elif session == "wayland":
         wallpaper_setters = [
             "hyprpaper",
+            "swaybg"  # not tested
         ]
     else:
         sys.stderr.write("Unknown session: %s" % session)
@@ -480,6 +485,9 @@ def _wm_set_background(wallpaper_path: Path | str):
                             sys.stderr.write("hyprpaper requires hyprctl.")
                         return
                     args = "hyprctl hyprpaper wallpaper \",%s\"" % wallpaper_path
+                    break
+                case "swaybg":
+                    args = "swaybg -o \"*\" -i %s -m fill" % wallpaper_path
                     break
                 case _:
                     sys.stderr.write("Tell the developer they \"forgot to add a case for %s\"" % setter)
