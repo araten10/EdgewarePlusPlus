@@ -14,7 +14,7 @@ from utils.paths import Defaults, Process
 
 
 def panic_script():
-    subprocess.run("for pid in $(ps -u $USER -ef | grep -E \"python.* *+.pyw\" | awk '{print $2}'); do echo $pid; kill -9 $pid; done", shell=True)
+    subprocess.run("pkill -u $USER -fi -9 \"python.* *+.pyw\"", shell=True)
 
 
 def set_borderless(root):
