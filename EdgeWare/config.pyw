@@ -628,18 +628,25 @@ def show_window():
 
     # tab display code start
     tabMaster = ttk.Notebook(root)  # tab manager
-    tabSubContainer = ttk.Frame(tabMaster)
-    tabSub = ttk.Notebook(tabSubContainer)
 
-    tabGeneral = ttk.Frame(None)  # general subtab, for basic info/settings
+    tabSubGeneral = ttk.Frame(tabMaster)
+    notebookGeneral = ttk.Notebook(tabSubGeneral)
+    tabMaster.add(tabSubGeneral, text="General")
     tabStart = ttk.Frame(None) # startup screen, info and presets
-    tabFile2 = ttk.Frame(None) # file management tab
+    tabFile = ttk.Frame(None) # file management tab
+    tabPackInfo = ttk.Frame(None)  # pack information
 
-    tabAnnoyance = ttk.Frame(None)  # annoyance subtab, for runtime settings
+    tabSubAnnoyance = ttk.Frame(tabMaster)
+    notebookAnnoyance = ttk.Notebook(tabSubAnnoyance)
+    tabMaster.add(tabSubAnnoyance, text="Annoyance/Runtime")
     tabPopups = ttk.Frame(None) # tab for popup settings
     tabWallpaper = ttk.Frame(None)  # tab for wallpaper rotation settings
+    tabBooru = ttk.Frame(None) # tab for booru downloader
+    tabDangerous = ttk.Frame(None) # tab for potentially dangerous settings
 
-    tabModes = ttk.Frame(None) # tab for mode settings
+    tabSubModes = ttk.Frame(tabMaster)
+    notebookModes = ttk.Notebook(tabSubModes)
+    tabMaster.add(tabSubModes, text="Modes")
     tabHibernate = ttk.Frame(None) # tab for hibernate mode
     tabCorruption = ttk.Frame(None)  # tab for popup settings
     tabTimer = ttk.Frame(None) # tab for timer mode
@@ -648,12 +655,6 @@ def show_window():
     tabJSON = ttk.Frame(None)  # tab for JSON editor (unused)
     tabAdvanced = ttk.Frame(None)  # advanced tab, will have settings pertaining to startup, hibernation mode settings
     tabInfo = ttk.Frame(None)  # info, github, version, about, etc.
-    tabPackInfo = ttk.Frame(None)  # pack information
-    tabFile = ttk.Frame(None)  # file management tab
-
-    # tabMaster.add(tabGeneral, text="General")
-    # tabMaster.add(tabAnnoyance, text="Annoyance")
-
 
     style = ttk.Style(root)  # style setting for left aligned tabs
 
@@ -702,6 +703,10 @@ def show_window():
     tab_packInfo = ttk.Frame(None)
     tab_file = ttk.Frame(None)
 
+    resourceFrame = Frame(root)
+    exportResourcesButton = Button(resourceFrame, text="Export Resource Pack", command=exportResource)
+    importResourcesButton = Button(resourceFrame, text="Import Resource Pack", command=lambda: importResource(root))
+    saveExitButton = Button(root, text="Save & Exit", command=lambda: write_save(in_var_group, in_var_names, safewordVar, True))
 
     # --------------------------------------------------------- #
     # ========================================================= #
@@ -709,8 +714,8 @@ def show_window():
     # ========================================================= #
     # --------------------------------------------------------- #
 
-    tabMaster.add(tabStart, text="Start")
     # ==========={IN HERE IS START TAB ITEM INITS}===========#
+    notebookGeneral.add(tabStart, text="Start")
 
     #version information
     Label(tabStart, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -728,6 +733,9 @@ def show_window():
     )
     openGitPlusButton = Button(zipGitFrame, text="Open Github (EdgeWare++)", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus"))
 
+    forceReload = Button(infoHostFrame, text="Force Reload", command=refresh)
+    optButton = Button(infoHostFrame, text="Test Func", command=lambda: getDescriptText("default"))
+
     infoHostFrame.pack(fill="x")
     zipGitFrame.pack(fill="both", side="left", expand=1)
     openGitButton.pack(fill="both", expand=1)
@@ -739,6 +747,11 @@ def show_window():
     local_verPlusLabel.pack(fill="x")
     web_verPlusLabel.pack(fill="x")
     openGitPlusButton.pack(fill="both", expand=1)
+
+    # force reload button for debugging, only appears on DEV versions
+    if local_version.endswith("DEV"):
+        forceReload.pack(fill="y", expand=1)
+        optButton.pack(fill="y", expand=1)
 
     # mode presets
     Label(tabStart, text="Mode Presets", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -1076,1195 +1089,84 @@ def show_window():
         "Minor (low risk but could lead to unwanted interactions):\n"
         "Disable Panic Hotkey, Run on Save & Exit",
     )
+    # ==========={EDGEWARE++ FILE TAB STARTS HERE}==============#
+    notebookGeneral.add(tabFile, text="File")
 
-    tabMaster.add(tabGeneral, text="General")
-    # ==========={IN HERE IS GENERAL TAB ITEM INITS}===========#
-    # init
-    hibernate_types = ["Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos"]
+    # save/load
+    Label(tabFile, text="Save/Load", font=titleFont, relief=GROOVE).pack(pady=2)
+    importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
+    fileTabImportButton = Button(importExportFrame, height=2, text="Import Resource Pack", command=lambda: importResource(root))
+    fileTabExportButton = Button(importExportFrame, height=2, text="Export Resource Pack", command=exportResource)
+    fileSaveButton = Button(tabFile, text="Save Config Settings", command=lambda: write_save(in_var_group, in_var_names, safewordVar, False))
 
-    hibernateHostFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
-    hibernateTypeFrame = Frame(hibernateHostFrame)
-    hibernateTypeDescriptionFrame = Frame(hibernateHostFrame, borderwidth=2, relief=GROOVE)
-    hibernateFrame = Frame(hibernateHostFrame)
-    hibernateMinFrame = Frame(hibernateHostFrame)
-    hibernateMaxFrame = Frame(hibernateHostFrame)
-    hibernateActivityFrame = Frame(hibernateHostFrame)
-    hibernateLengthFrame = Frame(hibernateHostFrame)
+    fileSaveButton.pack(fill="x", pady=2)
+    importExportFrame.pack(fill="x", pady=2)
+    fileTabImportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
+    fileTabExportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
 
-    toggleHibernateButton = Checkbutton(
-        hibernateTypeFrame, text="Hibernate Mode", variable=hibernateVar, command=lambda: hibernateHelper(hibernateTypeVar.get()), cursor="question_arrow"
-    )
-    fixWallpaperButton = Checkbutton(hibernateTypeFrame, text="Fix Wallpaper", variable=fixWallpaperVar, cursor="question_arrow")
-    hibernateTypeDropdown = OptionMenu(hibernateTypeFrame, hibernateTypeVar, *hibernate_types, command=lambda key: hibernateHelper(key))
-    hibernateTypeDescription = Label(hibernateTypeDescriptionFrame, text="Error loading Hibernate Description!", wraplength=175)
+    # directories
+    Label(tabFile, text="Directories", font=titleFont, relief=GROOVE).pack(pady=2)
 
-    def hibernateHelper(key: str):
-        if key == "Original":
-            hibernateTypeDescription.configure(text="Creates an immediate quantity of popups on wakeup based on the awaken activity.\n\n")
-            if hibernateVar.get():
-                toggleAssociateSettings(False, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Spaced":
-            hibernateTypeDescription.configure(text="Creates popups consistently over the hibernate length, based on popup delay.\n\n")
-            if hibernateVar.get():
-                toggleAssociateSettings(False, hactivity_group)
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Glitch":
-            hibernateTypeDescription.configure(
-                text="Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.\n"
-            )
-            if hibernateVar.get():
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Ramp":
-            hibernateTypeDescription.configure(
-                text="Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay."
-            )
-            if hibernateVar.get():
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Pump-Scare":
-            hibernateTypeDescription.configure(
-                text="Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?"
-            )
-            if hibernateVar.get():
-                toggleAssociateSettings(False, hlength_group)
-                toggleAssociateSettings(False, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if key == "Chaos":
-            hibernateTypeDescription.configure(text="Every time hibernate activates, a random type (other than chaos) is selected.\n\n")
-            if hibernateVar.get():
-                toggleAssociateSettings(True, hlength_group)
-                toggleAssociateSettings(True, hactivity_group)
-                toggleAssociateSettings(True, hibernate_group)
-        if not hibernateVar.get():
-            toggleAssociateSettings(False, hlength_group)
-            toggleAssociateSettings(False, hactivity_group)
-            toggleAssociateSettings(False, hibernate_group)
+    logNum = len(os.listdir(LOG_PATH)) if os.path.exists(LOG_PATH) else 0
+    logsFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
+    lSubFrame1 = Frame(logsFrame)
+    lSubFrame2 = Frame(logsFrame)
+    openLogsButton = Button(lSubFrame2, text="Open Logs Folder", command=lambda: explorerView(LOG_PATH))
+    clearLogsButton = Button(lSubFrame2, text="Delete All Logs", command=lambda: cleanLogs(), cursor="question_arrow")
+    logStat = Label(lSubFrame1, text=f"Total Logs: {logNum}")
 
-    hibernateHelper(hibernateTypeVar.get())
+    clearlogsttp = CreateToolTip(clearLogsButton, "This will delete every log (except the log currently being written).")
 
-    hibernateMinButton = Button(
-        hibernateMinFrame,
-        text="Manual min...",
-        command=lambda: assign(hibernateMinVar, simpledialog.askinteger("Manual Minimum Sleep (sec)", prompt="[1-7200]: ")),
-    )
-    hibernateMinScale = Scale(hibernateMinFrame, label="Min Sleep (sec)", variable=hibernateMinVar, orient="horizontal", from_=1, to=7200)
-    hibernateMaxButton = Button(
-        hibernateMaxFrame,
-        text="Manual max...",
-        command=lambda: assign(hibernateMaxVar, simpledialog.askinteger("Manual Maximum Sleep (sec)", prompt="[2-14400]: ")),
-    )
-    hibernateMaxScale = Scale(hibernateMaxFrame, label="Max Sleep (sec)", variable=hibernateMaxVar, orient="horizontal", from_=2, to=14400)
-    h_activityScale = Scale(hibernateActivityFrame, label="Awaken Activity", orient="horizontal", from_=1, to=50, variable=wakeupActivityVar)
-    h_activityButton = Button(
-        hibernateActivityFrame,
-        text="Manual act...",
-        command=lambda: assign(wakeupActivityVar, simpledialog.askinteger("Manual Wakeup Activity", prompt="[1-50]: ")),
-    )
-    hibernateLengthScale = Scale(hibernateLengthFrame, label="Max Length (sec)", variable=hibernateLengthVar, orient="horizontal", from_=5, to=300)
-    hibernateLengthButton = Button(
-        hibernateLengthFrame,
-        text="Manual length...",
-        command=lambda: assign(hibernateLengthVar, simpledialog.askinteger("Manual Hibernate Length", prompt="[5-300]: ")),
+    def cleanLogs():
+        try:
+            logNum = len(os.listdir(LOG_PATH)) if os.path.exists(LOG_PATH) else 0
+            if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete all logs? There are currently {logNum}.", icon="warning") == True:
+                if os.path.exists(LOG_PATH) and os.listdir(LOG_PATH):
+                    logs = os.listdir(LOG_PATH)
+                    for f in logs:
+                        if os.path.splitext(f)[0] == os.path.splitext(log_file)[0]:
+                            continue
+                        e = os.path.splitext(f)[1].lower()
+                        if e == ".txt":
+                            os.remove(LOG_PATH / f)
+                    logNum = len(os.listdir(LOG_PATH)) if os.path.exists(LOG_PATH) else 0
+                    logStat.configure(text=f"Total Logs: {logNum}")
+        except Exception as e:
+            logging.warning(f"could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}")
+
+    logsFrame.pack(fill="x", pady=2)
+    lSubFrame1.pack(fill="both", side="left", expand=1)
+    lSubFrame2.pack(fill="both", side="left", expand=1)
+    logStat.pack(fill="both", expand=1)
+    openLogsButton.pack(fill="x", expand=1)
+    clearLogsButton.pack(fill="x", expand=1)
+
+    moodsFileFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
+    mfSubFrame1 = Frame(moodsFileFrame)
+    mfSubFrame2 = Frame(moodsFileFrame)
+    uniqueIDCheck = Label(mfSubFrame1, text=("Using Unique ID?: " + ("✓" if (info_id == "0") else "✗")), fg=("green" if (info_id == "0") else "red"))
+    uniqueIDLabel = Label(mfSubFrame1, text=("Your Unique ID is: " + (UNIQUE_ID if (info_id == "0") else info_id)))
+    openMoodsButton = Button(mfSubFrame2, height=2, text="Open Moods Folder", command=lambda: explorerView(Data.MOODS), cursor="question_arrow")
+
+    openmoodsttp = CreateToolTip(
+        openMoodsButton,
+        'If your currently loaded pack has a "info.json" file, it can be found under the pack name in this folder.\n\n'
+        "If it does not have this file however, EdgeWare++ will generate a Unique ID for it, so you can still save your mood settings "
+        'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
     )
 
-    hibernatettp = CreateToolTip(
-        toggleHibernateButton,
-        "Runs EdgeWare silently without any popups.\n\n"
-        "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
-        'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
-        'Check the "About" tab for more detailed information on each hibernate type.',
-    )
-    fixwallpaperttp = CreateToolTip(
-        fixWallpaperButton,
-        '"fixes" your wallpaper after hibernate is finished by changing it to'
-        " your panic wallpaper. If left off, it will keep the pack's wallpaper on until you panic"
-        " or change it back yourself.",
-    )
+    moodsFileFrame.pack(fill="x", pady=2)
+    mfSubFrame1.pack(fill="both", side="left", expand=1)
+    mfSubFrame2.pack(fill="both", side="left", expand=1)
+    uniqueIDCheck.pack(fill="both", expand=1)
+    uniqueIDLabel.pack(fill="both", expand=1)
+    openMoodsButton.pack(fill="x", expand=1)
+
+    openResourcesButton = Button(tabFile, height=2, text="Open Resources Folder", command=lambda: explorerView(Resource.ROOT))
+    openResourcesButton.pack(fill="x", pady=2)
 
-    hibernate_group.append(hibernateMinButton)
-    hibernate_group.append(hibernateMinScale)
-    hibernate_group.append(hibernateMaxButton)
-    hibernate_group.append(hibernateMaxScale)
-
-    hlength_group.append(hibernateLengthButton)
-    hlength_group.append(hibernateLengthScale)
-
-    hactivity_group.append(h_activityScale)
-    hactivity_group.append(h_activityButton)
-
-    Label(tabGeneral, text="Hibernate Settings", font=titleFont, relief=GROOVE).pack(pady=2)
-    hibernateHostFrame.pack(fill="x")
-    hibernateFrame.pack(fill="y", side="left")
-    hibernateTypeFrame.pack(fill="x", side="left")
-    toggleHibernateButton.pack(fill="x", side="top")
-    fixWallpaperButton.pack(fill="x", side="top")
-    hibernateTypeDropdown.pack(fill="x", side="top")
-    hibernateTypeDescriptionFrame.pack(fill="both", side="left", expand=1, padx=2, pady=2)
-    hibernateTypeDescription.pack(fill="y", pady=2)
-    hibernateMinScale.pack(fill="y")
-    hibernateMinButton.pack(fill="y")
-    hibernateMinFrame.pack(fill="x", side="left")
-    hibernateMaxScale.pack(fill="y")
-    hibernateMaxButton.pack(fill="y")
-    hibernateMaxFrame.pack(fill="x", side="left")
-    h_activityScale.pack(fill="y")
-    h_activityButton.pack(fill="y")
-    hibernateActivityFrame.pack(fill="x", side="left")
-    hibernateLengthScale.pack(fill="y")
-    hibernateLengthButton.pack(fill="y")
-    hibernateLengthFrame.pack(fill="x", side="left")
-
-    # timer settings
-    Label(tabGeneral, text="Timer Settings", font=titleFont, relief=GROOVE).pack(pady=2)
-    timerFrame = Frame(tabGeneral, borderwidth=5, relief=RAISED)
-
-    timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=timerVar, command=lambda: timerHelper(), cursor="question_arrow")
-    timerSlider = Scale(timerFrame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=timerTimeVar)
-    safewordFrame = Frame(timerFrame)
-
-    def timerHelper():
-        toggleAssociateSettings(timerVar.get(), timer_group)
-        if timerVar.get():
-            startLoginVar.set(True)
-        else:
-            startLoginVar.set(False)
-
-    timerttp = CreateToolTip(
-        timerToggle,
-        'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
-        '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
-        "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
-        "instability when running EdgeWare multiple times without changing config settings.",
-    )
-
-    Label(safewordFrame, text="Emergency Safeword").pack()
-    timerSafeword = Entry(safewordFrame, show="*", textvariable=safewordVar)
-    timerSafeword.pack(expand=1, fill="both")
-
-    timer_group.append(timerSafeword)
-    timer_group.append(timerSlider)
-
-    timerToggle.pack(side="left", fill="x", padx=5)
-    timerSlider.pack(side="left", fill="x", expand=1, padx=10)
-    safewordFrame.pack(side="right", fill="x", padx=5)
-
-    timerFrame.pack(fill="x")
-
-    forceReload = Button(infoHostFrame, text="Force Reload", command=refresh)
-    optButton = Button(infoHostFrame, text="Test Func", command=lambda: getDescriptText("default"))
-
-    resourceFrame = Frame(root)
-    exportResourcesButton = Button(resourceFrame, text="Export Resource Pack", command=exportResource)
-    importResourcesButton = Button(resourceFrame, text="Import Resource Pack", command=lambda: importResource(root))
-    saveExitButton = Button(root, text="Save & Exit", command=lambda: write_save(in_var_group, in_var_names, safewordVar, True))
-
-
-    # force reload button for debugging, only appears on DEV versions
-    if local_version.endswith("DEV"):
-        forceReload.pack(fill="y", expand=1)
-        optButton.pack(fill="y", expand=1)
-
-    # zipDownloadButton.grid(column=0, row=10) #not using for now until can find consistent direct download
-    # zipDropdown.grid(column=0, row=9)
-    # ==========={HERE ENDS  GENERAL TAB ITEM INITS}===========#
-    tabMaster.add(tabAnnoyance, text="Annoyance")
-
-    Label(tabAnnoyance).pack()
-
-    delayModeFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
-    delayFrame = Frame(delayModeFrame)
-    lowkeyFrame = Frame(delayModeFrame)
-
-    delayScale = Scale(delayFrame, label="Popup Timer Delay (ms)", from_=10, to=60000, orient="horizontal", variable=delayVar)
-    delayManual = Button(delayFrame, text="Manual delay...", command=lambda: assign(delayVar, simpledialog.askinteger("Manual Delay", prompt="[10-60000]: ")))
-    opacityScale = Scale(tabAnnoyance, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
-
-    posList = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
-    lkItemVar = StringVar(root, posList[lkCorner.get()])
-    lowkeyDropdown = OptionMenu(lowkeyFrame, lkItemVar, *posList, command=lambda x: (lkCorner.set(posList.index(x))))
-    lowkeyToggle = Checkbutton(
-        lowkeyFrame, text="Lowkey Mode", variable=lkToggle, command=lambda: toggleAssociateSettings(lkToggle.get(), lowkey_group), cursor="question_arrow"
-    )
-
-    lowkeyttp = CreateToolTip(
-        lowkeyToggle,
-        "Makes popups appear in a corner of the screen instead of the middle.\n\n" "Best used with Popup Timeout or high delay as popups will stack.",
-    )
-
-    lowkey_group.append(lowkeyDropdown)
-
-    delayModeFrame.pack(fill="x")
-
-    delayScale.pack(fill="x", expand=1)
-    delayManual.pack(fill="x", expand=1)
-
-    delayFrame.pack(side="left", fill="x", expand=1)
-
-    lowkeyFrame.pack(fill="y", side="left")
-    lowkeyDropdown.pack(fill="x", padx=2, pady=5)
-    lowkeyToggle.pack(fill="both", expand=1)
-
-    opacityScale.pack(fill="x")
-
-    # popup frame handling
-    popupHostFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
-    popupFrame = Frame(popupHostFrame)
-    timeoutFrame = Frame(popupHostFrame)
-    mitosisFrame = Frame(popupHostFrame)
-    panicFrame = Frame(popupHostFrame)
-    denialFrame = Frame(popupHostFrame)
-    movingFrame = Frame(popupHostFrame)
-    speedFrame = Frame(popupHostFrame)
-
-    popupScale = Scale(popupFrame, label="Popup Freq (%)", from_=0, to=100, orient="horizontal", variable=popupVar)
-    popupManual = Button(
-        popupFrame,
-        text="Manual popup...",
-        command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup", prompt="[0-100]: ")),
-        cursor="question_arrow",
-    )
-
-    popupManualttp = CreateToolTip(
-        popupManual,
-        "Whenever the timer is reached to spawn a new popup, this value is rolled to see if it spawns or not.\n\n"
-        "Leave at 100 for a more consistent experience, and make it less for a more random one.",
-    )
-
-    mitosis_group.append(popupScale)
-    mitosis_group.append(popupManual)
-
-    def toggleMitosis():
-        toggleAssociateSettings(not mitosisVar.get(), mitosis_group)
-        toggleAssociateSettings(mitosisVar.get(), mitosis_cGroup)
-
-    mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=mitosisVar, command=toggleMitosis, cursor="question_arrow")
-    mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=mitosisStrenVar)
-
-    mitosisttp = CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
-
-    mitosis_cGroup.append(mitosisStren)
-
-    setPanicButtonButton = Button(
-        panicFrame,
-        text=f"Set Panic\nButton\n<{panicButtonVar.get()}>",
-        command=lambda: getKeyboardInput(setPanicButtonButton, panicButtonVar),
-        cursor="question_arrow",
-    )
-    doPanicButton = Button(panicFrame, text="Perform Panic", command=lambda: subprocess.Popen([sys.executable, Process.PANIC]))
-
-    setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
-
-    timeoutToggle = Checkbutton(
-        timeoutFrame, text="Popup Timeout", variable=timeoutPopupsVar, command=lambda: toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group)
-    )
-    timeoutSlider = Scale(timeoutFrame, label="Time (sec)", from_=1, to=120, orient="horizontal", variable=popupTimeoutVar)
-
-    timeout_group.append(timeoutSlider)
-
-    denialSlider = Scale(denialFrame, label="Denial Chance", orient="horizontal", variable=denialChance)
-    denialToggle = Checkbutton(
-        denialFrame, text="Denial Mode", variable=denialMode, command=lambda: toggleAssociateSettings(denialMode.get(), denial_group), cursor="question_arrow"
-    )
-
-    movingSlider = Scale(movingFrame, label="Moving Chance", orient="horizontal", variable=movingChanceVar, cursor="question_arrow")
-    movingRandToggle = Checkbutton(movingFrame, text="Rand. Direction", variable=movingRandomVar, cursor="question_arrow")
-
-    movingttp = CreateToolTip(
-        movingSlider,
-        'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
-        "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
-    )
-    moverandomttp = CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
-
-    movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=movingSpeedVar)
-    manualSpeed = Button(speedFrame, text="Manual speed...", command=lambda: assign(movingSpeedVar, simpledialog.askinteger("Manual Speed", prompt="[1-15]: ")))
-
-    denialttp = CreateToolTip(denialToggle, 'Adds a percentage chance to "censor" an image.')
-    denial_group.append(denialSlider)
-
-    popupHostFrame.pack(fill="x")
-    popupScale.pack(fill="x")
-    popupManual.pack(fill="x")
-    popupFrame.pack(fill="y", side="left")
-    timeoutSlider.pack(fill="x")
-    timeoutToggle.pack(fill="x")
-    timeoutFrame.pack(fill="y", side="left")
-    mitosisFrame.pack(fill="y", side="left")
-    mitosisStren.pack(fill="x")
-    mitosisToggle.pack(fill="x")
-    denialFrame.pack(fill="y", side="left")
-    denialSlider.pack(fill="x")
-    denialToggle.pack(fill="x")
-    movingFrame.pack(fill="y", side="left")
-    movingSlider.pack(fill="x")
-    movingRandToggle.pack(fill="x")
-    speedFrame.pack(fill="y", side="left")
-    movingSpeedSlider.pack(fill="x")
-    manualSpeed.pack(fill="x")
-    panicFrame.pack(fill="y", side="left")
-    setPanicButtonButton.pack(fill="x", expand=1)
-    doPanicButton.pack(fill="x")
-    # popup frame handle end
-
-    # additional popup options, mostly edgeware++ stuff
-    popupOptionsFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
-    popupOptionsSubFrame1 = Frame(popupOptionsFrame)
-    popupOptionsSubFrame2 = Frame(popupOptionsFrame)
-    popupOptionsSubFrame3 = Frame(popupOptionsFrame)
-
-    panicDisableButton = Checkbutton(popupOptionsSubFrame1, text="Disable Panic Hotkey", variable=panicVar, cursor="question_arrow")
-    popupWebToggle = Checkbutton(popupOptionsSubFrame1, text="Popup close opens web page", variable=popupWebVar)
-    toggleEasierButton = Checkbutton(popupOptionsSubFrame2, text="Buttonless Closing Popups", variable=buttonlessVar, cursor="question_arrow")
-    toggleSingleButton = Checkbutton(popupOptionsSubFrame3, text="Single Popup Mode", variable=singleModeVar, cursor="question_arrow")
-    toggleMultiClickButton = Checkbutton(popupOptionsSubFrame3, text="Multi-Click popups", variable=multiClickVar, cursor="question_arrow")
-
-    disablePanicttp = CreateToolTip(
-        panicDisableButton,
-        "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
-        "If you want to use Panic after this, you can still:\n"
-        '•Directly run "panic.pyw"\n'
-        '•Keep the config window open and press "Perform Panic"\n'
-        "•Use the panic desktop icon (if you kept those enabled)",
-    )
-    buttonlessttp = CreateToolTip(
-        toggleEasierButton,
-        'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
-        "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
-    )
-    singlettp = CreateToolTip(
-        toggleSingleButton,
-        'The randomization in EdgeWare does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
-        "For example, if you have audio, videos, and prompts all turned on, there's a very real chance you will get all of them popping up at the same "
-        "time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It "
-        "delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: The roll order for popups are as follows:\n"
-        "Web -> Video -> Audio -> Prompt -> Caption Popup -> Image\nTherefore, if every type of popup is at the same rate of appearing (and single mode is turned on), "
-        "web links will be slightly more common than videos, and videos slightly more common than audio, etc...",
-    )
-
-    popupOptionsFrame.pack(fill="x")
-    popupOptionsSubFrame1.pack(fill="y", side="left", expand=1)
-    popupOptionsSubFrame2.pack(fill="y", side="left", expand=1)
-    popupOptionsSubFrame3.pack(fill="y", side="left", expand=1)
-    panicDisableButton.pack(fill="x")
-    popupWebToggle.pack(fill="x")
-    toggleEasierButton.pack(fill="x")
-    toggleSingleButton.pack(fill="x")
-    # other start
-    otherHostFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
-
-    audioFrame = Frame(otherHostFrame)
-    webFrame = Frame(otherHostFrame)
-    vidFrameL = Frame(otherHostFrame)
-    vidFrameR = Frame(otherHostFrame)
-    promptFrame = Frame(otherHostFrame)
-    mistakeFrame = Frame(otherHostFrame)
-
-    audioScale = Scale(audioFrame, label="Audio Freq (%)", from_=0, to=100, orient="horizontal", variable=audioVar)
-    audioManual = Button(audioFrame, text="Manual audio...", command=lambda: assign(audioVar, simpledialog.askinteger("Manual Audio", prompt="[0-100]: ")))
-
-    webScale = Scale(webFrame, label="Website Freq (%)", from_=0, to=100, orient="horizontal", variable=webVar)
-    webManual = Button(webFrame, text="Manual web...", command=lambda: assign(webVar, simpledialog.askinteger("Web Chance", prompt="[0-100]: ")))
-
-    vidScale = Scale(vidFrameL, label="Video Chance (%)", from_=0, to=100, orient="horizontal", variable=vidVar)
-    vidManual = Button(vidFrameL, text="Manual vid...", command=lambda: assign(vidVar, simpledialog.askinteger("Video Chance", prompt="[0-100]: ")))
-    vidVolumeScale = Scale(vidFrameR, label="Video Volume", from_=0, to=100, orient="horizontal", variable=videoVolume)
-    vidVolumeManual = Button(
-        vidFrameR, text="Manual volume...", command=lambda: assign(videoVolume, simpledialog.askinteger("Video Volume", prompt="[0-100]: "))
-    )
-
-    promptScale = Scale(promptFrame, label="Prompt Freq (%)", from_=0, to=100, orient="horizontal", variable=promptVar)
-    promptManual = Button(promptFrame, text="Manual prompt...", command=lambda: assign(promptVar, simpledialog.askinteger("Manual Prompt", prompt="[0-100]: ")))
-
-    mistakeScale = Scale(mistakeFrame, label="Prompt Mistakes", from_=0, to=150, orient="horizontal", variable=promptMistakeVar)
-    mistakeManual = Button(
-        mistakeFrame,
-        text="Manual mistakes...",
-        command=lambda: assign(promptMistakeVar, simpledialog.askinteger("Max Mistakes", prompt="Max mistakes allowed in prompt text\n[0-150]: ")),
-        cursor="question_arrow",
-    )
-
-    mistakettp = CreateToolTip(
-        mistakeManual, "The number of allowed mistakes when filling out a prompt.\n\n" "Good for when you can't think straight, or typing with one hand..."
-    )
-
-    otherHostFrame.pack(fill="x")
-
-    audioScale.pack(fill="x", padx=3, expand=1)
-    audioManual.pack(fill="x")
-    audioFrame.pack(side="left")
-
-    webFrame.pack(fill="y", side="left", padx=3, expand=1)
-    webScale.pack(fill="x")
-    webManual.pack(fill="x")
-
-    vidFrameL.pack(fill="x", side="left", padx=(3, 0), expand=1)
-    vidScale.pack(fill="x")
-    vidManual.pack(fill="x")
-    vidFrameR.pack(fill="x", side="left", padx=(0, 3), expand=1)
-    vidVolumeScale.pack(fill="x")
-    vidVolumeManual.pack(fill="x")
-
-    promptFrame.pack(fill="y", side="left", padx=(3, 0), expand=1)
-    promptScale.pack(fill="x")
-    promptManual.pack(fill="x")
-    mistakeFrame.pack(fill="y", side="left", padx=(0, 3), expand=1)
-    mistakeScale.pack(fill="x")
-    mistakeManual.pack(fill="x")
-    # end web
-
-    # max start
-    maxPopupFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
-
-    maxAudioFrame = Frame(maxPopupFrame)
-    maxVideoFrame = Frame(maxPopupFrame)
-    subliminalsFrame = Frame(maxPopupFrame)
-
-    subliminalsChanceFrame = Frame(subliminalsFrame)
-    subliminalsAlphaFrame = Frame(subliminalsFrame)
-    maxSubliminalsFrame = Frame(subliminalsFrame)
-
-    maxAudioToggle = Checkbutton(
-        maxAudioFrame, text="Cap Audio", variable=maxAToggleVar, command=lambda: toggleAssociateSettings(maxAToggleVar.get(), maxAudio_group)
-    )
-    maxAudioScale = Scale(maxAudioFrame, label="Max Audio Popups", from_=1, to=50, orient="horizontal", variable=maxAudioVar)
-    maxAudioManual = Button(
-        maxAudioFrame, text="Manual Max Audio...", command=lambda: assign(maxAudioVar, simpledialog.askinteger("Manual Max Audio", prompt="[1-50]: "))
-    )
-
-    maxAudio_group.append(maxAudioScale)
-    maxAudio_group.append(maxAudioManual)
-
-    maxVideoToggle = Checkbutton(
-        maxVideoFrame, text="Cap Videos", variable=maxVToggleVar, command=lambda: toggleAssociateSettings(maxVToggleVar.get(), maxVideo_group)
-    )
-    maxVideoScale = Scale(maxVideoFrame, label="Max Video Popups", from_=1, to=50, orient="horizontal", variable=maxVideoVar)
-    maxVideoManual = Button(
-        maxVideoFrame, text="Manual Max Videos...", command=lambda: assign(maxVideoVar, simpledialog.askinteger("Manual Max Videos", prompt="[1-50]: "))
-    )
-
-    maxVideo_group.append(maxVideoScale)
-    maxVideo_group.append(maxVideoManual)
-
-    toggleSubliminalButton = Checkbutton(
-        subliminalsFrame,
-        text="Popup Subliminals",
-        variable=popupSublim,
-        command=lambda: toggleAssociateSettings(popupSublim.get(), subliminals_group),
-        cursor="question_arrow",
-    )
-
-    subliminalttp = CreateToolTip(
-        toggleSubliminalButton, "Overlays transparent gifs on popups.\n\nThis feature can be CPU intensive, try a low max limit to start!"
-    )
-
-    subliminalsChanceScale = Scale(subliminalsChanceFrame, label="Sublim. Chance (%)", from_=1, to=100, orient="horizontal", variable=subliminalsChanceVar)
-    subliminalsChanceManual = Button(
-        subliminalsChanceFrame,
-        text="Manual Sub Chance...",
-        command=lambda: assign(subliminalsChanceVar, simpledialog.askinteger("Manual Subliminal Chance", prompt="[1-100]: ")),
-    )
-
-    subliminals_group.append(subliminalsChanceScale)
-    subliminals_group.append(subliminalsChanceManual)
-
-    subliminalsAlphaScale = Scale(subliminalsAlphaFrame, label="Sublim. Alpha (%)", from_=1, to=99, orient="horizontal", variable=subliminalsAlphaVar)
-    subliminalsAlphaManual = Button(
-        subliminalsAlphaFrame,
-        text="Manual Sub Alpha...",
-        command=lambda: assign(subliminalsAlphaVar, simpledialog.askinteger("Manual Subliminal Chance", prompt="[1-99]: ")),
-    )
-
-    subliminals_group.append(subliminalsAlphaScale)
-    subliminals_group.append(subliminalsAlphaManual)
-
-    maxSubliminalsScale = Scale(maxSubliminalsFrame, label="Max Subliminals", from_=1, to=200, orient="horizontal", variable=maxSubliminalsVar)
-    maxSubliminalsManual = Button(
-        maxSubliminalsFrame,
-        text="Manual Max Sub...",
-        command=lambda: assign(maxSubliminalsVar, simpledialog.askinteger("Manual Max Subliminals", prompt="[1-200]: ")),
-    )
-
-    subliminals_group.append(maxSubliminalsScale)
-    subliminals_group.append(maxSubliminalsManual)
-
-    maxPopupFrame.pack(fill="x")
-
-    maxAudioFrame.pack(side="left")
-    maxAudioToggle.pack(fill="x")
-    maxAudioScale.pack(fill="x", padx=1, expand=1)
-    maxAudioManual.pack(fill="x")
-
-    maxVideoFrame.pack(side="left", padx=3, expand=1)
-    maxVideoToggle.pack(fill="x")
-    maxVideoScale.pack(fill="x", padx=1, expand=1)
-    maxVideoManual.pack(fill="x")
-
-    subliminalsFrame.pack(side="left")
-    toggleSubliminalButton.pack(fill="x")
-
-    subliminalsChanceFrame.pack(side="left", padx=3, expand=1)
-    subliminalsChanceScale.pack(fill="x", padx=1, expand=1)
-    subliminalsChanceManual.pack(fill="x")
-
-    subliminalsAlphaFrame.pack(side="left", padx=3, expand=1)
-    subliminalsAlphaScale.pack(fill="x", padx=1, expand=1)
-    subliminalsAlphaManual.pack(fill="x")
-
-    maxSubliminalsFrame.pack(side="left", padx=3, expand=1)
-    maxSubliminalsScale.pack(fill="x", padx=1, expand=1)
-    maxSubliminalsManual.pack(fill="x")
-
-    captionsFrame = Frame(tabAnnoyance, borderwidth=5, relief=RAISED)
-    captionsSubFrame1 = Frame(captionsFrame)
-    capPopFrame = Frame(captionsFrame)
-    capPopOpacityFrame = Frame(captionsFrame)
-    capPopTimerFrame = Frame(captionsFrame)
-
-    toggleCaptionsButton = Checkbutton(captionsSubFrame1, text="Popup Captions", variable=captionVar, cursor="question_arrow")
-    toggleFilenameButton = Checkbutton(captionsSubFrame1, text="Use filename for caption moods", variable=captionFilenameVar, cursor="question_arrow")
-    toggleMultiClickButton = Checkbutton(captionsSubFrame1, text="Multi-Click popups", variable=multiClickVar, cursor="question_arrow")
-    toggleCaptionMood = Checkbutton(captionsSubFrame1, text="Use Cap-Pop specific mood", variable=capPopMoodVar, cursor="question_arrow")
-
-    captionttp = CreateToolTip(
-        toggleCaptionsButton, "Enables captions on popups. These are short segments of text written by the pack creator that adorn the top of each popup."
-    )
-    multiclickttp = CreateToolTip(
-        toggleMultiClickButton,
-        "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
-        "to close. This feature must be set-up beforehand and won't do anything if not supported.",
-    )
-    captionfilenamettp = CreateToolTip(
-        toggleFilenameButton,
-        "When enabled, captions will try and match the filename of the image they attach to.\n\n"
-        'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
-        'of images named things like "goon300242", "goon-love", "goon_ytur8843", etc.\n\n'
-        "This is how EdgeWare processed captions before moods were implemented fully in EdgeWare++. The reason you'd turn this off, however, "
-        "is that if the mood doesn't match the filename, it won't display at all.\n\n For example, if you had a mood named \"succubus\", but "
-        'no files started with "succubus", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
-        "the pack supports it.",
-    )
-    capmoodttp = CreateToolTip(
-        toggleCaptionMood,
-        'Caption Popups have the option to use a special mood in the captions.json file called "subliminals". This mood doesn\'t '
-        "normally appear like other captions, and is meant for short, fast messages that will blink at you very quickly.\n\n"
-        "If your pack doesn't support subliminals, this "
-        "setting doesn't need to be disabled- it will automatically switch to using regular captions.",
-    )
-
-    captionsPopupSlider = Scale(capPopFrame, label="Cap-Pop Chance", from_=0, to=100, orient="horizontal", variable=capPopChanceVar)
-    captionsPopupManual = Button(
-        capPopFrame,
-        text="Manual Cap-Pop...",
-        command=lambda: assign(capPopChanceVar, simpledialog.askinteger("Manual Caption Popup Chance (%)", prompt="[0-100]: ")),
-        cursor="question_arrow",
-    )
-    capPopOpacitySlider = Scale(capPopOpacityFrame, label="Cap-Pop Opacity", from_=1, to=100, orient="horizontal", variable=capPopOpacityVar)
-    capPopOpacityManual = Button(
-        capPopOpacityFrame,
-        text="Manual Opacity...",
-        command=lambda: assign(capPopOpacityVar, simpledialog.askinteger("Manual Caption Popup Opacity (%)", prompt="[1-100]: ")),
-    )
-    capPopTimerSlider = Scale(capPopTimerFrame, label="Cap-Pop Timer", from_=1, to=1000, orient="horizontal", variable=capPopTimerVar)
-    capPopTimerManual = Button(
-        capPopTimerFrame,
-        text="Manual Timer...",
-        command=lambda: assign(capPopTimerVar, simpledialog.askinteger("Manual Caption Popup Timer (ms)", prompt="[1-1000]: ")),
-    )
-
-    cappopttp = CreateToolTip(
-        captionsPopupManual,
-        "Caption Popups are short full-screen popups that flash up briefly before they disappear, similar to subliminal messages. They "
-        'take from the pack\'s captions.json file, and can use a specific "subliminals" mood to have unique captions (if the setting to the left is toggled on).',
-    )
-
-    captionsFrame.pack(fill="x")
-    captionsSubFrame1.pack(fill="y", side="left")
-    toggleCaptionsButton.pack(fill="y", side="top")
-    toggleFilenameButton.pack(fill="y", side="top")
-    toggleMultiClickButton.pack(fill="y", side="top")
-    toggleCaptionMood.pack(fill="y", side="top")
-
-    capPopFrame.pack(fill="y", side="left")
-    captionsPopupSlider.pack(fill="x", padx=1, expand=1)
-    captionsPopupManual.pack(fill="x")
-    capPopOpacityFrame.pack(fill="y", side="left")
-    capPopOpacitySlider.pack(fill="x", padx=1, expand=1)
-    capPopOpacityManual.pack(fill="x")
-    capPopTimerFrame.pack(fill="y", side="left")
-    capPopTimerSlider.pack(fill="x", padx=1, expand=1)
-    capPopTimerManual.pack(fill="x")
-
-    # ===================={CORRUPTION}==============================#
-    tabMaster.add(tabCorruption, text="Corruption")
-
-    corruptionFrame = Frame(tabCorruption)
-
-    corruptionSettingsFrame = Frame(corruptionFrame)
-    corruptionSubFrame1 = Frame(corruptionSettingsFrame)
-
-    corruptionStartFrame = Frame(corruptionSubFrame1, borderwidth=5, relief=RAISED)
-
-    corruptionEnabled_group = []
-
-    corruptionToggle = Checkbutton(corruptionStartFrame, text="Turn on Corruption", variable=corruptionModeVar, cursor="question_arrow")
-    corruptionFullToggle = Checkbutton(corruptionStartFrame, text="Full Permissions Mode", variable=corruptionFullPermVar, cursor="question_arrow")
-    corruptionRecommendedToggle = Button(
-        corruptionStartFrame,
-        text="Recommended Settings",
-        cursor="question_arrow",
-        height=2,
-        command=lambda: packPreset(in_var_group, in_var_names, "corruption", presetsDangerVar.get()),
-    )
-    corruptionEnabled_group.append(corruptionToggle)
-    ctutorialstart_group.append(corruptionStartFrame)
-    ctutorialstart_group.append(corruptionToggle)
-    ctutorialstart_group.append(corruptionFullToggle)
-    ctutorialstart_group.append(corruptionRecommendedToggle)
-
-    corruptionFrame.pack(fill="x")
-    corruptionSettingsFrame.pack(fill="x", side="left")
-    corruptionSubFrame1.pack(fill="both", side="top")
-    corruptionStartFrame.pack(fill="both", side="left")
-
-    corruptionToggle.pack(fill="x", expand=1)
-    corruptionFullToggle.pack(fill="x", expand=1)
-    corruptionRecommendedToggle.pack(fill="x", padx=2, pady=2)
-
-    corruptionmodettp = CreateToolTip(
-        corruptionToggle,
-        "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
-        " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
-        "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
-        ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
-        ' EdgeWare.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
-    )
-    corruptionfullttp = CreateToolTip(
-        corruptionFullToggle, "This setting allows corruption mode to change config settings as it goes through corruption levels."
-    )
-    corruptionsettingsttp = CreateToolTip(
-        corruptionRecommendedToggle,
-        'Pack creators can set "default corruption settings" for their pack, to give'
-        " users a more designed and consistent experience. This setting turns those on (if they exist)."
-        '\n\nSidenote: this will load configurations similarly to the option in the "Pack Info" tab, however this one will only load corruption-specific settings.',
-    )
-
-    corruptionFadeFrame = Frame(corruptionSubFrame1, borderwidth=5, relief=RAISED)
-    fadeInfoFrame = Frame(corruptionFadeFrame)
-    fadeSubInfo = Frame(fadeInfoFrame)
-    triggerInfoFrame = Frame(corruptionFadeFrame)
-    triggerSubInfo = Frame(triggerInfoFrame)
-
-    fade_types = ["Normal", "Abrupt", "Noise"]
-    fadeDropdown = OptionMenu(fadeSubInfo, corruptionFadeTypeVar, *fade_types, command=lambda key: fadeHelper(key))
-    fadeDropdown.configure(width=9, highlightthickness=0)
-    fadeDescription = Label(fadeInfoFrame, text="Error loading fade description!", borderwidth=2, relief=GROOVE, wraplength=150)
-    fadeDescription.configure(height=3, width=22)
-    fadeImageNormal = ImageTk.PhotoImage(file=Defaults.CORRUPTION_DEFAULT)
-    fadeImageAbrupt = ImageTk.PhotoImage(file=Defaults.CORRUPTION_ABRUPT)
-    fadeImageNoise = ImageTk.PhotoImage(file=Defaults.CORRUPTION_NOISE)
-    fadeImageContainer = Label(fadeSubInfo, image=fadeImageNormal, borderwidth=2, relief=GROOVE)
-    trigger_types = ["Timed", "Popup", "Launch"]
-    triggerDropdown = OptionMenu(triggerSubInfo, corruptionTriggerVar, *trigger_types, command=lambda key: triggerHelper(key, False))
-    triggerDropdown.configure(width=9, highlightthickness=0)
-    triggerDescription = Label(triggerInfoFrame, text="Error loading trigger description!", borderwidth=2, relief=GROOVE, wraplength=150)
-    triggerDescription.configure(height=3, width=22)
-
-    ctutorialtransition_group.append(corruptionFadeFrame)
-    ctutorialtransition_group.append(fadeInfoFrame)
-    ctutorialtransition_group.append(fadeSubInfo)
-    ctutorialtransition_group.append(triggerInfoFrame)
-    ctutorialtransition_group.append(triggerSubInfo)
-    ctutorialtransition_group.append(fadeDropdown)
-    ctutorialtransition_group.append(fadeDescription)
-    ctutorialtransition_group.append(triggerDropdown)
-    ctutorialtransition_group.append(triggerDescription)
-
-    corruptionFadeFrame.pack(fill="both", side="left")
-    fadeInfoFrame.pack(side="top", fill="both", pady=1)
-    fadeSubInfo.pack(side="left", fill="x")
-    fadeDropdown.pack(side="top")
-    fadeImageContainer.pack(side="top")
-    fadeDescription.pack(side="left", fill="y", padx=3, ipadx=2, ipady=2)
-    triggerInfoFrame.pack(side="top", fill="both", pady=1)
-    triggerSubInfo.pack(side="left", fill="x")
-    triggerDropdown.pack(side="top")
-    triggerDescription.pack(side="left", fill="y", padx=3, ipadx=2, ipady=2)
-
-    # -Timer-
-
-    corruptionTimeFrame = Frame(corruptionSettingsFrame)
-    corruptionTimeFrame.pack(fill="x", side="top")
-    cTimerFrame = Frame(corruptionTimeFrame)
-    corruptionTimerButton = Button(
-        cTimerFrame, text="Manual time...", command=lambda: assign(corruptionTimeVar, simpledialog.askinteger("Manual Level Time (sec)", prompt="[5-1800]: "))
-    )
-    corruptionTimerScale = Scale(cTimerFrame, label="Level Time", variable=corruptionTimeVar, orient="horizontal", from_=5, to=1800)
-    cPopupsFrame = Frame(corruptionTimeFrame)
-    corruptionPopupsButton = Button(
-        cPopupsFrame,
-        text="Manual popups...",
-        command=lambda: assign(corruptionPopupsVar, simpledialog.askinteger("Manual Level Popups (per transition)", prompt="[1-100]: ")),
-    )
-    corruptionPopupsScale = Scale(cPopupsFrame, label="Level Popups", variable=corruptionPopupsVar, orient="horizontal", from_=1, to=100)
-    cLaunchesFrame = Frame(corruptionTimeFrame)
-    corruptionLaunchesButton = Button(
-        cLaunchesFrame,
-        text="Manual launches...",
-        command=lambda: assign(corruptionLaunchesVar, simpledialog.askinteger("Manual Level Launches (per transition)", prompt="[2-31]: ")),
-    )
-    corruptionLaunchesScale = Scale(cLaunchesFrame, label="Level Launches", variable=corruptionLaunchesVar, orient="horizontal", from_=2, to=31)
-    cOtherTimerFrame = Frame(corruptionTimeFrame)
-    clearLaunchesButton = Button(cOtherTimerFrame, text="Reset Launches", height=3, command=lambda: clearLaunches(True))
-
-    ctutorialtransition_group.append(corruptionTimerButton)
-    ctutorialtransition_group.append(corruptionTimerScale)
-    ctutorialtransition_group.append(corruptionPopupsButton)
-    ctutorialtransition_group.append(corruptionPopupsScale)
-    ctutorialtransition_group.append(corruptionLaunchesButton)
-    ctutorialtransition_group.append(corruptionLaunchesScale)
-
-    cTimerFrame.pack(side="left", fill="x", padx=1, expand=1)
-    corruptionTimerScale.pack(fill="y")
-    corruptionTimerButton.pack(fill="y")
-    cPopupsFrame.pack(side="left", fill="x", padx=1, expand=1)
-    corruptionPopupsScale.pack(fill="y")
-    corruptionPopupsButton.pack(fill="y")
-    cLaunchesFrame.pack(side="left", fill="x", padx=1, expand=1)
-    corruptionLaunchesScale.pack(fill="y")
-    corruptionLaunchesButton.pack(fill="y")
-    cOtherTimerFrame.pack(side="left", fill="x", padx=1, expand=1)
-    clearLaunchesButton.pack()
-
-    ctime_group.append(corruptionTimerButton)
-    ctime_group.append(corruptionTimerScale)
-    cpopup_group.append(corruptionPopupsButton)
-    cpopup_group.append(corruptionPopupsScale)
-    claunch_group.append(corruptionLaunchesButton)
-    claunch_group.append(corruptionLaunchesScale)
-
-    def fadeHelper(key):
-        if key == "Normal":
-            fadeDescription.configure(text="Gradually transitions between corruption levels.")
-            fadeImageContainer.configure(image=fadeImageNormal)
-        if key == "Abrupt":
-            fadeDescription.configure(text="Immediately switches to new level upon timer completion.")
-            fadeImageContainer.configure(image=fadeImageAbrupt)
-        if key == "Noise":
-            fadeDescription.configure(text="Scatters levels randomly across the time range.")
-            fadeImageContainer.configure(image=fadeImageNoise)
-
-    def triggerHelper(key, tutorialMode):
-        if key == "Timed":
-            triggerDescription.configure(text="Transitions based on time elapsed in current session.")
-            if tutorialMode:
-                toggleAssociateSettings_manual(True, ctime_group, "lime green", "forest green")
-                toggleAssociateSettings_manual(False, cpopup_group, "lime green", "forest green")
-                toggleAssociateSettings_manual(False, claunch_group, "lime green", "forest green")
-            else:
-                toggleAssociateSettings(True, ctime_group)
-                toggleAssociateSettings(False, cpopup_group)
-                toggleAssociateSettings(False, claunch_group)
-        if key == "Popup":
-            triggerDescription.configure(text="Transitions based on number of popups in current session.")
-            if tutorialMode:
-                toggleAssociateSettings_manual(False, ctime_group, "lime green", "forest green")
-                toggleAssociateSettings_manual(True, cpopup_group, "lime green", "forest green")
-                toggleAssociateSettings_manual(False, claunch_group, "lime green", "forest green")
-            else:
-                toggleAssociateSettings(False, ctime_group)
-                toggleAssociateSettings(True, cpopup_group)
-                toggleAssociateSettings(False, claunch_group)
-        if key == "Launch":
-            triggerDescription.configure(text="Transitions based on number of EdgeWare launches.")
-            if tutorialMode:
-                toggleAssociateSettings_manual(False, ctime_group, "lime green", "forest green")
-                toggleAssociateSettings_manual(False, cpopup_group, "lime green", "forest green")
-                toggleAssociateSettings_manual(True, claunch_group, "lime green", "forest green")
-            else:
-                toggleAssociateSettings(False, ctime_group)
-                toggleAssociateSettings(False, cpopup_group)
-                toggleAssociateSettings(True, claunch_group)
-
-    # -Tutorial-
-
-    corruptionTutorialFrame = Frame(corruptionFrame)
-    corruptionTabMaster = ttk.Notebook(corruptionTutorialFrame)
-    cTabIntro = Frame(None)
-    cTabStart = Frame(None)
-    cTabTransitions = Frame(None)
-    corruptionTabMaster.add(cTabIntro, text="Intro")
-    corruptionTabMaster.add(cTabStart, text="Start")
-    corruptionTabMaster.add(cTabTransitions, text="Transitions")
-
-    corruptionTutorialFrame.pack(side="left", fill="both", expand=1)
-    corruptionTabMaster.pack(fill="both", expand=1)
-
-    corruptionIntroBody = Label(cTabIntro, text=CINTRO_TEXT, wraplength=300)
-    corruptionStartBody = Label(cTabStart, text=CSTART_TEXT, wraplength=300)
-    corruptionTransitionBody = Label(cTabTransitions, text=CTRANSITION_TEXT, wraplength=300)
-
-    corruptionIntroBody.pack(fill="both", padx=2, pady=2)
-    corruptionStartBody.pack(fill="both", padx=2, pady=2)
-    corruptionTransitionBody.pack(fill="both", padx=2, pady=2)
-
-    # -Additional Settings-
-
-    corruptionAdditionalFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
-    corruptionAddSub1 = Frame(corruptionAdditionalFrame)
-    corruptionAddSub2 = Frame(corruptionAdditionalFrame)
-    corruptionAddSub3 = Frame(corruptionAdditionalFrame)
-
-    corruptionWallpaperToggle = Checkbutton(corruptionAddSub1, text="Don't Cycle Wallpaper", variable=corruptionWallpaperCycleVar, cursor="question_arrow")
-    corruptionThemeToggle = Checkbutton(corruptionAddSub1, text="Don't Cycle Themes", variable=corruptionThemeCycleVar, cursor="question_arrow")
-    corruptionPurityToggle = Checkbutton(corruptionAddSub2, text="Purity Mode", variable=corruptionPurityModeVar, cursor="question_arrow")
-    corruptionDevToggle = Checkbutton(corruptionAddSub2, text="Corruption Dev View", variable=corruptionDevVar, cursor="question_arrow")
-
-    ctutorialstart_group.append(corruptionAdditionalFrame)
-    ctutorialstart_group.append(corruptionAddSub1)
-    ctutorialstart_group.append(corruptionAddSub2)
-    ctutorialstart_group.append(corruptionAddSub3)
-    ctutorialstart_group.append(corruptionWallpaperToggle)
-    ctutorialstart_group.append(corruptionThemeToggle)
-    ctutorialstart_group.append(corruptionPurityToggle)
-    ctutorialstart_group.append(corruptionDevToggle)
-
-    corruptionAdditionalFrame.pack(fill="x")
-    corruptionAddSub1.pack(fill="both", side="left", expand=1)
-    corruptionAddSub2.pack(fill="both", side="left", expand=1)
-    corruptionAddSub3.pack(fill="both", side="left", expand=1)
-
-    corruptionWallpaperToggle.pack(fill="x", side="top")
-    corruptionThemeToggle.pack(fill="x", side="top")
-    corruptionPurityToggle.pack(fill="x", side="top")
-    corruptionDevToggle.pack(fill="x", side="top")
-
-    corrwallpaperttp = CreateToolTip(
-        corruptionWallpaperToggle,
-        "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to " "a pack defined static one.",
-    )
-    corrthemettp = CreateToolTip(
-        corruptionThemeToggle,
-        "Prevents the theme from cycling as you go through corruption levels, instead staying as "
-        'the theme you set in the "General" tab of the config window.',
-    )
-    corrpurityttp = CreateToolTip(
-        corruptionPurityToggle,
-        "Starts corruption mode at the highest corruption level, then works backwards to level 1. "
-        "Retains all of your other settings for this mode, if applicable.",
-    )
-    corruptiondevttp = CreateToolTip(
-        corruptionDevToggle,
-        "Enables captions on popups that show various info.\n\nclev: current corruption level when popup spawned\n"
-        "popmood: the popup's mood\npopnum: if popup trigger enabled, the number of the popup\n"
-        "filen: the filename of the popup's image/video",
-    )
-
-    # -Info-
-
-    corruptionPathFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
-
-    corruptionLabel = "--CORRUPTION PATH--"
-    corruptionPathLabel = Label(corruptionPathFrame, text=corruptionLabel)
-
-    pathInnerFrame = Frame(corruptionPathFrame)
-    pathTree = ttk.Treeview(pathInnerFrame, height=6, show="headings", columns=("level", "moods"))
-    pathScrollbarY = ttk.Scrollbar(corruptionPathFrame, orient="vertical", command=pathTree.yview)
-    pathScrollbarX = ttk.Scrollbar(pathInnerFrame, orient="horizontal", command=pathTree.xview)
-    pathTree.configure(yscroll=pathScrollbarY.set, xscroll=pathScrollbarX.set)
-
-    pathTree.heading("level", text="LEVEL")
-    pathTree.column("level", width=40, stretch=False, anchor="center")
-    pathTree.heading("moods", text="MOODS", anchor="w")
-
-    corruptionList = []
-    lineWidth = 0
-    # if os.path.isfile(Resource.CORRUPTION):
-    #     try:
-    #         with open(Resource.CORRUPTION, 'r') as f:
-    #             l = json.loads(f.read())
-    #             for key in list(l):
-    #                 if key == "moods":
-    #                     for level, i in l[key]:
-    #                         corruptionList.append((f'{level}', str(level.keys()).strip('[]')))
-    #
-    #     except Exception as e:
-    #         logging.warning(f'error in corruption.json. Aborting preview load. {e}')
-    #         errors_list.append('Something is wrong with the currently loaded corruption.json file!\n')
-    #     try:
-    #         for level in corruptionList:
-    #             if sum(len(i) for i in level) > lineWidth:
-    #                 lineWidth = sum(len(i) for i in level)
-    #             pathTree.insert('', 'end', values=level)
-    #     except Exception as e:
-    #         logging.warning(f'error in loading corruption treeview. {e}')
-    #         errors_list.append('The corruption treeview could not load properly!\n')
-
-    # just doing a magic number, long story short treeview is butts for horizontal scrolling
-    pathTree.column("moods", anchor="w", stretch=True, minwidth=int(lineWidth * 5.5))
-
-    corruptionPathFrame.pack(fill="x")
-    corruptionPathLabel.pack(pady=1, fill="x", side="top")
-    pathInnerFrame.pack(fill="both", side="left", expand=1)
-    pathScrollbarX.pack(side="bottom", fill="x")
-    pathTree.pack(side="left", fill="both", expand=1)
-    pathScrollbarY.pack(side="left", fill="y")
-
-    def corruptionTutorialHelper(event):
-        tab = event.widget.tab("current")["text"]
-        th = settings["themeType"].strip()
-        if tab == "Start":
-            toggleAssociateSettings_manual(True, ctutorialstart_group, "lime green", "forest green")
-            toggleAssociateSettings(True, ctutorialtransition_group)
-            triggerHelper(corruptionTriggerVar.get(), False)
-        elif tab == "Transitions":
-            toggleAssociateSettings_manual(True, ctutorialtransition_group, "lime green", "forest green")
-            toggleAssociateSettings(True, ctutorialstart_group)
-            triggerHelper(corruptionTriggerVar.get(), True)
-        else:
-            toggleAssociateSettings(True, ctutorialstart_group)
-            toggleAssociateSettings(True, ctutorialtransition_group)
-            triggerHelper(corruptionTriggerVar.get(), False)
-        toggleAssociateSettings(os.path.isfile(Resource.CORRUPTION), corruptionEnabled_group)
-
-    corruptionTabMaster.bind("<<NotebookTabChanged>>", corruptionTutorialHelper)
-
-    # ===================={DRIVE}==============================#
-    tabMaster.add(tabDrive, text="Drive")
-
-    hardDriveFrame = Frame(tabDrive, borderwidth=5, relief=RAISED)
-
-    pathFrame = Frame(hardDriveFrame)
-    fillFrame = Frame(hardDriveFrame)
-    replaceFrame = Frame(hardDriveFrame)
-
-    def local_assignPath():
-        nonlocal fillPathVar
-        path_ = str(filedialog.askdirectory(initialdir="/", title="Select Parent Folder"))
-        if path_ != "":
-            settings["drivePath"] = path_
-            pathBox.configure(state="normal")
-            pathBox.delete(0, 9999)
-            pathBox.insert(1, path_)
-            pathBox.configure(state="disabled")
-            fillPathVar.set(str(pathBox.get()))
-
-    pathBox = Entry(pathFrame)
-    pathButton = Button(pathFrame, text="Select", command=local_assignPath)
-
-    pathBox.insert(1, settings["drivePath"])
-    pathBox.configure(state="disabled")
-
-    fillBox = Checkbutton(
-        fillFrame, text="Fill Drive", variable=fillVar, command=lambda: toggleAssociateSettings(fillVar.get(), fill_group), cursor="question_arrow"
-    )
-    fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=fillDelayVar)
-
-    fillttp = CreateToolTip(
-        fillBox,
-        "Fills folders on your harddrive with images from the resource folder.\n\n"
-        "This can cause space issues, potential embarassment, navigation difficulties... Please read the full documentation in the About tab!!!",
-    )
-
-    fill_group.append(fillDelay)
-
-    replaceBox = Checkbutton(
-        fillFrame, text="Replace Images", variable=replaceVar, command=lambda: toggleAssociateSettings(replaceVar.get(), replace_group), cursor="question_arrow"
-    )
-    replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=replaceThreshVar)
-
-    replacettp = CreateToolTip(
-        replaceBox,
-        "Seeks out folders with more images than the threshold value, then replaces all of them. No, there is no automated backup!\n\n"
-        'I am begging you to read the full documentation in the "About" tab before even thinking about enabling this feature!\n\n'
-        "We are not responsible for any pain, suffering, miserere, or despondence caused by your files being deleted! "
-        "At the very least, back them up and use the blacklist!",
-    )
-
-    replace_group.append(replaceThreshScale)
-
-    avoidHostFrame = Frame(hardDriveFrame)
-
-    avoidListBox = Listbox(avoidHostFrame, selectmode=SINGLE)
-    for name in settings["avoidList"].split(">"):
-        avoidListBox.insert(2, name)
-    addName = Button(
-        avoidHostFrame, text="Add Name", command=lambda: addList(avoidListBox, "avoidList", "Folder Name", "Fill/replace will skip any folder with given name.")
-    )
-    removeName = Button(
-        avoidHostFrame,
-        text="Remove Name",
-        command=lambda: removeList(avoidListBox, "avoidList", "Remove EdgeWare", "You cannot remove the EdgeWare folder exception."),
-    )
-    resetName = Button(avoidHostFrame, text="Reset", command=lambda: resetList(avoidListBox, "avoidList", "EdgeWare>AppData"))
-
-    avoidHostFrame.pack(fill="y", side="left")
-    Label(avoidHostFrame, text="Folder Name Blacklist").pack(fill="x")
-    avoidListBox.pack(fill="x")
-    addName.pack(fill="x")
-    removeName.pack(fill="x")
-    resetName.pack(fill="x")
-
-    Label(tabDrive, text="Hard Drive Settings").pack(fill="both")
-    hardDriveFrame.pack(fill="x")
-    fillFrame.pack(fill="y", side="left")
-    fillBox.pack()
-    fillDelay.pack()
-    replaceFrame.pack(fill="y", side="left")
-    replaceBox.pack()
-    replaceThreshScale.pack()
-    pathFrame.pack(fill="x")
-    Label(pathFrame, text="Fill/Replace Start Folder").pack(fill="x")
-    pathBox.pack(fill="x")
-    pathButton.pack(fill="x")
-
-    downloadHostFrame = Frame(tabDrive, borderwidth=5, relief=RAISED)
-    otherFrame = Frame(downloadHostFrame)
-    tagFrame = Frame(downloadHostFrame)
-    booruFrame = Frame(downloadHostFrame)
-    booruNameEntry = Entry(booruFrame, textvariable=booruNameVar)
-    downloadEnabled = Checkbutton(
-        otherFrame,
-        text="Download from Booru",
-        variable=downloadEnabledVar,
-        command=lambda: (toggleAssociateSettings_manual(downloadEnabledVar.get(), download_group, "white", "gray25")),
-    )
-    downloadResourceEnabled = Checkbutton(otherFrame, text="Download from webResource", variable=useWebResourceVar)
-    toggleAssociateSettings(hasWebResourceVar.get(), [downloadResourceEnabled])
-    downloadMode = OptionMenu(booruFrame, downloadModeVar, *["All", "First Page", "Random Page"])
-    downloadMode.configure(width=15)
-    minScoreSlider = Scale(booruFrame, from_=-50, to=100, orient="horizontal", variable=booruMin, label="Minimum Score")
-
-    booruValidate = Button(
-        booruFrame,
-        text="Validate",
-        command=lambda: (
-            messagebox.showinfo("Success!", "Booru is valid.") if validateBooru(booruNameVar.get()) else messagebox.showerror("Failed", "Booru is invalid.")
-        ),
-    )
-
-    tagListBox = Listbox(tagFrame, selectmode=SINGLE)
-    for tag in settings["tagList"].split(">"):
-        tagListBox.insert(1, tag)
-    addTag = Button(tagFrame, text="Add Tag", command=lambda: addList(tagListBox, "tagList", "New Tag", "Enter Tag(s)"))
-    removeTag = Button(
-        tagFrame,
-        text="Remove Tag",
-        command=lambda: removeList_(tagListBox, "tagList", "Remove Failed", 'Cannot remove all tags. To download without a tag, use "all" as the tag.'),
-    )
-    resetTag = Button(tagFrame, text="Reset Tags", command=lambda: resetList(tagListBox, "tagList", "all"))
-
-    download_group.append(booruNameEntry)
-    download_group.append(booruValidate)
-    download_group.append(tagListBox)
-    download_group.append(addTag)
-    download_group.append(removeTag)
-    download_group.append(resetTag)
-    download_group.append(downloadMode)
-    download_group.append(minScoreSlider)
-
-    Label(tabDrive, text="Image Download Settings").pack(fill="x")
-    Label(
-        downloadHostFrame,
-        text="THE BOORU DOWNLOADER IS OUTDATED AND BROKEN. IT WILL LIKELY BARELY FUNCTION, IF AT ALL.\nNo I will not fix it, this shit is a pain in the ass and I'm stupid.",
-        foreground="red",
-    ).pack(fill="x")
-    tagFrame.pack(fill="y", side="left")
-    booruFrame.pack(fill="y", side="left")
-    otherFrame.pack(fill="both", side="right")
-
-    downloadEnabled.pack()
-    downloadHostFrame.pack(fill="both")
-    tagListBox.pack(fill="x")
-    addTag.pack(fill="x")
-    removeTag.pack(fill="x")
-    resetTag.pack(fill="x")
-    Label(booruFrame, text="Booru Name").pack(fill="x")
-    booruNameEntry.pack(fill="x")
-    booruValidate.pack(fill="x")
-    Label(booruFrame, text="Download Mode").pack(fill="x")
-    downloadMode.pack(fill="x")
-    minScoreSlider.pack(fill="x")
-    downloadResourceEnabled.pack(fill="x")
-
-    tabMaster.add(tabWallpaper, text="Wallpaper")
-    # ==========={WALLPAPER TAB ITEMS} ========================#
-    rotateCheckbox = Checkbutton(
-        tabWallpaper, text="Rotate Wallpapers", variable=rotateWallpaperVar, command=lambda: toggleAssociateSettings(rotateWallpaperVar.get(), wallpaper_group)
-    )
-    wpList = Listbox(tabWallpaper, selectmode=SINGLE)
-    for key in settings["wallpaperDat"]:
-        wpList.insert(1, key)
-    addWPButton = Button(tabWallpaper, text="Add/Edit Wallpaper", command=lambda: addWallpaper(wpList))
-    remWPButton = Button(tabWallpaper, text="Remove Wallpaper", command=lambda: removeWallpaper(wpList))
-    autoImport = Button(tabWallpaper, text="Auto Import", command=lambda: autoImportWallpapers(wpList))
-    varSlider = Scale(tabWallpaper, orient="horizontal", label="Rotate Variation (sec)", from_=0, to=(wallpaperDelayVar.get() - 1), variable=wpVarianceVar)
-    wpDelaySlider = Scale(
-        tabWallpaper,
-        orient="horizontal",
-        label="Rotate Timer (sec)",
-        from_=5,
-        to=300,
-        variable=wallpaperDelayVar,
-        command=lambda val: updateMax(varSlider, int(val) - 1),
-    )
-
-    pHoldImageR = Image.open(Defaults.PANIC_WALLPAPER).resize((int(root.winfo_screenwidth() * 0.13), int(root.winfo_screenheight() * 0.13)), Image.NEAREST)
-
-    def updatePanicPaper():
-        nonlocal pHoldImageR
-        selectedFile = filedialog.askopenfile("rb", filetypes=[("image file", ".jpg .jpeg .png")])
-        if not isinstance(selectedFile, type(None)):
-            try:
-                img = Image.open(selectedFile.name).convert("RGB")
-                img.save(Defaults.PANIC_WALLPAPER)
-                pHoldImageR = ImageTk.PhotoImage(img.resize((int(root.winfo_screenwidth() * 0.13), int(root.winfo_screenheight() * 0.13)), Image.NEAREST))
-                panicWallpaperLabel.config(image=pHoldImageR)
-                panicWallpaperLabel.update_idletasks()
-            except Exception as e:
-                logging.warning(f"failed to open/change default wallpaper\n{e}")
-
-    panicWPFrame = Frame(tabWallpaper)
-    panicWPFrameL = Frame(panicWPFrame)
-    panicWPFrameR = Frame(panicWPFrame)
-    panicWallpaperImage = ImageTk.PhotoImage(pHoldImageR)
-    panicWallpaperButton = Button(panicWPFrameL, text="Change Panic Wallpaper", command=updatePanicPaper, cursor="question_arrow")
-    panicWallpaperLabel = Label(panicWPFrameR, text="Current Panic Wallpaper", image=panicWallpaperImage)
-
-    panicWallpaperttp = CreateToolTip(
-        panicWallpaperButton,
-        "When you use panic, the wallpaper will be set to this image.\n\n"
-        "This is useful since most packs have a custom wallpaper, which is usually porn...!\n\n"
-        "It is recommended to find your preferred/original desktop wallpaper and set it to that.",
-    )
-
-    wallpaper_group.append(wpList)
-    wallpaper_group.append(addWPButton)
-    wallpaper_group.append(remWPButton)
-    wallpaper_group.append(wpDelaySlider)
-    wallpaper_group.append(autoImport)
-    wallpaper_group.append(varSlider)
-
-    rotateCheckbox.pack(fill="x")
-    wpList.pack(fill="x")
-    addWPButton.pack(fill="x")
-    remWPButton.pack(fill="x")
-    autoImport.pack(fill="x")
-    wpDelaySlider.pack(fill="x")
-    varSlider.pack(fill="x")
-    panicWPFrame.pack(fill="x", expand=1)
-    panicWPFrameL.pack(side="left", fill="y")
-    panicWPFrameR.pack(side="right", fill="x", expand=1)
-    panicWallpaperButton.pack(fill="x", padx=5, pady=5, expand=1)
-    Label(panicWPFrameR, text="Current Panic Wallpaper").pack(fill="x")
-    panicWallpaperLabel.pack()
     # ==========={EDGEWARE++ "PACK INFO" TAB STARTS HERE}===========#
-    tabMaster.add(tabPackInfo, text="Pack Info")
+    notebookGeneral.add(tabPackInfo, text="Pack Info")
 
     # Stats
     Label(tabPackInfo, text="Stats", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -2829,81 +1731,1181 @@ def show_window():
     moodsFrame.grid_columnconfigure(1, weight=1, uniform="group1")
     moodsFrame.grid_rowconfigure(0, weight=1)
 
-    # ==========={EDGEWARE++ FILE TAB STARTS HERE}==============#
-    tabMaster.add(tabFile, text="File")
+    # ==========={EDGEWARE++ "BOORU" TAB STARTS HERE}===========#
+    notebookGeneral.add(tabBooru, text="Booru Downloader")
 
-    # save/load
-    Label(tabFile, text="Save/Load", font=titleFont, relief=GROOVE).pack(pady=2)
-    importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-    fileTabImportButton = Button(importExportFrame, height=2, text="Import Resource Pack", command=lambda: importResource(root))
-    fileTabExportButton = Button(importExportFrame, height=2, text="Export Resource Pack", command=exportResource)
-    fileSaveButton = Button(tabFile, text="Save Config Settings", command=lambda: write_save(in_var_group, in_var_names, safewordVar, False))
+    downloadHostFrame = Frame(tabBooru, borderwidth=5, relief=RAISED)
+    otherFrame = Frame(downloadHostFrame)
+    tagFrame = Frame(downloadHostFrame)
+    booruFrame = Frame(downloadHostFrame)
+    booruNameEntry = Entry(booruFrame, textvariable=booruNameVar)
+    downloadEnabled = Checkbutton(
+        otherFrame,
+        text="Download from Booru",
+        variable=downloadEnabledVar,
+        command=lambda: (toggleAssociateSettings_manual(downloadEnabledVar.get(), download_group, "white", "gray25")),
+    )
+    downloadResourceEnabled = Checkbutton(otherFrame, text="Download from webResource", variable=useWebResourceVar)
+    toggleAssociateSettings(hasWebResourceVar.get(), [downloadResourceEnabled])
+    downloadMode = OptionMenu(booruFrame, downloadModeVar, *["All", "First Page", "Random Page"])
+    downloadMode.configure(width=15)
+    minScoreSlider = Scale(booruFrame, from_=-50, to=100, orient="horizontal", variable=booruMin, label="Minimum Score")
 
-    fileSaveButton.pack(fill="x", pady=2)
-    importExportFrame.pack(fill="x", pady=2)
-    fileTabImportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
-    fileTabExportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
-
-    # directories
-    Label(tabFile, text="Directories", font=titleFont, relief=GROOVE).pack(pady=2)
-
-    logNum = len(os.listdir(LOG_PATH)) if os.path.exists(LOG_PATH) else 0
-    logsFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-    lSubFrame1 = Frame(logsFrame)
-    lSubFrame2 = Frame(logsFrame)
-    openLogsButton = Button(lSubFrame2, text="Open Logs Folder", command=lambda: explorerView(LOG_PATH))
-    clearLogsButton = Button(lSubFrame2, text="Delete All Logs", command=lambda: cleanLogs(), cursor="question_arrow")
-    logStat = Label(lSubFrame1, text=f"Total Logs: {logNum}")
-
-    clearlogsttp = CreateToolTip(clearLogsButton, "This will delete every log (except the log currently being written).")
-
-    def cleanLogs():
-        try:
-            logNum = len(os.listdir(LOG_PATH)) if os.path.exists(LOG_PATH) else 0
-            if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete all logs? There are currently {logNum}.", icon="warning") == True:
-                if os.path.exists(LOG_PATH) and os.listdir(LOG_PATH):
-                    logs = os.listdir(LOG_PATH)
-                    for f in logs:
-                        if os.path.splitext(f)[0] == os.path.splitext(log_file)[0]:
-                            continue
-                        e = os.path.splitext(f)[1].lower()
-                        if e == ".txt":
-                            os.remove(LOG_PATH / f)
-                    logNum = len(os.listdir(LOG_PATH)) if os.path.exists(LOG_PATH) else 0
-                    logStat.configure(text=f"Total Logs: {logNum}")
-        except Exception as e:
-            logging.warning(f"could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}")
-
-    logsFrame.pack(fill="x", pady=2)
-    lSubFrame1.pack(fill="both", side="left", expand=1)
-    lSubFrame2.pack(fill="both", side="left", expand=1)
-    logStat.pack(fill="both", expand=1)
-    openLogsButton.pack(fill="x", expand=1)
-    clearLogsButton.pack(fill="x", expand=1)
-
-    moodsFileFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-    mfSubFrame1 = Frame(moodsFileFrame)
-    mfSubFrame2 = Frame(moodsFileFrame)
-    uniqueIDCheck = Label(mfSubFrame1, text=("Using Unique ID?: " + ("✓" if (info_id == "0") else "✗")), fg=("green" if (info_id == "0") else "red"))
-    uniqueIDLabel = Label(mfSubFrame1, text=("Your Unique ID is: " + (UNIQUE_ID if (info_id == "0") else info_id)))
-    openMoodsButton = Button(mfSubFrame2, height=2, text="Open Moods Folder", command=lambda: explorerView(Data.MOODS), cursor="question_arrow")
-
-    openmoodsttp = CreateToolTip(
-        openMoodsButton,
-        'If your currently loaded pack has a "info.json" file, it can be found under the pack name in this folder.\n\n'
-        "If it does not have this file however, EdgeWare++ will generate a Unique ID for it, so you can still save your mood settings "
-        'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
+    booruValidate = Button(
+        booruFrame,
+        text="Validate",
+        command=lambda: (
+            messagebox.showinfo("Success!", "Booru is valid.") if validateBooru(booruNameVar.get()) else messagebox.showerror("Failed", "Booru is invalid.")
+        ),
     )
 
-    moodsFileFrame.pack(fill="x", pady=2)
-    mfSubFrame1.pack(fill="both", side="left", expand=1)
-    mfSubFrame2.pack(fill="both", side="left", expand=1)
-    uniqueIDCheck.pack(fill="both", expand=1)
-    uniqueIDLabel.pack(fill="both", expand=1)
-    openMoodsButton.pack(fill="x", expand=1)
+    tagListBox = Listbox(tagFrame, selectmode=SINGLE)
+    for tag in settings["tagList"].split(">"):
+        tagListBox.insert(1, tag)
+    addTag = Button(tagFrame, text="Add Tag", command=lambda: addList(tagListBox, "tagList", "New Tag", "Enter Tag(s)"))
+    removeTag = Button(
+        tagFrame,
+        text="Remove Tag",
+        command=lambda: removeList_(tagListBox, "tagList", "Remove Failed", 'Cannot remove all tags. To download without a tag, use "all" as the tag.'),
+    )
+    resetTag = Button(tagFrame, text="Reset Tags", command=lambda: resetList(tagListBox, "tagList", "all"))
 
-    openResourcesButton = Button(tabFile, height=2, text="Open Resources Folder", command=lambda: explorerView(Resource.ROOT))
-    openResourcesButton.pack(fill="x", pady=2)
+    download_group.append(booruNameEntry)
+    download_group.append(booruValidate)
+    download_group.append(tagListBox)
+    download_group.append(addTag)
+    download_group.append(removeTag)
+    download_group.append(resetTag)
+    download_group.append(downloadMode)
+    download_group.append(minScoreSlider)
+
+    Label(tabBooru, text="Image Download Settings").pack(fill="x")
+    Label(
+        downloadHostFrame,
+        text="THE BOORU DOWNLOADER IS OUTDATED AND BROKEN. IT WILL LIKELY BARELY FUNCTION, IF AT ALL.\nNo I will not fix it, this shit is a pain in the ass and I'm stupid.",
+        foreground="red",
+    ).pack(fill="x")
+    tagFrame.pack(fill="y", side="left")
+    booruFrame.pack(fill="y", side="left")
+    otherFrame.pack(fill="both", side="right")
+
+    downloadEnabled.pack()
+    downloadHostFrame.pack(fill="both")
+    tagListBox.pack(fill="x")
+    addTag.pack(fill="x")
+    removeTag.pack(fill="x")
+    resetTag.pack(fill="x")
+    Label(booruFrame, text="Booru Name").pack(fill="x")
+    booruNameEntry.pack(fill="x")
+    booruValidate.pack(fill="x")
+    Label(booruFrame, text="Download Mode").pack(fill="x")
+    downloadMode.pack(fill="x")
+    minScoreSlider.pack(fill="x")
+    downloadResourceEnabled.pack(fill="x")
+
+    # ==========={EDGEWARE++ "POPUPS" TAB STARTS HERE}===========#
+    notebookAnnoyance.add(tabPopups, text="Popups")
+
+    Label(tabPopups).pack()
+
+    delayModeFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+    delayFrame = Frame(delayModeFrame)
+    lowkeyFrame = Frame(delayModeFrame)
+
+    delayScale = Scale(delayFrame, label="Popup Timer Delay (ms)", from_=10, to=60000, orient="horizontal", variable=delayVar)
+    delayManual = Button(delayFrame, text="Manual delay...", command=lambda: assign(delayVar, simpledialog.askinteger("Manual Delay", prompt="[10-60000]: ")))
+    opacityScale = Scale(tabPopups, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
+
+    posList = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
+    lkItemVar = StringVar(root, posList[lkCorner.get()])
+    lowkeyDropdown = OptionMenu(lowkeyFrame, lkItemVar, *posList, command=lambda x: (lkCorner.set(posList.index(x))))
+    lowkeyToggle = Checkbutton(
+        lowkeyFrame, text="Lowkey Mode", variable=lkToggle, command=lambda: toggleAssociateSettings(lkToggle.get(), lowkey_group), cursor="question_arrow"
+    )
+
+    lowkeyttp = CreateToolTip(
+        lowkeyToggle,
+        "Makes popups appear in a corner of the screen instead of the middle.\n\n" "Best used with Popup Timeout or high delay as popups will stack.",
+    )
+
+    lowkey_group.append(lowkeyDropdown)
+
+    delayModeFrame.pack(fill="x")
+
+    delayScale.pack(fill="x", expand=1)
+    delayManual.pack(fill="x", expand=1)
+
+    delayFrame.pack(side="left", fill="x", expand=1)
+
+    lowkeyFrame.pack(fill="y", side="left")
+    lowkeyDropdown.pack(fill="x", padx=2, pady=5)
+    lowkeyToggle.pack(fill="both", expand=1)
+
+    opacityScale.pack(fill="x")
+
+    # popup frame handling
+    popupHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+    popupFrame = Frame(popupHostFrame)
+    timeoutFrame = Frame(popupHostFrame)
+    mitosisFrame = Frame(popupHostFrame)
+    panicFrame = Frame(popupHostFrame)
+    denialFrame = Frame(popupHostFrame)
+    movingFrame = Frame(popupHostFrame)
+    speedFrame = Frame(popupHostFrame)
+
+    popupScale = Scale(popupFrame, label="Popup Freq (%)", from_=0, to=100, orient="horizontal", variable=popupVar)
+    popupManual = Button(
+        popupFrame,
+        text="Manual popup...",
+        command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup", prompt="[0-100]: ")),
+        cursor="question_arrow",
+    )
+
+    popupManualttp = CreateToolTip(
+        popupManual,
+        "Whenever the timer is reached to spawn a new popup, this value is rolled to see if it spawns or not.\n\n"
+        "Leave at 100 for a more consistent experience, and make it less for a more random one.",
+    )
+
+    mitosis_group.append(popupScale)
+    mitosis_group.append(popupManual)
+
+    def toggleMitosis():
+        toggleAssociateSettings(not mitosisVar.get(), mitosis_group)
+        toggleAssociateSettings(mitosisVar.get(), mitosis_cGroup)
+
+    mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=mitosisVar, command=toggleMitosis, cursor="question_arrow")
+    mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=mitosisStrenVar)
+
+    mitosisttp = CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
+
+    mitosis_cGroup.append(mitosisStren)
+
+    setPanicButtonButton = Button(
+        panicFrame,
+        text=f"Set Panic\nButton\n<{panicButtonVar.get()}>",
+        command=lambda: getKeyboardInput(setPanicButtonButton, panicButtonVar),
+        cursor="question_arrow",
+    )
+    doPanicButton = Button(panicFrame, text="Perform Panic", command=lambda: subprocess.Popen([sys.executable, Process.PANIC]))
+
+    setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
+
+    timeoutToggle = Checkbutton(
+        timeoutFrame, text="Popup Timeout", variable=timeoutPopupsVar, command=lambda: toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group)
+    )
+    timeoutSlider = Scale(timeoutFrame, label="Time (sec)", from_=1, to=120, orient="horizontal", variable=popupTimeoutVar)
+
+    timeout_group.append(timeoutSlider)
+
+    denialSlider = Scale(denialFrame, label="Denial Chance", orient="horizontal", variable=denialChance)
+    denialToggle = Checkbutton(
+        denialFrame, text="Denial Mode", variable=denialMode, command=lambda: toggleAssociateSettings(denialMode.get(), denial_group), cursor="question_arrow"
+    )
+
+    movingSlider = Scale(movingFrame, label="Moving Chance", orient="horizontal", variable=movingChanceVar, cursor="question_arrow")
+    movingRandToggle = Checkbutton(movingFrame, text="Rand. Direction", variable=movingRandomVar, cursor="question_arrow")
+
+    movingttp = CreateToolTip(
+        movingSlider,
+        'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
+        "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
+    )
+    moverandomttp = CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
+
+    movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=movingSpeedVar)
+    manualSpeed = Button(speedFrame, text="Manual speed...", command=lambda: assign(movingSpeedVar, simpledialog.askinteger("Manual Speed", prompt="[1-15]: ")))
+
+    denialttp = CreateToolTip(denialToggle, 'Adds a percentage chance to "censor" an image.')
+    denial_group.append(denialSlider)
+
+    popupHostFrame.pack(fill="x")
+    popupScale.pack(fill="x")
+    popupManual.pack(fill="x")
+    popupFrame.pack(fill="y", side="left")
+    timeoutSlider.pack(fill="x")
+    timeoutToggle.pack(fill="x")
+    timeoutFrame.pack(fill="y", side="left")
+    mitosisFrame.pack(fill="y", side="left")
+    mitosisStren.pack(fill="x")
+    mitosisToggle.pack(fill="x")
+    denialFrame.pack(fill="y", side="left")
+    denialSlider.pack(fill="x")
+    denialToggle.pack(fill="x")
+    movingFrame.pack(fill="y", side="left")
+    movingSlider.pack(fill="x")
+    movingRandToggle.pack(fill="x")
+    speedFrame.pack(fill="y", side="left")
+    movingSpeedSlider.pack(fill="x")
+    manualSpeed.pack(fill="x")
+    panicFrame.pack(fill="y", side="left")
+    setPanicButtonButton.pack(fill="x", expand=1)
+    doPanicButton.pack(fill="x")
+    # popup frame handle end
+
+    # additional popup options, mostly edgeware++ stuff
+    popupOptionsFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+    popupOptionsSubFrame1 = Frame(popupOptionsFrame)
+    popupOptionsSubFrame2 = Frame(popupOptionsFrame)
+    popupOptionsSubFrame3 = Frame(popupOptionsFrame)
+
+    panicDisableButton = Checkbutton(popupOptionsSubFrame1, text="Disable Panic Hotkey", variable=panicVar, cursor="question_arrow")
+    popupWebToggle = Checkbutton(popupOptionsSubFrame1, text="Popup close opens web page", variable=popupWebVar)
+    toggleEasierButton = Checkbutton(popupOptionsSubFrame2, text="Buttonless Closing Popups", variable=buttonlessVar, cursor="question_arrow")
+    toggleSingleButton = Checkbutton(popupOptionsSubFrame3, text="Single Popup Mode", variable=singleModeVar, cursor="question_arrow")
+    toggleMultiClickButton = Checkbutton(popupOptionsSubFrame3, text="Multi-Click popups", variable=multiClickVar, cursor="question_arrow")
+
+    disablePanicttp = CreateToolTip(
+        panicDisableButton,
+        "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
+        "If you want to use Panic after this, you can still:\n"
+        '•Directly run "panic.pyw"\n'
+        '•Keep the config window open and press "Perform Panic"\n'
+        "•Use the panic desktop icon (if you kept those enabled)",
+    )
+    buttonlessttp = CreateToolTip(
+        toggleEasierButton,
+        'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
+        "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
+    )
+    singlettp = CreateToolTip(
+        toggleSingleButton,
+        'The randomization in EdgeWare does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
+        "For example, if you have audio, videos, and prompts all turned on, there's a very real chance you will get all of them popping up at the same "
+        "time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It "
+        "delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: The roll order for popups are as follows:\n"
+        "Web -> Video -> Audio -> Prompt -> Caption Popup -> Image\nTherefore, if every type of popup is at the same rate of appearing (and single mode is turned on), "
+        "web links will be slightly more common than videos, and videos slightly more common than audio, etc...",
+    )
+
+    popupOptionsFrame.pack(fill="x")
+    popupOptionsSubFrame1.pack(fill="y", side="left", expand=1)
+    popupOptionsSubFrame2.pack(fill="y", side="left", expand=1)
+    popupOptionsSubFrame3.pack(fill="y", side="left", expand=1)
+    panicDisableButton.pack(fill="x")
+    popupWebToggle.pack(fill="x")
+    toggleEasierButton.pack(fill="x")
+    toggleSingleButton.pack(fill="x")
+    # other start
+    otherHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+
+    audioFrame = Frame(otherHostFrame)
+    webFrame = Frame(otherHostFrame)
+    vidFrameL = Frame(otherHostFrame)
+    vidFrameR = Frame(otherHostFrame)
+    promptFrame = Frame(otherHostFrame)
+    mistakeFrame = Frame(otherHostFrame)
+
+    audioScale = Scale(audioFrame, label="Audio Freq (%)", from_=0, to=100, orient="horizontal", variable=audioVar)
+    audioManual = Button(audioFrame, text="Manual audio...", command=lambda: assign(audioVar, simpledialog.askinteger("Manual Audio", prompt="[0-100]: ")))
+
+    webScale = Scale(webFrame, label="Website Freq (%)", from_=0, to=100, orient="horizontal", variable=webVar)
+    webManual = Button(webFrame, text="Manual web...", command=lambda: assign(webVar, simpledialog.askinteger("Web Chance", prompt="[0-100]: ")))
+
+    vidScale = Scale(vidFrameL, label="Video Chance (%)", from_=0, to=100, orient="horizontal", variable=vidVar)
+    vidManual = Button(vidFrameL, text="Manual vid...", command=lambda: assign(vidVar, simpledialog.askinteger("Video Chance", prompt="[0-100]: ")))
+    vidVolumeScale = Scale(vidFrameR, label="Video Volume", from_=0, to=100, orient="horizontal", variable=videoVolume)
+    vidVolumeManual = Button(
+        vidFrameR, text="Manual volume...", command=lambda: assign(videoVolume, simpledialog.askinteger("Video Volume", prompt="[0-100]: "))
+    )
+
+    promptScale = Scale(promptFrame, label="Prompt Freq (%)", from_=0, to=100, orient="horizontal", variable=promptVar)
+    promptManual = Button(promptFrame, text="Manual prompt...", command=lambda: assign(promptVar, simpledialog.askinteger("Manual Prompt", prompt="[0-100]: ")))
+
+    mistakeScale = Scale(mistakeFrame, label="Prompt Mistakes", from_=0, to=150, orient="horizontal", variable=promptMistakeVar)
+    mistakeManual = Button(
+        mistakeFrame,
+        text="Manual mistakes...",
+        command=lambda: assign(promptMistakeVar, simpledialog.askinteger("Max Mistakes", prompt="Max mistakes allowed in prompt text\n[0-150]: ")),
+        cursor="question_arrow",
+    )
+
+    mistakettp = CreateToolTip(
+        mistakeManual, "The number of allowed mistakes when filling out a prompt.\n\n" "Good for when you can't think straight, or typing with one hand..."
+    )
+
+    otherHostFrame.pack(fill="x")
+
+    audioScale.pack(fill="x", padx=3, expand=1)
+    audioManual.pack(fill="x")
+    audioFrame.pack(side="left")
+
+    webFrame.pack(fill="y", side="left", padx=3, expand=1)
+    webScale.pack(fill="x")
+    webManual.pack(fill="x")
+
+    vidFrameL.pack(fill="x", side="left", padx=(3, 0), expand=1)
+    vidScale.pack(fill="x")
+    vidManual.pack(fill="x")
+    vidFrameR.pack(fill="x", side="left", padx=(0, 3), expand=1)
+    vidVolumeScale.pack(fill="x")
+    vidVolumeManual.pack(fill="x")
+
+    promptFrame.pack(fill="y", side="left", padx=(3, 0), expand=1)
+    promptScale.pack(fill="x")
+    promptManual.pack(fill="x")
+    mistakeFrame.pack(fill="y", side="left", padx=(0, 3), expand=1)
+    mistakeScale.pack(fill="x")
+    mistakeManual.pack(fill="x")
+    # end web
+
+    # max start
+    maxPopupFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+
+    maxAudioFrame = Frame(maxPopupFrame)
+    maxVideoFrame = Frame(maxPopupFrame)
+    subliminalsFrame = Frame(maxPopupFrame)
+
+    subliminalsChanceFrame = Frame(subliminalsFrame)
+    subliminalsAlphaFrame = Frame(subliminalsFrame)
+    maxSubliminalsFrame = Frame(subliminalsFrame)
+
+    maxAudioToggle = Checkbutton(
+        maxAudioFrame, text="Cap Audio", variable=maxAToggleVar, command=lambda: toggleAssociateSettings(maxAToggleVar.get(), maxAudio_group)
+    )
+    maxAudioScale = Scale(maxAudioFrame, label="Max Audio Popups", from_=1, to=50, orient="horizontal", variable=maxAudioVar)
+    maxAudioManual = Button(
+        maxAudioFrame, text="Manual Max Audio...", command=lambda: assign(maxAudioVar, simpledialog.askinteger("Manual Max Audio", prompt="[1-50]: "))
+    )
+
+    maxAudio_group.append(maxAudioScale)
+    maxAudio_group.append(maxAudioManual)
+
+    maxVideoToggle = Checkbutton(
+        maxVideoFrame, text="Cap Videos", variable=maxVToggleVar, command=lambda: toggleAssociateSettings(maxVToggleVar.get(), maxVideo_group)
+    )
+    maxVideoScale = Scale(maxVideoFrame, label="Max Video Popups", from_=1, to=50, orient="horizontal", variable=maxVideoVar)
+    maxVideoManual = Button(
+        maxVideoFrame, text="Manual Max Videos...", command=lambda: assign(maxVideoVar, simpledialog.askinteger("Manual Max Videos", prompt="[1-50]: "))
+    )
+
+    maxVideo_group.append(maxVideoScale)
+    maxVideo_group.append(maxVideoManual)
+
+    toggleSubliminalButton = Checkbutton(
+        subliminalsFrame,
+        text="Popup Subliminals",
+        variable=popupSublim,
+        command=lambda: toggleAssociateSettings(popupSublim.get(), subliminals_group),
+        cursor="question_arrow",
+    )
+
+    subliminalttp = CreateToolTip(
+        toggleSubliminalButton, "Overlays transparent gifs on popups.\n\nThis feature can be CPU intensive, try a low max limit to start!"
+    )
+
+    subliminalsChanceScale = Scale(subliminalsChanceFrame, label="Sublim. Chance (%)", from_=1, to=100, orient="horizontal", variable=subliminalsChanceVar)
+    subliminalsChanceManual = Button(
+        subliminalsChanceFrame,
+        text="Manual Sub Chance...",
+        command=lambda: assign(subliminalsChanceVar, simpledialog.askinteger("Manual Subliminal Chance", prompt="[1-100]: ")),
+    )
+
+    subliminals_group.append(subliminalsChanceScale)
+    subliminals_group.append(subliminalsChanceManual)
+
+    subliminalsAlphaScale = Scale(subliminalsAlphaFrame, label="Sublim. Alpha (%)", from_=1, to=99, orient="horizontal", variable=subliminalsAlphaVar)
+    subliminalsAlphaManual = Button(
+        subliminalsAlphaFrame,
+        text="Manual Sub Alpha...",
+        command=lambda: assign(subliminalsAlphaVar, simpledialog.askinteger("Manual Subliminal Chance", prompt="[1-99]: ")),
+    )
+
+    subliminals_group.append(subliminalsAlphaScale)
+    subliminals_group.append(subliminalsAlphaManual)
+
+    maxSubliminalsScale = Scale(maxSubliminalsFrame, label="Max Subliminals", from_=1, to=200, orient="horizontal", variable=maxSubliminalsVar)
+    maxSubliminalsManual = Button(
+        maxSubliminalsFrame,
+        text="Manual Max Sub...",
+        command=lambda: assign(maxSubliminalsVar, simpledialog.askinteger("Manual Max Subliminals", prompt="[1-200]: ")),
+    )
+
+    subliminals_group.append(maxSubliminalsScale)
+    subliminals_group.append(maxSubliminalsManual)
+
+    maxPopupFrame.pack(fill="x")
+
+    maxAudioFrame.pack(side="left")
+    maxAudioToggle.pack(fill="x")
+    maxAudioScale.pack(fill="x", padx=1, expand=1)
+    maxAudioManual.pack(fill="x")
+
+    maxVideoFrame.pack(side="left", padx=3, expand=1)
+    maxVideoToggle.pack(fill="x")
+    maxVideoScale.pack(fill="x", padx=1, expand=1)
+    maxVideoManual.pack(fill="x")
+
+    subliminalsFrame.pack(side="left")
+    toggleSubliminalButton.pack(fill="x")
+
+    subliminalsChanceFrame.pack(side="left", padx=3, expand=1)
+    subliminalsChanceScale.pack(fill="x", padx=1, expand=1)
+    subliminalsChanceManual.pack(fill="x")
+
+    subliminalsAlphaFrame.pack(side="left", padx=3, expand=1)
+    subliminalsAlphaScale.pack(fill="x", padx=1, expand=1)
+    subliminalsAlphaManual.pack(fill="x")
+
+    maxSubliminalsFrame.pack(side="left", padx=3, expand=1)
+    maxSubliminalsScale.pack(fill="x", padx=1, expand=1)
+    maxSubliminalsManual.pack(fill="x")
+
+    captionsFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+    captionsSubFrame1 = Frame(captionsFrame)
+    capPopFrame = Frame(captionsFrame)
+    capPopOpacityFrame = Frame(captionsFrame)
+    capPopTimerFrame = Frame(captionsFrame)
+
+    toggleCaptionsButton = Checkbutton(captionsSubFrame1, text="Popup Captions", variable=captionVar, cursor="question_arrow")
+    toggleFilenameButton = Checkbutton(captionsSubFrame1, text="Use filename for caption moods", variable=captionFilenameVar, cursor="question_arrow")
+    toggleMultiClickButton = Checkbutton(captionsSubFrame1, text="Multi-Click popups", variable=multiClickVar, cursor="question_arrow")
+    toggleCaptionMood = Checkbutton(captionsSubFrame1, text="Use Cap-Pop specific mood", variable=capPopMoodVar, cursor="question_arrow")
+
+    captionttp = CreateToolTip(
+        toggleCaptionsButton, "Enables captions on popups. These are short segments of text written by the pack creator that adorn the top of each popup."
+    )
+    multiclickttp = CreateToolTip(
+        toggleMultiClickButton,
+        "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
+        "to close. This feature must be set-up beforehand and won't do anything if not supported.",
+    )
+    captionfilenamettp = CreateToolTip(
+        toggleFilenameButton,
+        "When enabled, captions will try and match the filename of the image they attach to.\n\n"
+        'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
+        'of images named things like "goon300242", "goon-love", "goon_ytur8843", etc.\n\n'
+        "This is how EdgeWare processed captions before moods were implemented fully in EdgeWare++. The reason you'd turn this off, however, "
+        "is that if the mood doesn't match the filename, it won't display at all.\n\n For example, if you had a mood named \"succubus\", but "
+        'no files started with "succubus", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
+        "the pack supports it.",
+    )
+    capmoodttp = CreateToolTip(
+        toggleCaptionMood,
+        'Caption Popups have the option to use a special mood in the captions.json file called "subliminals". This mood doesn\'t '
+        "normally appear like other captions, and is meant for short, fast messages that will blink at you very quickly.\n\n"
+        "If your pack doesn't support subliminals, this "
+        "setting doesn't need to be disabled- it will automatically switch to using regular captions.",
+    )
+
+    captionsPopupSlider = Scale(capPopFrame, label="Cap-Pop Chance", from_=0, to=100, orient="horizontal", variable=capPopChanceVar)
+    captionsPopupManual = Button(
+        capPopFrame,
+        text="Manual Cap-Pop...",
+        command=lambda: assign(capPopChanceVar, simpledialog.askinteger("Manual Caption Popup Chance (%)", prompt="[0-100]: ")),
+        cursor="question_arrow",
+    )
+    capPopOpacitySlider = Scale(capPopOpacityFrame, label="Cap-Pop Opacity", from_=1, to=100, orient="horizontal", variable=capPopOpacityVar)
+    capPopOpacityManual = Button(
+        capPopOpacityFrame,
+        text="Manual Opacity...",
+        command=lambda: assign(capPopOpacityVar, simpledialog.askinteger("Manual Caption Popup Opacity (%)", prompt="[1-100]: ")),
+    )
+    capPopTimerSlider = Scale(capPopTimerFrame, label="Cap-Pop Timer", from_=1, to=1000, orient="horizontal", variable=capPopTimerVar)
+    capPopTimerManual = Button(
+        capPopTimerFrame,
+        text="Manual Timer...",
+        command=lambda: assign(capPopTimerVar, simpledialog.askinteger("Manual Caption Popup Timer (ms)", prompt="[1-1000]: ")),
+    )
+
+    cappopttp = CreateToolTip(
+        captionsPopupManual,
+        "Caption Popups are short full-screen popups that flash up briefly before they disappear, similar to subliminal messages. They "
+        'take from the pack\'s captions.json file, and can use a specific "subliminals" mood to have unique captions (if the setting to the left is toggled on).',
+    )
+
+    captionsFrame.pack(fill="x")
+    captionsSubFrame1.pack(fill="y", side="left")
+    toggleCaptionsButton.pack(fill="y", side="top")
+    toggleFilenameButton.pack(fill="y", side="top")
+    toggleMultiClickButton.pack(fill="y", side="top")
+    toggleCaptionMood.pack(fill="y", side="top")
+
+    capPopFrame.pack(fill="y", side="left")
+    captionsPopupSlider.pack(fill="x", padx=1, expand=1)
+    captionsPopupManual.pack(fill="x")
+    capPopOpacityFrame.pack(fill="y", side="left")
+    capPopOpacitySlider.pack(fill="x", padx=1, expand=1)
+    capPopOpacityManual.pack(fill="x")
+    capPopTimerFrame.pack(fill="y", side="left")
+    capPopTimerSlider.pack(fill="x", padx=1, expand=1)
+    capPopTimerManual.pack(fill="x")
+
+    # ==========={WALLPAPER TAB ITEMS} ========================#
+    notebookAnnoyance.add(tabWallpaper, text="Wallpaper")
+    rotateCheckbox = Checkbutton(
+        tabWallpaper, text="Rotate Wallpapers", variable=rotateWallpaperVar, command=lambda: toggleAssociateSettings(rotateWallpaperVar.get(), wallpaper_group)
+    )
+    wpList = Listbox(tabWallpaper, selectmode=SINGLE)
+    for key in settings["wallpaperDat"]:
+        wpList.insert(1, key)
+    addWPButton = Button(tabWallpaper, text="Add/Edit Wallpaper", command=lambda: addWallpaper(wpList))
+    remWPButton = Button(tabWallpaper, text="Remove Wallpaper", command=lambda: removeWallpaper(wpList))
+    autoImport = Button(tabWallpaper, text="Auto Import", command=lambda: autoImportWallpapers(wpList))
+    varSlider = Scale(tabWallpaper, orient="horizontal", label="Rotate Variation (sec)", from_=0, to=(wallpaperDelayVar.get() - 1), variable=wpVarianceVar)
+    wpDelaySlider = Scale(
+        tabWallpaper,
+        orient="horizontal",
+        label="Rotate Timer (sec)",
+        from_=5,
+        to=300,
+        variable=wallpaperDelayVar,
+        command=lambda val: updateMax(varSlider, int(val) - 1),
+    )
+
+    pHoldImageR = Image.open(Defaults.PANIC_WALLPAPER).resize((int(root.winfo_screenwidth() * 0.13), int(root.winfo_screenheight() * 0.13)), Image.NEAREST)
+
+    def updatePanicPaper():
+        nonlocal pHoldImageR
+        selectedFile = filedialog.askopenfile("rb", filetypes=[("image file", ".jpg .jpeg .png")])
+        if not isinstance(selectedFile, type(None)):
+            try:
+                img = Image.open(selectedFile.name).convert("RGB")
+                img.save(Defaults.PANIC_WALLPAPER)
+                pHoldImageR = ImageTk.PhotoImage(img.resize((int(root.winfo_screenwidth() * 0.13), int(root.winfo_screenheight() * 0.13)), Image.NEAREST))
+                panicWallpaperLabel.config(image=pHoldImageR)
+                panicWallpaperLabel.update_idletasks()
+            except Exception as e:
+                logging.warning(f"failed to open/change default wallpaper\n{e}")
+
+    panicWPFrame = Frame(tabWallpaper)
+    panicWPFrameL = Frame(panicWPFrame)
+    panicWPFrameR = Frame(panicWPFrame)
+    panicWallpaperImage = ImageTk.PhotoImage(pHoldImageR)
+    panicWallpaperButton = Button(panicWPFrameL, text="Change Panic Wallpaper", command=updatePanicPaper, cursor="question_arrow")
+    panicWallpaperLabel = Label(panicWPFrameR, text="Current Panic Wallpaper", image=panicWallpaperImage)
+
+    panicWallpaperttp = CreateToolTip(
+        panicWallpaperButton,
+        "When you use panic, the wallpaper will be set to this image.\n\n"
+        "This is useful since most packs have a custom wallpaper, which is usually porn...!\n\n"
+        "It is recommended to find your preferred/original desktop wallpaper and set it to that.",
+    )
+
+    wallpaper_group.append(wpList)
+    wallpaper_group.append(addWPButton)
+    wallpaper_group.append(remWPButton)
+    wallpaper_group.append(wpDelaySlider)
+    wallpaper_group.append(autoImport)
+    wallpaper_group.append(varSlider)
+
+    rotateCheckbox.pack(fill="x")
+    wpList.pack(fill="x")
+    addWPButton.pack(fill="x")
+    remWPButton.pack(fill="x")
+    autoImport.pack(fill="x")
+    wpDelaySlider.pack(fill="x")
+    varSlider.pack(fill="x")
+    panicWPFrame.pack(fill="x", expand=1)
+    panicWPFrameL.pack(side="left", fill="y")
+    panicWPFrameR.pack(side="right", fill="x", expand=1)
+    panicWallpaperButton.pack(fill="x", padx=5, pady=5, expand=1)
+    Label(panicWPFrameR, text="Current Panic Wallpaper").pack(fill="x")
+    panicWallpaperLabel.pack()
+
+    # ==========={EDGEWARE++ "DANGEROUS SETTINGS" TAB STARTS HERE}===========#
+    notebookAnnoyance.add(tabDangerous, text="Dangerous Settings")
+
+    hardDriveFrame = Frame(tabDangerous, borderwidth=5, relief=RAISED)
+
+    pathFrame = Frame(hardDriveFrame)
+    fillFrame = Frame(hardDriveFrame)
+    replaceFrame = Frame(hardDriveFrame)
+
+    def local_assignPath():
+        nonlocal fillPathVar
+        path_ = str(filedialog.askdirectory(initialdir="/", title="Select Parent Folder"))
+        if path_ != "":
+            settings["drivePath"] = path_
+            pathBox.configure(state="normal")
+            pathBox.delete(0, 9999)
+            pathBox.insert(1, path_)
+            pathBox.configure(state="disabled")
+            fillPathVar.set(str(pathBox.get()))
+
+    pathBox = Entry(pathFrame)
+    pathButton = Button(pathFrame, text="Select", command=local_assignPath)
+
+    pathBox.insert(1, settings["drivePath"])
+    pathBox.configure(state="disabled")
+
+    fillBox = Checkbutton(
+        fillFrame, text="Fill Drive", variable=fillVar, command=lambda: toggleAssociateSettings(fillVar.get(), fill_group), cursor="question_arrow"
+    )
+    fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=fillDelayVar)
+
+    fillttp = CreateToolTip(
+        fillBox,
+        "Fills folders on your harddrive with images from the resource folder.\n\n"
+        "This can cause space issues, potential embarassment, navigation difficulties... Please read the full documentation in the About tab!!!",
+    )
+
+    fill_group.append(fillDelay)
+
+    replaceBox = Checkbutton(
+        fillFrame, text="Replace Images", variable=replaceVar, command=lambda: toggleAssociateSettings(replaceVar.get(), replace_group), cursor="question_arrow"
+    )
+    replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=replaceThreshVar)
+
+    replacettp = CreateToolTip(
+        replaceBox,
+        "Seeks out folders with more images than the threshold value, then replaces all of them. No, there is no automated backup!\n\n"
+        'I am begging you to read the full documentation in the "About" tab before even thinking about enabling this feature!\n\n'
+        "We are not responsible for any pain, suffering, miserere, or despondence caused by your files being deleted! "
+        "At the very least, back them up and use the blacklist!",
+    )
+
+    replace_group.append(replaceThreshScale)
+
+    avoidHostFrame = Frame(hardDriveFrame)
+
+    avoidListBox = Listbox(avoidHostFrame, selectmode=SINGLE)
+    for name in settings["avoidList"].split(">"):
+        avoidListBox.insert(2, name)
+    addName = Button(
+        avoidHostFrame, text="Add Name", command=lambda: addList(avoidListBox, "avoidList", "Folder Name", "Fill/replace will skip any folder with given name.")
+    )
+    removeName = Button(
+        avoidHostFrame,
+        text="Remove Name",
+        command=lambda: removeList(avoidListBox, "avoidList", "Remove EdgeWare", "You cannot remove the EdgeWare folder exception."),
+    )
+    resetName = Button(avoidHostFrame, text="Reset", command=lambda: resetList(avoidListBox, "avoidList", "EdgeWare>AppData"))
+
+    avoidHostFrame.pack(fill="y", side="left")
+    Label(avoidHostFrame, text="Folder Name Blacklist").pack(fill="x")
+    avoidListBox.pack(fill="x")
+    addName.pack(fill="x")
+    removeName.pack(fill="x")
+    resetName.pack(fill="x")
+
+    Label(tabDangerous, text="Hard Drive Settings").pack(fill="both")
+    hardDriveFrame.pack(fill="x")
+    fillFrame.pack(fill="y", side="left")
+    fillBox.pack()
+    fillDelay.pack()
+    replaceFrame.pack(fill="y", side="left")
+    replaceBox.pack()
+    replaceThreshScale.pack()
+    pathFrame.pack(fill="x")
+    Label(pathFrame, text="Fill/Replace Start Folder").pack(fill="x")
+    pathBox.pack(fill="x")
+    pathButton.pack(fill="x")
+
+    # ==========={EDGEWARE++ "HIBERNATE" TAB STARTS HERE}===========#
+    notebookModes.add(tabHibernate, text="Hibernate")
+    # init
+    hibernate_types = ["Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos"]
+
+    hibernateHostFrame = Frame(tabHibernate, borderwidth=5, relief=RAISED)
+    hibernateTypeFrame = Frame(hibernateHostFrame)
+    hibernateTypeDescriptionFrame = Frame(hibernateHostFrame, borderwidth=2, relief=GROOVE)
+    hibernateFrame = Frame(hibernateHostFrame)
+    hibernateMinFrame = Frame(hibernateHostFrame)
+    hibernateMaxFrame = Frame(hibernateHostFrame)
+    hibernateActivityFrame = Frame(hibernateHostFrame)
+    hibernateLengthFrame = Frame(hibernateHostFrame)
+
+    toggleHibernateButton = Checkbutton(
+        hibernateTypeFrame, text="Hibernate Mode", variable=hibernateVar, command=lambda: hibernateHelper(hibernateTypeVar.get()), cursor="question_arrow"
+    )
+    fixWallpaperButton = Checkbutton(hibernateTypeFrame, text="Fix Wallpaper", variable=fixWallpaperVar, cursor="question_arrow")
+    hibernateTypeDropdown = OptionMenu(hibernateTypeFrame, hibernateTypeVar, *hibernate_types, command=lambda key: hibernateHelper(key))
+    hibernateTypeDescription = Label(hibernateTypeDescriptionFrame, text="Error loading Hibernate Description!", wraplength=175)
+
+    def hibernateHelper(key: str):
+        if key == "Original":
+            hibernateTypeDescription.configure(text="Creates an immediate quantity of popups on wakeup based on the awaken activity.\n\n")
+            if hibernateVar.get():
+                toggleAssociateSettings(False, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Spaced":
+            hibernateTypeDescription.configure(text="Creates popups consistently over the hibernate length, based on popup delay.\n\n")
+            if hibernateVar.get():
+                toggleAssociateSettings(False, hactivity_group)
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Glitch":
+            hibernateTypeDescription.configure(
+                text="Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.\n"
+            )
+            if hibernateVar.get():
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Ramp":
+            hibernateTypeDescription.configure(
+                text="Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay."
+            )
+            if hibernateVar.get():
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Pump-Scare":
+            hibernateTypeDescription.configure(
+                text="Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?"
+            )
+            if hibernateVar.get():
+                toggleAssociateSettings(False, hlength_group)
+                toggleAssociateSettings(False, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if key == "Chaos":
+            hibernateTypeDescription.configure(text="Every time hibernate activates, a random type (other than chaos) is selected.\n\n")
+            if hibernateVar.get():
+                toggleAssociateSettings(True, hlength_group)
+                toggleAssociateSettings(True, hactivity_group)
+                toggleAssociateSettings(True, hibernate_group)
+        if not hibernateVar.get():
+            toggleAssociateSettings(False, hlength_group)
+            toggleAssociateSettings(False, hactivity_group)
+            toggleAssociateSettings(False, hibernate_group)
+
+    hibernateHelper(hibernateTypeVar.get())
+
+    hibernateMinButton = Button(
+        hibernateMinFrame,
+        text="Manual min...",
+        command=lambda: assign(hibernateMinVar, simpledialog.askinteger("Manual Minimum Sleep (sec)", prompt="[1-7200]: ")),
+    )
+    hibernateMinScale = Scale(hibernateMinFrame, label="Min Sleep (sec)", variable=hibernateMinVar, orient="horizontal", from_=1, to=7200)
+    hibernateMaxButton = Button(
+        hibernateMaxFrame,
+        text="Manual max...",
+        command=lambda: assign(hibernateMaxVar, simpledialog.askinteger("Manual Maximum Sleep (sec)", prompt="[2-14400]: ")),
+    )
+    hibernateMaxScale = Scale(hibernateMaxFrame, label="Max Sleep (sec)", variable=hibernateMaxVar, orient="horizontal", from_=2, to=14400)
+    h_activityScale = Scale(hibernateActivityFrame, label="Awaken Activity", orient="horizontal", from_=1, to=50, variable=wakeupActivityVar)
+    h_activityButton = Button(
+        hibernateActivityFrame,
+        text="Manual act...",
+        command=lambda: assign(wakeupActivityVar, simpledialog.askinteger("Manual Wakeup Activity", prompt="[1-50]: ")),
+    )
+    hibernateLengthScale = Scale(hibernateLengthFrame, label="Max Length (sec)", variable=hibernateLengthVar, orient="horizontal", from_=5, to=300)
+    hibernateLengthButton = Button(
+        hibernateLengthFrame,
+        text="Manual length...",
+        command=lambda: assign(hibernateLengthVar, simpledialog.askinteger("Manual Hibernate Length", prompt="[5-300]: ")),
+    )
+
+    hibernatettp = CreateToolTip(
+        toggleHibernateButton,
+        "Runs EdgeWare silently without any popups.\n\n"
+        "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
+        'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
+        'Check the "About" tab for more detailed information on each hibernate type.',
+    )
+    fixwallpaperttp = CreateToolTip(
+        fixWallpaperButton,
+        '"fixes" your wallpaper after hibernate is finished by changing it to'
+        " your panic wallpaper. If left off, it will keep the pack's wallpaper on until you panic"
+        " or change it back yourself.",
+    )
+
+    hibernate_group.append(hibernateMinButton)
+    hibernate_group.append(hibernateMinScale)
+    hibernate_group.append(hibernateMaxButton)
+    hibernate_group.append(hibernateMaxScale)
+
+    hlength_group.append(hibernateLengthButton)
+    hlength_group.append(hibernateLengthScale)
+
+    hactivity_group.append(h_activityScale)
+    hactivity_group.append(h_activityButton)
+
+    Label(tabHibernate, text="Hibernate Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+    hibernateHostFrame.pack(fill="x")
+    hibernateFrame.pack(fill="y", side="left")
+    hibernateTypeFrame.pack(fill="x", side="left")
+    toggleHibernateButton.pack(fill="x", side="top")
+    fixWallpaperButton.pack(fill="x", side="top")
+    hibernateTypeDropdown.pack(fill="x", side="top")
+    hibernateTypeDescriptionFrame.pack(fill="both", side="left", expand=1, padx=2, pady=2)
+    hibernateTypeDescription.pack(fill="y", pady=2)
+    hibernateMinScale.pack(fill="y")
+    hibernateMinButton.pack(fill="y")
+    hibernateMinFrame.pack(fill="x", side="left")
+    hibernateMaxScale.pack(fill="y")
+    hibernateMaxButton.pack(fill="y")
+    hibernateMaxFrame.pack(fill="x", side="left")
+    h_activityScale.pack(fill="y")
+    h_activityButton.pack(fill="y")
+    hibernateActivityFrame.pack(fill="x", side="left")
+    hibernateLengthScale.pack(fill="y")
+    hibernateLengthButton.pack(fill="y")
+    hibernateLengthFrame.pack(fill="x", side="left")
+
+    # ==========={EDGEWARE++ "TIMER" TAB STARTS HERE}===========#
+    notebookModes.add(tabTimer, text="Timer")
+    # timer settings
+    Label(tabTimer, text="Timer Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+    timerFrame = Frame(tabTimer, borderwidth=5, relief=RAISED)
+
+    timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=timerVar, command=lambda: timerHelper(), cursor="question_arrow")
+    timerSlider = Scale(timerFrame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=timerTimeVar)
+    safewordFrame = Frame(timerFrame)
+
+    def timerHelper():
+        toggleAssociateSettings(timerVar.get(), timer_group)
+        if timerVar.get():
+            startLoginVar.set(True)
+        else:
+            startLoginVar.set(False)
+
+    timerttp = CreateToolTip(
+        timerToggle,
+        'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
+        '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
+        "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
+        "instability when running EdgeWare multiple times without changing config settings.",
+    )
+
+    Label(safewordFrame, text="Emergency Safeword").pack()
+    timerSafeword = Entry(safewordFrame, show="*", textvariable=safewordVar)
+    timerSafeword.pack(expand=1, fill="both")
+
+    timer_group.append(timerSafeword)
+    timer_group.append(timerSlider)
+
+    timerToggle.pack(side="left", fill="x", padx=5)
+    timerSlider.pack(side="left", fill="x", expand=1, padx=10)
+    safewordFrame.pack(side="right", fill="x", padx=5)
+
+    timerFrame.pack(fill="x")
+
+    # ===================={CORRUPTION}==============================#
+    notebookModes.add(tabCorruption, text="Corruption")
+
+    corruptionFrame = Frame(tabCorruption)
+
+    corruptionSettingsFrame = Frame(corruptionFrame)
+    corruptionSubFrame1 = Frame(corruptionSettingsFrame)
+
+    corruptionStartFrame = Frame(corruptionSubFrame1, borderwidth=5, relief=RAISED)
+
+    corruptionEnabled_group = []
+
+    corruptionToggle = Checkbutton(corruptionStartFrame, text="Turn on Corruption", variable=corruptionModeVar, cursor="question_arrow")
+    corruptionFullToggle = Checkbutton(corruptionStartFrame, text="Full Permissions Mode", variable=corruptionFullPermVar, cursor="question_arrow")
+    corruptionRecommendedToggle = Button(
+        corruptionStartFrame,
+        text="Recommended Settings",
+        cursor="question_arrow",
+        height=2,
+        command=lambda: packPreset(in_var_group, in_var_names, "corruption", presetsDangerVar.get()),
+    )
+    corruptionEnabled_group.append(corruptionToggle)
+    ctutorialstart_group.append(corruptionStartFrame)
+    ctutorialstart_group.append(corruptionToggle)
+    ctutorialstart_group.append(corruptionFullToggle)
+    ctutorialstart_group.append(corruptionRecommendedToggle)
+
+    corruptionFrame.pack(fill="x")
+    corruptionSettingsFrame.pack(fill="x", side="left")
+    corruptionSubFrame1.pack(fill="both", side="top")
+    corruptionStartFrame.pack(fill="both", side="left")
+
+    corruptionToggle.pack(fill="x", expand=1)
+    corruptionFullToggle.pack(fill="x", expand=1)
+    corruptionRecommendedToggle.pack(fill="x", padx=2, pady=2)
+
+    corruptionmodettp = CreateToolTip(
+        corruptionToggle,
+        "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
+        " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
+        "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
+        ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
+        ' EdgeWare.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
+    )
+    corruptionfullttp = CreateToolTip(
+        corruptionFullToggle, "This setting allows corruption mode to change config settings as it goes through corruption levels."
+    )
+    corruptionsettingsttp = CreateToolTip(
+        corruptionRecommendedToggle,
+        'Pack creators can set "default corruption settings" for their pack, to give'
+        " users a more designed and consistent experience. This setting turns those on (if they exist)."
+        '\n\nSidenote: this will load configurations similarly to the option in the "Pack Info" tab, however this one will only load corruption-specific settings.',
+    )
+
+    corruptionFadeFrame = Frame(corruptionSubFrame1, borderwidth=5, relief=RAISED)
+    fadeInfoFrame = Frame(corruptionFadeFrame)
+    fadeSubInfo = Frame(fadeInfoFrame)
+    triggerInfoFrame = Frame(corruptionFadeFrame)
+    triggerSubInfo = Frame(triggerInfoFrame)
+
+    fade_types = ["Normal", "Abrupt", "Noise"]
+    fadeDropdown = OptionMenu(fadeSubInfo, corruptionFadeTypeVar, *fade_types, command=lambda key: fadeHelper(key))
+    fadeDropdown.configure(width=9, highlightthickness=0)
+    fadeDescription = Label(fadeInfoFrame, text="Error loading fade description!", borderwidth=2, relief=GROOVE, wraplength=150)
+    fadeDescription.configure(height=3, width=22)
+    fadeImageNormal = ImageTk.PhotoImage(file=Defaults.CORRUPTION_DEFAULT)
+    fadeImageAbrupt = ImageTk.PhotoImage(file=Defaults.CORRUPTION_ABRUPT)
+    fadeImageNoise = ImageTk.PhotoImage(file=Defaults.CORRUPTION_NOISE)
+    fadeImageContainer = Label(fadeSubInfo, image=fadeImageNormal, borderwidth=2, relief=GROOVE)
+    trigger_types = ["Timed", "Popup", "Launch"]
+    triggerDropdown = OptionMenu(triggerSubInfo, corruptionTriggerVar, *trigger_types, command=lambda key: triggerHelper(key, False))
+    triggerDropdown.configure(width=9, highlightthickness=0)
+    triggerDescription = Label(triggerInfoFrame, text="Error loading trigger description!", borderwidth=2, relief=GROOVE, wraplength=150)
+    triggerDescription.configure(height=3, width=22)
+
+    ctutorialtransition_group.append(corruptionFadeFrame)
+    ctutorialtransition_group.append(fadeInfoFrame)
+    ctutorialtransition_group.append(fadeSubInfo)
+    ctutorialtransition_group.append(triggerInfoFrame)
+    ctutorialtransition_group.append(triggerSubInfo)
+    ctutorialtransition_group.append(fadeDropdown)
+    ctutorialtransition_group.append(fadeDescription)
+    ctutorialtransition_group.append(triggerDropdown)
+    ctutorialtransition_group.append(triggerDescription)
+
+    corruptionFadeFrame.pack(fill="both", side="left")
+    fadeInfoFrame.pack(side="top", fill="both", pady=1)
+    fadeSubInfo.pack(side="left", fill="x")
+    fadeDropdown.pack(side="top")
+    fadeImageContainer.pack(side="top")
+    fadeDescription.pack(side="left", fill="y", padx=3, ipadx=2, ipady=2)
+    triggerInfoFrame.pack(side="top", fill="both", pady=1)
+    triggerSubInfo.pack(side="left", fill="x")
+    triggerDropdown.pack(side="top")
+    triggerDescription.pack(side="left", fill="y", padx=3, ipadx=2, ipady=2)
+
+    # -Timer-
+
+    corruptionTimeFrame = Frame(corruptionSettingsFrame)
+    corruptionTimeFrame.pack(fill="x", side="top")
+    cTimerFrame = Frame(corruptionTimeFrame)
+    corruptionTimerButton = Button(
+        cTimerFrame, text="Manual time...", command=lambda: assign(corruptionTimeVar, simpledialog.askinteger("Manual Level Time (sec)", prompt="[5-1800]: "))
+    )
+    corruptionTimerScale = Scale(cTimerFrame, label="Level Time", variable=corruptionTimeVar, orient="horizontal", from_=5, to=1800)
+    cPopupsFrame = Frame(corruptionTimeFrame)
+    corruptionPopupsButton = Button(
+        cPopupsFrame,
+        text="Manual popups...",
+        command=lambda: assign(corruptionPopupsVar, simpledialog.askinteger("Manual Level Popups (per transition)", prompt="[1-100]: ")),
+    )
+    corruptionPopupsScale = Scale(cPopupsFrame, label="Level Popups", variable=corruptionPopupsVar, orient="horizontal", from_=1, to=100)
+    cLaunchesFrame = Frame(corruptionTimeFrame)
+    corruptionLaunchesButton = Button(
+        cLaunchesFrame,
+        text="Manual launches...",
+        command=lambda: assign(corruptionLaunchesVar, simpledialog.askinteger("Manual Level Launches (per transition)", prompt="[2-31]: ")),
+    )
+    corruptionLaunchesScale = Scale(cLaunchesFrame, label="Level Launches", variable=corruptionLaunchesVar, orient="horizontal", from_=2, to=31)
+    cOtherTimerFrame = Frame(corruptionTimeFrame)
+    clearLaunchesButton = Button(cOtherTimerFrame, text="Reset Launches", height=3, command=lambda: clearLaunches(True))
+
+    ctutorialtransition_group.append(corruptionTimerButton)
+    ctutorialtransition_group.append(corruptionTimerScale)
+    ctutorialtransition_group.append(corruptionPopupsButton)
+    ctutorialtransition_group.append(corruptionPopupsScale)
+    ctutorialtransition_group.append(corruptionLaunchesButton)
+    ctutorialtransition_group.append(corruptionLaunchesScale)
+
+    cTimerFrame.pack(side="left", fill="x", padx=1, expand=1)
+    corruptionTimerScale.pack(fill="y")
+    corruptionTimerButton.pack(fill="y")
+    cPopupsFrame.pack(side="left", fill="x", padx=1, expand=1)
+    corruptionPopupsScale.pack(fill="y")
+    corruptionPopupsButton.pack(fill="y")
+    cLaunchesFrame.pack(side="left", fill="x", padx=1, expand=1)
+    corruptionLaunchesScale.pack(fill="y")
+    corruptionLaunchesButton.pack(fill="y")
+    cOtherTimerFrame.pack(side="left", fill="x", padx=1, expand=1)
+    clearLaunchesButton.pack()
+
+    ctime_group.append(corruptionTimerButton)
+    ctime_group.append(corruptionTimerScale)
+    cpopup_group.append(corruptionPopupsButton)
+    cpopup_group.append(corruptionPopupsScale)
+    claunch_group.append(corruptionLaunchesButton)
+    claunch_group.append(corruptionLaunchesScale)
+
+    def fadeHelper(key):
+        if key == "Normal":
+            fadeDescription.configure(text="Gradually transitions between corruption levels.")
+            fadeImageContainer.configure(image=fadeImageNormal)
+        if key == "Abrupt":
+            fadeDescription.configure(text="Immediately switches to new level upon timer completion.")
+            fadeImageContainer.configure(image=fadeImageAbrupt)
+        if key == "Noise":
+            fadeDescription.configure(text="Scatters levels randomly across the time range.")
+            fadeImageContainer.configure(image=fadeImageNoise)
+
+    def triggerHelper(key, tutorialMode):
+        if key == "Timed":
+            triggerDescription.configure(text="Transitions based on time elapsed in current session.")
+            if tutorialMode:
+                toggleAssociateSettings_manual(True, ctime_group, "lime green", "forest green")
+                toggleAssociateSettings_manual(False, cpopup_group, "lime green", "forest green")
+                toggleAssociateSettings_manual(False, claunch_group, "lime green", "forest green")
+            else:
+                toggleAssociateSettings(True, ctime_group)
+                toggleAssociateSettings(False, cpopup_group)
+                toggleAssociateSettings(False, claunch_group)
+        if key == "Popup":
+            triggerDescription.configure(text="Transitions based on number of popups in current session.")
+            if tutorialMode:
+                toggleAssociateSettings_manual(False, ctime_group, "lime green", "forest green")
+                toggleAssociateSettings_manual(True, cpopup_group, "lime green", "forest green")
+                toggleAssociateSettings_manual(False, claunch_group, "lime green", "forest green")
+            else:
+                toggleAssociateSettings(False, ctime_group)
+                toggleAssociateSettings(True, cpopup_group)
+                toggleAssociateSettings(False, claunch_group)
+        if key == "Launch":
+            triggerDescription.configure(text="Transitions based on number of EdgeWare launches.")
+            if tutorialMode:
+                toggleAssociateSettings_manual(False, ctime_group, "lime green", "forest green")
+                toggleAssociateSettings_manual(False, cpopup_group, "lime green", "forest green")
+                toggleAssociateSettings_manual(True, claunch_group, "lime green", "forest green")
+            else:
+                toggleAssociateSettings(False, ctime_group)
+                toggleAssociateSettings(False, cpopup_group)
+                toggleAssociateSettings(True, claunch_group)
+
+    # -Tutorial-
+
+    corruptionTutorialFrame = Frame(corruptionFrame)
+    corruptionTabMaster = ttk.Notebook(corruptionTutorialFrame)
+    cTabIntro = Frame(None)
+    cTabStart = Frame(None)
+    cTabTransitions = Frame(None)
+    corruptionTabMaster.add(cTabIntro, text="Intro")
+    corruptionTabMaster.add(cTabStart, text="Start")
+    corruptionTabMaster.add(cTabTransitions, text="Transitions")
+
+    corruptionTutorialFrame.pack(side="left", fill="both", expand=1)
+    corruptionTabMaster.pack(fill="both", expand=1)
+
+    corruptionIntroBody = Label(cTabIntro, text=CINTRO_TEXT, wraplength=300)
+    corruptionStartBody = Label(cTabStart, text=CSTART_TEXT, wraplength=300)
+    corruptionTransitionBody = Label(cTabTransitions, text=CTRANSITION_TEXT, wraplength=300)
+
+    corruptionIntroBody.pack(fill="both", padx=2, pady=2)
+    corruptionStartBody.pack(fill="both", padx=2, pady=2)
+    corruptionTransitionBody.pack(fill="both", padx=2, pady=2)
+
+    # -Additional Settings-
+
+    corruptionAdditionalFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
+    corruptionAddSub1 = Frame(corruptionAdditionalFrame)
+    corruptionAddSub2 = Frame(corruptionAdditionalFrame)
+    corruptionAddSub3 = Frame(corruptionAdditionalFrame)
+
+    corruptionWallpaperToggle = Checkbutton(corruptionAddSub1, text="Don't Cycle Wallpaper", variable=corruptionWallpaperCycleVar, cursor="question_arrow")
+    corruptionThemeToggle = Checkbutton(corruptionAddSub1, text="Don't Cycle Themes", variable=corruptionThemeCycleVar, cursor="question_arrow")
+    corruptionPurityToggle = Checkbutton(corruptionAddSub2, text="Purity Mode", variable=corruptionPurityModeVar, cursor="question_arrow")
+    corruptionDevToggle = Checkbutton(corruptionAddSub2, text="Corruption Dev View", variable=corruptionDevVar, cursor="question_arrow")
+
+    ctutorialstart_group.append(corruptionAdditionalFrame)
+    ctutorialstart_group.append(corruptionAddSub1)
+    ctutorialstart_group.append(corruptionAddSub2)
+    ctutorialstart_group.append(corruptionAddSub3)
+    ctutorialstart_group.append(corruptionWallpaperToggle)
+    ctutorialstart_group.append(corruptionThemeToggle)
+    ctutorialstart_group.append(corruptionPurityToggle)
+    ctutorialstart_group.append(corruptionDevToggle)
+
+    corruptionAdditionalFrame.pack(fill="x")
+    corruptionAddSub1.pack(fill="both", side="left", expand=1)
+    corruptionAddSub2.pack(fill="both", side="left", expand=1)
+    corruptionAddSub3.pack(fill="both", side="left", expand=1)
+
+    corruptionWallpaperToggle.pack(fill="x", side="top")
+    corruptionThemeToggle.pack(fill="x", side="top")
+    corruptionPurityToggle.pack(fill="x", side="top")
+    corruptionDevToggle.pack(fill="x", side="top")
+
+    corrwallpaperttp = CreateToolTip(
+        corruptionWallpaperToggle,
+        "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to " "a pack defined static one.",
+    )
+    corrthemettp = CreateToolTip(
+        corruptionThemeToggle,
+        "Prevents the theme from cycling as you go through corruption levels, instead staying as "
+        'the theme you set in the "General" tab of the config window.',
+    )
+    corrpurityttp = CreateToolTip(
+        corruptionPurityToggle,
+        "Starts corruption mode at the highest corruption level, then works backwards to level 1. "
+        "Retains all of your other settings for this mode, if applicable.",
+    )
+    corruptiondevttp = CreateToolTip(
+        corruptionDevToggle,
+        "Enables captions on popups that show various info.\n\nclev: current corruption level when popup spawned\n"
+        "popmood: the popup's mood\npopnum: if popup trigger enabled, the number of the popup\n"
+        "filen: the filename of the popup's image/video",
+    )
+
+    # -Info-
+
+    corruptionPathFrame = Frame(tabCorruption, borderwidth=5, relief=RAISED)
+
+    corruptionLabel = "--CORRUPTION PATH--"
+    corruptionPathLabel = Label(corruptionPathFrame, text=corruptionLabel)
+
+    pathInnerFrame = Frame(corruptionPathFrame)
+    pathTree = ttk.Treeview(pathInnerFrame, height=6, show="headings", columns=("level", "moods"))
+    pathScrollbarY = ttk.Scrollbar(corruptionPathFrame, orient="vertical", command=pathTree.yview)
+    pathScrollbarX = ttk.Scrollbar(pathInnerFrame, orient="horizontal", command=pathTree.xview)
+    pathTree.configure(yscroll=pathScrollbarY.set, xscroll=pathScrollbarX.set)
+
+    pathTree.heading("level", text="LEVEL")
+    pathTree.column("level", width=40, stretch=False, anchor="center")
+    pathTree.heading("moods", text="MOODS", anchor="w")
+
+    corruptionList = []
+    lineWidth = 0
+    # if os.path.isfile(Resource.CORRUPTION):
+    #     try:
+    #         with open(Resource.CORRUPTION, 'r') as f:
+    #             l = json.loads(f.read())
+    #             for key in list(l):
+    #                 if key == "moods":
+    #                     for level, i in l[key]:
+    #                         corruptionList.append((f'{level}', str(level.keys()).strip('[]')))
+    #
+    #     except Exception as e:
+    #         logging.warning(f'error in corruption.json. Aborting preview load. {e}')
+    #         errors_list.append('Something is wrong with the currently loaded corruption.json file!\n')
+    #     try:
+    #         for level in corruptionList:
+    #             if sum(len(i) for i in level) > lineWidth:
+    #                 lineWidth = sum(len(i) for i in level)
+    #             pathTree.insert('', 'end', values=level)
+    #     except Exception as e:
+    #         logging.warning(f'error in loading corruption treeview. {e}')
+    #         errors_list.append('The corruption treeview could not load properly!\n')
+
+    # just doing a magic number, long story short treeview is butts for horizontal scrolling
+    pathTree.column("moods", anchor="w", stretch=True, minwidth=int(lineWidth * 5.5))
+
+    corruptionPathFrame.pack(fill="x")
+    corruptionPathLabel.pack(pady=1, fill="x", side="top")
+    pathInnerFrame.pack(fill="both", side="left", expand=1)
+    pathScrollbarX.pack(side="bottom", fill="x")
+    pathTree.pack(side="left", fill="both", expand=1)
+    pathScrollbarY.pack(side="left", fill="y")
+
+    def corruptionTutorialHelper(event):
+        tab = event.widget.tab("current")["text"]
+        th = settings["themeType"].strip()
+        if tab == "Start":
+            toggleAssociateSettings_manual(True, ctutorialstart_group, "lime green", "forest green")
+            toggleAssociateSettings(True, ctutorialtransition_group)
+            triggerHelper(corruptionTriggerVar.get(), False)
+        elif tab == "Transitions":
+            toggleAssociateSettings_manual(True, ctutorialtransition_group, "lime green", "forest green")
+            toggleAssociateSettings(True, ctutorialstart_group)
+            triggerHelper(corruptionTriggerVar.get(), True)
+        else:
+            toggleAssociateSettings(True, ctutorialstart_group)
+            toggleAssociateSettings(True, ctutorialtransition_group)
+            triggerHelper(corruptionTriggerVar.get(), False)
+        toggleAssociateSettings(os.path.isfile(Resource.CORRUPTION), corruptionEnabled_group)
+
+    corruptionTabMaster.bind("<<NotebookTabChanged>>", corruptionTutorialHelper)
 
     # ==========={IN HERE IS ADVANCED TAB ITEM INITS}===========#
     tabMaster.add(tabAdvanced, text="Troubleshooting")
@@ -3097,6 +3099,9 @@ def show_window():
     toggleAssociateSettings(os.path.isfile(Resource.CORRUPTION), corruptionEnabled_group)
 
     tabMaster.pack(expand=1, fill="both")
+    notebookGeneral.pack(expand=1, fill="both")
+    notebookAnnoyance.pack(expand=1, fill="both")
+    notebookModes.pack(expand=1, fill="both")
     tabInfoExpound.pack(expand=1, fill="both")
     resourceFrame.pack(fill="x")
     importResourcesButton.pack(fill="x", side="left", expand=1)
