@@ -635,13 +635,16 @@ def show_window():
     tabStart = ttk.Frame(None) # startup screen, info and presets
     tabFile = ttk.Frame(None) # file management tab
     tabPackInfo = ttk.Frame(None)  # pack information
+    tabBooru = ttk.Frame(None) # tab for booru downloader
 
     tabSubAnnoyance = ttk.Frame(tabMaster)
     notebookAnnoyance = ttk.Notebook(tabSubAnnoyance)
     tabMaster.add(tabSubAnnoyance, text="Annoyance/Runtime")
     tabPopups = ttk.Frame(None) # tab for popup settings
     tabWallpaper = ttk.Frame(None)  # tab for wallpaper rotation settings
-    tabBooru = ttk.Frame(None) # tab for booru downloader
+    tabAudioVideo = ttk.Frame(None) # tab for managing audio and video settings
+    tabCaptions = ttk.Frame(None) # tab for caption settings
+    tabMoods = ttk.Frame(None) # tab for mood settings
     tabDangerous = ttk.Frame(None) # tab for potentially dangerous settings
 
     tabSubModes = ttk.Frame(tabMaster)
@@ -650,6 +653,7 @@ def show_window():
     tabHibernate = ttk.Frame(None) # tab for hibernate mode
     tabCorruption = ttk.Frame(None)  # tab for popup settings
     tabTimer = ttk.Frame(None) # tab for timer mode
+    tabMitosis = ttk.Frame(None)
 
     tabDrive = ttk.Frame(None)  # tab for drive settings
     tabJSON = ttk.Frame(None)  # tab for JSON editor (unused)
@@ -1104,6 +1108,61 @@ def show_window():
     fileTabImportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
     fileTabExportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
 
+    packConfigPresets = Frame(tabFile, borderwidth=5, relief=RAISED)
+    configPresetsSub1 = Frame(packConfigPresets)
+    configPresetsSub2 = Frame(packConfigPresets)
+    configPresetsButton = Button(
+        configPresetsSub2,
+        text="Load Pack Configuration",
+        cursor="question_arrow",
+        command=lambda: packPreset(in_var_group, in_var_names, "full", presetsDangerVar.get()),
+    )
+    # put the group here instead of with the rest since it's just a single button
+    configpresets_group = []
+    configpresets_group.append(configPresetsButton)
+    if os.path.exists(Resource.CONFIG):
+        with open(Resource.CONFIG) as f:
+            try:
+                l = json.loads(f.read())
+                if "version" in l:
+                    del l["version"]
+                if "versionplusplus" in l:
+                    del l["versionplusplus"]
+                configNum = len(l)
+            except Exception as e:
+                logging.warning(f"could not load pack suggested settings. Reason: {e}")
+                configNum = 0
+                toggleAssociateSettings(False, configpresets_group)
+    else:
+        configNum = 0
+        toggleAssociateSettings(False, configpresets_group)
+    configPresetsLabel = Label(configPresetsSub1, text=f"Number of suggested config settings: {configNum}")
+    presetsDangerToggle = Checkbutton(configPresetsSub1, text="Toggle on warning failsafes", variable=presetsDangerVar, cursor="question_arrow")
+
+    presetdangerttp = CreateToolTip(
+        presetsDangerToggle,
+        'Toggles on the "Warn if "Dangerous" Settings Active" setting after loading the '
+        "pack configuration file, regardless if it was toggled on or off in those settings.\n\nWhile downloading and loading "
+        "something that could be potentially malicious is a fetish in itself, this provides some peace of mind for those of you "
+        "who are more cautious with unknown files. More information on what these failsafe warnings entail is listed on the relevant "
+        'setting tooltip in the "General" tab.',
+    )
+    configpresetttp = CreateToolTip(
+        configPresetsButton,
+        "In EdgeWare++, the functionality was added for pack creators to add a config file to their pack, "
+        "allowing for quick loading of setting presets tailored to their intended pack experience. It is highly recommended you save your "
+        "personal preset beforehand, as this will overwrite all your current settings.\n\nIt should also be noted that this can potentially "
+        "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
+    )
+
+    packConfigPresets.pack(fill="x", pady=2)
+    configPresetsSub1.pack(fill="both", side="left", expand=1)
+    configPresetsSub2.pack(fill="both", side="left", expand=1)
+    configPresetsLabel.pack(fill="both", side="top")
+    presetsDangerToggle.pack(fill="both", side="top")
+    configPresetsButton.pack(fill="both", expand=1)
+
+
     # directories
     Label(tabFile, text="Directories", font=titleFont, relief=GROOVE).pack(pady=2)
 
@@ -1467,269 +1526,6 @@ def show_window():
         "Nevertheless, I have decided to put this here not only for those packs, but also for other "
         "packs that tap in to the same image IDs.",
     )
-
-    packConfigPresets = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
-    configPresetsSub1 = Frame(packConfigPresets)
-    configPresetsSub2 = Frame(packConfigPresets)
-    configPresetsButton = Button(
-        configPresetsSub2,
-        text="Load Pack Configuration",
-        cursor="question_arrow",
-        command=lambda: packPreset(in_var_group, in_var_names, "full", presetsDangerVar.get()),
-    )
-    # put the group here instead of with the rest since it's just a single button
-    configpresets_group = []
-    configpresets_group.append(configPresetsButton)
-    if os.path.exists(Resource.CONFIG):
-        with open(Resource.CONFIG) as f:
-            try:
-                l = json.loads(f.read())
-                if "version" in l:
-                    del l["version"]
-                if "versionplusplus" in l:
-                    del l["versionplusplus"]
-                configNum = len(l)
-            except Exception as e:
-                logging.warning(f"could not load pack suggested settings. Reason: {e}")
-                configNum = 0
-                toggleAssociateSettings(False, configpresets_group)
-    else:
-        configNum = 0
-        toggleAssociateSettings(False, configpresets_group)
-    configPresetsLabel = Label(configPresetsSub1, text=f"Number of suggested config settings: {configNum}")
-    presetsDangerToggle = Checkbutton(configPresetsSub1, text="Toggle on warning failsafes", variable=presetsDangerVar, cursor="question_arrow")
-
-    presetdangerttp = CreateToolTip(
-        presetsDangerToggle,
-        'Toggles on the "Warn if "Dangerous" Settings Active" setting after loading the '
-        "pack configuration file, regardless if it was toggled on or off in those settings.\n\nWhile downloading and loading "
-        "something that could be potentially malicious is a fetish in itself, this provides some peace of mind for those of you "
-        "who are more cautious with unknown files. More information on what these failsafe warnings entail is listed on the relevant "
-        'setting tooltip in the "General" tab.',
-    )
-    configpresetttp = CreateToolTip(
-        configPresetsButton,
-        "In EdgeWare++, the functionality was added for pack creators to add a config file to their pack, "
-        "allowing for quick loading of setting presets tailored to their intended pack experience. It is highly recommended you save your "
-        "personal preset beforehand, as this will overwrite all your current settings.\n\nIt should also be noted that this can potentially "
-        "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
-    )
-
-    packConfigPresets.pack(fill="x", pady=2)
-    configPresetsSub1.pack(fill="both", side="left", expand=1)
-    configPresetsSub2.pack(fill="both", side="left", expand=1)
-    configPresetsLabel.pack(fill="both", side="top")
-    presetsDangerToggle.pack(fill="both", side="top")
-    configPresetsButton.pack(fill="both", expand=1)
-
-    # Moods
-    Label(tabPackInfo, text="Moods", font=titleFont, relief=GROOVE).pack(pady=2)
-
-    moodsFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
-    moodsListFrame = Frame(moodsFrame)
-    tabMoodsMaster = ttk.Notebook(moodsListFrame)
-    moodsMediaFrame = Frame(tabMoodsMaster)
-    moodsCaptionsFrame = Frame(tabMoodsMaster)
-    moodsPromptsFrame = Frame(tabMoodsMaster)
-    moodsWebFrame = Frame(tabMoodsMaster)
-
-    moodsFrame.pack(fill="x")
-    moodsListFrame.grid(row=0, column=0, sticky="nsew")
-    tabMoodsMaster.pack(fill="x")
-    moodsMediaFrame.pack(fill="both")
-    moodsCaptionsFrame.pack(fill="both")
-    moodsPromptsFrame.pack(fill="both")
-    moodsWebFrame.pack(fill="both")
-
-    tabMoodsMaster.add(moodsMediaFrame, text="Media")
-    tabMoodsMaster.add(moodsCaptionsFrame, text="Captions")
-    tabMoodsMaster.add(moodsPromptsFrame, text="Prompts")
-    tabMoodsMaster.add(moodsWebFrame, text="Web")
-
-    # Media frame
-    mediaTree = CheckboxTreeview(moodsMediaFrame, height=7, show="tree", name="mediaTree")
-    mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
-    mediaTree.configure(yscroll=mediaScrollbar.set)
-
-    if os.path.exists(Resource.MEDIA):
-        try:
-            with open(Resource.MEDIA, "r") as f:
-                l = json.loads(f.read())
-                for m in l:
-                    if m == "default":
-                        continue
-                    parent = mediaTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                    mediaTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} media related to this mood."))
-                    mediaTree.change_state((f"{m}desc"), "disabled")
-
-        except Exception as e:
-            logging.warning(f"error in media.json. Aborting treeview load. {e}")
-            errors_list.append("The media.json treeview couldn't load properly!\n")
-            mediaTree.insert("", "end", id="NAer", text="Pack doesn't support media moods, \nor they're improperly configured!")
-            mediaTree.change_state("NAer", "disabled")
-    if len(mediaTree.get_children()) == 0:
-        mediaTree.insert("", "0", iid="NAmi", text="No media moods found in pack!")
-        mediaTree.change_state("NAmi", "disabled")
-
-    if settings["toggleMoodSet"] != True:
-        if len(mediaTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
-                try:
-                    with open(MOOD_PATH, "r") as mood:
-                        mood_dict = json.loads(mood.read())
-                        for c in mediaTree.get_children():
-                            value = mediaTree.item(c, "values")
-                            if value[0] in mood_dict["media"]:
-                                mediaTree.change_state(value[0], "checked")
-                except Exception as e:
-                    logging.warning(f"error checking media treeview nodes. {e}")
-                    errors_list.append("The media treeview nodes couldn't finish their checking setup!\n")
-
-    mediaTree.pack(side="left", fill="both", expand=1)
-    mediaScrollbar.pack(side="left", fill="y")
-
-    # Captions frame
-    captionsTree = CheckboxTreeview(moodsCaptionsFrame, height=7, show="tree", name="captionsTree")
-    captionsScrollbar = ttk.Scrollbar(moodsCaptionsFrame, orient=VERTICAL, command=captionsTree.yview)
-    captionsTree.configure(yscroll=captionsScrollbar.set)
-
-    if os.path.exists(Resource.CAPTIONS):
-        try:
-            with open(Resource.CAPTIONS, "r") as f:
-                l = json.loads(f.read())
-                if "prefix" in l:
-                    del l["prefix"]
-                if "subtext" in l:
-                    del l["subtext"]
-                if "subliminal" in l:
-                    del l["subliminal"]
-                if "prefix_settings" in l:
-                    del l["prefix_settings"]
-                for m in l:
-                    if m == "default":
-                        continue
-                    parent = captionsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                    captionsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} captions related to this mood."))
-                    captionsTree.change_state((f"{m}desc"), "disabled")
-
-        except Exception as e:
-            logging.warning(f"error in captions.json. Aborting treeview load. {e}")
-            errors_list.append("The captions.json treeview couldn't load properly!\n")
-            captionsTree.insert("", "end", iid="NAer", text="Pack doesn't support caption moods, \nor they're improperly configured!")
-            captionsTree.change_state("NAer", "disabled")
-    if len(captionsTree.get_children()) == 0:
-        captionsTree.insert("", "0", iid="NAmi", text="No caption moods found in pack!")
-        captionsTree.change_state("NAmi", "disabled")
-
-    if settings["toggleMoodSet"] != True:
-        if len(captionsTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
-                try:
-                    with open(MOOD_PATH, "r") as mood:
-                        mood_dict = json.loads(mood.read())
-                        for c in captionsTree.get_children():
-                            value = captionsTree.item(c, "values")
-                            if value[0] in mood_dict["captions"]:
-                                captionsTree.change_state(value[0], "checked")
-                except Exception as e:
-                    logging.warning(f"error checking caption treeview nodes. {e}")
-                    errors_list.append("The captions treeview nodes couldn't finish their checking setup!\n")
-
-    captionsTree.pack(side="left", fill="both", expand=1)
-    captionsScrollbar.pack(side="left", fill="y")
-
-    # Prompts frame
-    promptsTree = CheckboxTreeview(moodsPromptsFrame, height=7, show="tree", name="promptsTree")
-    promptsScrollbar = ttk.Scrollbar(moodsPromptsFrame, orient=VERTICAL, command=promptsTree.yview)
-    promptsTree.configure(yscroll=promptsScrollbar.set)
-
-    if os.path.exists(Resource.PROMPT):
-        try:
-            with open(Resource.PROMPT, "r") as f:
-                l = json.loads(f.read())
-                for m in l["moods"]:
-                    if m == "default":
-                        continue
-                    parent = promptsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                    promptsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} prompts related to this mood."))
-                    promptsTree.change_state((f"{m}desc"), "disabled")
-
-        except Exception as e:
-            logging.warning(f"error in prompt.json. Aborting treeview load. {e}")
-            errors_list.append("The prompt.json treeview couldn't load properly!\n")
-            promptsTree.insert("", "end", iid="NAer", text="Pack doesn't support prompt moods, \nor they're improperly configured!")
-            promptsTree.change_state("NAer", "disabled")
-
-    if len(promptsTree.get_children()) == 0:
-        promptsTree.insert("", "0", iid="NAmi", text="No prompt moods found in pack!")
-        promptsTree.change_state("NAmi", "disabled")
-
-    if settings["toggleMoodSet"] != True:
-        if len(promptsTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
-                try:
-                    with open(MOOD_PATH, "r") as mood:
-                        mood_dict = json.loads(mood.read())
-                        for c in promptsTree.get_children():
-                            value = promptsTree.item(c, "values")
-                            if value[0] in mood_dict["prompts"]:
-                                promptsTree.change_state(value[0], "checked")
-                except Exception as e:
-                    logging.warning(f"error checking prompt treeview nodes. {e}")
-                    errors_list.append("The prompt treeview nodes couldn't finish their checking setup!\n")
-
-    promptsTree.pack(side="left", fill="both", expand=1)
-    promptsScrollbar.pack(side="left", fill="y")
-    # Web frame
-    webTree = CheckboxTreeview(moodsWebFrame, height=7, show="tree", name="webTree")
-    webScrollbar = ttk.Scrollbar(moodsWebFrame, orient=VERTICAL, command=webTree.yview)
-    webTree.configure(yscroll=webScrollbar.set)
-
-    if os.path.exists(Resource.WEB):
-        try:
-            with open(Resource.WEB, "r") as f:
-                l = json.loads(f.read())
-                webMoodList = ["default"]
-                for m in l["moods"]:
-                    if m == "default":
-                        continue
-                    if m not in webMoodList:
-                        parent = webTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                        mCount = l["moods"].count(m)
-                        webTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{mCount} web links related to this mood."))
-                        webTree.change_state((f"{m}desc"), "disabled")
-                        webMoodList.append(m)
-
-        except Exception as e:
-            logging.warning(f"error in web.json. Aborting treeview load. {e}")
-            errors_list.append("The web.json treeview couldn't load properly!\n")
-            webTree.insert("", "end", iid="NAer", text="Pack doesn't support web moods, \nor they're improperly configured!")
-            webTree.change_state("NAer", "disabled")
-
-    if len(webTree.get_children()) == 0:
-        webTree.insert("", "0", iid="NAmi", text="No web moods found in pack!")
-        webTree.change_state("NAmi", "disabled")
-
-    if settings["toggleMoodSet"] != True:
-        if len(webTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
-                try:
-                    with open(MOOD_PATH, "r") as mood:
-                        mood_dict = json.loads(mood.read())
-                        for c in webTree.get_children():
-                            value = webTree.item(c, "values")
-                            if value[0] in mood_dict["web"]:
-                                webTree.change_state(value[0], "checked")
-                except Exception as e:
-                    logging.warning(f"error checking web treeview nodes. {e}")
-                    errors_list.append("The web treeview nodes couldn't finish their checking setup!\n")
-
-    webTree.pack(side="left", fill="both", expand=1)
-    webScrollbar.pack(side="left", fill="y")
-
-    moodsFrame.grid_columnconfigure(0, weight=1, uniform="group1")
-    moodsFrame.grid_columnconfigure(1, weight=1, uniform="group1")
-    moodsFrame.grid_rowconfigure(0, weight=1)
 
     # ==========={EDGEWARE++ "BOORU" TAB STARTS HERE}===========#
     notebookGeneral.add(tabBooru, text="Booru Downloader")
@@ -2151,7 +1947,13 @@ def show_window():
     maxSubliminalsScale.pack(fill="x", padx=1, expand=1)
     maxSubliminalsManual.pack(fill="x")
 
-    captionsFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+    # ==========={EDGEWARE++ AUDIO/VIDEO TAB STARTS HERE}==============#
+    notebookAnnoyance.add(tabAudioVideo, text="Audio/Video")
+
+    # ==========={EDGEWARE++ CAPTIONS TAB STARTS HERE}==============#
+    notebookAnnoyance.add(tabCaptions, text="Captions")
+
+    captionsFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
     captionsSubFrame1 = Frame(captionsFrame)
     capPopFrame = Frame(captionsFrame)
     capPopOpacityFrame = Frame(captionsFrame)
@@ -2302,6 +2104,217 @@ def show_window():
     panicWallpaperButton.pack(fill="x", padx=5, pady=5, expand=1)
     Label(panicWPFrameR, text="Current Panic Wallpaper").pack(fill="x")
     panicWallpaperLabel.pack()
+
+    # ==========={EDGEWARE++ MOODS TAB STARTS HERE}==============#
+    notebookAnnoyance.add(tabMoods, text="Moods")
+
+    Label(tabMoods, text="Moods", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    moodsFrame = Frame(tabMoods, borderwidth=5, relief=RAISED)
+    moodsListFrame = Frame(moodsFrame)
+    tabMoodsMaster = ttk.Notebook(moodsListFrame)
+    moodsMediaFrame = Frame(tabMoodsMaster)
+    moodsCaptionsFrame = Frame(tabMoodsMaster)
+    moodsPromptsFrame = Frame(tabMoodsMaster)
+    moodsWebFrame = Frame(tabMoodsMaster)
+
+    moodsFrame.pack(fill="x")
+    moodsListFrame.grid(row=0, column=0, sticky="nsew")
+    tabMoodsMaster.pack(fill="x")
+    moodsMediaFrame.pack(fill="both")
+    moodsCaptionsFrame.pack(fill="both")
+    moodsPromptsFrame.pack(fill="both")
+    moodsWebFrame.pack(fill="both")
+
+    tabMoodsMaster.add(moodsMediaFrame, text="Media")
+    tabMoodsMaster.add(moodsCaptionsFrame, text="Captions")
+    tabMoodsMaster.add(moodsPromptsFrame, text="Prompts")
+    tabMoodsMaster.add(moodsWebFrame, text="Web")
+
+    # Media frame
+    mediaTree = CheckboxTreeview(moodsMediaFrame, height=7, show="tree", name="mediaTree")
+    mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
+    mediaTree.configure(yscroll=mediaScrollbar.set)
+
+    if os.path.exists(Resource.MEDIA):
+        try:
+            with open(Resource.MEDIA, "r") as f:
+                l = json.loads(f.read())
+                for m in l:
+                    if m == "default":
+                        continue
+                    parent = mediaTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
+                    mediaTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} media related to this mood."))
+                    mediaTree.change_state((f"{m}desc"), "disabled")
+
+        except Exception as e:
+            logging.warning(f"error in media.json. Aborting treeview load. {e}")
+            errors_list.append("The media.json treeview couldn't load properly!\n")
+            mediaTree.insert("", "end", id="NAer", text="Pack doesn't support media moods, \nor they're improperly configured!")
+            mediaTree.change_state("NAer", "disabled")
+    if len(mediaTree.get_children()) == 0:
+        mediaTree.insert("", "0", iid="NAmi", text="No media moods found in pack!")
+        mediaTree.change_state("NAmi", "disabled")
+
+    if settings["toggleMoodSet"] != True:
+        if len(mediaTree.get_children()) != 0:
+            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+                try:
+                    with open(MOOD_PATH, "r") as mood:
+                        mood_dict = json.loads(mood.read())
+                        for c in mediaTree.get_children():
+                            value = mediaTree.item(c, "values")
+                            if value[0] in mood_dict["media"]:
+                                mediaTree.change_state(value[0], "checked")
+                except Exception as e:
+                    logging.warning(f"error checking media treeview nodes. {e}")
+                    errors_list.append("The media treeview nodes couldn't finish their checking setup!\n")
+
+    mediaTree.pack(side="left", fill="both", expand=1)
+    mediaScrollbar.pack(side="left", fill="y")
+
+    # Captions frame
+    captionsTree = CheckboxTreeview(moodsCaptionsFrame, height=7, show="tree", name="captionsTree")
+    captionsScrollbar = ttk.Scrollbar(moodsCaptionsFrame, orient=VERTICAL, command=captionsTree.yview)
+    captionsTree.configure(yscroll=captionsScrollbar.set)
+
+    if os.path.exists(Resource.CAPTIONS):
+        try:
+            with open(Resource.CAPTIONS, "r") as f:
+                l = json.loads(f.read())
+                if "prefix" in l:
+                    del l["prefix"]
+                if "subtext" in l:
+                    del l["subtext"]
+                if "subliminal" in l:
+                    del l["subliminal"]
+                if "prefix_settings" in l:
+                    del l["prefix_settings"]
+                for m in l:
+                    if m == "default":
+                        continue
+                    parent = captionsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
+                    captionsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} captions related to this mood."))
+                    captionsTree.change_state((f"{m}desc"), "disabled")
+
+        except Exception as e:
+            logging.warning(f"error in captions.json. Aborting treeview load. {e}")
+            errors_list.append("The captions.json treeview couldn't load properly!\n")
+            captionsTree.insert("", "end", iid="NAer", text="Pack doesn't support caption moods, \nor they're improperly configured!")
+            captionsTree.change_state("NAer", "disabled")
+    if len(captionsTree.get_children()) == 0:
+        captionsTree.insert("", "0", iid="NAmi", text="No caption moods found in pack!")
+        captionsTree.change_state("NAmi", "disabled")
+
+    if settings["toggleMoodSet"] != True:
+        if len(captionsTree.get_children()) != 0:
+            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+                try:
+                    with open(MOOD_PATH, "r") as mood:
+                        mood_dict = json.loads(mood.read())
+                        for c in captionsTree.get_children():
+                            value = captionsTree.item(c, "values")
+                            if value[0] in mood_dict["captions"]:
+                                captionsTree.change_state(value[0], "checked")
+                except Exception as e:
+                    logging.warning(f"error checking caption treeview nodes. {e}")
+                    errors_list.append("The captions treeview nodes couldn't finish their checking setup!\n")
+
+    captionsTree.pack(side="left", fill="both", expand=1)
+    captionsScrollbar.pack(side="left", fill="y")
+
+    # Prompts frame
+    promptsTree = CheckboxTreeview(moodsPromptsFrame, height=7, show="tree", name="promptsTree")
+    promptsScrollbar = ttk.Scrollbar(moodsPromptsFrame, orient=VERTICAL, command=promptsTree.yview)
+    promptsTree.configure(yscroll=promptsScrollbar.set)
+
+    if os.path.exists(Resource.PROMPT):
+        try:
+            with open(Resource.PROMPT, "r") as f:
+                l = json.loads(f.read())
+                for m in l["moods"]:
+                    if m == "default":
+                        continue
+                    parent = promptsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
+                    promptsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} prompts related to this mood."))
+                    promptsTree.change_state((f"{m}desc"), "disabled")
+
+        except Exception as e:
+            logging.warning(f"error in prompt.json. Aborting treeview load. {e}")
+            errors_list.append("The prompt.json treeview couldn't load properly!\n")
+            promptsTree.insert("", "end", iid="NAer", text="Pack doesn't support prompt moods, \nor they're improperly configured!")
+            promptsTree.change_state("NAer", "disabled")
+
+    if len(promptsTree.get_children()) == 0:
+        promptsTree.insert("", "0", iid="NAmi", text="No prompt moods found in pack!")
+        promptsTree.change_state("NAmi", "disabled")
+
+    if settings["toggleMoodSet"] != True:
+        if len(promptsTree.get_children()) != 0:
+            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+                try:
+                    with open(MOOD_PATH, "r") as mood:
+                        mood_dict = json.loads(mood.read())
+                        for c in promptsTree.get_children():
+                            value = promptsTree.item(c, "values")
+                            if value[0] in mood_dict["prompts"]:
+                                promptsTree.change_state(value[0], "checked")
+                except Exception as e:
+                    logging.warning(f"error checking prompt treeview nodes. {e}")
+                    errors_list.append("The prompt treeview nodes couldn't finish their checking setup!\n")
+
+    promptsTree.pack(side="left", fill="both", expand=1)
+    promptsScrollbar.pack(side="left", fill="y")
+    # Web frame
+    webTree = CheckboxTreeview(moodsWebFrame, height=7, show="tree", name="webTree")
+    webScrollbar = ttk.Scrollbar(moodsWebFrame, orient=VERTICAL, command=webTree.yview)
+    webTree.configure(yscroll=webScrollbar.set)
+
+    if os.path.exists(Resource.WEB):
+        try:
+            with open(Resource.WEB, "r") as f:
+                l = json.loads(f.read())
+                webMoodList = ["default"]
+                for m in l["moods"]:
+                    if m == "default":
+                        continue
+                    if m not in webMoodList:
+                        parent = webTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
+                        mCount = l["moods"].count(m)
+                        webTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{mCount} web links related to this mood."))
+                        webTree.change_state((f"{m}desc"), "disabled")
+                        webMoodList.append(m)
+
+        except Exception as e:
+            logging.warning(f"error in web.json. Aborting treeview load. {e}")
+            errors_list.append("The web.json treeview couldn't load properly!\n")
+            webTree.insert("", "end", iid="NAer", text="Pack doesn't support web moods, \nor they're improperly configured!")
+            webTree.change_state("NAer", "disabled")
+
+    if len(webTree.get_children()) == 0:
+        webTree.insert("", "0", iid="NAmi", text="No web moods found in pack!")
+        webTree.change_state("NAmi", "disabled")
+
+    if settings["toggleMoodSet"] != True:
+        if len(webTree.get_children()) != 0:
+            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+                try:
+                    with open(MOOD_PATH, "r") as mood:
+                        mood_dict = json.loads(mood.read())
+                        for c in webTree.get_children():
+                            value = webTree.item(c, "values")
+                            if value[0] in mood_dict["web"]:
+                                webTree.change_state(value[0], "checked")
+                except Exception as e:
+                    logging.warning(f"error checking web treeview nodes. {e}")
+                    errors_list.append("The web treeview nodes couldn't finish their checking setup!\n")
+
+    webTree.pack(side="left", fill="both", expand=1)
+    webScrollbar.pack(side="left", fill="y")
+
+    moodsFrame.grid_columnconfigure(0, weight=1, uniform="group1")
+    moodsFrame.grid_columnconfigure(1, weight=1, uniform="group1")
+    moodsFrame.grid_rowconfigure(0, weight=1)
 
     # ==========={EDGEWARE++ "DANGEROUS SETTINGS" TAB STARTS HERE}===========#
     notebookAnnoyance.add(tabDangerous, text="Dangerous Settings")
