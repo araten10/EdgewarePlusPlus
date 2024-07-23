@@ -650,9 +650,10 @@ def show_window():
     tabSubModes = ttk.Frame(tabMaster)
     notebookModes = ttk.Notebook(tabSubModes)
     tabMaster.add(tabSubModes, text="Modes")
+    tabBasicModes = ttk.Frame(None) #tab for basic popup modes
+    tabDangerModes = ttk.Frame(None) # tab for timer mode
     tabHibernate = ttk.Frame(None) # tab for hibernate mode
-    tabCorruption = ttk.Frame(None)  # tab for popup settings
-    tabTimer = ttk.Frame(None) # tab for timer mode
+    tabCorruption = ttk.Frame(None)  # tab for corruption mode
     tabMitosis = ttk.Frame(None)
 
     tabDrive = ttk.Frame(None)  # tab for drive settings
@@ -1785,25 +1786,12 @@ def show_window():
     # other start
     otherHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
 
-    audioFrame = Frame(otherHostFrame)
     webFrame = Frame(otherHostFrame)
-    vidFrameL = Frame(otherHostFrame)
-    vidFrameR = Frame(otherHostFrame)
     promptFrame = Frame(otherHostFrame)
     mistakeFrame = Frame(otherHostFrame)
 
-    audioScale = Scale(audioFrame, label="Audio Freq (%)", from_=0, to=100, orient="horizontal", variable=audioVar)
-    audioManual = Button(audioFrame, text="Manual audio...", command=lambda: assign(audioVar, simpledialog.askinteger("Manual Audio", prompt="[0-100]: ")))
-
     webScale = Scale(webFrame, label="Website Freq (%)", from_=0, to=100, orient="horizontal", variable=webVar)
     webManual = Button(webFrame, text="Manual web...", command=lambda: assign(webVar, simpledialog.askinteger("Web Chance", prompt="[0-100]: ")))
-
-    vidScale = Scale(vidFrameL, label="Video Chance (%)", from_=0, to=100, orient="horizontal", variable=vidVar)
-    vidManual = Button(vidFrameL, text="Manual vid...", command=lambda: assign(vidVar, simpledialog.askinteger("Video Chance", prompt="[0-100]: ")))
-    vidVolumeScale = Scale(vidFrameR, label="Video Volume", from_=0, to=100, orient="horizontal", variable=videoVolume)
-    vidVolumeManual = Button(
-        vidFrameR, text="Manual volume...", command=lambda: assign(videoVolume, simpledialog.askinteger("Video Volume", prompt="[0-100]: "))
-    )
 
     promptScale = Scale(promptFrame, label="Prompt Freq (%)", from_=0, to=100, orient="horizontal", variable=promptVar)
     promptManual = Button(promptFrame, text="Manual prompt...", command=lambda: assign(promptVar, simpledialog.askinteger("Manual Prompt", prompt="[0-100]: ")))
@@ -1822,20 +1810,9 @@ def show_window():
 
     otherHostFrame.pack(fill="x")
 
-    audioScale.pack(fill="x", padx=3, expand=1)
-    audioManual.pack(fill="x")
-    audioFrame.pack(side="left")
-
     webFrame.pack(fill="y", side="left", padx=3, expand=1)
     webScale.pack(fill="x")
     webManual.pack(fill="x")
-
-    vidFrameL.pack(fill="x", side="left", padx=(3, 0), expand=1)
-    vidScale.pack(fill="x")
-    vidManual.pack(fill="x")
-    vidFrameR.pack(fill="x", side="left", padx=(0, 3), expand=1)
-    vidVolumeScale.pack(fill="x")
-    vidVolumeManual.pack(fill="x")
 
     promptFrame.pack(fill="y", side="left", padx=(3, 0), expand=1)
     promptScale.pack(fill="x")
@@ -1848,35 +1825,11 @@ def show_window():
     # max start
     maxPopupFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
 
-    maxAudioFrame = Frame(maxPopupFrame)
-    maxVideoFrame = Frame(maxPopupFrame)
     subliminalsFrame = Frame(maxPopupFrame)
 
     subliminalsChanceFrame = Frame(subliminalsFrame)
     subliminalsAlphaFrame = Frame(subliminalsFrame)
     maxSubliminalsFrame = Frame(subliminalsFrame)
-
-    maxAudioToggle = Checkbutton(
-        maxAudioFrame, text="Cap Audio", variable=maxAToggleVar, command=lambda: toggleAssociateSettings(maxAToggleVar.get(), maxAudio_group)
-    )
-    maxAudioScale = Scale(maxAudioFrame, label="Max Audio Popups", from_=1, to=50, orient="horizontal", variable=maxAudioVar)
-    maxAudioManual = Button(
-        maxAudioFrame, text="Manual Max Audio...", command=lambda: assign(maxAudioVar, simpledialog.askinteger("Manual Max Audio", prompt="[1-50]: "))
-    )
-
-    maxAudio_group.append(maxAudioScale)
-    maxAudio_group.append(maxAudioManual)
-
-    maxVideoToggle = Checkbutton(
-        maxVideoFrame, text="Cap Videos", variable=maxVToggleVar, command=lambda: toggleAssociateSettings(maxVToggleVar.get(), maxVideo_group)
-    )
-    maxVideoScale = Scale(maxVideoFrame, label="Max Video Popups", from_=1, to=50, orient="horizontal", variable=maxVideoVar)
-    maxVideoManual = Button(
-        maxVideoFrame, text="Manual Max Videos...", command=lambda: assign(maxVideoVar, simpledialog.askinteger("Manual Max Videos", prompt="[1-50]: "))
-    )
-
-    maxVideo_group.append(maxVideoScale)
-    maxVideo_group.append(maxVideoManual)
 
     toggleSubliminalButton = Checkbutton(
         subliminalsFrame,
@@ -1922,16 +1875,6 @@ def show_window():
 
     maxPopupFrame.pack(fill="x")
 
-    maxAudioFrame.pack(side="left")
-    maxAudioToggle.pack(fill="x")
-    maxAudioScale.pack(fill="x", padx=1, expand=1)
-    maxAudioManual.pack(fill="x")
-
-    maxVideoFrame.pack(side="left", padx=3, expand=1)
-    maxVideoToggle.pack(fill="x")
-    maxVideoScale.pack(fill="x", padx=1, expand=1)
-    maxVideoManual.pack(fill="x")
-
     subliminalsFrame.pack(side="left")
     toggleSubliminalButton.pack(fill="x")
 
@@ -1949,6 +1892,130 @@ def show_window():
 
     # ==========={EDGEWARE++ AUDIO/VIDEO TAB STARTS HERE}==============#
     notebookAnnoyance.add(tabAudioVideo, text="Audio/Video")
+    #Audio
+    Label(tabAudioVideo, text="Audio", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    audioFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
+    audioSubFrame = Frame(audioFrame)
+    audioScale = Scale(audioSubFrame, label="Audio Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=audioVar)
+    audioManual = Button(audioSubFrame, text="Manual audio chance...", command=lambda: assign(audioVar, simpledialog.askinteger("Manual Audio", prompt="[0-100]: ")))
+
+    audioFrame.pack(fill="x")
+    audioSubFrame.pack(fill="x", side="left", expand=1)
+    audioScale.pack(fill="x", padx=3, expand=1)
+    audioManual.pack(fill="x")
+
+    #Video
+    Label(tabAudioVideo, text="Video", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    videoFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
+    vidFrameL = Frame(videoFrame)
+    vidFrameR = Frame(videoFrame)
+
+    vidScale = Scale(vidFrameL, label="Video Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=vidVar)
+    vidManual = Button(vidFrameL, text="Manual video chance...", command=lambda: assign(vidVar, simpledialog.askinteger("Video Chance", prompt="[0-100]: ")))
+    vidVolumeScale = Scale(vidFrameR, label="Video Volume", from_=0, to=100, orient="horizontal", variable=videoVolume)
+    vidVolumeManual = Button(
+        vidFrameR, text="Manual volume...", command=lambda: assign(videoVolume, simpledialog.askinteger("Video Volume", prompt="[0-100]: "))
+    )
+
+    videoFrame.pack(fill="x")
+    vidFrameL.pack(fill="x", side="left", padx=(3, 0), expand=1)
+    vidScale.pack(fill="x")
+    vidManual.pack(fill="x")
+    vidFrameR.pack(fill="x", side="left", padx=(0, 3), expand=1)
+    vidVolumeScale.pack(fill="x")
+    vidVolumeManual.pack(fill="x")
+
+    #Maximum
+    Label(tabAudioVideo, text="Maximum Audio/Video Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    maxAudVidFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
+
+    maxAudioFrame = Frame(maxAudVidFrame)
+    maxAudioToggle = Checkbutton(
+        maxAudioFrame, text="Cap Audio", variable=maxAToggleVar, command=lambda: toggleAssociateSettings(maxAToggleVar.get(), maxAudio_group)
+    )
+    maxAudioScale = Scale(maxAudioFrame, label="Max Audio Popups", from_=1, to=50, orient="horizontal", variable=maxAudioVar)
+    maxAudioManual = Button(
+        maxAudioFrame, text="Manual Max Audio...", command=lambda: assign(maxAudioVar, simpledialog.askinteger("Manual Max Audio", prompt="[1-50]: "))
+    )
+
+    maxVideoFrame = Frame(maxAudVidFrame)
+    maxVideoToggle = Checkbutton(
+        maxVideoFrame, text="Cap Videos", variable=maxVToggleVar, command=lambda: toggleAssociateSettings(maxVToggleVar.get(), maxVideo_group)
+    )
+    maxVideoScale = Scale(maxVideoFrame, label="Max Video Popups", from_=1, to=50, orient="horizontal", variable=maxVideoVar)
+    maxVideoManual = Button(
+        maxVideoFrame, text="Manual Max Videos...", command=lambda: assign(maxVideoVar, simpledialog.askinteger("Manual Max Videos", prompt="[1-50]: "))
+    )
+
+    maxAudio_group.append(maxAudioScale)
+    maxAudio_group.append(maxAudioManual)
+
+    maxVideo_group.append(maxVideoScale)
+    maxVideo_group.append(maxVideoManual)
+
+    maxAudVidFrame.pack(fill="x")
+
+    maxAudioFrame.pack(fill="x", side="left", padx=(3, 0), expand=1)
+    maxAudioToggle.pack(fill="x")
+    maxAudioScale.pack(fill="x", padx=1, expand=1)
+    maxAudioManual.pack(fill="x")
+
+    maxVideoFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
+    maxVideoToggle.pack(fill="x")
+    maxVideoScale.pack(fill="x", padx=1, expand=1)
+    maxVideoManual.pack(fill="x")
+
+    #playback options
+    Label(tabAudioVideo, text="Playback Options", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    playbackFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
+    playbackFrameL = Frame(playbackFrame)
+    playbackFrameR = Frame(playbackFrame)
+
+    offsetSlider = Scale(playbackFrameL, label="Pump-Scare Offset", orient="horizontal", variable=pumpScareOffsetVar, to=50, width=10)
+    scareOffsetButton = Button(
+        playbackFrameL,
+        text="Manual offset...",
+        command=lambda: assign(pumpScareOffsetVar, simpledialog.askinteger("Offset for Pump-Scare Audio (seconds)", prompt="[0-50]: ")),
+        cursor="question_arrow",
+    )
+
+    toggleVLC = Checkbutton(playbackFrameR, text="Use VLC to play videos", variable=vlcModeVar, cursor="question_arrow")
+    VLCNotice = Label(
+        playbackFrameR,
+        text="NOTE: Installing VLC is required for this option!\nMake sure you download the version your OS supports!\nIf you have a 64 bit OS, download x64!",
+        width=10,
+    )
+    installVLCButton = Button(playbackFrameR, text="Go to VLC's website", command=lambda: webbrowser.open("https://www.videolan.org/vlc/"))
+
+    playbackFrame.pack(fill="x")
+    playbackFrameL.pack(fill="both", side="left", expand=1)
+    offsetSlider.pack(fill="both", side="top", padx=2, expand=1)
+    scareOffsetButton.pack(fill="x", side="top", padx=2)
+    playbackFrameR.pack(fill="both", side="left", expand=1)
+    toggleVLC.pack(fill="both", side="top", expand=1, padx=2)
+    VLCNotice.pack(fill="both", side="top", expand=1, padx=2)
+    installVLCButton.pack(fill="both", side="top", padx=2)
+
+    psoffsetttp = CreateToolTip(
+        scareOffsetButton,
+        'Pump-Scare is a hibernate mode type where an image "jump-scares" you by appearing suddenly then disappears seconds later. However, '
+        "sometimes audio files are large enough that the audio won't even have a chance to load in before the image disappears.\n\nThis setting allows you to let the audio "
+        "start playing earlier so it has time to load properly. Maybe you also have an audio file that builds up to a horny crecendo and want the image to appear at that point? "
+        "You could get creative with this!",
+    )
+    vlcttp = CreateToolTip(
+        toggleVLC,
+        "Going to get a bit technical here:\n\nBy default, EdgeWare loads videos by taking the source file, turning every frame into an image, and then playing the images in "
+        "sequence at the specified framerate. The upside to this is it requires no additional dependencies, but it has multiple downsides. Firstly, it's very slow: you may have "
+        "noticed that videos take a while to load and also cause excessive memory usage. Secondly, there is a bug that can cause certain users to not have audio while playing videos."
+        "\n\nSo here's an alternative: by installing VLC to your computer and using this option, you can make videos play much faster and use less memory by using libvlc. "
+        "If videos were silent for you this will hopefully fix that as well.\n\nPlease note that this feature has the potential to break in the future as VLC is a program independent "
+        "from EdgeWare. For posterity's sake, the current version of VLC as of writing this tooltip is 3.0.20.",
+    )
 
     # ==========={EDGEWARE++ CAPTIONS TAB STARTS HERE}==============#
     notebookAnnoyance.add(tabCaptions, text="Captions")
@@ -2405,6 +2472,60 @@ def show_window():
     pathBox.pack(fill="x")
     pathButton.pack(fill="x")
 
+    # ==========={EDGEWARE++ "BASIC MODES" TAB STARTS HERE}===========#
+    notebookModes.add(tabBasicModes, text="Basic Modes")
+    #Unsure if not calling this denial/moving in the tab will confuse people, consider renaming if people find it annoying
+
+    Label(tabBasicModes, text="Denial Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+    denialFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
+
+    Label(tabBasicModes, text="Lowkey Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+    lowkeyFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
+
+    Label(tabBasicModes, text="Movement Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+    movementFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
+
+    # ==========={EDGEWARE++ "DANGEROUS MODES" TAB STARTS HERE}===========#
+    notebookModes.add(tabDangerModes, text="Dangerous Modes")
+    # timer settings
+    Label(tabDangerModes, text="Timer Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+    timerFrame = Frame(tabDangerModes, borderwidth=5, relief=RAISED)
+
+    timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=timerVar, command=lambda: timerHelper(), cursor="question_arrow")
+    timerSlider = Scale(timerFrame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=timerTimeVar)
+    safewordFrame = Frame(timerFrame)
+
+    def timerHelper():
+        toggleAssociateSettings(timerVar.get(), timer_group)
+        if timerVar.get():
+            startLoginVar.set(True)
+        else:
+            startLoginVar.set(False)
+
+    timerttp = CreateToolTip(
+        timerToggle,
+        'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
+        '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
+        "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
+        "instability when running EdgeWare multiple times without changing config settings.",
+    )
+
+    Label(safewordFrame, text="Emergency Safeword").pack()
+    timerSafeword = Entry(safewordFrame, show="*", textvariable=safewordVar)
+    timerSafeword.pack(expand=1, fill="both")
+
+    timer_group.append(timerSafeword)
+    timer_group.append(timerSlider)
+
+    timerToggle.pack(side="left", fill="x", padx=5)
+    timerSlider.pack(side="left", fill="x", expand=1, padx=10)
+    safewordFrame.pack(side="right", fill="x", padx=5)
+
+    timerFrame.pack(fill="x")
+
+    Label(tabDangerModes, text="Mitosis Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+    mitosisFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
+
     # ==========={EDGEWARE++ "HIBERNATE" TAB STARTS HERE}===========#
     notebookModes.add(tabHibernate, text="Hibernate")
     # init
@@ -2547,44 +2668,6 @@ def show_window():
     hibernateLengthScale.pack(fill="y")
     hibernateLengthButton.pack(fill="y")
     hibernateLengthFrame.pack(fill="x", side="left")
-
-    # ==========={EDGEWARE++ "TIMER" TAB STARTS HERE}===========#
-    notebookModes.add(tabTimer, text="Timer")
-    # timer settings
-    Label(tabTimer, text="Timer Settings", font=titleFont, relief=GROOVE).pack(pady=2)
-    timerFrame = Frame(tabTimer, borderwidth=5, relief=RAISED)
-
-    timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=timerVar, command=lambda: timerHelper(), cursor="question_arrow")
-    timerSlider = Scale(timerFrame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=timerTimeVar)
-    safewordFrame = Frame(timerFrame)
-
-    def timerHelper():
-        toggleAssociateSettings(timerVar.get(), timer_group)
-        if timerVar.get():
-            startLoginVar.set(True)
-        else:
-            startLoginVar.set(False)
-
-    timerttp = CreateToolTip(
-        timerToggle,
-        'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
-        '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
-        "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
-        "instability when running EdgeWare multiple times without changing config settings.",
-    )
-
-    Label(safewordFrame, text="Emergency Safeword").pack()
-    timerSafeword = Entry(safewordFrame, show="*", textvariable=safewordVar)
-    timerSafeword.pack(expand=1, fill="both")
-
-    timer_group.append(timerSafeword)
-    timer_group.append(timerSlider)
-
-    timerToggle.pack(side="left", fill="x", padx=5)
-    timerSlider.pack(side="left", fill="x", expand=1, padx=10)
-    safewordFrame.pack(side="right", fill="x", padx=5)
-
-    timerFrame.pack(fill="x")
 
     # ===================={CORRUPTION}==============================#
     notebookModes.add(tabCorruption, text="Corruption")
@@ -2963,37 +3046,6 @@ def show_window():
     toggleHibernateSkip.pack(fill="x", side="top")
     toggleMoodSettings.pack(fill="x", side="top")
 
-    Label(tabAdvanced, text="Playback Options", font=titleFont, relief=GROOVE).pack(pady=2)
-
-    troubleshootingHostFrame2 = Frame(tabAdvanced, borderwidth=5, relief=RAISED)
-    troubleshootingFrame3 = Frame(troubleshootingHostFrame2)
-    troubleshootingFrame4 = Frame(troubleshootingHostFrame2)
-
-    offsetSlider = Scale(troubleshootingFrame3, label="Pump-Scare Offset", orient="horizontal", variable=pumpScareOffsetVar, to=50, width=10)
-    scareOffsetButton = Button(
-        troubleshootingFrame3,
-        text="Manual offset...",
-        command=lambda: assign(pumpScareOffsetVar, simpledialog.askinteger("Offset for Pump-Scare Audio (seconds)", prompt="[0-50]: ")),
-        cursor="question_arrow",
-    )
-
-    toggleVLC = Checkbutton(troubleshootingFrame4, text="Use VLC to play videos", variable=vlcModeVar, cursor="question_arrow")
-    VLCNotice = Label(
-        troubleshootingFrame4,
-        text="NOTE: Installing VLC is required for this option!\nMake sure you download the version your OS supports!\nIf you have a 64 bit OS, download x64!",
-        width=10,
-    )
-    installVLCButton = Button(troubleshootingFrame4, text="Go to VLC's website", command=lambda: webbrowser.open("https://www.videolan.org/vlc/"))
-
-    troubleshootingHostFrame2.pack(fill="x")
-    troubleshootingFrame3.pack(fill="both", side="left", expand=1)
-    offsetSlider.pack(fill="both", side="top", padx=2, expand=1)
-    scareOffsetButton.pack(fill="x", side="top", padx=2)
-    troubleshootingFrame4.pack(fill="both", side="left", expand=1)
-    toggleVLC.pack(fill="both", side="top", expand=1, padx=2)
-    VLCNotice.pack(fill="both", side="top", expand=1, padx=2)
-    installVLCButton.pack(fill="both", side="top", padx=2)
-
     lanczosttp = CreateToolTip(
         toggleLanczos,
         "Are popups and the startup image inexplicably not showing up for you? Try this setting.\n\n"
@@ -3021,22 +3073,6 @@ def show_window():
         " files in //moods//unnamed, all pointing to what is essentially the same pack. This will reset your mood settings every time, too.\n\n"
         "In situations like this, I recommend creating a info file with a pack name, but if you're unsure how to do that or just don't want to"
         " deal with all this mood business, you can disable the mood saving feature here.",
-    )
-    psoffsetttp = CreateToolTip(
-        scareOffsetButton,
-        'Pump-Scare is a hibernate mode type where an image "jump-scares" you by appearing suddenly then disappears seconds later. However, '
-        "sometimes audio files are large enough that the audio won't even have a chance to load in before the image disappears.\n\nThis setting allows you to let the audio "
-        "start playing earlier so it has time to load properly. Maybe you also have an audio file that builds up to a horny crecendo and want the image to appear at that point? "
-        "You could get creative with this!",
-    )
-    vlcttp = CreateToolTip(
-        toggleVLC,
-        "Going to get a bit technical here:\n\nBy default, EdgeWare loads videos by taking the source file, turning every frame into an image, and then playing the images in "
-        "sequence at the specified framerate. The upside to this is it requires no additional dependencies, but it has multiple downsides. Firstly, it's very slow: you may have "
-        "noticed that videos take a while to load and also cause excessive memory usage. Secondly, there is a bug that can cause certain users to not have audio while playing videos."
-        "\n\nSo here's an alternative: by installing VLC to your computer and using this option, you can make videos play much faster and use less memory by using libvlc. "
-        "If videos were silent for you this will hopefully fix that as well.\n\nPlease note that this feature has the potential to break in the future as VLC is a program independent "
-        "from EdgeWare. For posterity's sake, the current version of VLC as of writing this tooltip is 3.0.20.",
     )
 
     Label(tabAdvanced, text="Errors", font=titleFont, relief=GROOVE).pack(pady=2)
