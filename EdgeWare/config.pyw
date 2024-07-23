@@ -1607,54 +1607,16 @@ def show_window():
 
     delayModeFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
     delayFrame = Frame(delayModeFrame)
-    lowkeyFrame = Frame(delayModeFrame)
+    popChanceFrame = Frame(delayModeFrame)
 
     delayScale = Scale(delayFrame, label="Popup Timer Delay (ms)", from_=10, to=60000, orient="horizontal", variable=delayVar)
     delayManual = Button(delayFrame, text="Manual delay...", command=lambda: assign(delayVar, simpledialog.askinteger("Manual Delay", prompt="[10-60000]: ")))
-    opacityScale = Scale(tabPopups, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
 
-    posList = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
-    lkItemVar = StringVar(root, posList[lkCorner.get()])
-    lowkeyDropdown = OptionMenu(lowkeyFrame, lkItemVar, *posList, command=lambda x: (lkCorner.set(posList.index(x))))
-    lowkeyToggle = Checkbutton(
-        lowkeyFrame, text="Lowkey Mode", variable=lkToggle, command=lambda: toggleAssociateSettings(lkToggle.get(), lowkey_group), cursor="question_arrow"
-    )
-
-    lowkeyttp = CreateToolTip(
-        lowkeyToggle,
-        "Makes popups appear in a corner of the screen instead of the middle.\n\n" "Best used with Popup Timeout or high delay as popups will stack.",
-    )
-
-    lowkey_group.append(lowkeyDropdown)
-
-    delayModeFrame.pack(fill="x")
-
-    delayScale.pack(fill="x", expand=1)
-    delayManual.pack(fill="x", expand=1)
-
-    delayFrame.pack(side="left", fill="x", expand=1)
-
-    lowkeyFrame.pack(fill="y", side="left")
-    lowkeyDropdown.pack(fill="x", padx=2, pady=5)
-    lowkeyToggle.pack(fill="both", expand=1)
-
-    opacityScale.pack(fill="x")
-
-    # popup frame handling
-    popupHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-    popupFrame = Frame(popupHostFrame)
-    timeoutFrame = Frame(popupHostFrame)
-    mitosisFrame = Frame(popupHostFrame)
-    panicFrame = Frame(popupHostFrame)
-    denialFrame = Frame(popupHostFrame)
-    movingFrame = Frame(popupHostFrame)
-    speedFrame = Frame(popupHostFrame)
-
-    popupScale = Scale(popupFrame, label="Popup Freq (%)", from_=0, to=100, orient="horizontal", variable=popupVar)
+    popupScale = Scale(popChanceFrame, label="Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=popupVar)
     popupManual = Button(
-        popupFrame,
-        text="Manual popup...",
-        command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup", prompt="[0-100]: ")),
+        popChanceFrame,
+        text="Manual chance...",
+        command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: ")),
         cursor="question_arrow",
     )
 
@@ -1663,6 +1625,24 @@ def show_window():
         "Whenever the timer is reached to spawn a new popup, this value is rolled to see if it spawns or not.\n\n"
         "Leave at 100 for a more consistent experience, and make it less for a more random one.",
     )
+
+    delayModeFrame.pack(fill="x")
+
+    delayScale.pack(fill="x", expand=1)
+    delayManual.pack(fill="x", expand=1)
+
+    delayFrame.pack(fill="x", side="left", padx=(3, 0), expand=1)
+    popChanceFrame.pack(fill="x", side="left", padx=(0, 3))
+    popupScale.pack(fill="x")
+    popupManual.pack(fill="x")
+
+    # popup frame handling
+    popupHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+    timeoutFrame = Frame(popupHostFrame)
+    mitosisFrame = Frame(popupHostFrame)
+    panicFrame = Frame(popupHostFrame)
+
+    opacityScale = Scale(popupHostFrame, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
 
     mitosis_group.append(popupScale)
     mitosis_group.append(popupManual)
@@ -1695,46 +1675,13 @@ def show_window():
 
     timeout_group.append(timeoutSlider)
 
-    denialSlider = Scale(denialFrame, label="Denial Chance", orient="horizontal", variable=denialChance)
-    denialToggle = Checkbutton(
-        denialFrame, text="Denial Mode", variable=denialMode, command=lambda: toggleAssociateSettings(denialMode.get(), denial_group), cursor="question_arrow"
-    )
-
-    movingSlider = Scale(movingFrame, label="Moving Chance", orient="horizontal", variable=movingChanceVar, cursor="question_arrow")
-    movingRandToggle = Checkbutton(movingFrame, text="Rand. Direction", variable=movingRandomVar, cursor="question_arrow")
-
-    movingttp = CreateToolTip(
-        movingSlider,
-        'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
-        "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
-    )
-    moverandomttp = CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
-
-    movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=movingSpeedVar)
-    manualSpeed = Button(speedFrame, text="Manual speed...", command=lambda: assign(movingSpeedVar, simpledialog.askinteger("Manual Speed", prompt="[1-15]: ")))
-
-    denialttp = CreateToolTip(denialToggle, 'Adds a percentage chance to "censor" an image.')
-    denial_group.append(denialSlider)
-
     popupHostFrame.pack(fill="x")
-    popupScale.pack(fill="x")
-    popupManual.pack(fill="x")
-    popupFrame.pack(fill="y", side="left")
     timeoutSlider.pack(fill="x")
     timeoutToggle.pack(fill="x")
     timeoutFrame.pack(fill="y", side="left")
     mitosisFrame.pack(fill="y", side="left")
     mitosisStren.pack(fill="x")
     mitosisToggle.pack(fill="x")
-    denialFrame.pack(fill="y", side="left")
-    denialSlider.pack(fill="x")
-    denialToggle.pack(fill="x")
-    movingFrame.pack(fill="y", side="left")
-    movingSlider.pack(fill="x")
-    movingRandToggle.pack(fill="x")
-    speedFrame.pack(fill="y", side="left")
-    movingSpeedSlider.pack(fill="x")
-    manualSpeed.pack(fill="x")
     panicFrame.pack(fill="y", side="left")
     setPanicButtonButton.pack(fill="x", expand=1)
     doPanicButton.pack(fill="x")
@@ -1822,10 +1769,13 @@ def show_window():
     mistakeManual.pack(fill="x")
     # end web
 
-    # max start
-    maxPopupFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+    # overlay start
+    Label(tabPopups, text="Popup Overlays", font=titleFont, relief=GROOVE).pack(pady=2)
 
-    subliminalsFrame = Frame(maxPopupFrame)
+    overlayFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+
+    subliminalsFrame = Frame(overlayFrame)
+    denialFrame = Frame(overlayFrame)
 
     subliminalsChanceFrame = Frame(subliminalsFrame)
     subliminalsAlphaFrame = Frame(subliminalsFrame)
@@ -1833,7 +1783,7 @@ def show_window():
 
     toggleSubliminalButton = Checkbutton(
         subliminalsFrame,
-        text="Popup Subliminals",
+        text="Subliminal Overlays",
         variable=popupSublim,
         command=lambda: toggleAssociateSettings(popupSublim.get(), subliminals_group),
         cursor="question_arrow",
@@ -1873,22 +1823,40 @@ def show_window():
     subliminals_group.append(maxSubliminalsScale)
     subliminals_group.append(maxSubliminalsManual)
 
-    maxPopupFrame.pack(fill="x")
+    denialSlider = Scale(denialFrame, label="Denial Chance", orient="horizontal", variable=denialChance)
+    denialToggle = Checkbutton(
+        denialFrame, text="Denial Overlays", variable=denialMode, command=lambda: toggleAssociateSettings(denialMode.get(), denial_group), cursor="question_arrow"
+    )
+    denialChanceManual = Button(
+        denialFrame,
+        text="Manual Denial Chance...",
+        command=lambda: assign(denialChance, simpledialog.askinteger("Manual Denial Chance", prompt="[1-100]: ")),
+    )
+    denialttp = CreateToolTip(denialToggle, 'Adds a percentage chance to "censor" an image.')
+    denial_group.append(denialSlider)
+    denial_group.append(denialChanceManual)
 
-    subliminalsFrame.pack(side="left")
+    overlayFrame.pack(fill="x")
+
+    subliminalsFrame.pack(fill="x", side="left", padx=(3, 0))
     toggleSubliminalButton.pack(fill="x")
 
-    subliminalsChanceFrame.pack(side="left", padx=3, expand=1)
-    subliminalsChanceScale.pack(fill="x", padx=1, expand=1)
+    subliminalsChanceFrame.pack(fill="x", side="left", padx=3)
+    subliminalsChanceScale.pack(fill="x")
     subliminalsChanceManual.pack(fill="x")
 
-    subliminalsAlphaFrame.pack(side="left", padx=3, expand=1)
-    subliminalsAlphaScale.pack(fill="x", padx=1, expand=1)
+    subliminalsAlphaFrame.pack(fill="x", side="left", padx=3)
+    subliminalsAlphaScale.pack(fill="x")
     subliminalsAlphaManual.pack(fill="x")
 
-    maxSubliminalsFrame.pack(side="left", padx=3, expand=1)
-    maxSubliminalsScale.pack(fill="x", padx=1, expand=1)
+    maxSubliminalsFrame.pack(fill="x", side="left", padx=3)
+    maxSubliminalsScale.pack(fill="x")
     maxSubliminalsManual.pack(fill="x")
+
+    denialFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
+    denialToggle.pack(fill="x")
+    denialSlider.pack(fill="x", padx=1, expand=1)
+    denialChanceManual.pack(fill="x")
 
     # ==========={EDGEWARE++ AUDIO/VIDEO TAB STARTS HERE}==============#
     notebookAnnoyance.add(tabAudioVideo, text="Audio/Video")
@@ -2474,16 +2442,53 @@ def show_window():
 
     # ==========={EDGEWARE++ "BASIC MODES" TAB STARTS HERE}===========#
     notebookModes.add(tabBasicModes, text="Basic Modes")
-    #Unsure if not calling this denial/moving in the tab will confuse people, consider renaming if people find it annoying
-
-    Label(tabBasicModes, text="Denial Mode", font=titleFont, relief=GROOVE).pack(pady=2)
-    denialFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
+    #Unsure if not calling this lowkey/moving in the tab will confuse people, consider renaming if people find it annoying
 
     Label(tabBasicModes, text="Lowkey Mode", font=titleFont, relief=GROOVE).pack(pady=2)
     lowkeyFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
 
+    posList = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
+    lkItemVar = StringVar(root, posList[lkCorner.get()])
+
+    lowkeyDropdown = OptionMenu(lowkeyFrame, lkItemVar, *posList, command=lambda x: (lkCorner.set(posList.index(x))))
+    lowkeyToggle = Checkbutton(
+        lowkeyFrame, text="Lowkey Mode", variable=lkToggle, command=lambda: toggleAssociateSettings(lkToggle.get(), lowkey_group), cursor="question_arrow"
+    )
+
+    lowkeyttp = CreateToolTip(
+        lowkeyToggle,
+        "Makes popups appear in a corner of the screen instead of the middle.\n\n" "Best used with Popup Timeout or high delay as popups will stack.",
+    )
+
+    lowkey_group.append(lowkeyDropdown)
+
+    lowkeyFrame.pack(fill="x")
+    lowkeyToggle.pack(fill="both", expand=1)
+    lowkeyDropdown.pack(fill="x", padx=2, pady=5)
+
     Label(tabBasicModes, text="Movement Mode", font=titleFont, relief=GROOVE).pack(pady=2)
     movementFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
+
+    movingSlider = Scale(movementFrame, label="Moving Chance", orient="horizontal", variable=movingChanceVar, cursor="question_arrow")
+    movingRandToggle = Checkbutton(movementFrame, text="Random Direction", variable=movingRandomVar, cursor="question_arrow")
+
+    movingttp = CreateToolTip(
+        movingSlider,
+        'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
+        "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
+    )
+    moverandomttp = CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
+
+    speedFrame = Frame(movementFrame)
+    movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=movingSpeedVar)
+    manualSpeed = Button(speedFrame, text="Manual speed...", command=lambda: assign(movingSpeedVar, simpledialog.askinteger("Manual Speed", prompt="[1-15]: ")))
+
+    movementFrame.pack(fill="y", side="left")
+    movingSlider.pack(fill="x")
+    movingRandToggle.pack(fill="x")
+    speedFrame.pack(fill="y", side="left")
+    movingSpeedSlider.pack(fill="x")
+    manualSpeed.pack(fill="x")
 
     # ==========={EDGEWARE++ "DANGEROUS MODES" TAB STARTS HERE}===========#
     notebookModes.add(tabDangerModes, text="Dangerous Modes")
