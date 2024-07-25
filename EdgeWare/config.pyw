@@ -1053,21 +1053,15 @@ def show_window():
     # other
     Label(tabStart, text="Other", font=titleFont, relief=GROOVE).pack(pady=2)
     otherHostFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
-    toggleFrame1 = Frame(otherHostFrame)
     toggleFrame2 = Frame(otherHostFrame)
     toggleFrame3 = Frame(otherHostFrame)
 
-    toggleStartupButton = Checkbutton(toggleFrame1, text="Launch on Startup", variable=startLoginVar)
-    toggleDiscordButton = Checkbutton(toggleFrame1, text="Show on Discord", variable=discordVar, cursor="question_arrow")
     toggleFlairButton = Checkbutton(toggleFrame2, text="Show Loading Flair", variable=startFlairVar, cursor="question_arrow")
     toggleROSButton = Checkbutton(toggleFrame2, text="Run Edgeware on Save & Exit", variable=rosVar)
     toggleDesktopButton = Checkbutton(toggleFrame3, text="Create Desktop Icons", variable=deskIconVar)
     toggleSafeMode = Checkbutton(toggleFrame3, text='Warn if "Dangerous" Settings Active', variable=safeModeVar, cursor="question_arrow")
 
     otherHostFrame.pack(fill="x")
-    toggleFrame1.pack(fill="both", side="left", expand=1)
-    toggleStartupButton.pack(fill="x")
-    toggleDiscordButton.pack(fill="x")
     toggleFrame2.pack(fill="both", side="left", expand=1)
     toggleFlairButton.pack(fill="x")
     toggleROSButton.pack(fill="x")
@@ -1075,9 +1069,6 @@ def show_window():
     toggleDesktopButton.pack(fill="x")
     toggleSafeMode.pack(fill="x")
 
-    discordttp = CreateToolTip(
-        toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator."
-    )
     loadingFlairttp = CreateToolTip(
         toggleFlairButton, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.'
     )
@@ -1090,7 +1081,7 @@ def show_window():
         "Major (very dangerous, can affect your computer):\n"
         "Launch on Startup, Fill Drive\n\n"
         "Medium (can lead to embarassment or reduced control over EdgeWare):\n"
-        "Timer Mode, Show on Discord, short hibernate cooldown\n\n"
+        "Timer Mode, Mitosis Mode, Show on Discord, short hibernate cooldown\n\n"
         "Minor (low risk but could lead to unwanted interactions):\n"
         "Disable Panic Hotkey, Run on Save & Exit",
     )
@@ -1615,7 +1606,7 @@ def show_window():
     popupScale = Scale(popChanceFrame, label="Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=popupVar)
     popupManual = Button(
         popChanceFrame,
-        text="Manual chance...",
+        text="Manual popup chance...",
         command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: ")),
         cursor="question_arrow",
     )
@@ -1639,24 +1630,9 @@ def show_window():
     # popup frame handling
     popupHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
     timeoutFrame = Frame(popupHostFrame)
-    mitosisFrame = Frame(popupHostFrame)
     panicFrame = Frame(popupHostFrame)
 
     opacityScale = Scale(popupHostFrame, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
-
-    mitosis_group.append(popupScale)
-    mitosis_group.append(popupManual)
-
-    def toggleMitosis():
-        toggleAssociateSettings(not mitosisVar.get(), mitosis_group)
-        toggleAssociateSettings(mitosisVar.get(), mitosis_cGroup)
-
-    mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=mitosisVar, command=toggleMitosis, cursor="question_arrow")
-    mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=mitosisStrenVar)
-
-    mitosisttp = CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
-
-    mitosis_cGroup.append(mitosisStren)
 
     setPanicButtonButton = Button(
         panicFrame,
@@ -1679,9 +1655,6 @@ def show_window():
     timeoutSlider.pack(fill="x")
     timeoutToggle.pack(fill="x")
     timeoutFrame.pack(fill="y", side="left")
-    mitosisFrame.pack(fill="y", side="left")
-    mitosisStren.pack(fill="x")
-    mitosisToggle.pack(fill="x")
     panicFrame.pack(fill="y", side="left")
     setPanicButtonButton.pack(fill="x", expand=1)
     doPanicButton.pack(fill="x")
@@ -1689,24 +1662,11 @@ def show_window():
 
     # additional popup options, mostly edgeware++ stuff
     popupOptionsFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-    popupOptionsSubFrame1 = Frame(popupOptionsFrame)
-    popupOptionsSubFrame2 = Frame(popupOptionsFrame)
-    popupOptionsSubFrame3 = Frame(popupOptionsFrame)
 
-    panicDisableButton = Checkbutton(popupOptionsSubFrame1, text="Disable Panic Hotkey", variable=panicVar, cursor="question_arrow")
-    popupWebToggle = Checkbutton(popupOptionsSubFrame1, text="Popup close opens web page", variable=popupWebVar)
-    toggleEasierButton = Checkbutton(popupOptionsSubFrame2, text="Buttonless Closing Popups", variable=buttonlessVar, cursor="question_arrow")
-    toggleSingleButton = Checkbutton(popupOptionsSubFrame3, text="Single Popup Mode", variable=singleModeVar, cursor="question_arrow")
-    toggleMultiClickButton = Checkbutton(popupOptionsSubFrame3, text="Multi-Click popups", variable=multiClickVar, cursor="question_arrow")
+    popupWebToggle = Checkbutton(popupOptionsFrame, text="Popup close opens web page", variable=popupWebVar)
+    toggleEasierButton = Checkbutton(popupOptionsFrame, text="Buttonless Closing Popups", variable=buttonlessVar, cursor="question_arrow")
+    toggleSingleButton = Checkbutton(popupOptionsFrame, text="Single Popup Mode", variable=singleModeVar, cursor="question_arrow")
 
-    disablePanicttp = CreateToolTip(
-        panicDisableButton,
-        "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
-        "If you want to use Panic after this, you can still:\n"
-        '•Directly run "panic.pyw"\n'
-        '•Keep the config window open and press "Perform Panic"\n'
-        "•Use the panic desktop icon (if you kept those enabled)",
-    )
     buttonlessttp = CreateToolTip(
         toggleEasierButton,
         'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
@@ -1723,13 +1683,9 @@ def show_window():
     )
 
     popupOptionsFrame.pack(fill="x")
-    popupOptionsSubFrame1.pack(fill="y", side="left", expand=1)
-    popupOptionsSubFrame2.pack(fill="y", side="left", expand=1)
-    popupOptionsSubFrame3.pack(fill="y", side="left", expand=1)
-    panicDisableButton.pack(fill="x")
-    popupWebToggle.pack(fill="x")
-    toggleEasierButton.pack(fill="x")
-    toggleSingleButton.pack(fill="x")
+    popupWebToggle.pack(fill="x", side="left", expand=1)
+    toggleEasierButton.pack(fill="x", side="left", expand=1)
+    toggleSingleButton.pack(fill="x", side="left", expand=1)
     # other start
     otherHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
 
@@ -2440,6 +2396,28 @@ def show_window():
     pathBox.pack(fill="x")
     pathButton.pack(fill="x")
 
+    Label(tabDangerous, text="Misc. Dangerous Settings").pack(fill="both")
+    dangerOtherFrame = Frame(tabDangerous, borderwidth=5, relief=RAISED)
+    panicDisableButton = Checkbutton(dangerOtherFrame, text="Disable Panic Hotkey", variable=panicVar, cursor="question_arrow")
+    toggleStartupButton = Checkbutton(dangerOtherFrame, text="Launch on PC Startup", variable=startLoginVar)
+    toggleDiscordButton = Checkbutton(dangerOtherFrame, text="Show on Discord", variable=discordVar, cursor="question_arrow")
+
+    disablePanicttp = CreateToolTip(
+        panicDisableButton,
+        "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
+        "If you want to use Panic after this, you can still:\n"
+        '•Directly run "panic.pyw"\n'
+        '•Keep the config window open and press "Perform Panic"\n'
+        "•Use the panic desktop icon (if you kept those enabled)",
+    )
+    discordttp = CreateToolTip(
+        toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator."
+    )
+    dangerOtherFrame.pack(fill="x")
+    panicDisableButton.pack(fill="x", side="left", expand=1)
+    toggleStartupButton.pack(fill="x", side="left", expand=1)
+    toggleDiscordButton.pack(fill="x", side="left", expand=1)
+
     # ==========={EDGEWARE++ "BASIC MODES" TAB STARTS HERE}===========#
     notebookModes.add(tabBasicModes, text="Basic Modes")
     #Unsure if not calling this lowkey/moving in the tab will confuse people, consider renaming if people find it annoying
@@ -2529,7 +2507,25 @@ def show_window():
     timerFrame.pack(fill="x")
 
     Label(tabDangerModes, text="Mitosis Mode", font=titleFont, relief=GROOVE).pack(pady=2)
-    mitosisFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
+    mitosisFrame = Frame(tabDangerModes, borderwidth=5, relief=RAISED)
+
+    mitosis_group.append(popupScale)
+    mitosis_group.append(popupManual)
+
+    def toggleMitosis():
+        toggleAssociateSettings(not mitosisVar.get(), mitosis_group)
+        toggleAssociateSettings(mitosisVar.get(), mitosis_cGroup)
+
+    mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=mitosisVar, command=toggleMitosis, cursor="question_arrow")
+    mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=mitosisStrenVar)
+
+    mitosisttp = CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
+
+    mitosis_cGroup.append(mitosisStren)
+
+    mitosisFrame.pack(fill="x")
+    mitosisToggle.pack(side="left", fill="x", padx=5)
+    mitosisStren.pack(side="left", fill="x", expand=1, padx=10)
 
     # ==========={EDGEWARE++ "HIBERNATE" TAB STARTS HERE}===========#
     notebookModes.add(tabHibernate, text="Hibernate")
@@ -3388,6 +3384,7 @@ def safeCheck(varList: list[StringVar | IntVar | BooleanVar], nameList: list[str
             )
     if (
         int(varList[nameList.index("timerMode")].get()) == 1
+        or int(varList[nameList.index("mitosisMode")].get()) == 1
         or int(varList[nameList.index("showDiscord")].get()) == 1
         or (
             int(varList[nameList.index("hibernateMode")].get()) == 1
@@ -3399,6 +3396,9 @@ def safeCheck(varList: list[StringVar | IntVar | BooleanVar], nameList: list[str
         if int(varList[nameList.index("timerMode")].get()) == 1:
             numDangers += 1
             dangersList.append("\n•Timer mode is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!")
+        if int(varList[nameList.index("mitosisMode")].get()) == 1:
+            numDangers += 1
+            dangersList.append("\n•Mitosis mode is enabled! With high popup rates, this could create a chain reaction, causing lag!")
         if int(varList[nameList.index("hibernateMode")].get()) == 1 and (
             int(varList[nameList.index("hibernateMin")].get()) < 30 or int(varList[nameList.index("hibernateMax")].get()) < 30
         ):

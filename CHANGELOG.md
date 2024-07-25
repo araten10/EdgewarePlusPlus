@@ -9,6 +9,8 @@
 
 **Since last version...**
 
+•*Mitosis mode tagged as a dangerous setting, danger level "medium"*
+
 •*Cleaned up log files so there's less benign errors being thrown for no reason*
 
 •*Changed sublabel mood from "subliminal" to "subliminals", to keep with consistency on config window and everything else i've mentioned about them*
