@@ -758,66 +758,6 @@ def show_window():
         forceReload.pack(fill="y", expand=1)
         optButton.pack(fill="y", expand=1)
 
-    # mode presets
-    Label(tabStart, text="Mode Presets", font=titleFont, relief=GROOVE).pack(pady=2)
-    presetFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
-    dropdownSelectFrame = Frame(presetFrame)
-
-    style_list = [_.split(".")[0].capitalize() for _ in getPresets() if _.endswith(".cfg")]
-    logging.info(f"pulled style_list={style_list}")
-    styleStr = StringVar(root, style_list.pop(0))
-
-    styleDropDown = OptionMenu(dropdownSelectFrame, styleStr, styleStr.get(), *style_list, command=lambda key: changeDescriptText(key))
-
-    def changeDescriptText(key: str):
-        descriptNameLabel.configure(text=f"{key} Description")
-        descriptLabel.configure(text=presetDescriptionWrap.fill(text=getDescriptText(key)))
-
-    def updateHelperFunc(key: str):
-        styleStr.set(key)
-        changeDescriptText(key)
-
-    def doSave() -> bool:
-        name_ = simpledialog.askstring("Save Preset", "Preset name")
-        existed = os.path.exists(Data.PRESETS / f"{name_.lower()}.cfg")
-        if name_ != None and name != "":
-            write_save(in_var_group, in_var_names, safewordVar, False)
-            if existed:
-                if messagebox.askquestion("Overwrite", "A preset with this name already exists. Overwrite it?") == "no":
-                    return False
-        if savePreset(name_) and not existed:
-            style_list.insert(0, "Default")
-            style_list.append(name_.capitalize())
-            styleStr.set("Default")
-            styleDropDown["menu"].delete(0, "end")
-            for item in style_list:
-                styleDropDown["menu"].add_command(label=item, command=lambda x=item: updateHelperFunc(x))
-            styleStr.set(style_list[0])
-        return True
-
-    confirmStyleButton = Button(dropdownSelectFrame, text="Load Preset", command=lambda: applyPreset(styleStr.get()))
-    saveStyleButton = Button(dropdownSelectFrame, text="Save Preset", command=doSave)
-
-    presetDescriptFrame = Frame(presetFrame, borderwidth=2, relief=GROOVE)
-
-    descriptNameLabel = Label(presetDescriptFrame, text="Default Description", font="Default 15")
-    presetDescriptionWrap = textwrap.TextWrapper(width=100, max_lines=5)
-    descriptLabel = Label(presetDescriptFrame, text=presetDescriptionWrap.fill(text="Default Text Here"), relief=GROOVE)
-    changeDescriptText("Default")
-
-    dropdownSelectFrame.pack(side="left", fill="x", padx=6)
-    styleDropDown.pack(fill="x", expand=1)
-    confirmStyleButton.pack(fill="both", expand=1)
-    Label(dropdownSelectFrame).pack(fill="both", expand=1)
-    Label(dropdownSelectFrame).pack(fill="both", expand=1)
-    saveStyleButton.pack(fill="both", expand=1)
-
-    presetDescriptFrame.pack(side="right", fill="both", expand=1)
-    descriptNameLabel.pack(fill="y", pady=4)
-    descriptLabel.pack(fill="both", expand=1)
-
-    presetFrame.pack(fill="both", pady=2)
-
     theme_types = ["Original", "Dark", "The One", "Ransom", "Goth", "Bimbo"]
 
     Label(tabStart, text="Theme", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -1076,7 +1016,7 @@ def show_window():
         toggleSafeMode,
         "Asks you to confirm before saving if certain settings are enabled.\n"
         "Things defined as Dangerous Settings:\n\n"
-        'Extreme (code red! code red! read the documentation in "about"!):\n'
+        'Extreme (code red! code red! make sure you fully understand what these do before using!):\n'
         "Replace Images\n\n"
         "Major (very dangerous, can affect your computer):\n"
         "Launch on Startup, Fill Drive\n\n"
@@ -1085,8 +1025,26 @@ def show_window():
         "Minor (low risk but could lead to unwanted interactions):\n"
         "Disable Panic Hotkey, Run on Save & Exit",
     )
+
+    #panic
+    Label(tabStart, text="Panic Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+    panicFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
+
+    setPanicButtonButton = Button(
+        panicFrame,
+        text=f"Set Panic\nButton\n<{panicButtonVar.get()}>",
+        command=lambda: getKeyboardInput(setPanicButtonButton, panicButtonVar),
+        cursor="question_arrow",
+    )
+    doPanicButton = Button(panicFrame, text="Perform Panic", command=lambda: subprocess.Popen([sys.executable, Process.PANIC]))
+
+    setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
+
+    panicFrame.pack(fill="x")
+    setPanicButtonButton.pack(fill="x", side="left", expand=1)
+    doPanicButton.pack(fill="both", side="left", expand=1)
     # ==========={EDGEWARE++ FILE TAB STARTS HERE}==============#
-    notebookGeneral.add(tabFile, text="File")
+    notebookGeneral.add(tabFile, text="File/Presets")
 
     # save/load
     Label(tabFile, text="Save/Load", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -1099,6 +1057,66 @@ def show_window():
     importExportFrame.pack(fill="x", pady=2)
     fileTabImportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
     fileTabExportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
+
+    # mode presets
+    Label(tabFile, text="Config Presets", font=titleFont, relief=GROOVE).pack(pady=2)
+    presetFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
+    dropdownSelectFrame = Frame(presetFrame)
+
+    style_list = [_.split(".")[0].capitalize() for _ in getPresets() if _.endswith(".cfg")]
+    logging.info(f"pulled style_list={style_list}")
+    styleStr = StringVar(root, style_list.pop(0))
+
+    styleDropDown = OptionMenu(dropdownSelectFrame, styleStr, styleStr.get(), *style_list, command=lambda key: changeDescriptText(key))
+
+    def changeDescriptText(key: str):
+        descriptNameLabel.configure(text=f"{key} Description")
+        descriptLabel.configure(text=presetDescriptionWrap.fill(text=getDescriptText(key)))
+
+    def updateHelperFunc(key: str):
+        styleStr.set(key)
+        changeDescriptText(key)
+
+    def doSave() -> bool:
+        name_ = simpledialog.askstring("Save Preset", "Preset name")
+        existed = os.path.exists(Data.PRESETS / f"{name_.lower()}.cfg")
+        if name_ != None and name != "":
+            write_save(in_var_group, in_var_names, safewordVar, False)
+            if existed:
+                if messagebox.askquestion("Overwrite", "A preset with this name already exists. Overwrite it?") == "no":
+                    return False
+        if savePreset(name_) and not existed:
+            style_list.insert(0, "Default")
+            style_list.append(name_.capitalize())
+            styleStr.set("Default")
+            styleDropDown["menu"].delete(0, "end")
+            for item in style_list:
+                styleDropDown["menu"].add_command(label=item, command=lambda x=item: updateHelperFunc(x))
+            styleStr.set(style_list[0])
+        return True
+
+    confirmStyleButton = Button(dropdownSelectFrame, text="Load Preset", command=lambda: applyPreset(styleStr.get()))
+    saveStyleButton = Button(dropdownSelectFrame, text="Save Preset", command=doSave)
+
+    presetDescriptFrame = Frame(presetFrame, borderwidth=2, relief=GROOVE)
+
+    descriptNameLabel = Label(presetDescriptFrame, text="Default Description", font="Default 15")
+    presetDescriptionWrap = textwrap.TextWrapper(width=100, max_lines=5)
+    descriptLabel = Label(presetDescriptFrame, text=presetDescriptionWrap.fill(text="Default Text Here"), relief=GROOVE)
+    changeDescriptText("Default")
+
+    dropdownSelectFrame.pack(side="left", fill="x", padx=6)
+    styleDropDown.pack(fill="x", expand=1)
+    confirmStyleButton.pack(fill="both", expand=1)
+    Label(dropdownSelectFrame).pack(fill="both", expand=1)
+    Label(dropdownSelectFrame).pack(fill="both", expand=1)
+    saveStyleButton.pack(fill="both", expand=1)
+
+    presetDescriptFrame.pack(side="right", fill="both", expand=1)
+    descriptNameLabel.pack(fill="y", pady=4)
+    descriptLabel.pack(fill="both", expand=1)
+
+    presetFrame.pack(fill="both", pady=2)
 
     packConfigPresets = Frame(tabFile, borderwidth=5, relief=RAISED)
     configPresetsSub1 = Frame(packConfigPresets)
@@ -1630,19 +1648,8 @@ def show_window():
     # popup frame handling
     popupHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
     timeoutFrame = Frame(popupHostFrame)
-    panicFrame = Frame(popupHostFrame)
 
     opacityScale = Scale(popupHostFrame, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
-
-    setPanicButtonButton = Button(
-        panicFrame,
-        text=f"Set Panic\nButton\n<{panicButtonVar.get()}>",
-        command=lambda: getKeyboardInput(setPanicButtonButton, panicButtonVar),
-        cursor="question_arrow",
-    )
-    doPanicButton = Button(panicFrame, text="Perform Panic", command=lambda: subprocess.Popen([sys.executable, Process.PANIC]))
-
-    setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
 
     timeoutToggle = Checkbutton(
         timeoutFrame, text="Popup Timeout", variable=timeoutPopupsVar, command=lambda: toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group)
@@ -1655,9 +1662,6 @@ def show_window():
     timeoutSlider.pack(fill="x")
     timeoutToggle.pack(fill="x")
     timeoutFrame.pack(fill="y", side="left")
-    panicFrame.pack(fill="y", side="left")
-    setPanicButtonButton.pack(fill="x", expand=1)
-    doPanicButton.pack(fill="x")
     # popup frame handle end
 
     # additional popup options, mostly edgeware++ stuff
@@ -2447,8 +2451,9 @@ def show_window():
     Label(tabBasicModes, text="Movement Mode", font=titleFont, relief=GROOVE).pack(pady=2)
     movementFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
 
-    movingSlider = Scale(movementFrame, label="Moving Chance", orient="horizontal", variable=movingChanceVar, cursor="question_arrow")
-    movingRandToggle = Checkbutton(movementFrame, text="Random Direction", variable=movingRandomVar, cursor="question_arrow")
+    moveChanceFrame = Frame(movementFrame)
+    movingSlider = Scale(moveChanceFrame, label="Moving Chance", orient="horizontal", variable=movingChanceVar, cursor="question_arrow")
+    movingRandToggle = Checkbutton(moveChanceFrame, text="Random Direction", variable=movingRandomVar, cursor="question_arrow")
 
     movingttp = CreateToolTip(
         movingSlider,
@@ -2461,10 +2466,11 @@ def show_window():
     movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=movingSpeedVar)
     manualSpeed = Button(speedFrame, text="Manual speed...", command=lambda: assign(movingSpeedVar, simpledialog.askinteger("Manual Speed", prompt="[1-15]: ")))
 
-    movementFrame.pack(fill="y", side="left")
+    movementFrame.pack(fill="x")
+    moveChanceFrame.pack(fill="x", side="left")
     movingSlider.pack(fill="x")
     movingRandToggle.pack(fill="x")
-    speedFrame.pack(fill="y", side="left")
+    speedFrame.pack(fill="x", side="left")
     movingSpeedSlider.pack(fill="x")
     manualSpeed.pack(fill="x")
 
