@@ -37,6 +37,8 @@ from tkinter import (
     messagebox,
     simpledialog,
     ttk,
+    Message,
+    CENTER,
 )
 
 import requests
@@ -90,6 +92,9 @@ logging.info(f"args: {SYS_ARGS}")
 
 pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
+
+# description text for each tab
+START_1_TEXT = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 
 # text for the about tab
 ANNOYANCE_TEXT = 'The "Annoyance" section consists of the 5 main configurable settings of Edgeware:\nDelay\nPopup Frequency\nWebsite Frequency\nAudio Frequency\nPromptFrequency\n\nEach is fairly self explanatory, but will still be expounded upon in this section. Delay is the forced time delay between each tick of the "clock" for Edgeware. The longer it is, the slower things will happen. Popup frequency is the percent chance that a randomly selected popup will appear on any given tick of the clock, and similarly for the rest, website being the probability of opening a website or video from /resource/vid/, audio for playing a file from /resource/aud/, and prompt for a typing prompt to pop up.\n\nThese values can be set by adjusting the bars, or by clicking the button beneath each respective slider, which will allow you to type in an explicit number instead of searching for it on the scrollbar.\n\nIn order to disable any feature, lower its probability to 0, to ensure that you\'ll be getting as much of any feature as possible, turn it up to 100.\nThe popup setting "Mitosis mode" changes how popups are displayed. Instead of popping up based on the timer, the program create a single popup when it starts. When the submit button on ANY popup is clicked to close it, a number of popups will open up in its place, as given by the "Mitosis Strength" setting.\n\nPopup timeout will result in popups timing out and closing after a certain number of seconds.'
@@ -721,6 +726,8 @@ def show_window():
 
     # ==========={IN HERE IS START TAB ITEM INITS}===========#
     notebookGeneral.add(tabStart, text="Start")
+
+    Message(tabStart, text=START_1_TEXT, justify=CENTER, width=650).pack(fill="both")
 
     #version information
     Label(tabStart, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
