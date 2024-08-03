@@ -94,7 +94,10 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-START_1_TEXT = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+START_INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a \"question mark\", hover for a second or two to see more information on the setting.'
+START_PANIC_TEXT = '\"Panic\" is a feature that allows you to instantly halt the program and revert your desktop background back to the \"panic background\" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
+
+FILE_PRESET_TEXT = 'Please be careful before importing unknown config presets! Double check to make sure you\'re okay with the settings before launching Edgeware.'
 
 # text for the about tab
 ANNOYANCE_TEXT = 'The "Annoyance" section consists of the 5 main configurable settings of Edgeware:\nDelay\nPopup Frequency\nWebsite Frequency\nAudio Frequency\nPromptFrequency\n\nEach is fairly self explanatory, but will still be expounded upon in this section. Delay is the forced time delay between each tick of the "clock" for Edgeware. The longer it is, the slower things will happen. Popup frequency is the percent chance that a randomly selected popup will appear on any given tick of the clock, and similarly for the rest, website being the probability of opening a website or video from /resource/vid/, audio for playing a file from /resource/aud/, and prompt for a typing prompt to pop up.\n\nThese values can be set by adjusting the bars, or by clicking the button beneath each respective slider, which will allow you to type in an explicit number instead of searching for it on the scrollbar.\n\nIn order to disable any feature, lower its probability to 0, to ensure that you\'ll be getting as much of any feature as possible, turn it up to 100.\nThe popup setting "Mitosis mode" changes how popups are displayed. Instead of popping up based on the timer, the program create a single popup when it starts. When the submit button on ANY popup is clicked to close it, a number of popups will open up in its place, as given by the "Mitosis Strength" setting.\n\nPopup timeout will result in popups timing out and closing after a certain number of seconds.'
@@ -727,7 +730,7 @@ def show_window():
     # ==========={IN HERE IS START TAB ITEM INITS}===========#
     notebookGeneral.add(tabStart, text="Start")
 
-    Message(tabStart, text=START_1_TEXT, justify=CENTER, width=650).pack(fill="both")
+    Message(tabStart, text=START_INTRO_TEXT, justify=CENTER, width=675).pack(fill="both")
 
     #version information
     Label(tabStart, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -1035,6 +1038,9 @@ def show_window():
 
     #panic
     Label(tabStart, text="Panic Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    Message(tabStart, text=START_PANIC_TEXT, justify=CENTER, width=675).pack(fill="both")
+
     panicFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
 
     setPanicButtonButton = Button(
@@ -1067,6 +1073,9 @@ def show_window():
 
     # mode presets
     Label(tabFile, text="Config Presets", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    Message(tabFile, text=FILE_PRESET_TEXT, justify=CENTER, width=675).pack(fill="both")
+
     presetFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
     dropdownSelectFrame = Frame(presetFrame)
 
