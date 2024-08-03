@@ -99,6 +99,10 @@ START_PANIC_TEXT = '\"Panic\" is a feature that allows you to instantly halt the
 
 FILE_PRESET_TEXT = 'Please be careful before importing unknown config presets! Double check to make sure you\'re okay with the settings before launching Edgeware.'
 
+POPUP_INTRO_TEXT = 'Here is where you can change the most important settings of Edgeware: the frequency and behaviour of popups. The \"Popup Timer Delay\" is how long a popup takes to spawn, and the overall \"Popup Chance\" then rolls to see if the popup spawns. Keeping the chance at 100% allows for a consistent experience, while lowering it makes for a more random one.\n\nOnce ready to spawn, a popup can be many things: A regular image, a website link (opens in your default browser), a prompt you need to fill out, autoplaying audio or videos, or a subliminal message. All of these are rolled for corresponding to their respective frequency settings, which can be found in the \"Audio/Video\" tab, \"Captions\" tab, and this tab as well. There are also plenty of other settings there to configure popups to your liking~! '
+POPUP_OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial \"censors\" a popup by blurring it, simple as.'
+
+
 # text for the about tab
 ANNOYANCE_TEXT = 'The "Annoyance" section consists of the 5 main configurable settings of Edgeware:\nDelay\nPopup Frequency\nWebsite Frequency\nAudio Frequency\nPromptFrequency\n\nEach is fairly self explanatory, but will still be expounded upon in this section. Delay is the forced time delay between each tick of the "clock" for Edgeware. The longer it is, the slower things will happen. Popup frequency is the percent chance that a randomly selected popup will appear on any given tick of the clock, and similarly for the rest, website being the probability of opening a website or video from /resource/vid/, audio for playing a file from /resource/aud/, and prompt for a typing prompt to pop up.\n\nThese values can be set by adjusting the bars, or by clicking the button beneath each respective slider, which will allow you to type in an explicit number instead of searching for it on the scrollbar.\n\nIn order to disable any feature, lower its probability to 0, to ensure that you\'ll be getting as much of any feature as possible, turn it up to 100.\nThe popup setting "Mitosis mode" changes how popups are displayed. Instead of popping up based on the timer, the program create a single popup when it starts. When the submit button on ANY popup is clicked to close it, a number of popups will open up in its place, as given by the "Mitosis Strength" setting.\n\nPopup timeout will result in popups timing out and closing after a certain number of seconds.'
 DRIVE_TEXT = 'The "Drive" portion of Edgeware has three features: fill drive, replace images, and Booru downloader.\n\n"Fill Drive" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a "." or have their names listed in the folder name blacklist.\nIt will also ONLY place images into the User folder and its subfolders.\nFill drive has one modifier, which is its own forced delay. Because it runs with between 1 and 8 threads at any given time, when unchecked it can fill your drive VERY quickly. To ensure that you get that nice slow fill, you can adjust the delay between each folder sweep it performs and the max number of threads.\n\n"Replace Images" is more complicated. Its searching is the exact same as fill drive, but instead of throwing images everywhere, it will seek out folders with large numbers of images (more than the threshold value) and when it finds one, it will replace ALL of the images with porn from /resource/img/. REMEMBER THAT IF YOU CARE ABOUT YOUR PHOTOS, AND THEY\'RE IN A FOLDER WITH MORE IMAGES THAN YOUR CHOSEN THRESHOLD VALUE, EITHER BACK THEM UP IN A ZIP OR SOMETHING OR DO. NOT. USE. THIS SETTING. I AM NOT RESPONSIBLE FOR YOUR OWN DECISION TO RUIN YOUR PHOTOS.\n\nBooru downloader allows you to download new items from a Booru of your choice. For the booru name, ONLY the literal name is used, like "censored" or "blacked" instead of the full url. This is not case sensitive. Use the "Validate" button to ensure that downloading will be successful before running. For tagging, if you want to have mutliple tags, they can be combined using "tag1+tag2+tag3" or if you want to add blacklist tags, type your tag and append a "+-blacklist_tag" after the desired tag.'
@@ -1628,7 +1632,7 @@ def show_window():
     # ==========={EDGEWARE++ "POPUPS" TAB STARTS HERE}===========#
     notebookAnnoyance.add(tabPopups, text="Popups")
 
-    Label(tabPopups).pack()
+    Message(tabPopups, text=POPUP_INTRO_TEXT, justify=CENTER, width=675).pack(fill="both")
 
     delayModeFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
     delayFrame = Frame(delayModeFrame)
@@ -1641,14 +1645,7 @@ def show_window():
     popupManual = Button(
         popChanceFrame,
         text="Manual popup chance...",
-        command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: ")),
-        cursor="question_arrow",
-    )
-
-    popupManualttp = CreateToolTip(
-        popupManual,
-        "Whenever the timer is reached to spawn a new popup, this value is rolled to see if it spawns or not.\n\n"
-        "Leave at 100 for a more consistent experience, and make it less for a more random one.",
+        command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: "))
     )
 
     delayModeFrame.pack(fill="x")
@@ -1661,51 +1658,6 @@ def show_window():
     popupScale.pack(fill="x")
     popupManual.pack(fill="x")
 
-    # popup frame handling
-    popupHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-    timeoutFrame = Frame(popupHostFrame)
-
-    opacityScale = Scale(popupHostFrame, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
-
-    timeoutToggle = Checkbutton(
-        timeoutFrame, text="Popup Timeout", variable=timeoutPopupsVar, command=lambda: toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group)
-    )
-    timeoutSlider = Scale(timeoutFrame, label="Time (sec)", from_=1, to=120, orient="horizontal", variable=popupTimeoutVar)
-
-    timeout_group.append(timeoutSlider)
-
-    popupHostFrame.pack(fill="x")
-    timeoutSlider.pack(fill="x")
-    timeoutToggle.pack(fill="x")
-    timeoutFrame.pack(fill="y", side="left")
-    # popup frame handle end
-
-    # additional popup options, mostly edgeware++ stuff
-    popupOptionsFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-
-    popupWebToggle = Checkbutton(popupOptionsFrame, text="Popup close opens web page", variable=popupWebVar)
-    toggleEasierButton = Checkbutton(popupOptionsFrame, text="Buttonless Closing Popups", variable=buttonlessVar, cursor="question_arrow")
-    toggleSingleButton = Checkbutton(popupOptionsFrame, text="Single Popup Mode", variable=singleModeVar, cursor="question_arrow")
-
-    buttonlessttp = CreateToolTip(
-        toggleEasierButton,
-        'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
-        "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
-    )
-    singlettp = CreateToolTip(
-        toggleSingleButton,
-        'The randomization in EdgeWare does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
-        "For example, if you have audio, videos, and prompts all turned on, there's a very real chance you will get all of them popping up at the same "
-        "time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It "
-        "delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: The roll order for popups are as follows:\n"
-        "Web -> Video -> Audio -> Prompt -> Caption Popup -> Image\nTherefore, if every type of popup is at the same rate of appearing (and single mode is turned on), "
-        "web links will be slightly more common than videos, and videos slightly more common than audio, etc...",
-    )
-
-    popupOptionsFrame.pack(fill="x")
-    popupWebToggle.pack(fill="x", side="left", expand=1)
-    toggleEasierButton.pack(fill="x", side="left", expand=1)
-    toggleSingleButton.pack(fill="x", side="left", expand=1)
     # other start
     otherHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
 
@@ -1731,7 +1683,16 @@ def show_window():
         mistakeManual, "The number of allowed mistakes when filling out a prompt.\n\n" "Good for when you can't think straight, or typing with one hand..."
     )
 
-    otherHostFrame.pack(fill="x")
+    opacityScale = Scale(otherHostFrame, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=popopOpacity)
+
+    timeoutFrame = Frame(otherHostFrame)
+
+    timeoutToggle = Checkbutton(
+        timeoutFrame, text="Popup Timeout", variable=timeoutPopupsVar, command=lambda: toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group)
+    )
+    timeoutSlider = Scale(timeoutFrame, label="Time (sec)", from_=1, to=120, orient="horizontal", variable=popupTimeoutVar)
+
+    timeout_group.append(timeoutSlider)
 
     webFrame.pack(fill="y", side="left", padx=3, expand=1)
     webScale.pack(fill="x")
@@ -1743,10 +1704,44 @@ def show_window():
     mistakeFrame.pack(fill="y", side="left", padx=(0, 3), expand=1)
     mistakeScale.pack(fill="x")
     mistakeManual.pack(fill="x")
-    # end web
+    ttk.Separator(otherHostFrame, orient="vertical").pack(fill="y", side="left")
+    opacityScale.pack(fill="both", side="left", padx=3, expand=1)
+    timeoutSlider.pack(fill="x")
+    timeoutToggle.pack(fill="x")
+    timeoutFrame.pack(fill="y", side="left", padx=3, expand=1)
+    otherHostFrame.pack(fill="x")
+
+    # additional popup options, mostly edgeware++ stuff
+    popupOptionsFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
+
+    popupWebToggle = Checkbutton(popupOptionsFrame, text="Popup close opens web page", variable=popupWebVar)
+    toggleEasierButton = Checkbutton(popupOptionsFrame, text="Buttonless Closing Popups", variable=buttonlessVar, cursor="question_arrow")
+    toggleSingleButton = Checkbutton(popupOptionsFrame, text="Single Roll Per Popup", variable=singleModeVar, cursor="question_arrow")
+
+    buttonlessttp = CreateToolTip(
+        toggleEasierButton,
+        'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
+        "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
+    )
+    singlettp = CreateToolTip(
+        toggleSingleButton,
+        'The randomization in EdgeWare does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
+        "For example, if you have audio, videos, and prompts all turned on, there's a very real chance you will get all of them popping up at the same "
+        "time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It "
+        "delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: The roll order for popups are as follows:\n"
+        "Web -> Video -> Audio -> Prompt -> Caption Popup -> Image\nTherefore, if every type of popup is at the same rate of appearing (and single mode is turned on), "
+        "web links will be slightly more common than videos, and videos slightly more common than audio, etc...",
+    )
+
+    popupOptionsFrame.pack(fill="x")
+    popupWebToggle.pack(fill="x", side="left", expand=1)
+    toggleEasierButton.pack(fill="x", side="left", expand=1)
+    toggleSingleButton.pack(fill="x", side="left", expand=1)
 
     # overlay start
     Label(tabPopups, text="Popup Overlays", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    Message(tabPopups, text=POPUP_OVERLAY_TEXT, justify=CENTER, width=675).pack(fill="both")
 
     overlayFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
 
@@ -1761,12 +1756,7 @@ def show_window():
         subliminalsFrame,
         text="Subliminal Overlays",
         variable=popupSublim,
-        command=lambda: toggleAssociateSettings(popupSublim.get(), subliminals_group),
-        cursor="question_arrow",
-    )
-
-    subliminalttp = CreateToolTip(
-        toggleSubliminalButton, "Overlays transparent gifs on popups.\n\nThis feature can be CPU intensive, try a low max limit to start!"
+        command=lambda: toggleAssociateSettings(popupSublim.get(), subliminals_group)
     )
 
     subliminalsChanceScale = Scale(subliminalsChanceFrame, label="Sublim. Chance (%)", from_=1, to=100, orient="horizontal", variable=subliminalsChanceVar)
@@ -1801,14 +1791,13 @@ def show_window():
 
     denialSlider = Scale(denialFrame, label="Denial Chance", orient="horizontal", variable=denialChance)
     denialToggle = Checkbutton(
-        denialFrame, text="Denial Overlays", variable=denialMode, command=lambda: toggleAssociateSettings(denialMode.get(), denial_group), cursor="question_arrow"
+        denialFrame, text="Denial Overlays", variable=denialMode, command=lambda: toggleAssociateSettings(denialMode.get(), denial_group)
     )
     denialChanceManual = Button(
         denialFrame,
         text="Manual Denial Chance...",
         command=lambda: assign(denialChance, simpledialog.askinteger("Manual Denial Chance", prompt="[1-100]: ")),
     )
-    denialttp = CreateToolTip(denialToggle, 'Adds a percentage chance to "censor" an image.')
     denial_group.append(denialSlider)
     denial_group.append(denialChanceManual)
 
