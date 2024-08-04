@@ -404,6 +404,8 @@ def show_window():
 
             subliminalsAlphaVar = IntVar(root, value=int(settings["subliminalsAlpha"]))
 
+            messageOffVar = BooleanVar(root, value=(int(settings["messageOff"]) == 1))
+
             # grouping for sanity's sake later
             in_var_group = [
                 delayVar,
@@ -495,6 +497,7 @@ def show_window():
                 capPopTimerVar,
                 capPopMoodVar,
                 subliminalsAlphaVar,
+                messageOffVar,
             ]
 
             in_var_names = [
@@ -587,6 +590,7 @@ def show_window():
                 "capPopTimer",
                 "capPopMood",
                 "subliminalsAlpha",
+                "messageOff",
             ]
             break
         except Exception as e:
@@ -634,6 +638,7 @@ def show_window():
     claunch_group = []
     ctutorialstart_group = []
     ctutorialtransition_group = []
+    message_group = []
 
     webv = getLiveVersion(UPDCHECK_URL, False)
     webvpp = getLiveVersion(UPDCHECK_PP_URL, True)
@@ -734,7 +739,9 @@ def show_window():
     # ==========={IN HERE IS START TAB ITEM INITS}===========#
     notebookGeneral.add(tabStart, text="Start")
 
-    Message(tabStart, text=START_INTRO_TEXT, justify=CENTER, width=675).pack(fill="both")
+    startMessage = Message(tabStart, text=START_INTRO_TEXT, justify=CENTER, width=675)
+    startMessage.pack(fill="both")
+    message_group.append(startMessage)
 
     #version information
     Label(tabStart, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -1012,6 +1019,7 @@ def show_window():
 
     toggleFlairButton = Checkbutton(toggleFrame2, text="Show Loading Flair", variable=startFlairVar, cursor="question_arrow")
     toggleROSButton = Checkbutton(toggleFrame2, text="Run Edgeware on Save & Exit", variable=rosVar)
+    toggleMessageButton = Checkbutton(otherHostFrame, text="Disable Config Help Messages\n(requires save & restart)", variable=messageOffVar)
     toggleDesktopButton = Checkbutton(toggleFrame3, text="Create Desktop Icons", variable=deskIconVar)
     toggleSafeMode = Checkbutton(toggleFrame3, text='Warn if "Dangerous" Settings Active', variable=safeModeVar, cursor="question_arrow")
 
@@ -1022,6 +1030,7 @@ def show_window():
     toggleFrame3.pack(fill="both", side="left", expand=1)
     toggleDesktopButton.pack(fill="x")
     toggleSafeMode.pack(fill="x")
+    toggleMessageButton.pack(fill="both", expand=1)
 
     loadingFlairttp = CreateToolTip(
         toggleFlairButton, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.'
@@ -1043,7 +1052,9 @@ def show_window():
     #panic
     Label(tabStart, text="Panic Settings", font=titleFont, relief=GROOVE).pack(pady=2)
 
-    Message(tabStart, text=START_PANIC_TEXT, justify=CENTER, width=675).pack(fill="both")
+    panicMessage = Message(tabStart, text=START_PANIC_TEXT, justify=CENTER, width=675)
+    panicMessage.pack(fill="both")
+    message_group.append(panicMessage)
 
     panicFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
 
@@ -1078,7 +1089,9 @@ def show_window():
     # mode presets
     Label(tabFile, text="Config Presets", font=titleFont, relief=GROOVE).pack(pady=2)
 
-    Message(tabFile, text=FILE_PRESET_TEXT, justify=CENTER, width=675).pack(fill="both")
+    presetMessage = Message(tabFile, text=FILE_PRESET_TEXT, justify=CENTER, width=675)
+    presetMessage.pack(fill="both")
+    message_group.append(presetMessage)
 
     presetFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
     dropdownSelectFrame = Frame(presetFrame)
@@ -1632,7 +1645,9 @@ def show_window():
     # ==========={EDGEWARE++ "POPUPS" TAB STARTS HERE}===========#
     notebookAnnoyance.add(tabPopups, text="Popups")
 
-    Message(tabPopups, text=POPUP_INTRO_TEXT, justify=CENTER, width=675).pack(fill="both")
+    popupMessage = Message(tabPopups, text=POPUP_INTRO_TEXT, justify=CENTER, width=675)
+    popupMessage.pack(fill="both")
+    message_group.append(popupMessage)
 
     delayModeFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
     delayFrame = Frame(delayModeFrame)
@@ -1741,7 +1756,9 @@ def show_window():
     # overlay start
     Label(tabPopups, text="Popup Overlays", font=titleFont, relief=GROOVE).pack(pady=2)
 
-    Message(tabPopups, text=POPUP_OVERLAY_TEXT, justify=CENTER, width=675).pack(fill="both")
+    overlayMessage = Message(tabPopups, text=POPUP_OVERLAY_TEXT, justify=CENTER, width=675)
+    overlayMessage.pack(fill="both")
+    message_group.append(overlayMessage)
 
     overlayFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
 
@@ -1833,10 +1850,27 @@ def show_window():
     audioScale = Scale(audioSubFrame, label="Audio Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=audioVar)
     audioManual = Button(audioSubFrame, text="Manual audio chance...", command=lambda: assign(audioVar, simpledialog.askinteger("Manual Audio", prompt="[0-100]: ")))
 
+    maxAudioFrame = Frame(audioFrame)
+    maxAudioToggle = Checkbutton(
+        maxAudioFrame, text="Cap Audio", variable=maxAToggleVar, command=lambda: toggleAssociateSettings(maxAToggleVar.get(), maxAudio_group)
+    )
+    maxAudioScale = Scale(maxAudioFrame, label="Max Audio Popups", from_=1, to=50, orient="horizontal", variable=maxAudioVar)
+    maxAudioManual = Button(
+        maxAudioFrame, text="Manual Max Audio...", command=lambda: assign(maxAudioVar, simpledialog.askinteger("Manual Max Audio", prompt="[1-50]: "))
+    )
+
     audioFrame.pack(fill="x")
-    audioSubFrame.pack(fill="x", side="left", expand=1)
-    audioScale.pack(fill="x", padx=3, expand=1)
+    audioSubFrame.pack(fill="x", side="left", padx=(3, 0), expand=1)
+    audioScale.pack(fill="x", pady=(25, 0), expand=1)
     audioManual.pack(fill="x")
+
+    maxAudioFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
+    maxAudioToggle.pack(fill="x")
+    maxAudioScale.pack(fill="x", expand=1)
+    maxAudioManual.pack(fill="x")
+
+    maxAudio_group.append(maxAudioScale)
+    maxAudio_group.append(maxAudioManual)
 
     #Video
     Label(tabAudioVideo, text="Video", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -1852,29 +1886,7 @@ def show_window():
         vidFrameR, text="Manual volume...", command=lambda: assign(videoVolume, simpledialog.askinteger("Video Volume", prompt="[0-100]: "))
     )
 
-    videoFrame.pack(fill="x")
-    vidFrameL.pack(fill="x", side="left", padx=(3, 0), expand=1)
-    vidScale.pack(fill="x")
-    vidManual.pack(fill="x")
-    vidFrameR.pack(fill="x", side="left", padx=(0, 3), expand=1)
-    vidVolumeScale.pack(fill="x")
-    vidVolumeManual.pack(fill="x")
-
-    #Maximum
-    Label(tabAudioVideo, text="Maximum Audio/Video Settings", font=titleFont, relief=GROOVE).pack(pady=2)
-
-    maxAudVidFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
-
-    maxAudioFrame = Frame(maxAudVidFrame)
-    maxAudioToggle = Checkbutton(
-        maxAudioFrame, text="Cap Audio", variable=maxAToggleVar, command=lambda: toggleAssociateSettings(maxAToggleVar.get(), maxAudio_group)
-    )
-    maxAudioScale = Scale(maxAudioFrame, label="Max Audio Popups", from_=1, to=50, orient="horizontal", variable=maxAudioVar)
-    maxAudioManual = Button(
-        maxAudioFrame, text="Manual Max Audio...", command=lambda: assign(maxAudioVar, simpledialog.askinteger("Manual Max Audio", prompt="[1-50]: "))
-    )
-
-    maxVideoFrame = Frame(maxAudVidFrame)
+    maxVideoFrame = Frame(videoFrame)
     maxVideoToggle = Checkbutton(
         maxVideoFrame, text="Cap Videos", variable=maxVToggleVar, command=lambda: toggleAssociateSettings(maxVToggleVar.get(), maxVideo_group)
     )
@@ -1883,23 +1895,22 @@ def show_window():
         maxVideoFrame, text="Manual Max Videos...", command=lambda: assign(maxVideoVar, simpledialog.askinteger("Manual Max Videos", prompt="[1-50]: "))
     )
 
-    maxAudio_group.append(maxAudioScale)
-    maxAudio_group.append(maxAudioManual)
+    videoFrame.pack(fill="x")
+    vidFrameL.pack(fill="x", side="left", padx=(3, 0), expand=1)
+    vidScale.pack(fill="x", pady=(25, 0))
+    vidManual.pack(fill="x")
 
-    maxVideo_group.append(maxVideoScale)
-    maxVideo_group.append(maxVideoManual)
-
-    maxAudVidFrame.pack(fill="x")
-
-    maxAudioFrame.pack(fill="x", side="left", padx=(3, 0), expand=1)
-    maxAudioToggle.pack(fill="x")
-    maxAudioScale.pack(fill="x", padx=1, expand=1)
-    maxAudioManual.pack(fill="x")
+    vidFrameR.pack(fill="x", side="left", expand=1)
+    vidVolumeScale.pack(fill="x", pady=(25, 0))
+    vidVolumeManual.pack(fill="x")
 
     maxVideoFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
     maxVideoToggle.pack(fill="x")
-    maxVideoScale.pack(fill="x", padx=1, expand=1)
+    maxVideoScale.pack(fill="x", expand=1)
     maxVideoManual.pack(fill="x")
+
+    maxVideo_group.append(maxVideoScale)
+    maxVideo_group.append(maxVideoManual)
 
     #playback options
     Label(tabAudioVideo, text="Playback Options", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -3159,6 +3170,9 @@ def show_window():
     triggerHelper(corruptionTriggerVar.get(), False)
     toggleAssociateSettings(os.path.isfile(Resource.CORRUPTION), corruptionEnabled_group)
 
+    #messageOff toggle here, for turning off all help messages
+    toggleHelp(messageOffVar.get(), message_group)
+
     tabMaster.pack(expand=1, fill="both")
     notebookGeneral.pack(expand=1, fill="both")
     notebookAnnoyance.pack(expand=1, fill="both")
@@ -3925,6 +3939,14 @@ def clearLaunches(confirmation: bool):
         print(f"failed to clear launches. {e}")
         logging.warning(f"could not delete the corruption launches file. {e}")
 
+def toggleHelp(state: bool, messages: list):
+    if state == True:
+        try:
+            for widget in messages:
+                widget.destroy()
+        except Exception as e:
+            print(f"failed to toggle help off. {e}")
+            logging.warning(f"could not properly turn help off. {e}")
 
 if __name__ == "__main__":
     try:
