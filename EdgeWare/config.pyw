@@ -3737,6 +3737,9 @@ def all_children(widget):
 
 def themeChange(theme: str, root, style, mfont, tfont):
     if theme == "Original" or settings["themeNoConfig"] == True:
+        for widget in all_children(root):
+            if isinstance(widget, Message):
+                widget.configure(font=(mfont, 8))
         style.configure("TFrame", background="#f0f0f0")
         style.configure("TNotebook", background="#f0f0f0")
         style.map("TNotebook.Tab", background=[("selected", "#f0f0f0")])
@@ -3758,6 +3761,8 @@ def themeChange(theme: str, root, style, mfont, tfont):
                     widget.configure(bg="#282c34", fg="ghost white", activebackground="#282c34", troughcolor="#c8c8c8", highlightthickness=0)
                 if isinstance(widget, Checkbutton):
                     widget.configure(bg="#282c34", fg="ghost white", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="ghost white")
+                if isinstance(widget, Message):
+                    widget.configure(bg="#282c34", fg="ghost white", font=(mfont, 8))
             for widget in CreateToolTip.instances:
                 widget.background = "#1b1d23"
                 widget.foreground = "#ffffff"
@@ -3782,6 +3787,8 @@ def themeChange(theme: str, root, style, mfont, tfont):
                     widget.configure(bg="#282c34", fg="#00ff41", activebackground="#282c34", troughcolor="#009a22", highlightthickness=0)
                 if isinstance(widget, Checkbutton):
                     widget.configure(bg="#282c34", fg="#00ff41", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="#00ff41")
+                if isinstance(widget, Message):
+                    widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8))
             for widget in CreateToolTip.instances:
                 widget.background = "#1b1d23"
                 widget.foreground = "#00ff41"
@@ -3808,6 +3815,8 @@ def themeChange(theme: str, root, style, mfont, tfont):
                     widget.configure(bg="#841212", fg="white", activebackground="#841212", troughcolor="#c8c8c8", highlightthickness=0)
                 if isinstance(widget, Checkbutton):
                     widget.configure(bg="#841212", fg="white", selectcolor="#5c0d0d", activebackground="#841212", activeforeground="white")
+                if isinstance(widget, Message):
+                    widget.configure(bg="#841212", fg="white", font=("Arial", 8))
             for widget in CreateToolTip.instances:
                 widget.background = "#ff2600"
                 widget.foreground = "#ffffff"
@@ -3834,6 +3843,8 @@ def themeChange(theme: str, root, style, mfont, tfont):
                     widget.configure(bg="#282c34", fg="MediumPurple1", activebackground="#282c34", troughcolor="MediumOrchid2", highlightthickness=0)
                 if isinstance(widget, Checkbutton):
                     widget.configure(bg="#282c34", fg="MediumPurple1", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="MediumPurple1")
+                if isinstance(widget, Message):
+                    widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 8))
             for widget in CreateToolTip.instances:
                 widget.background = "#1b1d23"
                 widget.foreground = "#cc60ff"
@@ -3860,6 +3871,8 @@ def themeChange(theme: str, root, style, mfont, tfont):
                     widget.configure(bg="pink", fg="deep pink", activebackground="pink", troughcolor="hot pink", highlightthickness=0)
                 if isinstance(widget, Checkbutton):
                     widget.configure(bg="pink", fg="deep pink", selectcolor="light pink", activebackground="pink", activeforeground="deep pink")
+                if isinstance(widget, Message):
+                    widget.configure(bg="pink", fg="deep pink", font=("Constantia", 8))
             for widget in CreateToolTip.instances:
                 widget.background = "#ffc5cd"
                 widget.foreground = "#ff3aa3"
