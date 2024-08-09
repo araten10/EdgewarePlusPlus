@@ -100,5 +100,6 @@
   "capPopOpacity": 100,
   "capPopTimer": 300,
   "capPopMood": 1,
-  "subliminalsAlpha": 20
+  "subliminalsAlpha": 20,
+  "messageOff": 0
 }
