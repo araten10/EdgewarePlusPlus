@@ -62,6 +62,46 @@ if __name__ == "__main__":
         RollTarget(lambda: display_notification(settings, pack), settings.notification_chance),
     ]
 
+    # TO CONSIDER FOR DANGEROUS:
+    # wakeupActivity for hibernate (as well as very low hibernate durations)?
+    # mitosismode/mitosis_strength can potentially cause a dangerous payload of popups if set incorrectly
+    # capPopTimer could potentially cause seizures if low enough... however, considering not bothering with this as so many settings have to be set right
+    # remember: a lot of obvious dangerous settings are not listed here as they are on the blacklist
+    config_dangerous = [
+        "fill",  # fill drive
+        "fill_delay",
+        "maxFillThreads",
+        "panicDisabled",  # disables panic in hotkey/system tray, can still be run via panic.pyw
+        "webPopup",  # opens up web popup on popup close, this one could be cut from this list as it's not listed as dangerous in config but could lead to bad performance
+    ]
+
+    def danger_check(pack: Pack, config_dangers: list) -> list:
+        danger_list = []
+        for level in pack.corruption_levels:
+            if level.config is not None:
+                for key in level.config:
+                    if key in config_dangers:
+                        #keep an eye out if any dangerous setting is dangerous because it is turned off, try to avoid making these
+                        if key not in danger_list and level.config[key] == 1:
+                            danger_list.append(key)
+                    if key == "delay":
+                        if level.config["delay"] < 2000:
+                            danger_list.append(f"Low delay ({level.config['delay']}ms)")
+                    if key == "wakeupActivity":
+                        if level.config["wakeupActivity"] > 35:
+                            danger_list.append(f"High hibernate wakeup ({level.config['wakeupActivity']})")
+                    if key == "hibernateMax":
+                        if level.config["hibernateMax"] < 10:
+                            danger_list.append(f"Low max hibernate delay ({level.config['hibernateMax']})")
+        return danger_list
+
+    if settings.corruption_mode and settings.corruption_full:
+        dangers = danger_check(pack, config_dangerous)
+        if dangers:
+            print(f"Dangerous settings detected: {dangers}") #temporary, do something actually useful instead
+            logging.info(f"Dangerous settings detected in corruption load, informing user...\n{dangers}")
+
+
     def start_main() -> None:
         Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))

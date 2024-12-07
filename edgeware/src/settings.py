@@ -50,18 +50,6 @@ config_blacklist = [
     "mitosisMode",
 ]
 
-# TODO/TO CONSIDER FOR DANGEROUS:
-# wakeupActivity for hibernate (as well as very low hibernate durations)?
-# mitosismode/mitosis_strength can potentially cause a dangerous payload of popups if set incorrectly
-# capPopTimer could potentially cause seizures if low enough... however, considering not bothering with this as so many settings have to be set right
-config_dangerous = [
-    "fill",  # fill drive
-    "fill_delay",
-    "maxFillThreads",
-    "panicDisabled",  # disables panic in hotkey/system tray, can still be run via panic.pyw
-    "webPopup",  # opens up web popup on popup close, this one could be cut from this list as it's not listed as dangerous in config but could lead to bad performance
-]
-
 # Settings I found that are maybe dead currently since I can't find use (feel free to delete this once it's taken care of):
 # pumpScareOffset (used to be for offsetting the pumpscare audio, might be irrelevant once we force vlc)
 
@@ -106,37 +94,9 @@ class Settings:
         self.config = load_config()
         self.load_settings()
 
-        #if self.config["corruptionMode"] and self.config["corruptionFullPerm"]:
-            #self.dangers = self.danger_check()
-            #print(self.dangers)
-
-
     def set_config(key: str, value: str):
         if key not in config_blacklist:
             self.config[key] = value
-
-    def danger_check(self) -> list:
-        danger_list = []
-        with open(Resource.CORRUPTION) as f:
-            corruption_data = json.loads(f.read())
-            for level in corruption_data["config"]:
-                for key in corruption_data["config"][level]:
-                    if key in config_dangerous and not danger_list:
-                        danger_list.append(key)
-                    if key == "delay":
-                        if corruption_data["config"][level]["delay"] < 2000:
-                            danger_list.append(f"Low delay ({corruption_data['config'][level]['delay']}ms)")
-                    if key == "wakeupActivity":
-                        if corruption_data["config"][level]["wakeupActivity"] > 35:
-                            danger_list.append(f"High hibernate wakeup ({corruption_data['config'][level]['wakeupActivity']})")
-                    if key == "hibernateMax":
-                        if corruption_data["config"][level]["hibernateMax"] < 10:
-                            danger_list.append(f"Low max hibernate delay ({corruption_data['config'][level]['hibernateMax']})")
-        return danger_list
-
-
-
-
 
     def load_settings(self):
         # Impacts other settings
