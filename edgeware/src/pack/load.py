@@ -82,9 +82,8 @@ def load_captions() -> Captions:
     return try_load(Resource.CAPTIONS, load) or default
 
 
-# TODO: Config
-def load_corruption():
-    def load(content: str):
+def load_corruption() -> list[CorruptionLevel]:
+    def load(content: str) -> list[CorruptionLevel]:
         corruption = json.loads(content)
 
         Schema(
@@ -100,12 +99,13 @@ def load_corruption():
         configs = corruption["config"]
 
         levels: list[CorruptionLevel] = []
-        for i in range(max(len(moods), len(wallpapers) - (1 if "default" in wallpapers else 0))):
+        for i in range(max(len(moods), len(wallpapers) - (1 if "default" in wallpapers else 0), len(configs))):
             n = str(i + 1)
 
             mood_change = moods.get(n, {"add": [], "remove": []})
             wallpaper = wallpapers.get(n)
-            config_change = configs.get(n)
+            config_change = configs.get(n, {})
+
             if i == 0:
                 levels.append(CorruptionLevel(set(mood_change["add"]), wallpaper or wallpapers.get("default"), config_change))
             else:

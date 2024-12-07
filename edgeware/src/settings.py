@@ -94,7 +94,7 @@ class Settings:
         self.config = load_config()
         self.load_settings()
 
-    def set_config(key: str, value: str):
+    def set_config(key: str, value: str | int) -> None:
         if key not in config_blacklist:
             self.config[key] = value
 
