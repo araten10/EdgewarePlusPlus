@@ -99,7 +99,7 @@ if __name__ == "__main__":
         dangers = danger_check(pack, config_dangerous)
         if dangers:
             print(f"Dangerous settings detected: {dangers}") #temporary, do something actually useful instead
-            logging.info(f"Dangerous settings detected in corruption load, informing user...\n{dangers}")
+            #logging.info(f"Dangerous settings detected in corruption load, informing user...\n{dangers}")
 
 
     def start_main() -> None:
