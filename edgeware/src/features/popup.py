@@ -76,16 +76,19 @@ class Popup(Toplevel):
     def try_corruption_dev(self) -> None:
         if self.settings.corruption_dev_mode:
             levels = []
+            curr_level = self.state.corruption_level
             mood = self.pack.media_moods.get(self.media.name, None)
             for level in self.pack.corruption_levels:
                 if mood in level.moods:
                     levels.append(self.pack.corruption_levels.index(level) + 1)
 
-            label_level = Label(self, text=f"Corruption levels: {levels}", fg=self.theme.fg, bg=self.theme.bg)
             label_mood = Label(self, text=f"Popup mood: {mood}", fg=self.theme.fg, bg=self.theme.bg)
+            label_level = Label(self, text=f"Valid Levels: {levels}", fg=self.theme.fg, bg=self.theme.bg)
+            label_current_level = Label(self, text=f"Current Level: {curr_level}", fg=self.theme.fg, bg=self.theme.bg)
 
-            label_level.place(x=5, y=(self.height // 2))
-            label_mood.place(x=5, y=(self.height // 2 + label_level.winfo_reqheight() + 2))
+            label_mood.place(x=5, y=(self.height // 2))
+            label_level.place(x=5, y=(self.height // 2 + label_mood.winfo_reqheight() + 2))
+            label_current_level.place(x=5, y=(self.height // 2 + label_mood.winfo_reqheight() + label_level.winfo_reqheight() + 4))
 
     def try_button(self) -> None:
         if self.settings.buttonless:

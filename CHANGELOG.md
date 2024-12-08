@@ -25,6 +25,8 @@
 •*Added more config tutorial messages*
 
 •*Expanded the moods box to be larger in both dimensions*
+
+•*Changed corruption dev mode to be more helpful*
 **Version 13b**
 
 Hello everyone! The huge rewrite by LewdDevelopment is finally done (big round of applause)! This means lots of bugfixes and general stability improvements.... hopefully! I label this as a "beta" because due to both of us working on different platforms (araten windows/LewdDevelopment linux) there might be some huge OS-specific bugs that slipped through the cracks. These will be fixed as they are reported, but for the time being know that some temporary instability might occur. In the future however, it will hopefully be much smoother to use!

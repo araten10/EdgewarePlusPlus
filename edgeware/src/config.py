@@ -3181,9 +3181,9 @@ def show_window():
     )
     corruptiondevttp = CreateToolTip(
         corruptionDevToggle,
-        "Enables captions on popups that show various info.\n\nclev: current corruption level when popup spawned\n"
-        "popmood: the popup's mood\npopnum: if popup trigger enabled, the number of the popup\n"
-        "filen: the filename of the popup's image/video",
+        "Enables captions on popups that show various info.\n\n Mood: the mood in which the popup belongs to\n"
+        "Valid Level: the corruption levels in which the popup spawns\nCurrent Level: the current corruption level\n\n"
+        "Additionally, this also enables extra print logs in debug.py, allowing you to see what the corruption is currently doing.",
     )
 
     # -Info-

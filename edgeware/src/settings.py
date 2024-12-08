@@ -46,7 +46,7 @@ config_blacklist = [
     "hibernateMode",
     "start_on_logon",
     # TODO: Test changing these, they will probably work but may have strange interactions
-    "lkToggle",
+    #"lkToggle",
     "mitosisMode",
 ]
 
@@ -94,9 +94,12 @@ class Settings:
         self.config = load_config()
         self.load_settings()
 
-    def set_config(key: str, value: str | int) -> None:
-        if key not in config_blacklist:
-            self.config[key] = value
+    def corrupt_settings(self, level: dict[str, str | int]) -> None:
+        for key, value in level.items():
+            if key not in config_blacklist:
+                if self.config["corruptionDevMode"]:
+                    print(f"changing {key} to {value}...")
+                self.config[key] = value
 
     def load_settings(self):
         # Impacts other settings

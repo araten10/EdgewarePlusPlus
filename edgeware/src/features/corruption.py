@@ -13,8 +13,8 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
     pack.active_moods.media = level.moods.copy()
     if settings.corruption_wallpaper:
         utils.set_wallpaper(Resource.ROOT / (level.wallpaper or pack.wallpaper))
-    # if settings.corruption_full:
-
+    if settings.corruption_full:
+        settings.corrupt_settings(level.config)
 
 def update_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     if settings.corruption_purity:
