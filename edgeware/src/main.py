@@ -42,6 +42,7 @@ if __name__ == "__main__":
     first_launch_configure()
 
     root = Tk()
+    root.withdraw()
     settings = Settings()
     pack = Pack()
     state = State()
@@ -86,5 +87,4 @@ if __name__ == "__main__":
     else:
         start_main()
 
-    root.withdraw()
     root.mainloop()

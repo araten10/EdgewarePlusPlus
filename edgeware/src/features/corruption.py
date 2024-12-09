@@ -1,5 +1,6 @@
 import logging
-from tkinter import Tk
+import sys
+from tkinter import Tk, messagebox
 
 from features.corruption_config import CorruptionConfig
 from pack import Pack
@@ -29,7 +30,14 @@ def corruption_danger_check(settings: Settings, pack: Pack) -> None:
                         dangers.append(f"High {key} ({value})")
 
     if dangers:
-        print(f"Dangerous settings detected: {dangers}")  # temporary, do something actually useful instead
+        proceed = messagebox.askyesno(
+            "Corruption config warning",
+            "You are using corruption in full permission mode, meaning your pack is capable of changing Edgeware's settings\n\n"
+            f"Your pack changes the following settings which may be dangerous: {dangers}\n\n"
+            "Are you sure you want to proceed?",
+        )
+        if not proceed:
+            sys.exit()
 
 
 def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
