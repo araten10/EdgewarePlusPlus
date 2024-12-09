@@ -15,6 +15,7 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
         utils.set_wallpaper(Resource.ROOT / (level.wallpaper or pack.wallpaper))
     if settings.corruption_full:
         settings.corrupt_settings(level.config)
+        settings.load_settings()
 
 def update_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     if settings.corruption_purity:
