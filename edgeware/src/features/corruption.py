@@ -1,6 +1,7 @@
 import logging
 from tkinter import Tk
 
+from features.corruption_config import CorruptionConfig
 from pack import Pack
 from paths import Data, Resource
 from settings import Settings
@@ -8,14 +9,48 @@ from state import State
 from utils import utils
 
 
+def corruption_danger_check(settings: Settings, pack: Pack) -> None:
+    if not (settings.corruption_mode and settings.corruption_full):
+        return
+
+    dangers = []
+    for level in pack.corruption_levels:
+        if level.config is not None:
+            for key, value in level.config.items():
+                if key in CorruptionConfig.DANGEROUS and key not in dangers:
+                    dangers.append(key)
+
+                range = CorruptionConfig.SAFE_RANGE.get(key)
+                if range:
+                    min, max = range
+                    if min and value < min:
+                        dangers.append(f"Low {key} ({value})")
+                    if max and value > max:
+                        dangers.append(f"High {key} ({value})")
+
+    if dangers:
+        print(f"Dangerous settings detected: {dangers}")  # temporary, do something actually useful instead
+
+
 def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     level = pack.corruption_levels[state.corruption_level - 1]
     pack.active_moods.media = level.moods.copy()
+
     if settings.corruption_wallpaper:
         utils.set_wallpaper(Resource.ROOT / (level.wallpaper or pack.wallpaper))
+
     if settings.corruption_full:
-        settings.corrupt_settings(level.config)
+        for key, value in level.config.items():
+            if key in CorruptionConfig.BLACKLIST:
+                continue
+
+            if settings.corruption_dev_mode:
+                logging.info(f"Changing {key} to {value}")
+            settings.config[key] = value
+
+        # Reload settings from the config dict so the changes get applied
         settings.load_settings()
+
 
 def update_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     if settings.corruption_purity:
