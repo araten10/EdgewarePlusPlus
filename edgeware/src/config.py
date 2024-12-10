@@ -42,7 +42,7 @@ from tkinter import (
 import requests
 import ttkwidgets as tw
 from panic import send_panic
-from paths import Assets, CustomAssets, Data, Process, Resource
+from paths import Assets, CustomAssets, Data, PackPaths, Process
 from PIL import Image, ImageTk
 from settings import load_config, load_default_config
 from utils import utils
@@ -52,6 +52,7 @@ PATH = Path(__file__).parent
 os.chdir(PATH)
 
 log_file = utils.init_logging("config")
+paths = PackPaths(PATH.parent / "resource")
 
 
 # if you are working on this i'm just letting you know there's like almost no documentation for ttkwidgets
@@ -143,10 +144,10 @@ INFO_CREATOR_DEFAULT = "Anonymous"
 INFO_VERSION_DEFAULT = "0"
 INFO_DISCORD_DEFAULT = ["[No pack loaded, or the pack does not have a 'discord.dat' file.]", "default"]
 
-if os.path.isfile(Resource.INFO):
+if os.path.isfile(paths.info):
     try:
         info_dict = ""
-        with open(Resource.INFO) as r:
+        with open(paths.info) as r:
             info_dict = json.loads(r.read())
         info_name = info_dict["name"] if info_dict["name"] else "Unnamed Pack"
         info_description = info_dict["description"] if info_dict["description"] else "No description set."
@@ -176,9 +177,9 @@ UNIQUE_ID = "0"
 
 # creating a semi-parseable unique ID for the pack to make mood saving work, if the pack doesn't have an info.json file.
 # probably could have made it so the user manually has to save/load and not worried about this, but here we are
-if info_id == "0" and os.path.exists(Resource.ROOT):
+if info_id == "0" and os.path.exists(paths.root):
     try:
-        UNIQUE_ID = utils.compute_mood_id()
+        UNIQUE_ID = utils.compute_mood_id(paths)
         logging.info(f"generated unique ID. {UNIQUE_ID}")
     except Exception as e:
         logging.warning(f"failed to create unique id. {e}")
@@ -202,9 +203,9 @@ pass_ = ""
 Data.MOODS.mkdir(parents=True, exist_ok=True)
 MOOD_PATH = "0"
 if config["toggleMoodSet"] != True:
-    if UNIQUE_ID != "0" and os.path.exists(Resource.ROOT):
+    if UNIQUE_ID != "0" and os.path.exists(paths.root):
         MOOD_PATH = Data.MOODS / f"{UNIQUE_ID}.json"
-    elif UNIQUE_ID == "0" and os.path.exists(Resource.ROOT):
+    elif UNIQUE_ID == "0" and os.path.exists(paths.root):
         MOOD_PATH = Data.MOODS / f"{info_id}.json"
 
     # creating the mood file if it doesn't exist
@@ -215,18 +216,18 @@ if config["toggleMoodSet"] != True:
                 mood_dict = {"media": [], "captions": [], "prompts": [], "web": []}
 
                 try:
-                    if os.path.isfile(Resource.MEDIA):
+                    if os.path.isfile(paths.media):
                         media_dict = ""
-                        with open(Resource.MEDIA) as media:
+                        with open(paths.media) as media:
                             media_dict = json.loads(media.read())
                             mood_dict["media"] += media_dict
                 except Exception:
                     logging.warning("media mood extraction failed.")
 
                 try:
-                    if os.path.isfile(Resource.CAPTIONS):
+                    if os.path.isfile(paths.captions):
                         captions_dict = ""
-                        with open(Resource.CAPTIONS) as captions:
+                        with open(paths.captions) as captions:
                             captions_dict = json.loads(captions.read())
                             if "prefix" in captions_dict:
                                 del captions_dict["prefix"]
@@ -241,18 +242,18 @@ if config["toggleMoodSet"] != True:
                     logging.warning("captions mood extraction failed.")
 
                 try:
-                    if os.path.isfile(Resource.PROMPT):
+                    if os.path.isfile(paths.prompt):
                         prompt_dict = ""
-                        with open(Resource.PROMPT) as prompt:
+                        with open(paths.prompt) as prompt:
                             prompt_dict = json.loads(prompt.read())
                             mood_dict["prompts"] += prompt_dict["moods"]
                 except Exception:
                     logging.warning("prompt mood extraction failed.")
 
                 try:
-                    if os.path.isfile(Resource.WEB):
+                    if os.path.isfile(paths.web):
                         web_dict = ""
-                        with open(Resource.WEB) as web:
+                        with open(paths.web) as web:
                             web_dict = json.loads(web.read())
                             for n in web_dict["moods"]:
                                 if n not in mood_dict["web"]:
@@ -1157,8 +1158,8 @@ def show_window():
     # put the group here instead of with the rest since it's just a single button
     configpresets_group = []
     configpresets_group.append(configPresetsButton)
-    if os.path.exists(Resource.CONFIG):
-        with open(Resource.CONFIG) as f:
+    if os.path.exists(paths.config):
+        with open(paths.config) as f:
             try:
                 l = json.loads(f.read())
                 if "version" in l:
@@ -1257,7 +1258,7 @@ def show_window():
     uniqueIDLabel.pack(fill="both", expand=1)
     openMoodsButton.pack(fill="x", expand=1)
 
-    openResourcesButton = Button(tabFile, height=2, text="Open Resources Folder", command=lambda: explorerView(Resource.ROOT))
+    openResourcesButton = Button(tabFile, height=2, text="Open Resources Folder", command=lambda: explorerView(paths.root))
     openResourcesButton.pack(fill="x", pady=2)
 
     # ==========={EDGEWARE++ "PACK INFO" TAB STARTS HERE}===========#
@@ -1274,14 +1275,14 @@ def show_window():
     statusIconFrame = Frame(infoStatusFrame)
     statusCorruptionFrame = Frame(infoStatusFrame)
 
-    if os.path.exists(Resource.ROOT):
+    if os.path.exists(paths.root):
         statusPack = True
-        statusAbout = True if os.path.isfile(Resource.INFO) else False
-        statusWallpaper = True if os.path.isfile(Resource.WALLPAPER) else False
-        statusStartup = True if Resource.SPLASH else False
-        statusDiscord = True if os.path.isfile(Resource.DISCORD) else False
-        statusIcon = True if os.path.isfile(Resource.ICON) else False
-        statusCorruption = True if os.path.isfile(Resource.CORRUPTION) else False
+        statusAbout = True if os.path.isfile(paths.info) else False
+        statusWallpaper = True if os.path.isfile(paths.wallpaper) else False
+        statusStartup = True if paths.splash else False
+        statusDiscord = True if os.path.isfile(paths.discord) else False
+        statusIcon = True if os.path.isfile(paths.icon) else False
+        statusCorruption = True if os.path.isfile(paths.corruption) else False
     else:
         statusPack = False
         statusAbout = False
@@ -1357,13 +1358,13 @@ def show_window():
     captionsStatsFrame = Frame(statsFrame2)
     subliminalsStatsFrame = Frame(statsFrame2)
 
-    imageStat = len(os.listdir(Resource.IMAGE)) if os.path.exists(Resource.IMAGE) else 0
-    audioStat = len(os.listdir(Resource.AUDIO)) if os.path.exists(Resource.AUDIO) else 0
-    videoStat = len(os.listdir(Resource.VIDEO)) if os.path.exists(Resource.VIDEO) else 0
+    imageStat = len(os.listdir(paths.image)) if os.path.exists(paths.image) else 0
+    audioStat = len(os.listdir(paths.audio)) if os.path.exists(paths.audio) else 0
+    videoStat = len(os.listdir(paths.video)) if os.path.exists(paths.video) else 0
 
-    if os.path.exists(Resource.WEB):
+    if os.path.exists(paths.web):
         try:
-            with open(Resource.WEB, "r") as f:
+            with open(paths.web, "r") as f:
                 webStat = len(json.loads(f.read())["urls"])
         except Exception as e:
             logging.warning(f"error in web.json. Aborting preview load. {e}")
@@ -1372,10 +1373,10 @@ def show_window():
     else:
         webStat = 0
 
-    if os.path.exists(Resource.PROMPT):
+    if os.path.exists(paths.prompt):
         # frankly really ugly but the easiest way I found to do it
         try:
-            with open(Resource.PROMPT, "r") as f:
+            with open(paths.prompt, "r") as f:
                 l = json.loads(f.read())
                 i = 0
                 if "moods" in l:
@@ -1400,9 +1401,9 @@ def show_window():
     else:
         promptStat = 0
 
-    if os.path.exists(Resource.CAPTIONS):
+    if os.path.exists(paths.captions):
         try:
-            with open(Resource.CAPTIONS, "r") as f:
+            with open(paths.captions, "r") as f:
                 l = json.loads(f.read())
                 i = 0
                 if "prefix" in l:
@@ -1423,7 +1424,7 @@ def show_window():
     else:
         captionStat = 0
 
-    subliminalStat = len(os.listdir(Resource.SUBLIMINALS)) if os.path.exists(Resource.SUBLIMINALS) else 0
+    subliminalStat = len(os.listdir(paths.subliminals)) if os.path.exists(paths.subliminals) else 0
 
     statsFrame.pack(fill="x", pady=1)
     statsFrame1.pack(fill="x", side="top")
@@ -1522,7 +1523,7 @@ def show_window():
     discordStatusImageLabel = Label(discordStatusFrame, text="Discord Status Image:", font="Default 10")
     if statusDiscord:
         try:
-            with open((Resource.DISCORD), "r") as f:
+            with open((paths.discord), "r") as f:
                 datfile = f.read()
                 if not datfile == "":
                     info_discord = datfile.split("\n")
@@ -2380,9 +2381,9 @@ def show_window():
     mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
     mediaTree.configure(yscroll=mediaScrollbar.set)
 
-    if os.path.exists(Resource.MEDIA):
+    if os.path.exists(paths.media):
         try:
-            with open(Resource.MEDIA, "r") as f:
+            with open(paths.media, "r") as f:
                 l = json.loads(f.read())
                 for m in l:
                     if m == "default":
@@ -2402,7 +2403,7 @@ def show_window():
 
     if config["toggleMoodSet"] != True:
         if len(mediaTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+            if MOOD_PATH != "0" and os.path.exists(paths.root):
                 try:
                     with open(MOOD_PATH, "r") as mood:
                         mood_dict = json.loads(mood.read())
@@ -2422,9 +2423,9 @@ def show_window():
     captionsScrollbar = ttk.Scrollbar(moodsCaptionsFrame, orient=VERTICAL, command=captionsTree.yview)
     captionsTree.configure(yscroll=captionsScrollbar.set)
 
-    if os.path.exists(Resource.CAPTIONS):
+    if os.path.exists(paths.captions):
         try:
-            with open(Resource.CAPTIONS, "r") as f:
+            with open(paths.captions, "r") as f:
                 l = json.loads(f.read())
                 if "prefix" in l:
                     del l["prefix"]
@@ -2452,7 +2453,7 @@ def show_window():
 
     if config["toggleMoodSet"] != True:
         if len(captionsTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+            if MOOD_PATH != "0" and os.path.exists(paths.root):
                 try:
                     with open(MOOD_PATH, "r") as mood:
                         mood_dict = json.loads(mood.read())
@@ -2472,9 +2473,9 @@ def show_window():
     promptsScrollbar = ttk.Scrollbar(moodsPromptsFrame, orient=VERTICAL, command=promptsTree.yview)
     promptsTree.configure(yscroll=promptsScrollbar.set)
 
-    if os.path.exists(Resource.PROMPT):
+    if os.path.exists(paths.prompt):
         try:
-            with open(Resource.PROMPT, "r") as f:
+            with open(paths.prompt, "r") as f:
                 l = json.loads(f.read())
                 for m in l["moods"]:
                     if m == "default":
@@ -2495,7 +2496,7 @@ def show_window():
 
     if config["toggleMoodSet"] != True:
         if len(promptsTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+            if MOOD_PATH != "0" and os.path.exists(paths.root):
                 try:
                     with open(MOOD_PATH, "r") as mood:
                         mood_dict = json.loads(mood.read())
@@ -2514,9 +2515,9 @@ def show_window():
     webScrollbar = ttk.Scrollbar(moodsWebFrame, orient=VERTICAL, command=webTree.yview)
     webTree.configure(yscroll=webScrollbar.set)
 
-    if os.path.exists(Resource.WEB):
+    if os.path.exists(paths.web):
         try:
-            with open(Resource.WEB, "r") as f:
+            with open(paths.web, "r") as f:
                 l = json.loads(f.read())
                 webMoodList = ["default"]
                 for m in l["moods"]:
@@ -2541,7 +2542,7 @@ def show_window():
 
     if config["toggleMoodSet"] != True:
         if len(webTree.get_children()) != 0:
-            if MOOD_PATH != "0" and os.path.exists(Resource.ROOT):
+            if MOOD_PATH != "0" and os.path.exists(paths.root):
                 try:
                     with open(MOOD_PATH, "r") as mood:
                         mood_dict = json.loads(mood.read())
@@ -3251,7 +3252,7 @@ def show_window():
             toggleAssociateSettings(True, ctutorialstart_group)
             toggleAssociateSettings(True, ctutorialtransition_group)
             triggerHelper(corruptionTriggerVar.get(), False)
-        toggleAssociateSettings(os.path.isfile(Resource.CORRUPTION), corruptionEnabled_group)
+        toggleAssociateSettings(os.path.isfile(paths.corruption), corruptionEnabled_group)
 
     corruptionTabMaster.bind("<<NotebookTabChanged>>", corruptionTutorialHelper)
 
@@ -3387,7 +3388,7 @@ def show_window():
     hibernateHelper(hibernateTypeVar.get())
     fadeHelper(corruptionFadeTypeVar.get())
     triggerHelper(corruptionTriggerVar.get(), False)
-    toggleAssociateSettings(os.path.isfile(Resource.CORRUPTION), corruptionEnabled_group)
+    toggleAssociateSettings(os.path.isfile(paths.corruption), corruptionEnabled_group)
 
     # messageOff toggle here, for turning off all help messages
     toggleHelp(messageOffVar.get(), message_group)
@@ -3440,7 +3441,7 @@ def exportResource() -> bool:
         saveLocation = filedialog.asksaveasfile("w", defaultextension=".zip")
         with zipfile.ZipFile(saveLocation.name, "w", compression=zipfile.ZIP_DEFLATED) as zip:
             beyondRoot = False
-            for root, dirs, files in os.walk(Resource.ROOT):
+            for root, dirs, files in os.walk(paths.root):
                 for file in files:
                     logging.info(f"write {file}")
                     if beyondRoot:
@@ -3463,7 +3464,7 @@ def importResource(parent: Tk) -> bool:
         openLocation = filedialog.askopenfile("r", defaultextension=".zip")
         if openLocation == None:
             return False
-        if os.path.exists(Resource.ROOT):
+        if os.path.exists(paths.root):
             resp = confirmBox(
                 parent,
                 "Confirm",
@@ -3473,10 +3474,10 @@ def importResource(parent: Tk) -> bool:
             if not resp:
                 logging.info("exited import resource overwrite")
                 return False
-            shutil.rmtree(Resource.ROOT)
+            shutil.rmtree(paths.root)
             logging.info("removed old resource folder")
         with zipfile.ZipFile(openLocation.name, "r") as zip:
-            zip.extractall(Resource.ROOT)
+            zip.extractall(paths.root)
             logging.info("extracted all from zip")
         messagebox.showinfo("Done", "Resource importing completed.")
         clearLaunches(False)
@@ -3522,7 +3523,7 @@ def write_save(varList: list[StringVar | IntVar | BooleanVar], nameList: list[st
     config["wallpaperDat"] = str(config["wallpaperDat"])
     config["wallpaperDat"] = f'{config["wallpaperDat"]}'
     config["is_configed"] = 1
-    if not os.path.isfile(Resource.CORRUPTION):
+    if not os.path.isfile(paths.corruption):
         config["corruptionMode"] = 0
 
     utils.toggle_run_at_startup(int(varList[nameList.index("start_on_logon")].get()) == 1)
@@ -3723,7 +3724,7 @@ def autoImportWallpapers(tkListObj: Listbox):
                 tkListObj.delete(1)
             except Exception:
                 break
-        for file in os.listdir(Resource.ROOT):
+        for file in os.listdir(paths.root):
             if (file.endswith(".png") or file.endswith(".jpg") or file.endswith(".jpeg")) and file != "wallpaper.png":
                 name_ = file.split(".")[0]
                 tkListObj.insert(1, name_)
@@ -3853,9 +3854,9 @@ def getDescriptText(name: str) -> str:
 def updateMoods(type: str, id: str, check: bool):
     try:
         if config["toggleMoodSet"] != True:
-            if UNIQUE_ID != "0" and os.path.exists(Resource.ROOT):
+            if UNIQUE_ID != "0" and os.path.exists(paths.root):
                 moodUpdatePath = Data.MOODS / f"{UNIQUE_ID}.json"
-            elif UNIQUE_ID == "0" and os.path.exists(Resource.ROOT):
+            elif UNIQUE_ID == "0" and os.path.exists(paths.root):
                 moodUpdatePath = Data.MOODS / f"{info_id}.json"
             with open(moodUpdatePath, "r") as mood:
                 mood_dict = json.loads(mood.read())
@@ -4057,7 +4058,7 @@ def themeChange(theme: str, root, style, mfont, tfont):
 # applyPreset already exists, but there's a reason i'm not using it. I want the per-pack preset to not include every setting unless specified to do so, and
 # I also want the settings to not automatically be saved in case the user does not like what the pack sets.
 def packPreset(varList: list[StringVar | IntVar | BooleanVar], nameList: list[str], presetType: str, danger):
-    with open(Resource.CONFIG) as f:
+    with open(paths.config) as f:
         try:
             l = json.loads(f.read())
             print(l)

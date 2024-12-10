@@ -6,7 +6,7 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import TypeVar
 
-from paths import Data, Resource
+from paths import Data, PackPaths
 from utils import utils
 from voluptuous import ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Equal, In, Length, Number, Optional, Range, Schema, Url
 from voluptuous.error import Invalid
@@ -34,7 +34,7 @@ def length_equal_to(data: dict, key: str, equal_to: str) -> None:
     Schema(Equal(len(data[equal_to]), msg=f'Length of "{key}" must be equal to "{equal_to}"'))(len(data[key]))
 
 
-def load_captions() -> Captions:
+def load_captions(paths: PackPaths) -> Captions:
     default = Captions()
 
     def load(content: str) -> Captions:
@@ -79,10 +79,10 @@ def load_captions() -> Captions:
             captions["default"],
         )
 
-    return try_load(Resource.CAPTIONS, load) or default
+    return try_load(paths.captions, load) or default
 
 
-def load_corruption() -> list[CorruptionLevel]:
+def load_corruption(paths: PackPaths) -> list[CorruptionLevel]:
     def load(content: str) -> list[CorruptionLevel]:
         corruption = json.loads(content)
 
@@ -119,10 +119,10 @@ def load_corruption() -> list[CorruptionLevel]:
 
         return levels
 
-    return try_load(Resource.CORRUPTION, load) or []
+    return try_load(paths.corruption, load) or []
 
 
-def load_discord() -> Discord:
+def load_discord(paths: PackPaths) -> Discord:
     default = Discord()
 
     def load(content: str) -> Discord:
@@ -136,11 +136,11 @@ def load_discord() -> Discord:
 
         return Discord(discord[0], discord[1] if has_image else default.image)
 
-    return try_load(Resource.DISCORD, load) or default
+    return try_load(paths.discord, load) or default
 
 
-def load_info() -> Info:
-    default = Info(mood_file=Data.MOODS / f"{utils.compute_mood_id()}.json")
+def load_info(paths: PackPaths) -> Info:
+    default = Info(mood_file=Data.MOODS / f"{utils.compute_mood_id(paths)}.json")
 
     def load(content: str) -> Info:
         info = json.loads(content)
@@ -149,10 +149,10 @@ def load_info() -> Info:
 
         return Info(info["name"], Data.MOODS / f"{info['id']}.json", info["creator"], info["version"], info["description"])
 
-    return try_load(Resource.INFO, load) or default
+    return try_load(paths.info, load) or default
 
 
-def load_media() -> dict[str, str]:
+def load_media(paths: PackPaths) -> dict[str, str]:
     def load(content: str) -> dict[str, str]:
         media = json.loads(content)
 
@@ -166,10 +166,10 @@ def load_media() -> dict[str, str]:
 
         return media_moods
 
-    return try_load(Resource.MEDIA, load) or {}
+    return try_load(paths.media, load) or {}
 
 
-def load_prompt() -> Prompts:
+def load_prompt(paths: PackPaths) -> Prompts:
     default = Prompts()
 
     def load(content: str) -> Prompts:
@@ -199,10 +199,10 @@ def load_prompt() -> Prompts:
             moods.append(PromptMood(mood, prompt["freqList"][i], prompt[mood]))
         return Prompts(moods, prompt["minLen"], prompt["maxLen"], prompt.get("commandtext", default.command_text), prompt.get("subtext", default.submit_text))
 
-    return try_load(Resource.PROMPT, load) or default
+    return try_load(paths.prompt, load) or default
 
 
-def load_web() -> list[Web]:
+def load_web(paths: PackPaths) -> list[Web]:
     def load(content: str) -> list[Web]:
         web = json.loads(content)
 
@@ -218,7 +218,7 @@ def load_web() -> list[Web]:
 
         return web_list
 
-    return try_load(Resource.WEB, load) or []
+    return try_load(paths.web, load) or []
 
 
 def load_moods(mood_file: Path) -> ActiveMoods:

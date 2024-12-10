@@ -2,7 +2,7 @@ import random
 from pathlib import Path
 
 import filetype
-from paths import Assets, CustomAssets, Resource
+from paths import Assets, CustomAssets, PackPaths
 from settings import Settings
 
 from pack.data import CaptionMood, PromptMood, Web
@@ -10,29 +10,31 @@ from pack.load import list_media, load_captions, load_corruption, load_discord, 
 
 
 class Pack:
-    def __init__(self):
+    def __init__(self, root: Path):
+        self.paths = PackPaths(root)
+
         # Pack files
-        self.captions = load_captions()
-        self.corruption_levels = load_corruption()
-        self.discord = load_discord()
-        self.info = load_info()
-        self.media_moods = load_media()
-        self.prompts = load_prompt()
-        self.web = load_web()
+        self.captions = load_captions(self.paths)
+        self.corruption_levels = load_corruption(self.paths)
+        self.discord = load_discord(self.paths)
+        self.info = load_info(self.paths)
+        self.media_moods = load_media(self.paths)
+        self.prompts = load_prompt(self.paths)
+        self.web = load_web(self.paths)
 
         # Data files
         self.active_moods = load_moods(self.info.mood_file)
 
         # Media
-        self.images = list_media(Resource.IMAGE, filetype.is_image, self.media_moods)
-        self.videos = list_media(Resource.VIDEO, filetype.is_video, self.media_moods)
-        self.audio = list_media(Resource.AUDIO, filetype.is_audio, self.media_moods)
-        self.subliminal_overlays = list_media(Resource.SUBLIMINALS, filetype.is_image)
+        self.images = list_media(self.paths.image, filetype.is_image, self.media_moods)
+        self.videos = list_media(self.paths.video, filetype.is_video, self.media_moods)
+        self.audio = list_media(self.paths.audio, filetype.is_audio, self.media_moods)
+        self.subliminal_overlays = list_media(self.paths.subliminals, filetype.is_image)
 
         # Paths
-        self.icon = Resource.ICON if Resource.ICON.is_file() else CustomAssets.icon()
-        self.wallpaper = Resource.WALLPAPER if Resource.WALLPAPER.is_file() else Assets.DEFAULT_WALLPAPER
-        self.startup_splash = next((path for path in Resource.SPLASH if path.is_file()), None) or CustomAssets.startup_splash()
+        self.icon = self.paths.icon if self.paths.icon.is_file() else CustomAssets.icon()
+        self.wallpaper = self.paths.wallpaper if self.paths.wallpaper.is_file() else Assets.DEFAULT_WALLPAPER
+        self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
 
     def filter_media(self, media_list: list[Path]) -> list[Path]:
         filter_function = lambda media: media.mood is None or media.mood in self.active_moods.media

@@ -4,7 +4,7 @@ from tkinter import Tk, messagebox
 
 from features.corruption_config import CorruptionConfig
 from pack import Pack
-from paths import Data, Resource
+from paths import Data
 from settings import Settings
 from state import State
 from utils import utils
@@ -45,7 +45,7 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
     pack.active_moods.media = level.moods.copy()
 
     if settings.corruption_wallpaper:
-        utils.set_wallpaper(Resource.ROOT / (level.wallpaper or pack.wallpaper))
+        utils.set_wallpaper(pack.paths.root / (level.wallpaper or pack.wallpaper))
 
     if settings.corruption_full:
         for key, value in level.config.items():

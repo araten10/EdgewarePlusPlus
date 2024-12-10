@@ -5,7 +5,7 @@ import platform
 import sys
 import time
 
-from paths import Data, Resource
+from paths import Data, PackPaths
 
 
 class RedactUsernameFormatter(logging.Formatter):
@@ -28,15 +28,15 @@ def init_logging(filename: str) -> str:
     return log_file
 
 
-def compute_mood_id() -> str:
-    im = str(len(os.listdir(Resource.IMAGE))) if Resource.IMAGE.is_dir() else "0"
-    au = str(len(os.listdir(Resource.AUDIO))) if Resource.AUDIO.is_dir() else "0"
-    vi = str(len(os.listdir(Resource.VIDEO))) if Resource.VIDEO.is_dir() else "0"
-    wa = "w" if Resource.WALLPAPER.is_file() else "x"
-    sp = "s" if Resource.SPLASH else "x"
-    di = "d" if Resource.DISCORD.is_file() else "x"
-    ic = "i" if Resource.ICON.is_file() else "x"
-    co = "c" if Resource.CORRUPTION.is_file() else "x"
+def compute_mood_id(paths: PackPaths) -> str:
+    im = str(len(os.listdir(paths.image))) if paths.image.is_dir() else "0"
+    au = str(len(os.listdir(paths.audio))) if paths.audio.is_dir() else "0"
+    vi = str(len(os.listdir(paths.video))) if paths.video.is_dir() else "0"
+    wa = "w" if paths.wallpaper.is_file() else "x"
+    sp = "s" if paths.splash else "x"
+    di = "d" if paths.discord.is_file() else "x"
+    ic = "i" if paths.icon.is_file() else "x"
+    co = "c" if paths.corruption.is_file() else "x"
     return im + au + vi + wa + sp + di + ic + co
 
 

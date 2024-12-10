@@ -13,7 +13,7 @@ from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from pack import Pack
 from panic import panic
-from paths import CustomAssets, Data, Process, Resource
+from paths import CustomAssets, Data, Process
 from PIL import Image
 from pygame import mixer
 from pypresence import Presence
@@ -98,7 +98,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
             wallpapers.remove(previous)
 
         wallpaper = random.choice(wallpapers)
-        utils.set_wallpaper(Resource.ROOT / wallpaper)
+        utils.set_wallpaper(pack.paths.root / wallpaper)
 
         t = settings.wallpaper_timer
         v = settings.wallpaper_variance

@@ -87,24 +87,25 @@ class CustomAssets:
 
 
 @dataclass
-class Resource:
-    ROOT = PATH / "resource"
+class PackPaths:
+    def __init__(self, root: Path):
+        self.root = root
 
-    # Directories
-    AUDIO = ROOT / "aud"
-    IMAGE = ROOT / "img"
-    SUBLIMINALS = ROOT / "subliminals"
-    VIDEO = ROOT / "vid"
+        # Directories
+        self.audio = self.root / "aud"
+        self.image = self.root / "img"
+        self.subliminals = self.root / "subliminals"
+        self.video = self.root / "vid"
 
-    # Files
-    CAPTIONS = ROOT / "captions.json"
-    CONFIG = ROOT / "config.json"
-    CORRUPTION = ROOT / "corruption.json"
-    DISCORD = ROOT / "discord.dat"
-    ICON = ROOT / "icon.ico"
-    INFO = ROOT / "info.json"
-    SPLASH = [PATH / "resource" / f"loading_splash.{extension}" for extension in ["png", "gif", "jpg", "jpeg", "bmp"]]
-    MEDIA = ROOT / "media.json"
-    PROMPT = ROOT / "prompt.json"
-    WALLPAPER = ROOT / "wallpaper.png"
-    WEB = ROOT / "web.json"
+        # Files
+        self.captions = self.root / "captions.json"
+        self.config = self.root / "config.json"
+        self.corruption = self.root / "corruption.json"
+        self.discord = self.root / "discord.dat"
+        self.icon = self.root / "icon.ico"
+        self.info = self.root / "info.json"
+        self.splash = [self.root / f"loading_splash.{extension}" for extension in ["png", "gif", "jpg", "jpeg", "bmp"]]
+        self.media = self.root / "media.json"
+        self.prompt = self.root / "prompt.json"
+        self.wallpaper = self.root / "wallpaper.png"
+        self.web = self.root / "web.json"
