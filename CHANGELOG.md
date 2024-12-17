@@ -9,6 +9,13 @@
 
 **Since last version...**
 
+**Version 14**
+
+Hello once again, and happy holidays! If you haven't been checking the github or my twitter (bksy?) for updates, I'm sure it's seemed like a long time since the last patch. While there have been a ton of new features slowly added in without incrementing the patch number, I held off on pushing the update notification to everyone since I kept getting distracted from polishing/further testing things! So this is a further reminder that if you're chomping at the bit to get new Edgeware++ updates, feel free to hop on over here every so often to see what's been going on. In the upcoming updates I want to make the "You are running an out of date version!" popup less annoying, with a direct download link as well... I think both of these will make me feel better about making smaller, more frequent updates more official.
+
+The big thing this patch is a further addition to corruption! Full mode allows corruption to change settings over time, allowing edgeware to fully transform as you use it. This is something you have to opt into of course- it could potentially cause dangerous settings to be enabled if the pack creator adds it in! We have added a warning system if this is the case, but are planning to tweak it over time. Currently a warning popup will appear if a few settings are flagged to be enabled with this setting on.
+
+On top of all this, notification support is added- a brand new type of popup! It allows for both images and captions to pop up like system notifications, if your operating system supports it.
 •*Added notification support under "Captions" in the config menu- allows for your operating system to send you both caption and image notifications!*
 
 •*Increased the default popup delay to 5 seconds instead of 1 second, so new users don't have their computer detonated (and I don't have to remember to increase it every time I flush settings)*
@@ -24,9 +31,14 @@
 
 •*Added more config tutorial messages*
 
-•*Expanded the moods box to be larger in both dimensions*
+•*Expanded the moods box in the corresponding config tab to be larger in both dimensions*
 
 •*Changed corruption dev mode to be more helpful*
+
+•*Completed "Full Mode" in corruption, which allows pack creators to change settings with corruption levels if turned on*
+
+•*Also added a warning popup on edgeware startup if dangerous settings are enabled in "full mode".*
+
 **Version 13b**
 
 Hello everyone! The huge rewrite by LewdDevelopment is finally done (big round of applause)! This means lots of bugfixes and general stability improvements.... hopefully! I label this as a "beta" because due to both of us working on different platforms (araten windows/LewdDevelopment linux) there might be some huge OS-specific bugs that slipped through the cracks. These will be fixed as they are reported, but for the time being know that some temporary instability might occur. In the future however, it will hopefully be much smoother to use!
