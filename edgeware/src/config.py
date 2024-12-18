@@ -742,17 +742,14 @@ def show_window():
     Label(tabStart, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
     infoHostFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
     zipGitFrame = Frame(infoHostFrame)
-    verFrame = Frame(infoHostFrame)
-    local_verLabel = Label(verFrame, text=f'EdgeWare Local Version:\n{default_config["version"]}')
-    web_verLabel = Label(verFrame, text=f"EdgeWare GitHub Version:\n{webv}", bg=(BUTTON_FACE if (default_config["version"] == webv) else "red"))
-    openGitButton = Button(zipGitFrame, text="Open Github (EdgeWare Base)", command=lambda: webbrowser.open("https://github.com/PetitTournesol/Edgeware"))
+    openGitButton = Button(zipGitFrame, text="Open Edgeware++ Github", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus"))
 
     verPlusFrame = Frame(infoHostFrame)
     local_verPlusLabel = Label(verPlusFrame, text=f'EdgeWare++ Local Version:\n{default_config["versionplusplus"]}')
     web_verPlusLabel = Label(
-        verPlusFrame, text=f"EdgeWare++ GitHub Version:\n{webvpp}", bg=(BUTTON_FACE if (default_config["versionplusplus"] == webvpp) else "red")
+        verPlusFrame, text=f"EdgeWare++ Github Version:\n{webvpp}", bg=(BUTTON_FACE if (default_config["versionplusplus"] == webvpp) else "red")
     )
-    openGitPlusButton = Button(zipGitFrame, text="Open Github (EdgeWare++)", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus"))
+    directDownloadButton = Button(zipGitFrame, text="Download Newest Update", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus/archive/refs/heads/main.zip"))
 
     forceReload = Button(infoHostFrame, text="Force Reload", command=refresh)
     optButton = Button(infoHostFrame, text="Test Func", command=lambda: getDescriptText("default"))
@@ -760,14 +757,11 @@ def show_window():
     infoHostFrame.pack(fill="x")
     zipGitFrame.pack(fill="both", side="left", expand=1)
     openGitButton.pack(fill="both", expand=1)
-    verFrame.pack(fill="both", side="left", expand=1)
-    local_verLabel.pack(fill="x")
-    web_verLabel.pack(fill="x")
 
     verPlusFrame.pack(fill="both", side="left", expand=1)
     local_verPlusLabel.pack(fill="x")
     web_verPlusLabel.pack(fill="x")
-    openGitPlusButton.pack(fill="both", expand=1)
+    directDownloadButton.pack(fill="both", expand=1)
 
     # force reload button for debugging, only appears on DEV versions
     if local_version.endswith("DEV"):
@@ -3411,7 +3405,7 @@ def show_window():
     #   the version will still be red to draw attention to it
     if local_pp_version.split("_")[0] != webvpp.split("_")[0] and not (local_pp_version.endswith("DEV") or config["toggleInternet"]):
         messagebox.showwarning(
-            "Update Available", "Main local version and web version are not the same.\nPlease visit the Github and download the newer files."
+            "Update Available", "Main local version and web version are not the same.\nPlease visit the Github and download the newer files,\nor use the direct download link on the \"Start\" tab."
         )
     root.mainloop()
 

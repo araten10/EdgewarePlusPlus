@@ -11,11 +11,12 @@
 
 **Version 14**
 
-Hello once again, and happy holidays! If you haven't been checking the github or my twitter (bksy?) for updates, I'm sure it's seemed like a long time since the last patch. While there have been a ton of new features slowly added in without incrementing the patch number, I held off on pushing the update notification to everyone since I kept getting distracted from polishing/further testing things! So this is a further reminder that if you're chomping at the bit to get new Edgeware++ updates, feel free to hop on over here every so often to see what's been going on. In the upcoming updates I want to make the "You are running an out of date version!" popup less annoying, with a direct download link as well... I think both of these will make me feel better about making smaller, more frequent updates more official.
+Hello once again, and happy holidays! If you haven't been checking the github or my twitter (bksy?) for updates, I'm sure it's seemed like a long time since the last patch. While there have been a ton of new features slowly added in without incrementing the patch number, I held off on pushing the update notification to everyone since I kept getting distracted from polishing/further testing things! So this is a further reminder that if you're chomping at the bit to get new Edgeware++ updates, feel free to hop on over here every so often to see what's been going on. In the upcoming updates I might make the "You are running an out of date version!" popup less annoying... I think it might make me feel better about making smaller, more frequent official updates.
 
 The big thing this patch is a further addition to corruption! Full mode allows corruption to change settings over time, allowing edgeware to fully transform as you use it. This is something you have to opt into of course- it could potentially cause dangerous settings to be enabled if the pack creator adds it in! We have added a warning system if this is the case, but are planning to tweak it over time. Currently a warning popup will appear if a few settings are flagged to be enabled with this setting on.
 
-On top of all this, notification support is added- a brand new type of popup! It allows for both images and captions to pop up like system notifications, if your operating system supports it.
+On top of all this, notification support is added- a brand new type of popup! It allows for both images and captions to pop up like system notifications, if your operating system supports it. The pack creator has been expanded upon as well, adding some experimental-ish compression features that will drastically reduce the size of your pack if you have the time to let it work it's magic.
+
 •*Added notification support under "Captions" in the config menu- allows for your operating system to send you both caption and image notifications!*
 
 •*Increased the default popup delay to 5 seconds instead of 1 second, so new users don't have their computer detonated (and I don't have to remember to increase it every time I flush settings)*
@@ -38,6 +39,25 @@ On top of all this, notification support is added- a brand new type of popup! It
 •*Completed "Full Mode" in corruption, which allows pack creators to change settings with corruption levels if turned on*
 
 •*Also added a warning popup on edgeware startup if dangerous settings are enabled in "full mode".*
+
+•*Initial work on multiple packs being loaded at once has been started, but is not currently implemented*
+
+•*Replaced the link to the original edgeware's github with a link to directly download the newest version of Edgeware++. Also removed the original Edgeware's version number in the same section*
+>When this project first started, I kept both versions closely tied as I was a fairly novice programmer just tacking on features to Petit's original program without doing many sweeping changes. After Marigold started helping me a ton as well as refactoring the entire code, Edgeware++ has become very far removed from the original version. I think that even if Petit came back to continue to work on the original Edgeware, ++ would be so radically different that we couldn't go back and merge their changes into ours no matter how much we wanted to! I feel bad removing further references to the original project, but at this point it serves more to confuse than to help.
+
+My personal goals for next updates include:
+
+•Get rid of "About" tab in config and salvage any remaining useful information it has, completing config help along the way
+
+•Also get rid of the error log box in the config window, it honestly confuses more people than I intended
+
+•Clean up the readme file and update some out of date information
+
+•Add fade feature to corruption
+
+•Further look into video solutions, and potentially squash some bugs with VLC (making it packaged with edgeware by default would also be nice, but might be over my head)
+
+•Finish one of the many started-but-not-completed demo packs
 
 **Version 13b**
 
