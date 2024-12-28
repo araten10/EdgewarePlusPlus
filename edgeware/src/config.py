@@ -400,6 +400,8 @@ def show_window():
             notificationChanceVar = IntVar(root, value=int(config["notificationChance"]))
             notificationImageVar = IntVar(root, value=int(config["notificationImageChance"]))
 
+            packPathVar = StringVar(root, value=config["packPath"] or "default")
+
             subliminalsAlphaVar = IntVar(root, value=int(config["subliminalsAlpha"]))
 
             messageOffVar = BooleanVar(root, value=(int(config["messageOff"]) == 1))
@@ -495,6 +497,7 @@ def show_window():
                 notificationMoodVar,
                 notificationChanceVar,
                 notificationImageVar,
+                packPathVar,
             ]
 
             in_var_names = [
@@ -587,6 +590,7 @@ def show_window():
                 "notificationMood",
                 "notificationChance",
                 "notificationImageChance",
+                "packPath",
             ]
             break
         except Exception as e:
@@ -1066,14 +1070,21 @@ def show_window():
     # save/load
     Label(tabFile, text="Save/Load", font=titleFont, relief=GROOVE).pack(pady=2)
     importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-    fileTabImportButton = Button(importExportFrame, height=2, text="Import Resource Pack", command=lambda: importResource(root))
-    fileTabExportButton = Button(importExportFrame, height=2, text="Export Resource Pack", command=exportResource)
     fileSaveButton = Button(tabFile, text="Save Config Settings", command=lambda: write_save(in_var_group, in_var_names, False))
+
+    Data.PACKS.mkdir(parents=True, exist_ok=True)
+    pack_list = ["default"] + os.listdir(Data.PACKS)
+    packDropDown = OptionMenu(importExportFrame, packPathVar, *pack_list)
+    packDropDown["menu"].insert_separator(1)
+
+    defaultImportButton = Button(importExportFrame, text="Import Default Resource Pack", command=lambda: importResource(root))
+    defaultExportButton = Button(importExportFrame, text="Export Default Resource Pack", command=exportResource)
 
     fileSaveButton.pack(fill="x", pady=2)
     importExportFrame.pack(fill="x", pady=2)
-    fileTabImportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
-    fileTabExportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
+    packDropDown.pack(pady=2)
+    defaultImportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
+    defaultExportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
 
     # mode presets
     Label(tabFile, text="Config Presets", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -3523,6 +3534,11 @@ def write_save(varList: list[StringVar | IntVar | BooleanVar], nameList: list[st
     utils.toggle_run_at_startup(int(varList[nameList.index("start_on_logon")].get()) == 1)
 
     for name in varNames:
+        if name == "packPath":
+            pack_path = varList[nameList.index(name)].get()
+            temp["packPath"] = pack_path if pack_path != "default" else None
+            continue
+
         try:
             p = varList[nameList.index(name)].get()
             # standard named variables
@@ -4060,6 +4076,8 @@ def packPreset(varList: list[StringVar | IntVar | BooleanVar], nameList: list[st
                 del l["version"]
             if "versionplusplus" in l:
                 del l["versionplusplus"]
+            if "packPath" in l:
+                del l["packPath"]
             filter = []
             num = 0
             if presetType == "full":

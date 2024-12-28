@@ -3,8 +3,7 @@ import json
 import shutil
 import subprocess
 import sys
-
-from paths import Assets, Data, Process
+from paths import Assets, Data, Process, DEFAULT_PACK_PATH
 
 try:
     import vlc
@@ -62,6 +61,7 @@ class Settings:
         self.startup_splash = bool(self.config["showLoadingFlair"])
         self.desktop_icons = bool(self.config["desktopIcons"])
         self.panic_key = self.config["panicButton"]
+        self.pack_path = Data.PACKS / self.config["packPath"] if self.config["packPath"] else DEFAULT_PACK_PATH
 
         # Booru downloader
         self.booru_download = bool(self.config["downloadEnabled"])

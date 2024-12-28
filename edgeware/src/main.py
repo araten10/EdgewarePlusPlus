@@ -23,7 +23,6 @@ from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from pack import Pack
 from panic import start_panic_listener
-from paths import PATH
 from pygame import mixer
 from roll import RollTarget, roll_targets
 from settings import Settings, first_launch_configure
@@ -45,7 +44,7 @@ if __name__ == "__main__":
     root = Tk()
     root.withdraw()
     settings = Settings()
-    pack = Pack(PATH / "resource")  # TODO: Select path from settings
+    pack = Pack(settings.pack_path)
     state = State()
 
     # if sound is laggy or strange try changing buffer size (doc: https://www.pygame.org/docs/ref/mixer.html)

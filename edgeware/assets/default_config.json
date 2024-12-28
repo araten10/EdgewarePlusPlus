@@ -93,5 +93,6 @@
   "messageOff": 0,
   "notificationMood": 0,
   "notificationChance": 0,
-  "notificationImageChance": 50
+  "notificationImageChance": 50,
+  "packPath": null
 }

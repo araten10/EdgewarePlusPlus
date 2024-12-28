@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 PATH = Path(__file__).parent.parent
+DEFAULT_PACK_PATH = PATH / "resource"
 
 
 @dataclass
@@ -45,6 +46,7 @@ class Data:
     DOWNLOAD = ROOT / "download"
     LOGS = ROOT / "logs"
     MOODS = ROOT / "moods"
+    PACKS = ROOT / "packs"
     PRESETS = ROOT / "presets"
 
     # Files
