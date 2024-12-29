@@ -42,17 +42,22 @@ from tkinter import (
 import requests
 import ttkwidgets as tw
 from panic import send_panic
-from paths import Assets, CustomAssets, Data, PackPaths, Process
+from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data, PackPaths, Process
 from PIL import Image, ImageTk
 from settings import load_config, load_default_config
 from utils import utils
 from widgets.tooltip import CreateToolTip
 
 PATH = Path(__file__).parent
-os.chdir(PATH)
 
 log_file = utils.init_logging("config")
-paths = PackPaths(PATH.parent / "resource")
+
+config = load_config()
+config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
+default_config = load_default_config()
+varNames = default_config.keys()
+
+paths = PackPaths(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_PACK_PATH)
 
 
 # if you are working on this i'm just letting you know there's like almost no documentation for ttkwidgets
@@ -190,10 +195,6 @@ if info_id == "0" and os.path.exists(paths.root):
 UPDCHECK_URL = "http://raw.githubusercontent.com/PetitTournesol/Edgeware/main/EdgeWare/configDefault.dat"
 UPDCHECK_PP_URL = "http://raw.githubusercontent.com/araten10/EdgewarePlusPlus/main/edgeware/assets/default_config.json"
 
-config = load_config()
-config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
-default_config = load_default_config()
-varNames = default_config.keys()
 local_version = default_config["version"]
 local_pp_version = default_config["versionplusplus"]
 
@@ -753,7 +754,9 @@ def show_window():
     web_verPlusLabel = Label(
         verPlusFrame, text=f"EdgeWare++ Github Version:\n{webvpp}", bg=(BUTTON_FACE if (default_config["versionplusplus"] == webvpp) else "red")
     )
-    directDownloadButton = Button(zipGitFrame, text="Download Newest Update", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus/archive/refs/heads/main.zip"))
+    directDownloadButton = Button(
+        zipGitFrame, text="Download Newest Update", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus/archive/refs/heads/main.zip")
+    )
 
     forceReload = Button(infoHostFrame, text="Force Reload", command=refresh)
     optButton = Button(infoHostFrame, text="Test Func", command=lambda: getDescriptText("default"))
@@ -1072,19 +1075,41 @@ def show_window():
     importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
     fileSaveButton = Button(tabFile, text="Save Config Settings", command=lambda: write_save(in_var_group, in_var_names, False))
 
+    def import_new_pack() -> None:
+        try:
+            pack_zip = filedialog.askopenfile("r", defaultextension=".zip")
+            if not pack_zip:
+                return
+
+            with zipfile.ZipFile(pack_zip.name, "r") as zip:
+                pack_name = Path(pack_zip.name).with_suffix("").name
+                import_location = Data.PACKS / pack_name
+                import_location.mkdir(parents=True, exist_ok=True)
+                zip.extractall(import_location)
+
+            messagebox.showinfo("Done", "New pack imported")
+            refresh()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to import new pack.\n[{e}]")
+
+    packSelectionFrame = Frame(importExportFrame)
     Data.PACKS.mkdir(parents=True, exist_ok=True)
     pack_list = ["default"] + os.listdir(Data.PACKS)
-    packDropDown = OptionMenu(importExportFrame, packPathVar, *pack_list)
+    packDropDown = OptionMenu(packSelectionFrame, packPathVar, *pack_list)
     packDropDown["menu"].insert_separator(1)
+    importButton = Button(packSelectionFrame, text="Import New Pack", command=import_new_pack)
 
     defaultImportButton = Button(importExportFrame, text="Import Default Resource Pack", command=lambda: importResource(root))
     defaultExportButton = Button(importExportFrame, text="Export Default Resource Pack", command=exportResource)
 
     fileSaveButton.pack(fill="x", pady=2)
     importExportFrame.pack(fill="x", pady=2)
-    packDropDown.pack(pady=2)
-    defaultImportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
-    defaultExportButton.pack(padx=5, pady=5, fill="x", side="left", expand=1)
+    packSelectionFrame.pack(fill="both", pady=2, expand=1)
+    packDropDown.pack(padx=2, fill="x", side="left")
+    importButton.pack(padx=2, fill="x", side="left", expand=1)
+    ttk.Separator(importExportFrame, orient="horizontal").pack(fill="x", pady=2)
+    defaultImportButton.pack(padx=2, pady=2, fill="x", side="left", expand=1)
+    defaultExportButton.pack(padx=2, pady=2, fill="x", side="left", expand=1)
 
     # mode presets
     Label(tabFile, text="Config Presets", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -3416,7 +3441,8 @@ def show_window():
     #   the version will still be red to draw attention to it
     if local_pp_version.split("_")[0] != webvpp.split("_")[0] and not (local_pp_version.endswith("DEV") or config["toggleInternet"]):
         messagebox.showwarning(
-            "Update Available", "Main local version and web version are not the same.\nPlease visit the Github and download the newer files,\nor use the direct download link on the \"Start\" tab."
+            "Update Available",
+            'Main local version and web version are not the same.\nPlease visit the Github and download the newer files,\nor use the direct download link on the "Start" tab.',
         )
     root.mainloop()
 

@@ -3,7 +3,8 @@ import json
 import shutil
 import subprocess
 import sys
-from paths import Assets, Data, Process, DEFAULT_PACK_PATH
+
+from paths import DEFAULT_PACK_PATH, Assets, Data, Process
 
 try:
     import vlc
