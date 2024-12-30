@@ -97,6 +97,7 @@ pil_logger.setLevel(logging.INFO)
 # description text for each tab
 START_INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
 START_PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
+PACK_IMPORT_TEXT = 'If you\'re familiar with Edgeware, you may know that by default you can only have one pack imported under "resource". But you can also import multiple packs under "data/packs" using the "Import New Pack" button and choose which one you want to use with the dropdown menu on the left. This way you only need to import each pack once and you can conveniently switch between them. After choosing a pack from the dropdown menu, click the "Save & Refresh" button to update the config window to reflect your choice.\n\nPacks can still be imported and exported the old way using the "Import Default Pack" and "Export Default Pack" buttons, make sure to select "default" from the dropdown if you want to do this!'
 FILE_PRESET_TEXT = (
     "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
 )
@@ -274,7 +275,7 @@ def show_window():
     # window things
     root = Tk()
     root.title("Edgeware++ Config")
-    root.geometry("740x860")
+    root.geometry("740x900")
     try:
         root.iconbitmap(CustomAssets.config_icon())
         logging.info("set iconbitmap.")
@@ -1071,9 +1072,9 @@ def show_window():
     notebookGeneral.add(tabFile, text="File/Presets")
 
     # save/load
-    Label(tabFile, text="Save/Load", font=titleFont, relief=GROOVE).pack(pady=2)
-    importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-    fileSaveButton = Button(tabFile, text="Save Config Settings", command=lambda: write_save(in_var_group, in_var_names, False))
+    def save_and_refresh() -> None:
+        write_save(in_var_group, in_var_names, False)
+        refresh()
 
     def import_new_pack() -> None:
         try:
@@ -1092,6 +1093,13 @@ def show_window():
         except Exception as e:
             messagebox.showerror("Error", f"Failed to import new pack.\n[{e}]")
 
+    Label(tabFile, text="Save/Load", font=titleFont, relief=GROOVE).pack(pady=2)
+    packImportMessage = Message(tabFile, text=PACK_IMPORT_TEXT, justify=CENTER, width=675)
+    message_group.append(packImportMessage)
+    importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
+    fileSaveButton = Button(tabFile, text="Save Settings", command=lambda: write_save(in_var_group, in_var_names, False))
+    saveAndRefreshButton = Button(tabFile, text="Safe & Refresh", command=save_and_refresh)
+
     packSelectionFrame = Frame(importExportFrame)
     Data.PACKS.mkdir(parents=True, exist_ok=True)
     pack_list = ["default"] + os.listdir(Data.PACKS)
@@ -1099,10 +1107,12 @@ def show_window():
     packDropDown["menu"].insert_separator(1)
     importButton = Button(packSelectionFrame, text="Import New Pack", command=import_new_pack)
 
-    defaultImportButton = Button(importExportFrame, text="Import Default Resource Pack", command=lambda: importResource(root))
-    defaultExportButton = Button(importExportFrame, text="Export Default Resource Pack", command=exportResource)
+    defaultImportButton = Button(importExportFrame, text="Import Default Pack", command=lambda: importResource(root))
+    defaultExportButton = Button(importExportFrame, text="Export Default Pack", command=exportResource)
 
+    packImportMessage.pack(fill="both")
     fileSaveButton.pack(fill="x", pady=2)
+    saveAndRefreshButton.pack(fill="x", pady=2)
     importExportFrame.pack(fill="x", pady=2)
     packSelectionFrame.pack(fill="both", pady=2, expand=1)
     packDropDown.pack(padx=2, fill="x", side="left")
