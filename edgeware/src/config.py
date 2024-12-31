@@ -102,6 +102,7 @@ FILE_PRESET_TEXT = (
     "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
 )
 DEFAULTFILE_INTRO_TEXT = 'Changing these will change the default file EdgeWare++ falls back on when a replacement isn\'t provided by a pack. The files you choose will be stored under "data."'
+INFO_MULTI_TEXT = 'NOTE: If you have multiple packs loaded (via the file tab), make sure to apply the pack you want using the \"Save & Refresh\" button there! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
 
 POPUP_INTRO_TEXT = 'Here is where you can change the most important settings of Edgeware: the frequency and behaviour of popups. The "Popup Timer Delay" is how long a popup takes to spawn, and the overall "Popup Chance" then rolls to see if the popup spawns. Keeping the chance at 100% allows for a consistent experience, while lowering it makes for a more random one.\n\nOnce ready to spawn, a popup can be many things: A regular image, a website link (opens in your default browser), a prompt you need to fill out, autoplaying audio or videos, or a subliminal message. All of these are rolled for corresponding to their respective frequency settings, which can be found in the "Audio/Video" tab, "Captions" tab, and this tab as well. There are also plenty of other settings there to configure popups to your liking~! '
 POPUP_OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
@@ -109,9 +110,13 @@ AUDVID_PLAYBACK_TEXT = '"Pump-Scare Offset" is directly tied to the hibernate mo
 CAPTION_INTRO_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
 CAPTION_ADV_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
 CAPTION_SUB_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. "Use Subliminal specific mood" allows for this without interfering with other captions, as it uses the special mood "subliminals" which don\'t appear in the regular caption pool. However, these subliminals are set by the pack creator, so if none are set the default will be used instead.'
+CAPTION_NOTIF_TEXT = 'These are a special type of caption-centric popup that uses your operating system\'s notification feature. For examples, this system is usually used for things like alerts (\"You may now safely remove your USB device\") or web browser notifications if you have those enabled. (\"User XYZ has liked your youtube comment\")'
 WALLPAPER_ROTATE_TEXT = "Turning on wallpaper rotate disables built-in pack wallpapers, allowing you to cycle through your own instead. Keep in mind some packs use the corruption feature to rotate wallpapers without this setting enabled."
 WALLPAPER_PANIC_TEXT = "This is the panic wallpaper, make sure to set it to your default wallpaper ASAP! Otherwise quitting edgeware via panic will leave you with a nice and generic windows one instead."
 MOOD_TEXT = 'Moods are a very important part of edgeware, but also something completely optional to the end-user. Every piece of media has a mood attached to it, and edgeware checks to see if that mood is enabled before deciding to show it. Think of moods like booru tags, categories, or genres.\n\nIn this tab you can disable or enable moods. Don\'t like a particular fetish included in a pack? Turn it off! By default, all moods are turned on...\n\n...Except for packs that utilize corruption. A more in-depth explanation can be found on the "corruption" tab (under modes), but the quick summary is that corruption turns on and off moods automatically over a period of time.\n\nPS: Moods date back all the way to the original edgeware- they just had no purpose. Because of this, every pack is "compatible" with the moods feature- but most older ones just have everything set to "default", which might not show up in this window.'
+DANGER_INTRO_TEXT = 'This tab is for settings that could potentially delete or alter files on your computer, or make Edgeware run in undesired ways. Please note that with certain combinations of settings not listed here, Edgeware can also be potentially dangerous (low popup delay, high hibernate payload)- these settings are just particularly explicit in their destructive potential.'
+DANGER_DRIVE_TEXT = 'There are two main features in this section: \"Fill Drive\" and \"Replace Images\". This explanation might be long, but these features are very dangerous, so please pay attention if you plan to use them!\n\nFill drive will attempt to fill your computer with as much porn from the currently loaded pack as possible. It does, however, have some restrictions, which are further explained in the hover tooltip. Fill delay is a forced delay on saving, as when not properly configured it can fill your drive VERY quickly.\n\nReplace images will seek out folders with large numbers of pre-existing images (more than the threshold value) and when it finds one, it will replace ALL of the images with images from the currently loaded pack. For example, you could point it at certain steam directories to have all of your game preview/banner images replaced with porn. Please, please, please, backup any important images before using this setting... Edgeware will attempt to backup any replaced images under /data/backups, but nobody involved with any Edgeware version past, present, or future, is responsible for any lost images. Don\'t solely rely on the included backup feature... do the smart thing and make personal backups as well!\n\nI understand techdom and gooning are both fetishes about making irresponsible decisions, but at least understand the risks and take a moment to decide on how you want to use these features. Set up blacklists and make backups if you wish to proceed, but to echo the inadequate sex-ed public schools dole out: abstinence is the safest option.'
+DANGER_MISC_TEXT = 'These settings are less destructive on your PC, but will either cause embarrassment or give you less control over Edgeware.\n\nDisable Panic Hotkey disables both the panic hotkey and system tray panic. A full list of panic alternatives can be found in the hover tooltip.\nLaunch on PC Startup is self explanatory, but keep caution on this if you\'re running Edgeware with a strong payload.\nShow on Discord will give you a status on discord while you run Edgeware. There\'s actually a decent amount of customization for this option, and packs can have their own status. However, this setting could definitely be \"socially destructive\", or at least cause you great (unerotic) shame, so be careful with enabling it.'
 
 LOWKEY_TEXT = 'Lowkey mode makes it so all window-based popups will spawn in a corner of your screen rather than random locations. This is meant for more passive use as it generally makes popups interrupt other actions less often.\n\nBest used with the "Popup Timeout" feature along with a relatively high delay, as popups will stack on top of eachother.'
 
@@ -1098,7 +1103,7 @@ def show_window():
     message_group.append(packImportMessage)
     importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
     fileSaveButton = Button(tabFile, text="Save Settings", command=lambda: write_save(in_var_group, in_var_names, False))
-    saveAndRefreshButton = Button(tabFile, text="Safe & Refresh", command=save_and_refresh)
+    saveAndRefreshButton = Button(tabFile, text="Save & Refresh", command=save_and_refresh)
 
     packSelectionFrame = Frame(importExportFrame)
     Data.PACKS.mkdir(parents=True, exist_ok=True)
@@ -1303,6 +1308,10 @@ def show_window():
 
     # ==========={EDGEWARE++ "PACK INFO" TAB STARTS HERE}===========#
     notebookGeneral.add(tabPackInfo, text="Pack Info")
+
+    infoMultiMessage = Message(tabPackInfo, text=INFO_MULTI_TEXT, justify=CENTER, width=675)
+    infoMultiMessage.pack(fill="both")
+    message_group.append(infoMultiMessage)
 
     # Stats
     Label(tabPackInfo, text="Stats", font=titleFont, relief=GROOVE).pack(pady=2)
@@ -2276,6 +2285,10 @@ def show_window():
 
     Label(tabCaptions, text="Notifications", font=titleFont, relief=GROOVE).pack(pady=2)
 
+    captionsNotifMessage = Message(tabCaptions, text=CAPTION_NOTIF_TEXT, justify=CENTER, width=675)
+    captionsNotifMessage.pack(fill="both")
+    message_group.append(captionsNotifMessage)
+
     notificationFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
     notificationMoodToggle = Checkbutton(notificationFrame, text="Use Notification specific mood", variable=notificationMoodVar)
 
@@ -2604,6 +2617,12 @@ def show_window():
     # ==========={EDGEWARE++ "DANGEROUS SETTINGS" TAB STARTS HERE}===========#
     notebookAnnoyance.add(tabDangerous, text="Dangerous Settings")
 
+    Label(tabDangerous, text="Hard Drive Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    dangerDriveMessage = Message(tabDangerous, text=DANGER_DRIVE_TEXT, justify=CENTER, width=675)
+    dangerDriveMessage.pack(fill="both")
+    message_group.append(dangerDriveMessage)
+
     hardDriveFrame = Frame(tabDangerous, borderwidth=5, relief=RAISED)
 
     pathFrame = Frame(hardDriveFrame)
@@ -2634,8 +2653,11 @@ def show_window():
 
     fillttp = CreateToolTip(
         fillBox,
-        "Fills folders on your harddrive with images from the resource folder.\n\n"
-        "This can cause space issues, potential embarassment, navigation difficulties... Please read the full documentation in the About tab!!!",
+        "\"Fill Drive\" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. "
+        "It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a \".\" or have their "
+        "names listed in the folder name blacklist.\nIt will also ONLY place images into the User folder and its subfolders.\nFill drive has "
+        "one modifier, which is its own forced delay. Because it runs with between 1 and 8 threads at any given time, when improperly configured it can "
+        "fill your drive VERY quickly. To ensure that you get that nice slow fill, you can adjust the delay between each folder sweep it performs.",
     )
 
     fill_group.append(fillDelay)
@@ -2677,7 +2699,6 @@ def show_window():
     removeName.pack(fill="x")
     resetName.pack(fill="x")
 
-    Label(tabDangerous, text="Hard Drive Settings").pack(fill="both")
     hardDriveFrame.pack(fill="x")
     fillFrame.pack(fill="y", side="left")
     fillBox.pack()
@@ -2690,7 +2711,12 @@ def show_window():
     pathBox.pack(fill="x")
     pathButton.pack(fill="x")
 
-    Label(tabDangerous, text="Misc. Dangerous Settings").pack(fill="both")
+    Label(tabDangerous, text="Misc. Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+
+    dangerMiscMessage = Message(tabDangerous, text=DANGER_MISC_TEXT, justify=CENTER, width=675)
+    dangerMiscMessage.pack(fill="both")
+    message_group.append(dangerMiscMessage)
+
     dangerOtherFrame = Frame(tabDangerous, borderwidth=5, relief=RAISED)
     panicDisableButton = Checkbutton(dangerOtherFrame, text="Disable Panic Hotkey", variable=panicVar, cursor="question_arrow")
     toggleStartupButton = Checkbutton(dangerOtherFrame, text="Launch on PC Startup", variable=startLoginVar)

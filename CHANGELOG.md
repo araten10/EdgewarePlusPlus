@@ -9,6 +9,14 @@
 
 **Since last version...**
 
+**Version 14.2**
+
+Marigold added a very useful feature: the ability to load multiple packs at once! This doesn't combine them into one mega-pack, instead it allows you to quickly switch between them using the config window. If packs are gigabytes huge, this will also save on the time it takes to unzip them!
+
+•*Added the feature to save and load multiple packs to edgeware/data/packs, found in the "File" tab*
+
+•*Added more help messages to the config window, particularly to the "dangerous settings" tab, which ended up turning into a lecture about the dangers of unprotected file manipulation*
+
 **Version 14**
 
 Hello once again, and happy holidays! If you haven't been checking the github or my twitter (bksy?) for updates, I'm sure it's seemed like a long time since the last patch. While there have been a ton of new features slowly added in without incrementing the patch number, I held off on pushing the update notification to everyone since I kept getting distracted from polishing/further testing things! So this is a further reminder that if you're chomping at the bit to get new Edgeware++ updates, feel free to hop on over here every so often to see what's been going on. In the upcoming updates I might make the "You are running an out of date version!" popup less annoying... I think it might make me feel better about making smaller, more frequent official updates.
