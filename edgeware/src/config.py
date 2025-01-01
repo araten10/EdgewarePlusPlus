@@ -296,17 +296,6 @@ def show_window():
     # painful control variables ._.
     while fail_loop < 2:
         try:
-            popupVar = IntVar(root, value=int(config["popupMod"]))
-            webVar = IntVar(root, value=int(config["webMod"]))
-            audioVar = IntVar(root, value=int(config["audioMod"]))
-            promptVar = IntVar(root, value=int(config["promptMod"]))
-            fillVar = BooleanVar(root, value=(config["fill"] == 1))
-
-            fillDelayVar = IntVar(root, value=int(config["fill_delay"]))
-            replaceVar = BooleanVar(root, value=(config["replace"] == 1))
-            replaceThreshVar = IntVar(root, value=int(config["replaceThresh"]))
-            startLoginVar = BooleanVar(root, value=(config["start_on_logon"] == 1))
-
             hibernateVar = BooleanVar(root, value=(config["hibernateMode"] == 1))
             hibernateMinVar = IntVar(root, value=int(config["hibernateMin"]))
             hibernateMaxVar = IntVar(root, value=(config["hibernateMax"]))
@@ -415,15 +404,6 @@ def show_window():
 
             # grouping for sanity's sake later
             in_var_group = [
-                popupVar,
-                webVar,
-                audioVar,
-                promptVar,
-                fillVar,
-                fillDelayVar,
-                replaceVar,
-                replaceThreshVar,
-                startLoginVar,
                 hibernateVar,
                 hibernateMinVar,
                 hibernateMaxVar,
@@ -507,15 +487,6 @@ def show_window():
             ]
 
             in_var_names = [
-                "popupMod",
-                "webMod",
-                "audioMod",
-                "promptMod",
-                "fill",
-                "fill_delay",
-                "replace",
-                "replaceThresh",
-                "start_on_logon",
                 "hibernateMode",
                 "hibernateMin",
                 "hibernateMax",
@@ -1883,9 +1854,9 @@ def show_window():
         delayFrame, text="Manual delay...", command=lambda: assign(vars["delay"], simpledialog.askinteger("Manual Delay", prompt="[10-60000]: "))
     )
 
-    popupScale = Scale(popChanceFrame, label="Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=popupVar)
+    popupScale = Scale(popChanceFrame, label="Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=vars.add(IntVar, "popupMod"))
     popupManual = Button(
-        popChanceFrame, text="Manual popup chance...", command=lambda: assign(popupVar, simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: "))
+        popChanceFrame, text="Manual popup chance...", command=lambda: assign(vars["popupMod"], simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: "))
     )
 
     delayModeFrame.pack(fill="x")
@@ -1905,11 +1876,11 @@ def show_window():
     promptFrame = Frame(otherHostFrame)
     mistakeFrame = Frame(otherHostFrame)
 
-    webScale = Scale(webFrame, label="Website Freq (%)", from_=0, to=100, orient="horizontal", variable=webVar)
-    webManual = Button(webFrame, text="Manual web...", command=lambda: assign(webVar, simpledialog.askinteger("Web Chance", prompt="[0-100]: ")))
+    webScale = Scale(webFrame, label="Website Freq (%)", from_=0, to=100, orient="horizontal", variable=vars.add(IntVar, "webMod"))
+    webManual = Button(webFrame, text="Manual web...", command=lambda: assign(vars["webMod"], simpledialog.askinteger("Web Chance", prompt="[0-100]: ")))
 
-    promptScale = Scale(promptFrame, label="Prompt Freq (%)", from_=0, to=100, orient="horizontal", variable=promptVar)
-    promptManual = Button(promptFrame, text="Manual prompt...", command=lambda: assign(promptVar, simpledialog.askinteger("Manual Prompt", prompt="[0-100]: ")))
+    promptScale = Scale(promptFrame, label="Prompt Freq (%)", from_=0, to=100, orient="horizontal", variable=vars.add(IntVar, "promptMod"))
+    promptManual = Button(promptFrame, text="Manual prompt...", command=lambda: assign(vars["promptMod"], simpledialog.askinteger("Manual Prompt", prompt="[0-100]: ")))
 
     mistakeScale = Scale(mistakeFrame, label="Prompt Mistakes", from_=0, to=150, orient="horizontal", variable=promptMistakeVar)
     mistakeManual = Button(
@@ -2068,9 +2039,9 @@ def show_window():
 
     audioFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
     audioSubFrame = Frame(audioFrame)
-    audioScale = Scale(audioSubFrame, label="Audio Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=audioVar)
+    audioScale = Scale(audioSubFrame, label="Audio Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=vars.add(IntVar, "audioMod"))
     audioManual = Button(
-        audioSubFrame, text="Manual audio chance...", command=lambda: assign(audioVar, simpledialog.askinteger("Manual Audio", prompt="[0-100]: "))
+        audioSubFrame, text="Manual audio chance...", command=lambda: assign(vars["audioMod"], simpledialog.askinteger("Manual Audio", prompt="[0-100]: "))
     )
 
     maxAudioFrame = Frame(audioFrame)
@@ -2647,9 +2618,9 @@ def show_window():
     pathBox.configure(state="disabled")
 
     fillBox = Checkbutton(
-        fillFrame, text="Fill Drive", variable=fillVar, command=lambda: toggleAssociateSettings(fillVar.get(), fill_group), cursor="question_arrow"
+        fillFrame, text="Fill Drive", variable=vars.add(BooleanVar, "fill"), command=lambda: toggleAssociateSettings(vars["fill"].get(), fill_group), cursor="question_arrow"
     )
-    fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=fillDelayVar)
+    fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=vars.add(IntVar, "fill_delay"))
 
     fillttp = CreateToolTip(
         fillBox,
@@ -2663,9 +2634,9 @@ def show_window():
     fill_group.append(fillDelay)
 
     replaceBox = Checkbutton(
-        fillFrame, text="Replace Images", variable=replaceVar, command=lambda: toggleAssociateSettings(replaceVar.get(), replace_group), cursor="question_arrow"
+        fillFrame, text="Replace Images", variable=vars.add(BooleanVar, "replace"), command=lambda: toggleAssociateSettings(vars["replace"].get(), replace_group), cursor="question_arrow"
     )
-    replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=replaceThreshVar)
+    replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=vars.add(IntVar, "replaceThresh"))
 
     replacettp = CreateToolTip(
         replaceBox,
@@ -2719,7 +2690,7 @@ def show_window():
 
     dangerOtherFrame = Frame(tabDangerous, borderwidth=5, relief=RAISED)
     panicDisableButton = Checkbutton(dangerOtherFrame, text="Disable Panic Hotkey", variable=panicVar, cursor="question_arrow")
-    toggleStartupButton = Checkbutton(dangerOtherFrame, text="Launch on PC Startup", variable=startLoginVar)
+    toggleStartupButton = Checkbutton(dangerOtherFrame, text="Launch on PC Startup", variable=vars.add(BooleanVar, "start_on_logon"))
     toggleDiscordButton = Checkbutton(dangerOtherFrame, text="Show on Discord", variable=discordVar, cursor="question_arrow")
 
     disablePanicttp = CreateToolTip(
@@ -3439,8 +3410,8 @@ def show_window():
     # ==========={TOGGLE ASSOCIATE SETTINGS}===========#
     # all toggleAssociateSettings goes here, because it is rendered after the appropriate theme change
 
-    toggleAssociateSettings(fillVar.get(), fill_group)
-    toggleAssociateSettings(replaceVar.get(), replace_group)
+    toggleAssociateSettings(vars["fill"].get(), fill_group)
+    toggleAssociateSettings(vars["replace"].get(), replace_group)
     toggleAssociateSettings(rotateWallpaperVar.get(), wallpaper_group)
     toggleAssociateSettings(timeoutPopupsVar.get(), timeout_group)
     toggleAssociateSettings(mitosisVar.get(), mitosis_cGroup)
@@ -3593,7 +3564,7 @@ def write_save(varList: list[StringVar | IntVar | BooleanVar], nameList: list[st
     if not os.path.isfile(paths.corruption):
         config["corruptionMode"] = 0
 
-    utils.toggle_run_at_startup(int(varList[nameList.index("start_on_logon")].get()) == 1)
+    utils.toggle_run_at_startup(vars["start_on_logon"].get())
 
     for name in varNames:
         if name == "packPath":
@@ -3635,21 +3606,21 @@ def safeCheck(varList: list[StringVar | IntVar | BooleanVar], nameList: list[str
     dangersList = []
     numDangers = 0
     logging.info("running through danger list...")
-    if int(varList[nameList.index("replace")].get()) == 1:
+    if int(vars["replace"].get()) == 1:
         logging.info("extreme dangers found.")
         dangersList.append("\n\nExtreme:")
-        if int(varList[nameList.index("replace")].get()) == 1:
+        if int(vars["replace"].get()) == 1:
             numDangers += 1
             dangersList.append(
                 '\n•Replace Images is enabled! THIS WILL DELETE FILES ON YOUR COMPUTER! Only enable this willingly and cautiously! Read the documentation in the "About" tab!'
             )
-    if int(varList[nameList.index("start_on_logon")].get()) == 1 or int(varList[nameList.index("fill")].get()) == 1:
+    if int(vars["start_on_logon"].get()) == 1 or int(vars["fill"].get()) == 1:
         logging.info("major dangers found.")
         dangersList.append("\n\nMajor:")
-        if int(varList[nameList.index("start_on_logon")].get()) == 1:
+        if int(vars["start_on_logon"].get()) == 1:
             numDangers += 1
             dangersList.append("\n•Launch on Startup is enabled! This will run EdgeWare when you start your computer! (Note: Timer mode enables this setting!)")
-        if int(varList[nameList.index("fill")].get()) == 1:
+        if int(vars["fill"].get()) == 1:
             numDangers += 1
             dangersList.append(
                 "\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
