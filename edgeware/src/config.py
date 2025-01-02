@@ -3308,11 +3308,12 @@ def confirm_box(parent: Tk, btitle: str, message: str) -> bool:
 
 # helper funcs for lambdas =======================================================
 def write_save(exit_at_end: bool) -> None:
-    if vars.safe_mode.get() and exit_at_end not safe_check():
+    if vars.safe_mode.get() and exit_at_end and not safe_check():
         return
 
     logging.info("starting config save write...")
     temp = config.copy()
+    temp["wallpaperDat"] = str(config["wallpaperDat"])
 
     utils.toggle_run_at_startup(vars.run_at_startup.get())
 
