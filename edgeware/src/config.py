@@ -6,7 +6,6 @@ import shutil
 import subprocess
 import sys
 import textwrap
-import urllib.request
 import webbrowser
 import zipfile
 from pathlib import Path
@@ -41,8 +40,9 @@ from tkinter import (
 
 import requests
 import ttkwidgets as tw
-from config_src.vars import Vars
-from panic import send_panic
+from config_window.general.start import StartTab
+from config_window.utils import all_children, get_live_version, set_widget_states, set_widget_states_with_colors
+from config_window.vars import Vars
 from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data, PackPaths, Process
 from PIL import Image, ImageTk
 from settings import load_config, load_default_config
@@ -56,7 +56,6 @@ log_file = utils.init_logging("config")
 config = load_config()
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()
-varNames = default_config.keys()
 paths = PackPaths(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_PACK_PATH)
 
 
@@ -95,8 +94,6 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-START_INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
-START_PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
 PACK_IMPORT_TEXT = 'If you\'re familiar with Edgeware, you may know that by default you can only have one pack imported under "resource". But you can also import multiple packs under "data/packs" using the "Import New Pack" button and choose which one you want to use with the dropdown menu on the left. This way you only need to import each pack once and you can conveniently switch between them. After choosing a pack from the dropdown menu, click the "Save & Refresh" button to update the config window to reflect your choice.\n\nPacks can still be imported and exported the old way using the "Import Default Pack" and "Export Default Pack" buttons, make sure to select "default" from the dropdown if you want to do this!'
 FILE_PRESET_TEXT = (
     "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
@@ -140,7 +137,6 @@ CINTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and
 CSTART_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
 CTRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
 errors_list = []
-BUTTON_FACE = "SystemButtonFace" if os.name == "nt" else "gray90"
 
 # all booru consts
 BOORU_FLAG = "<BOORU_INSERT>"  # flag to replace w/ booru name
@@ -195,16 +191,6 @@ if info_id == "0" and os.path.exists(paths.root):
     except Exception as e:
         logging.warning(f"failed to create unique id. {e}")
         errors_list.append("Could not create the pack unique ID! Mood settings might not save!\n")
-
-
-# url to check online version
-UPDCHECK_URL = "http://raw.githubusercontent.com/PetitTournesol/Edgeware/main/EdgeWare/configDefault.dat"
-UPDCHECK_PP_URL = "http://raw.githubusercontent.com/araten10/EdgewarePlusPlus/main/edgeware/assets/default_config.json"
-
-local_version = default_config["version"]
-local_pp_version = default_config["versionplusplus"]
-
-pass_ = ""
 
 
 Data.MOODS.mkdir(parents=True, exist_ok=True)
@@ -290,8 +276,8 @@ class Config(Tk):
         fail_loop = 0
 
         windowFont = font.nametofont("TkDefaultFont")
-        titleFont = font.Font(font="Default")
-        titleFont.configure(size=13)
+        title_font = font.Font(font="Default")
+        title_font.configure(size=13)
 
         vars = Vars(config)
 
@@ -318,7 +304,6 @@ class Config(Tk):
         subliminals_group = []
         info_group = []
         discord_group = []
-        test_group = []
         ctime_group = []
         cpopup_group = []
         claunch_group = []
@@ -326,8 +311,8 @@ class Config(Tk):
         ctutorialtransition_group = []
         message_group = []
 
-        webv = get_live_version(UPDCHECK_URL, False)
-        webvpp = get_live_version(UPDCHECK_PP_URL, True)
+        local_version = default_config["versionplusplus"]
+        live_version = get_live_version()
 
         # tab display code start
         tabMaster = ttk.Notebook(self)  # tab manager
@@ -335,7 +320,7 @@ class Config(Tk):
         tabSubGeneral = ttk.Frame(tabMaster)
         notebookGeneral = ttk.Notebook(tabSubGeneral)
         tabMaster.add(tabSubGeneral, text="General")
-        tabStart = ttk.Frame(None)  # startup screen, info and presets
+        notebookGeneral.add(StartTab(vars, title_font, message_group, local_version, live_version), text="Start")  # startup screen, info and presets
         tabFile = ttk.Frame(None)  # file management tab
         tabPackInfo = ttk.Frame(None)  # pack information
         tabBooru = ttk.Frame(None)  # tab for booru downloader
@@ -423,348 +408,6 @@ class Config(Tk):
         # ========================================================= #
         # --------------------------------------------------------- #
 
-        # ==========={IN HERE IS START TAB ITEM INITS}===========#
-        notebookGeneral.add(tabStart, text="Start")
-
-        startMessage = Message(tabStart, text=START_INTRO_TEXT, justify=CENTER, width=675)
-        startMessage.pack(fill="both")
-        message_group.append(startMessage)
-
-        # version information
-        Label(tabStart, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
-        infoHostFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
-        zipGitFrame = Frame(infoHostFrame)
-        openGitButton = Button(zipGitFrame, text="Open Edgeware++ Github", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus"))
-
-        verPlusFrame = Frame(infoHostFrame)
-        local_verPlusLabel = Label(verPlusFrame, text=f'EdgeWare++ Local Version:\n{default_config["versionplusplus"]}')
-        web_verPlusLabel = Label(
-            verPlusFrame, text=f"EdgeWare++ Github Version:\n{webvpp}", bg=(BUTTON_FACE if (default_config["versionplusplus"] == webvpp) else "red")
-        )
-        directDownloadButton = Button(
-            zipGitFrame,
-            text="Download Newest Update",
-            command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus/archive/refs/heads/main.zip"),
-        )
-
-        forceReload = Button(infoHostFrame, text="Force Reload", command=refresh)
-        optButton = Button(infoHostFrame, text="Test Func", command=lambda: get_descript_text("default"))
-
-        infoHostFrame.pack(fill="x")
-        zipGitFrame.pack(fill="both", side="left", expand=1)
-        openGitButton.pack(fill="both", expand=1)
-
-        verPlusFrame.pack(fill="both", side="left", expand=1)
-        local_verPlusLabel.pack(fill="x")
-        web_verPlusLabel.pack(fill="x")
-        directDownloadButton.pack(fill="both", expand=1)
-
-        # force reload button for debugging, only appears on DEV versions
-        if local_version.endswith("DEV"):
-            forceReload.pack(fill="y", expand=1)
-            optButton.pack(fill="y", expand=1)
-
-        theme_types = ["Original", "Dark", "The One", "Ransom", "Goth", "Bimbo"]
-
-        Label(tabStart, text="Theme", font=titleFont, relief=GROOVE).pack(pady=2)
-        themeFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
-        subThemeFrame = Frame(themeFrame)
-        testThemeFrame = Frame(themeFrame)
-        testThemePopup = Frame(testThemeFrame)
-        testThemePrompt = Frame(testThemeFrame)
-        testThemeConfig = Frame(testThemeFrame)
-
-        themeDropdown = OptionMenu(subThemeFrame, vars.theme, *theme_types, command=lambda key: themeHelper(key))
-        themeDropdown.configure(width=12)
-        ignoreConfigToggle = Checkbutton(subThemeFrame, text="Ignore Config", variable=vars.theme_ignore_config, cursor="question_arrow")
-
-        ignoreconfigttp = CreateToolTip(ignoreConfigToggle, "When enabled, the selected theme does not apply to the config window.")
-
-        def themeHelper(theme):
-            skiplist = [testThemeFrame, testThemePopup, testThemePrompt, testThemeConfig, testPopupTitle, testPromptTitle, testConfigTitle]
-            if theme == "Original":
-                for widget in all_children(testThemeFrame):
-                    if widget in skiplist:
-                        continue
-                    if isinstance(widget, Frame):
-                        widget.configure(bg="#f0f0f0")
-                    if isinstance(widget, Button):
-                        widget.configure(bg="#f0f0f0", fg="black", font="TkDefaultFont", activebackground="#f0f0f0", activeforeground="black")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#f0f0f0", fg="black", font="TkDefaultFont")
-                    if isinstance(widget, OptionMenu):
-                        widget.configure(bg="#f0f0f0", fg="black", font="TkDefaultFont", activebackground="#f0f0f0", activeforeground="black")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="white", fg="black")
-                    if isinstance(widget, Scale):
-                        widget.configure(bg="#f0f0f0", fg="black", font="TkDefaultFont", activebackground="#f0f0f0", troughcolor="#c8c8c8")
-                    if isinstance(widget, Checkbutton):
-                        widget.configure(
-                            bg="#f0f0f0", fg="black", font="TkDefaultFont", selectcolor="white", activebackground="#f0f0f0", activeforeground="black"
-                        )
-                testpopupttp.background = "#ffffff"
-                testpopupttp.foreground = "#000000"
-                testpopupttp.bordercolor = "#000000"
-            if theme == "Dark":
-                for widget in all_children(testThemeFrame):
-                    if widget in skiplist:
-                        continue
-                    if isinstance(widget, Frame):
-                        widget.configure(bg="#282c34")
-                    if isinstance(widget, Button):
-                        widget.configure(bg="#282c34", fg="ghost white", font=("Segoe UI", 9), activebackground="#282c34", activeforeground="ghost white")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#282c34", fg="ghost white", font=("Segoe UI", 9))
-                    if isinstance(widget, OptionMenu):
-                        widget.configure(bg="#282c34", fg="ghost white", font=("Segoe UI", 9), activebackground="#282c34", activeforeground="ghost white")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="#1b1d23", fg="ghost white")
-                    if isinstance(widget, Scale):
-                        widget.configure(bg="#282c34", fg="ghost white", font=("Segoe UI", 9), activebackground="#282c34", troughcolor="#c8c8c8")
-                    if isinstance(widget, Checkbutton):
-                        widget.configure(
-                            bg="#282c34",
-                            fg="ghost white",
-                            font=("Segoe UI", 9),
-                            selectcolor="#1b1d23",
-                            activebackground="#282c34",
-                            activeforeground="ghost white",
-                        )
-                testpopupttp.background = "#1b1d23"
-                testpopupttp.foreground = "#ffffff"
-                testpopupttp.bordercolor = "#ffffff"
-            if theme == "The One":
-                for widget in all_children(testThemeFrame):
-                    if widget in skiplist:
-                        continue
-                    if isinstance(widget, Frame):
-                        widget.configure(bg="#282c34")
-                    if isinstance(widget, Button):
-                        widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8), activebackground="#1b1d23", activeforeground="#00ff41")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8))
-                    if isinstance(widget, OptionMenu):
-                        widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8), activebackground="#282c34", activeforeground="#00ff41")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="#1b1d23", fg="#00ff41")
-                    if isinstance(widget, Scale):
-                        widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8), activebackground="#282c34", troughcolor="#009a22")
-                    if isinstance(widget, Checkbutton):
-                        widget.configure(
-                            bg="#282c34", fg="#00ff41", font=("Consolas", 8), selectcolor="#1b1d23", activebackground="#282c34", activeforeground="#00ff41"
-                        )
-                testpopupttp.background = "#1b1d23"
-                testpopupttp.foreground = "#00ff41"
-                testpopupttp.bordercolor = "#00ff41"
-            if theme == "Ransom":
-                for widget in all_children(testThemeFrame):
-                    if widget in skiplist:
-                        continue
-                    if isinstance(widget, Frame):
-                        widget.configure(bg="#841212")
-                    if isinstance(widget, Button):
-                        widget.configure(bg="#841212", fg="yellow", font=("Arial", 9), activebackground="#841212", activeforeground="yellow")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#841212", fg="white", font=("Arial Bold", 9))
-                    if isinstance(widget, OptionMenu):
-                        widget.configure(bg="#841212", fg="white", font=("Arial Bold", 9), activebackground="#841212", activeforeground="white")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="white", fg="black")
-                    if isinstance(widget, Scale):
-                        widget.configure(bg="#841212", fg="white", font=("Arial", 9), activebackground="#841212", troughcolor="#c8c8c8")
-                    if isinstance(widget, Checkbutton):
-                        widget.configure(
-                            bg="#841212", fg="white", font=("Arial", 9), selectcolor="#5c0d0d", activebackground="#841212", activeforeground="white"
-                        )
-                testpopupttp.background = "#ff2600"
-                testpopupttp.foreground = "#ffffff"
-                testpopupttp.bordercolor = "#000000"
-            if theme == "Goth":
-                for widget in all_children(testThemeFrame):
-                    if widget in skiplist:
-                        continue
-                    if isinstance(widget, Frame):
-                        widget.configure(bg="#282c34")
-                    if isinstance(widget, Button):
-                        widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 9), activebackground="#282c34", activeforeground="MediumPurple1")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 9))
-                    if isinstance(widget, OptionMenu):
-                        widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 9), activebackground="#282c34", activeforeground="MediumPurple1")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="MediumOrchid2", fg="purple4")
-                    if isinstance(widget, Scale):
-                        widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 9), activebackground="#282c34", troughcolor="MediumOrchid2")
-                    if isinstance(widget, Checkbutton):
-                        widget.configure(
-                            bg="#282c34",
-                            fg="MediumPurple1",
-                            font=("Constantia", 9),
-                            selectcolor="#1b1d23",
-                            activebackground="#282c34",
-                            activeforeground="MediumPurple1",
-                        )
-                testpopupttp.background = "#1b1d23"
-                testpopupttp.foreground = "#cc60ff"
-                testpopupttp.bordercolor = "#b999fe"
-            if theme == "Bimbo":
-                for widget in all_children(testThemeFrame):
-                    if widget in skiplist:
-                        continue
-                    if isinstance(widget, Frame):
-                        widget.configure(bg="pink")
-                    if isinstance(widget, Button):
-                        widget.configure(bg="pink", fg="deep pink", font=("Constantia", 9), activebackground="hot pink", activeforeground="deep pink")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="pink", fg="deep pink", font=("Constantia", 9))
-                    if isinstance(widget, OptionMenu):
-                        widget.configure(bg="pink", fg="deep pink", font=("Constantia", 9), activebackground="hot pink", activeforeground="deep pink")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="light pink", fg="magenta2")
-                    if isinstance(widget, Scale):
-                        widget.configure(bg="pink", fg="deep pink", font=("Constantia", 9), activebackground="pink", troughcolor="hot pink")
-                    if isinstance(widget, Checkbutton):
-                        widget.configure(
-                            bg="pink", fg="deep pink", font=("Constantia", 9), selectcolor="light pink", activebackground="pink", activeforeground="deep pink"
-                        )
-                testpopupttp.background = "#ffc5cd"
-                testpopupttp.foreground = "#ff3aa3"
-                testpopupttp.bordercolor = "#ff84c1"
-            toggle_associate_settings(False, test_group, theme)
-
-        testPopupTitle = Label(testThemePopup, text="Popup")
-        testPopupImage = ImageTk.PhotoImage(file=CustomAssets.theme_demo())
-        testPopupLabel = Label(testThemePopup, image=testPopupImage, width=150, height=75, borderwidth=2, relief=GROOVE, cursor="question_arrow")
-        testPopupButton = Button(testPopupLabel, text="Test~")
-        testPopupCaption = Label(testPopupLabel, text="Lewd Caption Here!")
-
-        testpopupttp = CreateToolTip(
-            testPopupLabel,
-            "NOTE: the test image is very small, buttons and captions will appear proportionally larger here!\n\n" "Also, look! The tooltip changed too!",
-        )
-
-        testPromptBody = Frame(testThemePrompt, borderwidth=2, relief=GROOVE, width=150, height=75)
-        testPromptTitle = Label(testThemePrompt, text="Prompt")
-        testPromptInput = Text(testPromptBody, width=18, height=1)
-        testPromptButton = Button(testPromptBody, text="Sure!")
-
-        testConfigBody = Frame(testThemeConfig, borderwidth=2, relief=GROOVE)
-        testConfigTitle = Label(testThemeConfig, text="Config")
-        testCColumn1 = Frame(testConfigBody)
-        testToggle = Checkbutton(testConfigBody, text="Check")
-        testOptionsMenuVar = StringVar(self, "Option")
-        test_types = ["Option", "Menu"]
-        testConfigMenu = OptionMenu(testConfigBody, testOptionsMenuVar, *test_types)
-        testConfigMenu.config(highlightthickness=0)
-
-        testCColumn2 = Frame(testConfigBody)
-        testScaleActivated = Scale(testCColumn2, orient="horizontal", from_=1, to=100, highlightthickness=0)
-        testButtonActivated = Button(testCColumn2, text="Activated")
-
-        testCColumn3 = Frame(testConfigBody)
-        testScaleDeactivated = Scale(testCColumn3, orient="horizontal", from_=1, to=100, highlightthickness=0)
-        testButtonDeactivated = Button(testCColumn3, text="Deactivated")
-
-        test_group.append(testScaleDeactivated)
-        test_group.append(testButtonDeactivated)
-        toggle_associate_settings(False, test_group)
-
-        themeFrame.pack(fill="x")
-        subThemeFrame.pack(fill="both", side="left")
-        themeDropdown.pack(fill="both", side="top")
-        ignoreConfigToggle.pack(fill="both", side="top")
-        testThemeFrame.pack(fill="both", side="left", expand=1)
-
-        testThemePopup.pack(fill="both", side="left", padx=1)
-        testPopupTitle.pack(side="top")
-        # why ipadx and ipady don't support tuples but padx and pady do is beyond me... i'm a perfectionist and hate bottom and right being one pixel smaller but
-        # its a small enough issue im not going to bother doing some hacks to make it look right
-        testPopupLabel.pack(side="top", ipadx=1, ipady=1)
-        testPopupButton.place(x=140 - testPopupButton.winfo_reqwidth(), y=70 - testPopupButton.winfo_reqheight())
-        testPopupCaption.place(x=5, y=5)
-
-        testThemePrompt.pack(fill="both", side="left", padx=1)
-        testPromptTitle.pack()
-        testPromptBody.pack(fill="both", expand=1)
-        Label(testPromptBody, text="Do as I say~").pack(fill="both", expand=1)
-        testPromptInput.pack(fill="both")
-        testPromptButton.pack(expand=1)
-
-        testThemeConfig.pack(fill="both", side="left", padx=1)
-        testConfigTitle.pack(side="top")
-        testConfigBody.pack(fill="both", expand=1)
-        testCColumn1.pack(side="left", fill="both", expand=1)
-        testCColumn2.pack(side="left", fill="both", expand=1)
-        testCColumn3.pack(side="left", fill="both", expand=1)
-        testToggle.pack(fill="y")
-        testConfigMenu.pack(fill="y")
-        testButtonActivated.pack(fill="y")
-        testScaleActivated.pack(fill="y", expand=1)
-        testButtonDeactivated.pack(fill="y")
-        testScaleDeactivated.pack(fill="y", expand=1)
-
-        themeHelper(vars.theme.get())
-
-        # other
-        Label(tabStart, text="Other", font=titleFont, relief=GROOVE).pack(pady=2)
-        otherHostFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
-        toggleFrame2 = Frame(otherHostFrame)
-        toggleFrame3 = Frame(otherHostFrame)
-
-        toggleFlairButton = Checkbutton(toggleFrame2, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
-        toggleROSButton = Checkbutton(toggleFrame2, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit)
-        toggleMessageButton = Checkbutton(otherHostFrame, text="Disable Config Help Messages\n(requires save & restart)", variable=vars.message_off)
-        toggleDesktopButton = Checkbutton(toggleFrame3, text="Create Desktop Icons", variable=vars.desktop_icons)
-        toggleSafeMode = Checkbutton(toggleFrame3, text='Warn if "Dangerous" Settings Active', variable=vars.safe_mode, cursor="question_arrow")
-
-        otherHostFrame.pack(fill="x")
-        toggleFrame2.pack(fill="both", side="left", expand=1)
-        toggleFlairButton.pack(fill="x")
-        toggleROSButton.pack(fill="x")
-        toggleFrame3.pack(fill="both", side="left", expand=1)
-        toggleDesktopButton.pack(fill="x")
-        toggleSafeMode.pack(fill="x")
-        toggleMessageButton.pack(fill="both", expand=1)
-
-        loadingFlairttp = CreateToolTip(
-            toggleFlairButton, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.'
-        )
-        safeModettp = CreateToolTip(
-            toggleSafeMode,
-            "Asks you to confirm before saving if certain settings are enabled.\n"
-            "Things defined as Dangerous Settings:\n\n"
-            "Extreme (code red! code red! make sure you fully understand what these do before using!):\n"
-            "Replace Images\n\n"
-            "Major (very dangerous, can affect your computer):\n"
-            "Launch on Startup, Fill Drive\n\n"
-            "Medium (can lead to embarassment or reduced control over EdgeWare):\n"
-            "Timer Mode, Mitosis Mode, Show on Discord, short hibernate cooldown\n\n"
-            "Minor (low risk but could lead to unwanted interactions):\n"
-            "Disable Panic Hotkey, Run on Save & Exit",
-        )
-
-        # panic
-        Label(tabStart, text="Panic Settings", font=titleFont, relief=GROOVE).pack(pady=2)
-
-        panicMessage = Message(tabStart, text=START_PANIC_TEXT, justify=CENTER, width=675)
-        panicMessage.pack(fill="both")
-        message_group.append(panicMessage)
-
-        panicFrame = Frame(tabStart, borderwidth=5, relief=RAISED)
-
-        setPanicButtonButton = Button(
-            panicFrame,
-            text=f"Set Panic\nButton\n<{vars.panic_key.get()}>",
-            command=lambda: get_keyboard_input(setPanicButtonButton, vars.panic_key),
-            cursor="question_arrow",
-        )
-        doPanicButton = Button(panicFrame, text="Perform Panic", command=send_panic)
-
-        setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
-
-        panicFrame.pack(fill="x")
-        setPanicButtonButton.pack(fill="x", side="left", expand=1)
-        doPanicButton.pack(fill="both", side="left", expand=1)
         # ==========={EDGEWARE++ FILE TAB STARTS HERE}==============#
         notebookGeneral.add(tabFile, text="File/Presets")
 
@@ -790,7 +433,7 @@ class Config(Tk):
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to import new pack.\n[{e}]")
 
-        Label(tabFile, text="Save/Load", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabFile, text="Save/Load", font=title_font, relief=GROOVE).pack(pady=2)
         packImportMessage = Message(tabFile, text=PACK_IMPORT_TEXT, justify=CENTER, width=675)
         message_group.append(packImportMessage)
         importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
@@ -819,7 +462,7 @@ class Config(Tk):
         defaultExportButton.pack(padx=2, pady=2, fill="x", side="left", expand=1)
 
         # mode presets
-        Label(tabFile, text="Config Presets", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabFile, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)
 
         presetMessage = Message(tabFile, text=FILE_PRESET_TEXT, justify=CENTER, width=675)
         presetMessage.pack(fill="both")
@@ -907,10 +550,10 @@ class Config(Tk):
                 except Exception as e:
                     logging.warning(f"could not load pack suggested settings. Reason: {e}")
                     configNum = 0
-                    toggle_associate_settings(False, configpresets_group)
+                    set_widget_states(False, configpresets_group)
         else:
             configNum = 0
-            toggle_associate_settings(False, configpresets_group)
+            set_widget_states(False, configpresets_group)
         configPresetsLabel = Label(configPresetsSub1, text=f"Number of suggested config settings: {configNum}")
         presetsDangerToggle = Checkbutton(configPresetsSub1, text="Toggle on warning failsafes", variable=vars.preset_danger, cursor="question_arrow")
 
@@ -938,7 +581,7 @@ class Config(Tk):
         configPresetsButton.pack(fill="both", expand=1)
 
         # directories
-        Label(tabFile, text="Directories", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabFile, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
 
         logNum = len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
         logsFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
@@ -1008,7 +651,7 @@ class Config(Tk):
         message_group.append(infoMultiMessage)
 
         # Stats
-        Label(tabPackInfo, text="Stats", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabPackInfo, text="Stats", font=title_font, relief=GROOVE).pack(pady=2)
         infoStatusFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
         statusPackFrame = Frame(infoStatusFrame)
         statusAboutFrame = Frame(infoStatusFrame)
@@ -1210,7 +853,7 @@ class Config(Tk):
         Label(subliminalsStatsFrame, text=f"{subliminalStat}").pack(pady=2, side="top")
 
         # Information
-        Label(tabPackInfo, text="Information", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabPackInfo, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
         infoDescFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
         subInfoFrame = Frame(infoDescFrame, borderwidth=2, relief=GROOVE)
         descriptionFrame = Frame(infoDescFrame, borderwidth=2, relief=GROOVE)
@@ -1266,7 +909,7 @@ class Config(Tk):
         info_group.append(versionFrame)
         info_group.append(versionLabel)
         info_group.append(versionVarLabel)
-        toggle_associate_settings(statusAbout, info_group)
+        set_widget_states(statusAbout, info_group)
 
         discordStatusFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
         discordStatusLabel = Label(discordStatusFrame, text="Custom Discord Status:", font="Default 10")
@@ -1303,7 +946,7 @@ class Config(Tk):
         discord_group.append(discordStatusImageLabel)
         discord_group.append(discordStatusVarLabel)
         discord_group.append(discordStatusImageVarLabel)
-        toggle_associate_settings(statusDiscord, discord_group)
+        set_widget_states(statusDiscord, discord_group)
 
         discordimagettp = CreateToolTip(
             discordStatusImageVarLabel,
@@ -1326,7 +969,7 @@ class Config(Tk):
             otherFrame,
             text="Download from Booru",
             variable=vars.booru_download,
-            command=lambda: (toggle_associate_settings_manual(vars.booru_download.get(), download_group, "white", "gray25")),
+            command=lambda: (set_widget_states_with_colors(vars.booru_download.get(), download_group, "white", "gray25")),
         )
         minScoreSlider = Scale(booruFrame, from_=-50, to=100, orient="horizontal", variable=vars.min_score, label="Minimum Score")
 
@@ -1649,7 +1292,7 @@ class Config(Tk):
             timeoutFrame,
             text="Popup Timeout",
             variable=vars.timeout_enabled,
-            command=lambda: toggle_associate_settings(vars.timeout_enabled.get(), timeout_group),
+            command=lambda: set_widget_states(vars.timeout_enabled.get(), timeout_group),
         )
         timeoutSlider = Scale(timeoutFrame, label="Time (sec)", from_=1, to=120, orient="horizontal", variable=vars.timeout)
 
@@ -1699,7 +1342,7 @@ class Config(Tk):
         toggleSingleButton.pack(fill="x", side="left", expand=1)
 
         # overlay start
-        Label(tabPopups, text="Popup Overlays", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabPopups, text="Popup Overlays", font=title_font, relief=GROOVE).pack(pady=2)
 
         overlayMessage = Message(tabPopups, text=POPUP_OVERLAY_TEXT, justify=CENTER, width=675)
         overlayMessage.pack(fill="both")
@@ -1718,7 +1361,7 @@ class Config(Tk):
             subliminalsFrame,
             text="Subliminal Overlays",
             variable=vars.popup_subliminals,
-            command=lambda: toggle_associate_settings(vars.popup_subliminals.get(), subliminals_group),
+            command=lambda: set_widget_states(vars.popup_subliminals.get(), subliminals_group),
         )
 
         subliminalsChanceScale = Scale(
@@ -1755,7 +1398,7 @@ class Config(Tk):
 
         denialSlider = Scale(denialFrame, label="Denial Chance", orient="horizontal", variable=vars.denial_chance)
         denialToggle = Checkbutton(
-            denialFrame, text="Denial Overlays", variable=vars.denial_mode, command=lambda: toggle_associate_settings(vars.denial_mode.get(), denial_group)
+            denialFrame, text="Denial Overlays", variable=vars.denial_mode, command=lambda: set_widget_states(vars.denial_mode.get(), denial_group)
         )
         denialChanceManual = Button(
             denialFrame,
@@ -1790,7 +1433,7 @@ class Config(Tk):
         # ==========={EDGEWARE++ AUDIO/VIDEO TAB STARTS HERE}==============#
         notebookAnnoyance.add(tabAudioVideo, text="Audio/Video")
         # Audio
-        Label(tabAudioVideo, text="Audio", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabAudioVideo, text="Audio", font=title_font, relief=GROOVE).pack(pady=2)
 
         audioFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
         audioSubFrame = Frame(audioFrame)
@@ -1818,7 +1461,7 @@ class Config(Tk):
         maxAudio_group.append(maxAudioManual)
 
         # Video
-        Label(tabAudioVideo, text="Video", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabAudioVideo, text="Video", font=title_font, relief=GROOVE).pack(pady=2)
 
         videoFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
         vidFrameL = Frame(videoFrame)
@@ -1838,7 +1481,7 @@ class Config(Tk):
             maxVideoFrame,
             text="Cap Videos",
             variable=vars.max_video_enabled,
-            command=lambda: toggle_associate_settings(vars.max_video_enabled.get(), maxVideo_group),
+            command=lambda: set_widget_states(vars.max_video_enabled.get(), maxVideo_group),
         )
         maxVideoScale = Scale(maxVideoFrame, label="Max Video Popups", from_=1, to=50, orient="horizontal", variable=vars.max_video)
         maxVideoManual = Button(
@@ -1863,7 +1506,7 @@ class Config(Tk):
         maxVideo_group.append(maxVideoManual)
 
         # playback options
-        Label(tabAudioVideo, text="Playback Options", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabAudioVideo, text="Playback Options", font=title_font, relief=GROOVE).pack(pady=2)
 
         audVidPlaybackMessage = Message(tabAudioVideo, text=AUDVID_PLAYBACK_TEXT, justify=CENTER, width=675)
         audVidPlaybackMessage.pack(fill="both")
@@ -1918,7 +1561,7 @@ class Config(Tk):
         # ==========={EDGEWARE++ CAPTIONS TAB STARTS HERE}==============#
         notebookAnnoyance.add(tabCaptions, text="Captions")
 
-        Label(tabCaptions, text="Captions", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabCaptions, text="Captions", font=title_font, relief=GROOVE).pack(pady=2)
 
         captionsIntroMessage = Message(tabCaptions, text=CAPTION_INTRO_TEXT, justify=CENTER, width=675)
         captionsIntroMessage.pack(fill="both")
@@ -1958,7 +1601,7 @@ class Config(Tk):
         toggleFilenameButton.pack(fill="y", side="left", expand=1)
         toggleMultiClickButton.pack(fill="y", side="left", expand=1)
 
-        Label(tabCaptions, text="Subliminal Message Popups", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabCaptions, text="Subliminal Message Popups", font=title_font, relief=GROOVE).pack(pady=2)
 
         captionsSubMessage = Message(tabCaptions, text=CAPTION_SUB_TEXT, justify=CENTER, width=675)
         captionsSubMessage.pack(fill="both")
@@ -2022,7 +1665,7 @@ class Config(Tk):
         capPopTimerSlider.pack(fill="x", padx=1, expand=1)
         capPopTimerManual.pack(fill="x")
 
-        Label(tabCaptions, text="Notifications", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabCaptions, text="Notifications", font=title_font, relief=GROOVE).pack(pady=2)
 
         captionsNotifMessage = Message(tabCaptions, text=CAPTION_NOTIF_TEXT, justify=CENTER, width=675)
         captionsNotifMessage.pack(fill="both")
@@ -2069,7 +1712,7 @@ class Config(Tk):
             tabWallpaper,
             text="Rotate Wallpapers",
             variable=vars.rotate_wallpaper,
-            command=lambda: toggle_associate_settings(vars.rotate_wallpaper.get(), wallpaper_group),
+            command=lambda: set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group),
         )
         wpList = Listbox(tabWallpaper, selectmode=SINGLE)
         for key in config["wallpaperDat"]:
@@ -2148,7 +1791,7 @@ class Config(Tk):
         # ==========={EDGEWARE++ MOODS TAB STARTS HERE}==============#
         notebookAnnoyance.add(tabMoods, text="Moods")
 
-        Label(tabMoods, text="Moods", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabMoods, text="Moods", font=title_font, relief=GROOVE).pack(pady=2)
 
         moodsMessage = Message(tabMoods, text=MOOD_TEXT, justify=CENTER, width=675)
         moodsMessage.pack(fill="both")
@@ -2363,7 +2006,7 @@ class Config(Tk):
         # ==========={EDGEWARE++ "DANGEROUS SETTINGS" TAB STARTS HERE}===========#
         notebookAnnoyance.add(tabDangerous, text="Dangerous Settings")
 
-        Label(tabDangerous, text="Hard Drive Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabDangerous, text="Hard Drive Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
         dangerDriveMessage = Message(tabDangerous, text=DANGER_DRIVE_TEXT, justify=CENTER, width=675)
         dangerDriveMessage.pack(fill="both")
@@ -2395,7 +2038,7 @@ class Config(Tk):
             fillFrame,
             text="Fill Drive",
             variable=vars.fill_drive,
-            command=lambda: toggle_associate_settings(vars.fill_drive.get(), fill_group),
+            command=lambda: set_widget_states(vars.fill_drive.get(), fill_group),
             cursor="question_arrow",
         )
         fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=vars.fill_delay)
@@ -2415,7 +2058,7 @@ class Config(Tk):
             fillFrame,
             text="Replace Images",
             variable=vars.replace_images,
-            command=lambda: toggle_associate_settings(vars.replace_images.get(), replace_group),
+            command=lambda: set_widget_states(vars.replace_images.get(), replace_group),
             cursor="question_arrow",
         )
         replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=vars.replace_threshold)
@@ -2466,7 +2109,7 @@ class Config(Tk):
         pathBox.pack(fill="x")
         pathButton.pack(fill="x")
 
-        Label(tabDangerous, text="Misc. Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabDangerous, text="Misc. Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
         dangerMiscMessage = Message(tabDangerous, text=DANGER_MISC_TEXT, justify=CENTER, width=675)
         dangerMiscMessage.pack(fill="both")
@@ -2497,7 +2140,7 @@ class Config(Tk):
         notebookModes.add(tabBasicModes, text="Basic Modes")
         # Unsure if not calling this lowkey/moving in the tab will confuse people, consider renaming if people find it annoying
 
-        Label(tabBasicModes, text="Lowkey Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabBasicModes, text="Lowkey Mode", font=title_font, relief=GROOVE).pack(pady=2)
         lowkeyFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
 
         posList = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
@@ -2508,7 +2151,7 @@ class Config(Tk):
             lowkeyFrame,
             text="Lowkey Mode",
             variable=vars.lowkey_mode,
-            command=lambda: toggle_associate_settings(vars.lowkey_mode.get(), lowkey_group),
+            command=lambda: set_widget_states(vars.lowkey_mode.get(), lowkey_group),
             cursor="question_arrow",
         )
 
@@ -2523,7 +2166,7 @@ class Config(Tk):
         lowkeyToggle.pack(fill="both", expand=1)
         lowkeyDropdown.pack(fill="x", padx=2, pady=5)
 
-        Label(tabBasicModes, text="Movement Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabBasicModes, text="Movement Mode", font=title_font, relief=GROOVE).pack(pady=2)
         movementFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
 
         moveChanceFrame = Frame(movementFrame)
@@ -2554,7 +2197,7 @@ class Config(Tk):
         # ==========={EDGEWARE++ "DANGEROUS MODES" TAB STARTS HERE}===========#
         notebookModes.add(tabDangerModes, text="Dangerous Modes")
         # timer settings
-        Label(tabDangerModes, text="Timer Settings", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabDangerModes, text="Timer Settings", font=title_font, relief=GROOVE).pack(pady=2)
         timerFrame = Frame(tabDangerModes, borderwidth=5, relief=RAISED)
 
         timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=vars.timer_mode, command=lambda: timerHelper(), cursor="question_arrow")
@@ -2562,7 +2205,7 @@ class Config(Tk):
         safewordFrame = Frame(timerFrame)
 
         def timerHelper():
-            toggle_associate_settings(vars.timer_mode.get(), timer_group)
+            set_widget_states(vars.timer_mode.get(), timer_group)
 
         timerttp = CreateToolTip(
             timerToggle,
@@ -2585,15 +2228,15 @@ class Config(Tk):
 
         timerFrame.pack(fill="x")
 
-        Label(tabDangerModes, text="Mitosis Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabDangerModes, text="Mitosis Mode", font=title_font, relief=GROOVE).pack(pady=2)
         mitosisFrame = Frame(tabDangerModes, borderwidth=5, relief=RAISED)
 
         mitosis_group.append(popupScale)
         mitosis_group.append(popupManual)
 
         def toggleMitosis():
-            toggle_associate_settings(not vars.mitosis_mode.get(), mitosis_group)
-            toggle_associate_settings(vars.mitosis_mode.get(), mitosis_cGroup)
+            set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
+            set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
 
         mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=vars.mitosis_mode, command=toggleMitosis, cursor="question_arrow")
         mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=vars.mitosis_strength)
@@ -2635,49 +2278,49 @@ class Config(Tk):
             if key == "Original":
                 hibernateTypeDescription.configure(text="Creates an immediate quantity of popups on wakeup based on the awaken activity.\n\n")
                 if vars.hibernate_mode.get():
-                    toggle_associate_settings(False, hlength_group)
-                    toggle_associate_settings(True, hactivity_group)
-                    toggle_associate_settings(True, hibernate_group)
+                    set_widget_states(False, hlength_group)
+                    set_widget_states(True, hactivity_group)
+                    set_widget_states(True, hibernate_group)
             if key == "Spaced":
                 hibernateTypeDescription.configure(text="Creates popups consistently over the hibernate length, based on popup delay.\n\n")
                 if vars.hibernate_mode.get():
-                    toggle_associate_settings(False, hactivity_group)
-                    toggle_associate_settings(True, hlength_group)
-                    toggle_associate_settings(True, hibernate_group)
+                    set_widget_states(False, hactivity_group)
+                    set_widget_states(True, hlength_group)
+                    set_widget_states(True, hibernate_group)
             if key == "Glitch":
                 hibernateTypeDescription.configure(
                     text="Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.\n"
                 )
                 if vars.hibernate_mode.get():
-                    toggle_associate_settings(True, hlength_group)
-                    toggle_associate_settings(True, hactivity_group)
-                    toggle_associate_settings(True, hibernate_group)
+                    set_widget_states(True, hlength_group)
+                    set_widget_states(True, hactivity_group)
+                    set_widget_states(True, hibernate_group)
             if key == "Ramp":
                 hibernateTypeDescription.configure(
                     text="Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay."
                 )
                 if vars.hibernate_mode.get():
-                    toggle_associate_settings(True, hlength_group)
-                    toggle_associate_settings(True, hactivity_group)
-                    toggle_associate_settings(True, hibernate_group)
+                    set_widget_states(True, hlength_group)
+                    set_widget_states(True, hactivity_group)
+                    set_widget_states(True, hibernate_group)
             if key == "Pump-Scare":
                 hibernateTypeDescription.configure(
                     text="Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?"
                 )
                 if vars.hibernate_mode.get():
-                    toggle_associate_settings(False, hlength_group)
-                    toggle_associate_settings(False, hactivity_group)
-                    toggle_associate_settings(True, hibernate_group)
+                    set_widget_states(False, hlength_group)
+                    set_widget_states(False, hactivity_group)
+                    set_widget_states(True, hibernate_group)
             if key == "Chaos":
                 hibernateTypeDescription.configure(text="Every time hibernate activates, a random type (other than chaos) is selected.\n\n")
                 if vars.hibernate_mode.get():
-                    toggle_associate_settings(True, hlength_group)
-                    toggle_associate_settings(True, hactivity_group)
-                    toggle_associate_settings(True, hibernate_group)
+                    set_widget_states(True, hlength_group)
+                    set_widget_states(True, hactivity_group)
+                    set_widget_states(True, hibernate_group)
             if not vars.hibernate_mode.get():
-                toggle_associate_settings(False, hlength_group)
-                toggle_associate_settings(False, hactivity_group)
-                toggle_associate_settings(False, hibernate_group)
+                set_widget_states(False, hlength_group)
+                set_widget_states(False, hactivity_group)
+                set_widget_states(False, hibernate_group)
 
         hibernateHelper(vars.hibernate_type.get())
 
@@ -2733,7 +2376,7 @@ class Config(Tk):
         hactivity_group.append(h_activityScale)
         hactivity_group.append(h_activityButton)
 
-        Label(tabHibernate, text="Hibernate Mode", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabHibernate, text="Hibernate Mode", font=title_font, relief=GROOVE).pack(pady=2)
         hibernateHostFrame.pack(fill="x")
         hibernateFrame.pack(fill="y", side="left")
         hibernateTypeFrame.pack(fill="x", side="left")
@@ -2920,33 +2563,33 @@ class Config(Tk):
             if key == "Timed":
                 triggerDescription.configure(text="Transitions based on time elapsed in current session.")
                 if tutorialMode:
-                    toggle_associate_settings_manual(True, ctime_group, "lime green", "forest green")
-                    toggle_associate_settings_manual(False, cpopup_group, "lime green", "forest green")
-                    toggle_associate_settings_manual(False, claunch_group, "lime green", "forest green")
+                    set_widget_states_with_colors(True, ctime_group, "lime green", "forest green")
+                    set_widget_states_with_colors(False, cpopup_group, "lime green", "forest green")
+                    set_widget_states_with_colors(False, claunch_group, "lime green", "forest green")
                 else:
-                    toggle_associate_settings(True, ctime_group)
-                    toggle_associate_settings(False, cpopup_group)
-                    toggle_associate_settings(False, claunch_group)
+                    set_widget_states(True, ctime_group)
+                    set_widget_states(False, cpopup_group)
+                    set_widget_states(False, claunch_group)
             if key == "Popup":
                 triggerDescription.configure(text="Transitions based on number of popups in current session.")
                 if tutorialMode:
-                    toggle_associate_settings_manual(False, ctime_group, "lime green", "forest green")
-                    toggle_associate_settings_manual(True, cpopup_group, "lime green", "forest green")
-                    toggle_associate_settings_manual(False, claunch_group, "lime green", "forest green")
+                    set_widget_states_with_colors(False, ctime_group, "lime green", "forest green")
+                    set_widget_states_with_colors(True, cpopup_group, "lime green", "forest green")
+                    set_widget_states_with_colors(False, claunch_group, "lime green", "forest green")
                 else:
-                    toggle_associate_settings(False, ctime_group)
-                    toggle_associate_settings(True, cpopup_group)
-                    toggle_associate_settings(False, claunch_group)
+                    set_widget_states(False, ctime_group)
+                    set_widget_states(True, cpopup_group)
+                    set_widget_states(False, claunch_group)
             if key == "Launch":
                 triggerDescription.configure(text="Transitions based on number of EdgeWare launches.")
                 if tutorialMode:
-                    toggle_associate_settings_manual(False, ctime_group, "lime green", "forest green")
-                    toggle_associate_settings_manual(False, cpopup_group, "lime green", "forest green")
-                    toggle_associate_settings_manual(True, claunch_group, "lime green", "forest green")
+                    set_widget_states_with_colors(False, ctime_group, "lime green", "forest green")
+                    set_widget_states_with_colors(False, cpopup_group, "lime green", "forest green")
+                    set_widget_states_with_colors(True, claunch_group, "lime green", "forest green")
                 else:
-                    toggle_associate_settings(False, ctime_group)
-                    toggle_associate_settings(False, cpopup_group)
-                    toggle_associate_settings(True, claunch_group)
+                    set_widget_states(False, ctime_group)
+                    set_widget_states(False, cpopup_group)
+                    set_widget_states(True, claunch_group)
 
         # -Tutorial-
 
@@ -3076,18 +2719,18 @@ class Config(Tk):
             tab = event.widget.tab("current")["text"]
             th = config["themeType"].strip()
             if tab == "Start":
-                toggle_associate_settings_manual(True, ctutorialstart_group, "lime green", "forest green")
-                toggle_associate_settings(True, ctutorialtransition_group)
+                set_widget_states_with_colors(True, ctutorialstart_group, "lime green", "forest green")
+                set_widget_states(True, ctutorialtransition_group)
                 triggerHelper(vars.corruption_trigger.get(), False)
             elif tab == "Transitions":
-                toggle_associate_settings_manual(True, ctutorialtransition_group, "lime green", "forest green")
-                toggle_associate_settings(True, ctutorialstart_group)
+                set_widget_states_with_colors(True, ctutorialtransition_group, "lime green", "forest green")
+                set_widget_states(True, ctutorialstart_group)
                 triggerHelper(vars.corruption_trigger.get(), True)
             else:
-                toggle_associate_settings(True, ctutorialstart_group)
-                toggle_associate_settings(True, ctutorialtransition_group)
+                set_widget_states(True, ctutorialstart_group)
+                set_widget_states(True, ctutorialtransition_group)
                 triggerHelper(vars.corruption_trigger.get(), False)
-            toggle_associate_settings(os.path.isfile(paths.corruption), corruptionEnabled_group)
+            set_widget_states(os.path.isfile(paths.corruption), corruptionEnabled_group)
 
         corruptionTabMaster.bind("<<NotebookTabChanged>>", corruptionTutorialHelper)
 
@@ -3105,7 +2748,7 @@ class Config(Tk):
         dropdownMenu = OptionMenu(advPanel, dropdownObj, *itemList, command=lambda a: update_text([textInput, expectedLabel], config[a], a))
         dropdownMenu.configure(width=10)
         applyButton = Button(advPanel, text="Apply", command=lambda: assign_json(dropdownObj.get(), textInput.get()))
-        Label(tabAdvanced, text="Debug Config Edit", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabAdvanced, text="Debug Config Edit", font=title_font, relief=GROOVE).pack(pady=2)
         Label(
             tabAdvanced,
             text="Be careful messing with some of these; improper configuring can cause\nproblems when running, or potentially cause unintended damage to files.",
@@ -3116,7 +2759,7 @@ class Config(Tk):
         applyButton.pack(padx=2, fill="x", side="right")
         expectedLabel.pack()
         # ==========={HERE ENDS  ADVANCED TAB ITEM INITS}===========#
-        Label(tabAdvanced, text="Troubleshooting", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabAdvanced, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)
         troubleshootingHostFrame = Frame(tabAdvanced, borderwidth=5, relief=RAISED)
         troubleshootingFrame1 = Frame(troubleshootingHostFrame)
         troubleshootingFrame2 = Frame(troubleshootingHostFrame)
@@ -3156,7 +2799,7 @@ class Config(Tk):
             " deal with all this mood business, you can disable the mood saving feature here.",
         )
 
-        Label(tabAdvanced, text="Errors", font=titleFont, relief=GROOVE).pack(pady=2)
+        Label(tabAdvanced, text="Errors", font=title_font, relief=GROOVE).pack(pady=2)
         errorsFrame = Frame(tabAdvanced, borderwidth=5, relief=GROOVE)
         errorsFrame.pack(fill="x")
         Label(
@@ -3205,27 +2848,27 @@ class Config(Tk):
         Label(tab_corruption, text=CORRUPTION_TEXT, anchor="nw", wraplength=460).pack()
         # ==========={HERE ENDS  ABOUT TAB ITEM INITS}===========#
 
-        theme_change(config["themeType"].strip(), self, style, windowFont, titleFont)
+        theme_change(config["themeType"].strip(), self, style, windowFont, title_font)
 
         # ==========={TOGGLE ASSOCIATE SETTINGS}===========#
         # all toggleAssociateSettings goes here, because it is rendered after the appropriate theme change
 
-        toggle_associate_settings(vars.fill_drive.get(), fill_group)
-        toggle_associate_settings(vars.replace_images.get(), replace_group)
-        toggle_associate_settings(vars.rotate_wallpaper.get(), wallpaper_group)
-        toggle_associate_settings(vars.timeout_enabled.get(), timeout_group)
-        toggle_associate_settings(vars.mitosis_mode.get(), mitosis_cGroup)
-        toggle_associate_settings(not vars.mitosis_mode.get(), mitosis_group)
-        toggle_associate_settings_manual(vars.booru_download.get(), download_group, "white", "gray25")
-        toggle_associate_settings(vars.timer_mode.get(), timer_group)
-        toggle_associate_settings(vars.lowkey_mode.get(), lowkey_group)
-        toggle_associate_settings(vars.denial_mode.get(), denial_group)
-        toggle_associate_settings(vars.max_video_enabled.get(), maxVideo_group)
-        toggle_associate_settings(vars.popup_subliminals.get(), subliminals_group)
+        set_widget_states(vars.fill_drive.get(), fill_group)
+        set_widget_states(vars.replace_images.get(), replace_group)
+        set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group)
+        set_widget_states(vars.timeout_enabled.get(), timeout_group)
+        set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
+        set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
+        set_widget_states_with_colors(vars.booru_download.get(), download_group, "white", "gray25")
+        set_widget_states(vars.timer_mode.get(), timer_group)
+        set_widget_states(vars.lowkey_mode.get(), lowkey_group)
+        set_widget_states(vars.denial_mode.get(), denial_group)
+        set_widget_states(vars.max_video_enabled.get(), maxVideo_group)
+        set_widget_states(vars.popup_subliminals.get(), subliminals_group)
         hibernateHelper(vars.hibernate_type.get())
         fadeHelper(vars.corruption_fade.get())
         triggerHelper(vars.corruption_trigger.get(), False)
-        toggle_associate_settings(os.path.isfile(paths.corruption), corruptionEnabled_group)
+        set_widget_states(os.path.isfile(paths.corruption), corruptionEnabled_group)
 
         # messageOff toggle here, for turning off all help messages
         toggle_help(vars.message_off.get(), message_group)
@@ -3246,7 +2889,7 @@ class Config(Tk):
         # version alert, if core web version (0.0.0) is different from the github configdefault, alerts user that update is available
         #   if user is a bugfix patch behind, the _X at the end of the 0.0.0, they will not be alerted
         #   the version will still be red to draw attention to it
-        if local_pp_version.split("_")[0] != webvpp.split("_")[0] and not (local_pp_version.endswith("DEV") or config["toggleInternet"]):
+        if local_version.split("_")[0] != live_version.split("_")[0] and not (local_version.endswith("DEV") or config["toggleInternet"]):
             messagebox.showwarning(
                 "Update Available",
                 'Main local version and web version are not the same.\nPlease visit the Github and download the newer files,\nor use the direct download link on the "Start" tab.',
@@ -3457,24 +3100,6 @@ def validate_booru(name: str) -> bool:
     return requests.get(BOORU_URL.replace(BOORU_FLAG, name)).status_code == 200
 
 
-def get_live_version(url: str, pp: bool) -> str:
-    test = config["toggleInternet"]
-    if test == 0 or test == "0":
-        try:
-            logging.info("fetching github version")
-            with open(urllib.request.urlretrieve(url)[0], "r") as liveDCfg:
-                if pp:
-                    return json.loads(liveDCfg.read())["versionplusplus"]
-                else:
-                    return liveDCfg.read().split("\n")[1].split(",")[0]
-        except Exception as e:
-            logging.warning(f"failed to fetch github version.\n\tReason: {e}")
-            return "Could not check version."
-    else:
-        logging.info(f"user has connection to github disabled. Version will not be checked. {test}")
-        return "Version check disabled!"
-
-
 def add_list(tk_list_obj: Listbox, key: str, title: str, text: str):
     name = simpledialog.askstring(title, text)
     if name != "" and name != None:
@@ -3582,58 +3207,12 @@ def assign_json(key: str, var: int or str):
         f.write(json.dumps(config))
 
 
-def toggle_associate_settings(owner_state: bool, obj_list: list, demo: str = False):
-    if demo:
-        th = demo
-    else:
-        th = config["themeType"].strip()
-    if th == "Original" or (config["themeNoConfig"] == True and not demo):
-        toggle_associate_settings_manual(owner_state, obj_list, BUTTON_FACE, "gray35")
-    else:
-        if th == "Dark":
-            toggle_associate_settings_manual(owner_state, obj_list, "#282c34", "gray65")
-        if th == "The One":
-            toggle_associate_settings_manual(owner_state, obj_list, "#282c34", "#37573d")
-        if th == "Ransom":
-            toggle_associate_settings_manual(owner_state, obj_list, "#841212", "#573737")
-        if th == "Goth":
-            toggle_associate_settings_manual(owner_state, obj_list, "#282c34", "#4b3757")
-        if th == "Bimbo":
-            toggle_associate_settings_manual(owner_state, obj_list, "#ffc5cd", "#bc7abf")
-
-
-def toggle_associate_settings_manual(owner_state: bool, obj_list: list, color_on: int, color_off: int):
-    logging.info(f"toggling state of {obj_list} to {owner_state}")
-    for tkObject in obj_list:
-        if not tkObject.winfo_class() == "Frame" and not tkObject.winfo_class() == "Label":
-            tkObject.configure(state=("normal" if owner_state else "disabled"))
-        tkObject.configure(bg=(color_on if owner_state else color_off))
-
-
 def assign(obj: StringVar or IntVar or BooleanVar, var: str or int or bool):
     try:
         obj.set(var)
     except Exception:
-        ""
+        pass
         # no assignment
-
-
-def get_keyboard_input(button: Button, var: StringVar):
-    child = Tk()
-    child.resizable(False, False)
-    child.title("Key Listener")
-    child.wm_attributes("-topmost", 1)
-    child.geometry("250x250")
-    child.focus_force()
-    Label(child, text="Press any key or exit").pack(expand=1, fill="both")
-    child.bind("<KeyPress>", lambda key: assign_key(child, button, var, key))
-    child.mainloop()
-
-
-def assign_key(parent: Tk, button: Button, var: StringVar, key):
-    button.configure(text=f"Set Panic\nButton\n<{key.keysym}>")
-    var.set(str(key.keysym))
-    parent.destroy()
 
 
 def get_presets() -> list[str]:
@@ -3723,10 +3302,6 @@ def update_moods(type: str, id: str, check: bool):
                 mood.write(json.dumps(mood_dict))
     except Exception as e:
         logging.warning(f"error updating mood files. {e}")
-
-
-def all_children(widget):
-    return [widget] + [subchild for child in widget.winfo_children() for subchild in all_children(child)]
 
 
 def theme_change(theme: str, root, style, mfont, tfont):
