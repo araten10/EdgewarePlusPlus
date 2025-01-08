@@ -5,6 +5,7 @@ from tkinter import (
     RAISED,
     Button,
     Checkbutton,
+    Event,
     Frame,
     Label,
     Message,
@@ -12,7 +13,7 @@ from tkinter import (
     Scale,
     StringVar,
     Text,
-    Tk,
+    Toplevel,
 )
 from tkinter.font import Font
 
@@ -27,80 +28,65 @@ START_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this wi
 PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
 
 
-def assign_key(parent: Tk, button: Button, var: StringVar, key):
-    button.configure(text=f"Set Panic\nButton\n<{key.keysym}>")
-    var.set(str(key.keysym))
-    parent.destroy()
+def request_panic_key(button: Button, var: StringVar) -> None:
+    window = Toplevel()
 
+    def assign_panic_key(event: Event) -> None:
+        button.configure(text=f"Set Panic\nButton\n<{event.keysym}>")
+        var.set(str(event.keysym))
+        window.destroy()
 
-def get_keyboard_input(button: Button, var: StringVar):
-    child = Tk()
-    child.resizable(False, False)
-    child.title("Key Listener")
-    child.wm_attributes("-topmost", 1)
-    child.geometry("250x250")
-    child.focus_force()
-    Label(child, text="Press any key or exit").pack(expand=1, fill="both")
-    child.bind("<KeyPress>", lambda key: assign_key(child, button, var, key))
-    child.mainloop()
+    window.resizable(False, False)
+    window.title("Key Listener")
+    window.wm_attributes("-topmost", 1)
+    window.geometry("250x250")
+    window.focus_force()
+    window.bind("<KeyPress>", assign_panic_key)
+    Label(window, text="Press any key or exit").pack(expand=1, fill="both")
 
 
 class StartTab(Frame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: int, live_version: int):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: str, live_version: str):
         super().__init__()
-
-        test_group = []
 
         start_message = Message(self, text=START_TEXT, justify=CENTER, width=675)
         start_message.pack(fill="both")
         message_group.append(start_message)
 
-        # version information
+        # Information
         Label(self, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
-        infoHostFrame = Frame(self, borderwidth=5, relief=RAISED)
-        zipGitFrame = Frame(infoHostFrame)
-        openGitButton = Button(zipGitFrame, text="Open Edgeware++ Github", command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus"))
 
-        verPlusFrame = Frame(infoHostFrame)
-        local_verPlusLabel = Label(verPlusFrame, text=f"EdgeWare++ Local Version:\n{local_version}")
-        web_verPlusLabel = Label(
-            verPlusFrame, text=f"EdgeWare++ Github Version:\n{live_version}", bg=(BUTTON_FACE if (local_version == live_version) else "red")
-        )
-        directDownloadButton = Button(
-            zipGitFrame,
-            text="Download Newest Update",
-            command=lambda: webbrowser.open("https://github.com/araten10/EdgewarePlusPlus/archive/refs/heads/main.zip"),
-        )
+        information_frame = Frame(self, borderwidth=5, relief=RAISED)
+        information_frame.pack(fill="x")
 
-        infoHostFrame.pack(fill="x")
-        zipGitFrame.pack(fill="both", side="left", expand=1)
-        openGitButton.pack(fill="both", expand=1)
+        github_frame = Frame(information_frame)
+        github_frame.pack(fill="both", side="left", expand=1)
+        github_url = "https://github.com/araten10/EdgewarePlusPlus"
+        download_url = "https://github.com/araten10/EdgewarePlusPlus/archive/refs/heads/main.zip"
+        Button(github_frame, text="Open Edgeware++ Github", command=lambda: webbrowser.open(github_url)).pack(fill="both", expand=1)
+        Button(github_frame, text="Download Newest Update", command=lambda: webbrowser.open(download_url)).pack(fill="both", expand=1)
 
-        verPlusFrame.pack(fill="both", side="left", expand=1)
-        local_verPlusLabel.pack(fill="x")
-        web_verPlusLabel.pack(fill="x")
-        directDownloadButton.pack(fill="both", expand=1)
+        version_frame = Frame(information_frame)
+        version_frame.pack(fill="both", side="left", expand=1)
+        Label(version_frame, text=f"EdgeWare++ Local Version:\n{local_version}").pack(fill="x")
+        Label(version_frame, text=f"EdgeWare++ Github Version:\n{live_version}", bg=(BUTTON_FACE if (local_version == live_version) else "red")).pack(fill="x")
 
-        theme_types = ["Original", "Dark", "The One", "Ransom", "Goth", "Bimbo"]
-
+        # Theme
         Label(self, text="Theme", font=title_font, relief=GROOVE).pack(pady=2)
-        themeFrame = Frame(self, borderwidth=5, relief=RAISED)
-        subThemeFrame = Frame(themeFrame)
-        testThemeFrame = Frame(themeFrame)
-        testThemePopup = Frame(testThemeFrame)
-        testThemePrompt = Frame(testThemeFrame)
-        testThemeConfig = Frame(testThemeFrame)
 
-        themeDropdown = OptionMenu(subThemeFrame, vars.theme, *theme_types, command=lambda key: themeHelper(key))
-        themeDropdown.configure(width=12)
-        ignoreConfigToggle = Checkbutton(subThemeFrame, text="Ignore Config", variable=vars.theme_ignore_config, cursor="question_arrow")
-
-        ignoreconfigttp = CreateToolTip(ignoreConfigToggle, "When enabled, the selected theme does not apply to the config window.")
-
-        def themeHelper(theme):
-            skiplist = [testThemeFrame, testThemePopup, testThemePrompt, testThemeConfig, testPopupTitle, testPromptTitle, testConfigTitle]
+        # TODO: Use Theme object
+        def theme_helper(theme):
+            skiplist = [
+                theme_demo_frame,
+                theme_demo_popup_frame,
+                theme_demo_prompt_frame,
+                theme_demo_config_frame,
+                theme_demo_popup_title,
+                theme_demo_prompt_title,
+                theme_demo_config_title,
+            ]
             if theme == "Original":
-                for widget in all_children(testThemeFrame):
+                for widget in all_children(theme_demo_frame):
                     if widget in skiplist:
                         continue
                     if isinstance(widget, Frame):
@@ -119,11 +105,11 @@ class StartTab(Frame):
                         widget.configure(
                             bg="#f0f0f0", fg="black", font="TkDefaultFont", selectcolor="white", activebackground="#f0f0f0", activeforeground="black"
                         )
-                testpopupttp.background = "#ffffff"
-                testpopupttp.foreground = "#000000"
-                testpopupttp.bordercolor = "#000000"
+                theme_demo_popup_tooltip.background = "#ffffff"
+                theme_demo_popup_tooltip.foreground = "#000000"
+                theme_demo_popup_tooltip.bordercolor = "#000000"
             if theme == "Dark":
-                for widget in all_children(testThemeFrame):
+                for widget in all_children(theme_demo_frame):
                     if widget in skiplist:
                         continue
                     if isinstance(widget, Frame):
@@ -147,11 +133,11 @@ class StartTab(Frame):
                             activebackground="#282c34",
                             activeforeground="ghost white",
                         )
-                testpopupttp.background = "#1b1d23"
-                testpopupttp.foreground = "#ffffff"
-                testpopupttp.bordercolor = "#ffffff"
+                theme_demo_popup_tooltip.background = "#1b1d23"
+                theme_demo_popup_tooltip.foreground = "#ffffff"
+                theme_demo_popup_tooltip.bordercolor = "#ffffff"
             if theme == "The One":
-                for widget in all_children(testThemeFrame):
+                for widget in all_children(theme_demo_frame):
                     if widget in skiplist:
                         continue
                     if isinstance(widget, Frame):
@@ -170,11 +156,11 @@ class StartTab(Frame):
                         widget.configure(
                             bg="#282c34", fg="#00ff41", font=("Consolas", 8), selectcolor="#1b1d23", activebackground="#282c34", activeforeground="#00ff41"
                         )
-                testpopupttp.background = "#1b1d23"
-                testpopupttp.foreground = "#00ff41"
-                testpopupttp.bordercolor = "#00ff41"
+                theme_demo_popup_tooltip.background = "#1b1d23"
+                theme_demo_popup_tooltip.foreground = "#00ff41"
+                theme_demo_popup_tooltip.bordercolor = "#00ff41"
             if theme == "Ransom":
-                for widget in all_children(testThemeFrame):
+                for widget in all_children(theme_demo_frame):
                     if widget in skiplist:
                         continue
                     if isinstance(widget, Frame):
@@ -193,11 +179,11 @@ class StartTab(Frame):
                         widget.configure(
                             bg="#841212", fg="white", font=("Arial", 9), selectcolor="#5c0d0d", activebackground="#841212", activeforeground="white"
                         )
-                testpopupttp.background = "#ff2600"
-                testpopupttp.foreground = "#ffffff"
-                testpopupttp.bordercolor = "#000000"
+                theme_demo_popup_tooltip.background = "#ff2600"
+                theme_demo_popup_tooltip.foreground = "#ffffff"
+                theme_demo_popup_tooltip.bordercolor = "#000000"
             if theme == "Goth":
-                for widget in all_children(testThemeFrame):
+                for widget in all_children(theme_demo_frame):
                     if widget in skiplist:
                         continue
                     if isinstance(widget, Frame):
@@ -221,11 +207,11 @@ class StartTab(Frame):
                             activebackground="#282c34",
                             activeforeground="MediumPurple1",
                         )
-                testpopupttp.background = "#1b1d23"
-                testpopupttp.foreground = "#cc60ff"
-                testpopupttp.bordercolor = "#b999fe"
+                theme_demo_popup_tooltip.background = "#1b1d23"
+                theme_demo_popup_tooltip.foreground = "#cc60ff"
+                theme_demo_popup_tooltip.bordercolor = "#b999fe"
             if theme == "Bimbo":
-                for widget in all_children(testThemeFrame):
+                for widget in all_children(theme_demo_frame):
                     if widget in skiplist:
                         continue
                     if isinstance(widget, Frame):
@@ -244,110 +230,102 @@ class StartTab(Frame):
                         widget.configure(
                             bg="pink", fg="deep pink", font=("Constantia", 9), selectcolor="light pink", activebackground="pink", activeforeground="deep pink"
                         )
-                testpopupttp.background = "#ffc5cd"
-                testpopupttp.foreground = "#ff3aa3"
-                testpopupttp.bordercolor = "#ff84c1"
+                theme_demo_popup_tooltip.background = "#ffc5cd"
+                theme_demo_popup_tooltip.foreground = "#ff3aa3"
+                theme_demo_popup_tooltip.bordercolor = "#ff84c1"
             set_widget_states(False, test_group, theme)
 
-        testPopupTitle = Label(testThemePopup, text="Popup")
-        self.testPopupImage = ImageTk.PhotoImage(file=CustomAssets.theme_demo())  # Stored to avoid garbage collection
-        testPopupLabel = Label(testThemePopup, image=self.testPopupImage, width=150, height=75, borderwidth=2, relief=GROOVE, cursor="question_arrow")
-        testPopupButton = Button(testPopupLabel, text="Test~")
-        testPopupCaption = Label(testPopupLabel, text="Lewd Caption Here!")
+        theme_types = ["Original", "Dark", "The One", "Ransom", "Goth", "Bimbo"]
 
-        testpopupttp = CreateToolTip(
-            testPopupLabel,
+        theme_frame = Frame(self, borderwidth=5, relief=RAISED)
+        theme_frame.pack(fill="x")
+
+        theme_selection_frame = Frame(theme_frame)
+        theme_selection_frame.pack(fill="both", side="left")
+        theme_dropdown = OptionMenu(theme_selection_frame, vars.theme, *theme_types, command=lambda key: theme_helper(key))
+        theme_dropdown.configure(width=12)
+        theme_dropdown.pack(fill="both", side="top")
+        ignore_config_toggle = Checkbutton(theme_selection_frame, text="Ignore Config", variable=vars.theme_ignore_config, cursor="question_arrow")
+        ignore_config_toggle.pack(fill="both", side="top")
+        CreateToolTip(ignore_config_toggle, "When enabled, the selected theme does not apply to the config window.")
+
+        theme_demo_frame = Frame(theme_frame)
+        theme_demo_frame.pack(fill="both", side="left", expand=1)
+
+        theme_demo_popup_frame = Frame(theme_demo_frame)
+        theme_demo_popup_frame.pack(fill="both", side="left", padx=1)
+        theme_demo_popup_title = Label(theme_demo_popup_frame, text="Popup")
+        theme_demo_popup_title.pack(side="top")
+        self.demo_popup_image = ImageTk.PhotoImage(file=CustomAssets.theme_demo())  # Stored to avoid garbage collection
+        theme_demo_popup_label = Label(
+            theme_demo_popup_frame, image=self.demo_popup_image, width=150, height=75, borderwidth=2, relief=GROOVE, cursor="question_arrow"
+        )
+        theme_demo_popup_label.pack(side="top", ipadx=1, ipady=1)
+        theme_demo_popup_tooltip = CreateToolTip(
+            theme_demo_popup_label,
             "NOTE: the test image is very small, buttons and captions will appear proportionally larger here!\n\n" "Also, look! The tooltip changed too!",
         )
+        Button(theme_demo_popup_label, text="Test~").place(x=-10, y=-10, relx=1, rely=1, anchor="se")
+        Label(theme_demo_popup_label, text="Lewd Caption Here!").place(x=5, y=5)
 
-        testPromptBody = Frame(testThemePrompt, borderwidth=2, relief=GROOVE, width=150, height=75)
-        testPromptTitle = Label(testThemePrompt, text="Prompt")
-        testPromptInput = Text(testPromptBody, width=18, height=1)
-        testPromptButton = Button(testPromptBody, text="Sure!")
+        theme_demo_prompt_frame = Frame(theme_demo_frame)
+        theme_demo_prompt_frame.pack(fill="both", side="left", padx=1)
+        theme_demo_prompt_title = Label(theme_demo_prompt_frame, text="Prompt")
+        theme_demo_prompt_title.pack()
+        theme_demo_prompt_body = Frame(theme_demo_prompt_frame, borderwidth=2, relief=GROOVE, width=150, height=75)
+        theme_demo_prompt_body.pack(fill="both", expand=1)
+        Label(theme_demo_prompt_body, text="Do as I say~").pack(fill="both", expand=1)
+        Text(theme_demo_prompt_body, width=18, height=1).pack(fill="both")
+        Button(theme_demo_prompt_body, text="Sure!").pack(expand=1)
 
-        testConfigBody = Frame(testThemeConfig, borderwidth=2, relief=GROOVE)
-        testConfigTitle = Label(testThemeConfig, text="Config")
-        testCColumn1 = Frame(testConfigBody)
-        testToggle = Checkbutton(testConfigBody, text="Check")
-        testOptionsMenuVar = StringVar(self, "Option")
-        test_types = ["Option", "Menu"]
-        testConfigMenu = OptionMenu(testConfigBody, testOptionsMenuVar, *test_types)
-        testConfigMenu.config(highlightthickness=0)
+        theme_demo_config_frame = Frame(theme_demo_frame)
+        theme_demo_config_frame.pack(fill="both", side="left", padx=1)
+        theme_demo_config_title = Label(theme_demo_config_frame, text="Config")
+        theme_demo_config_title.pack(side="top")
+        theme_demo_config_body = Frame(theme_demo_config_frame, borderwidth=2, relief=GROOVE)
+        theme_demo_config_body.pack(fill="both", expand=1)
 
-        testCColumn2 = Frame(testConfigBody)
-        testScaleActivated = Scale(testCColumn2, orient="horizontal", from_=1, to=100, highlightthickness=0)
-        testButtonActivated = Button(testCColumn2, text="Activated")
+        theme_demo_config_col_1 = Frame(theme_demo_config_body)
+        theme_demo_config_col_1.pack(side="left", fill="both", expand=1)
+        Button(theme_demo_config_col_1, text="Activated").pack(fill="y")
+        Scale(theme_demo_config_col_1, orient="horizontal", from_=1, to=100, highlightthickness=0).pack(fill="y", expand=1)
 
-        testCColumn3 = Frame(testConfigBody)
-        testScaleDeactivated = Scale(testCColumn3, orient="horizontal", from_=1, to=100, highlightthickness=0)
-        testButtonDeactivated = Button(testCColumn3, text="Deactivated")
-
-        test_group.append(testScaleDeactivated)
-        test_group.append(testButtonDeactivated)
+        theme_demo_config_col_2 = Frame(theme_demo_config_body)
+        theme_demo_config_col_2.pack(side="left", fill="both", expand=1)
+        theme_demo_config_button_deactivated = Button(theme_demo_config_col_2, text="Deactivated")
+        theme_demo_config_button_deactivated.pack(fill="y")
+        theme_demo_button_scale_deactivated = Scale(theme_demo_config_col_2, orient="horizontal", from_=1, to=100, highlightthickness=0)
+        theme_demo_button_scale_deactivated.pack(fill="y", expand=1)
+        test_group = [theme_demo_button_scale_deactivated, theme_demo_config_button_deactivated]
         set_widget_states(False, test_group)
 
-        themeFrame.pack(fill="x")
-        subThemeFrame.pack(fill="both", side="left")
-        themeDropdown.pack(fill="both", side="top")
-        ignoreConfigToggle.pack(fill="both", side="top")
-        testThemeFrame.pack(fill="both", side="left", expand=1)
+        Checkbutton(theme_demo_config_body, text="Check").pack(fill="y")
+        theme_demo_config_dropdown = OptionMenu(theme_demo_config_body, StringVar(self, "Option"), *["Option", "Menu"])
+        theme_demo_config_dropdown.config(highlightthickness=0)
+        theme_demo_config_dropdown.pack(fill="y")
 
-        testThemePopup.pack(fill="both", side="left", padx=1)
-        testPopupTitle.pack(side="top")
-        # why ipadx and ipady don't support tuples but padx and pady do is beyond me... i'm a perfectionist and hate bottom and right being one pixel smaller but
-        # its a small enough issue im not going to bother doing some hacks to make it look right
-        testPopupLabel.pack(side="top", ipadx=1, ipady=1)
-        testPopupButton.place(x=140 - testPopupButton.winfo_reqwidth(), y=70 - testPopupButton.winfo_reqheight())
-        testPopupCaption.place(x=5, y=5)
+        theme_helper(vars.theme.get())
 
-        testThemePrompt.pack(fill="both", side="left", padx=1)
-        testPromptTitle.pack()
-        testPromptBody.pack(fill="both", expand=1)
-        Label(testPromptBody, text="Do as I say~").pack(fill="both", expand=1)
-        testPromptInput.pack(fill="both")
-        testPromptButton.pack(expand=1)
-
-        testThemeConfig.pack(fill="both", side="left", padx=1)
-        testConfigTitle.pack(side="top")
-        testConfigBody.pack(fill="both", expand=1)
-        testCColumn1.pack(side="left", fill="both", expand=1)
-        testCColumn2.pack(side="left", fill="both", expand=1)
-        testCColumn3.pack(side="left", fill="both", expand=1)
-        testToggle.pack(fill="y")
-        testConfigMenu.pack(fill="y")
-        testButtonActivated.pack(fill="y")
-        testScaleActivated.pack(fill="y", expand=1)
-        testButtonDeactivated.pack(fill="y")
-        testScaleDeactivated.pack(fill="y", expand=1)
-
-        themeHelper(vars.theme.get())
-
-        # other
+        # Other
         Label(self, text="Other", font=title_font, relief=GROOVE).pack(pady=2)
-        otherHostFrame = Frame(self, borderwidth=5, relief=RAISED)
-        toggleFrame2 = Frame(otherHostFrame)
-        toggleFrame3 = Frame(otherHostFrame)
 
-        toggleFlairButton = Checkbutton(toggleFrame2, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
-        toggleROSButton = Checkbutton(toggleFrame2, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit)
-        toggleMessageButton = Checkbutton(otherHostFrame, text="Disable Config Help Messages\n(requires save & restart)", variable=vars.message_off)
-        toggleDesktopButton = Checkbutton(toggleFrame3, text="Create Desktop Icons", variable=vars.desktop_icons)
-        toggleSafeMode = Checkbutton(toggleFrame3, text='Warn if "Dangerous" Settings Active', variable=vars.safe_mode, cursor="question_arrow")
+        other_frame = Frame(self, borderwidth=5, relief=RAISED)
+        other_frame.pack(fill="x")
 
-        otherHostFrame.pack(fill="x")
-        toggleFrame2.pack(fill="both", side="left", expand=1)
-        toggleFlairButton.pack(fill="x")
-        toggleROSButton.pack(fill="x")
-        toggleFrame3.pack(fill="both", side="left", expand=1)
-        toggleDesktopButton.pack(fill="x")
-        toggleSafeMode.pack(fill="x")
-        toggleMessageButton.pack(fill="both", expand=1)
+        other_col_1 = Frame(other_frame)
+        other_col_1.pack(fill="both", side="left", expand=1)
+        toggle_flair_button = Checkbutton(other_col_1, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
+        toggle_flair_button.pack(fill="x")
+        CreateToolTip(toggle_flair_button, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.')
+        Checkbutton(other_col_1, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit).pack(fill="x")
 
-        loadingFlairttp = CreateToolTip(
-            toggleFlairButton, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.'
-        )
-        safeModettp = CreateToolTip(
-            toggleSafeMode,
+        other_col_2 = Frame(other_frame)
+        other_col_2.pack(fill="both", side="left", expand=1)
+        Checkbutton(other_col_2, text="Create Desktop Icons", variable=vars.desktop_icons).pack(fill="x")
+        toggle_safe_mode_button = Checkbutton(other_col_2, text='Warn if "Dangerous" Settings Active', variable=vars.safe_mode, cursor="question_arrow")
+        toggle_safe_mode_button.pack(fill="x")
+        CreateToolTip(
+            toggle_safe_mode_button,
             "Asks you to confirm before saving if certain settings are enabled.\n"
             "Things defined as Dangerous Settings:\n\n"
             "Extreme (code red! code red! make sure you fully understand what these do before using!):\n"
@@ -360,25 +338,24 @@ class StartTab(Frame):
             "Disable Panic Hotkey, Run on Save & Exit",
         )
 
-        # panic
+        Checkbutton(other_frame, text="Disable Config Help Messages\n(requires save & restart)", variable=vars.message_off).pack(fill="both", expand=1)
+
+        # Panic
         Label(self, text="Panic Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
-        panicMessage = Message(self, text=PANIC_TEXT, justify=CENTER, width=675)
-        panicMessage.pack(fill="both")
-        message_group.append(panicMessage)
+        panic_message = Message(self, text=PANIC_TEXT, justify=CENTER, width=675)
+        panic_message.pack(fill="both")
+        message_group.append(panic_message)
 
-        panicFrame = Frame(self, borderwidth=5, relief=RAISED)
+        panic_frame = Frame(self, borderwidth=5, relief=RAISED)
+        panic_frame.pack(fill="x")
 
-        setPanicButtonButton = Button(
-            panicFrame,
+        set_panic_key_button = Button(
+            panic_frame,
             text=f"Set Panic\nButton\n<{vars.panic_key.get()}>",
-            command=lambda: get_keyboard_input(setPanicButtonButton, vars.panic_key),
+            command=lambda: request_panic_key(set_panic_key_button, vars.panic_key),
             cursor="question_arrow",
         )
-        doPanicButton = Button(panicFrame, text="Perform Panic", command=send_panic)
-
-        setpanicttp = CreateToolTip(setPanicButtonButton, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
-
-        panicFrame.pack(fill="x")
-        setPanicButtonButton.pack(fill="x", side="left", expand=1)
-        doPanicButton.pack(fill="both", side="left", expand=1)
+        set_panic_key_button.pack(fill="x", side="left", expand=1)
+        CreateToolTip(set_panic_key_button, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
+        Button(panic_frame, text="Perform Panic", command=send_panic).pack(fill="both", side="left", expand=1)
