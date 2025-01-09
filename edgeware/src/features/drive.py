@@ -15,7 +15,7 @@ from state import State
 
 def filter_avoid_list(settings: Settings, dirs: list[str]) -> None:
     for dir in dirs.copy():
-        if dir in settings.drive_avoid_list or dir[0] == ".":
+        if dir in settings.drive_avoid_list or dir.startswith(('.', '$')):
             dirs.remove(dir)
 
 
@@ -28,6 +28,8 @@ def fill_drive(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     for path, dirs, files in os.walk(settings.drive_path):
         filter_avoid_list(settings, dirs)
         paths.append(Path(path))
+    if settings.random_fill:
+        random.shuffle(paths)
 
     def fill() -> None:
         if len(paths) == 0:

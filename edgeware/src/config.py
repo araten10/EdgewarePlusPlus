@@ -2041,7 +2041,14 @@ class Config(Tk):
             command=lambda: set_widget_states(vars.fill_drive.get(), fill_group),
             cursor="question_arrow",
         )
-        fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=vars.fill_delay)
+        random_fillBox = Checkbutton(
+            fillFrame,
+            text="Random Filling",
+            variable=vars.random_fill,
+            command=lambda: vars.random_fill.get(),
+            cursor="question_arrow",
+        )
+        fillDelay = Scale(fillFrame, label="Fill Delay (10ms increments)", from_=0, to=1000, orient="horizontal", variable=vars.fill_delay)
 
         fillttp = CreateToolTip(
             fillBox,
@@ -2050,9 +2057,18 @@ class Config(Tk):
             "names listed in the folder name blacklist.\nIt will also ONLY place images into the User folder and its subfolders.\nFill drive has "
             "one modifier, which is its own forced delay. Because it runs with between 1 and 8 threads at any given time, when improperly configured it can "
             "fill your drive VERY quickly. To ensure that you get that nice slow fill, you can adjust the delay between each folder sweep it performs.",
+            "If you want to fill folders in a privileged folder such as C:, you need to run the script as admin using Admin.bat",
         )
 
+        random_fillttp = CreateToolTip(
+            random_fillBox,
+            'Normally the specified directory and its subdirectories are filled in order, in a deterministic way, so if you '
+            'want to undo the filling, using the debugger and some print statements, you can get an idea of how the folders '
+            'were filled and you can go through them to delete the images. If you turn this on you won\'t be able to do this '
+            'and finding the images will be a pain. You were warned.',
+        )
         fill_group.append(fillDelay)
+        fill_group.append(random_fillBox)
 
         replaceBox = Checkbutton(
             fillFrame,
@@ -2100,6 +2116,7 @@ class Config(Tk):
         hardDriveFrame.pack(fill="x")
         fillFrame.pack(fill="y", side="left")
         fillBox.pack()
+        random_fillBox.pack()
         fillDelay.pack()
         replaceFrame.pack(fill="y", side="left")
         replaceBox.pack()

@@ -129,6 +129,7 @@ class Settings:
         # Dangerous
         self.drive_avoid_list = self.config["avoidList"].split(">")  # TODO: Store in a better way
         self.fill_drive = bool(self.config["fill"])
+        self.random_fill = bool(self.config["random_fill"])
         self.drive_path = self.config["drivePath"]
         self.fill_delay = int(self.config["fill_delay"]) * 10  # Milliseconds
         self.replace_images = bool(self.config["replace"])

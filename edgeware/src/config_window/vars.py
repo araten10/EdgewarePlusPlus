@@ -15,6 +15,8 @@ class Vars:
         self.audio_chance = self.make(IntVar, "audioMod")
         self.prompt_chance = self.make(IntVar, "promptMod")
         self.fill_drive = self.make(BooleanVar, "fill")
+        self.random_fill =  self.make(BooleanVar, "random_fill")
+
 
         self.fill_delay = self.make(IntVar, "fill_delay")
         self.replace_images = self.make(BooleanVar, "replace")

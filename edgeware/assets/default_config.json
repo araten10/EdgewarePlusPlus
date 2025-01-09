@@ -3,6 +3,7 @@
   "versionplusplus": "14.2",
   "delay": 5000,
   "fill": 0,
+  "random_fill": 0,
   "replace": 0,
   "webMod": 0,
   "popupMod": 100,
