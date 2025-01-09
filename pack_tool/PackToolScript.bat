@@ -56,30 +56,26 @@ echo 2: Compress Videos
 echo 3: Compress Both
 echo 4: Compress Neither
 set /p compressSelect=Select number:
-if %compressSelect%==1 goto compressImg
-if %compressSelect%==2 goto compressVid
-if %compressSelect%==3 goto compressBoth
-if %compressSelect%==4 goto compressNeither
+if %compressSelect%==1 set "arg1=-i" & goto ptRename
+if %compressSelect%==2 set "arg1=-v" & goto ptRename
+if %compressSelect%==3 set "arg1=-i" & set "arg2=-v" & goto ptRename
+if %compressSelect%==4 goto ptRename
 echo Must enter selection number (1, 2, 3, 4)
 pause
 goto ptCompress
-:compressImg
-src\main.py -i "%compileName%"
-echo Done.
+:ptRename
+echo Would you like to rename the built media to allow for mood specific captions?
+echo This will insert the name of the mood at the start of every file, such as "mood_nameoffile.png"
+echo 1: Yes
+echo 2: No
+set /p renameSelect=Select Number:
+if %renameSelect%==1 set "arg3=-r" & goto finishBuild
+if %renameSelect%==2 goto finishBuild
+echo Must enter selection number (1, 2)
 pause
-goto top
-:compressVid
-src\main.py -v "%compileName%"
-echo Done.
-pause
-goto top
-:compressBoth
-src\main.py -i -v "%compileName%"
-echo Done.
-pause
-goto top
-:compressNeither
-src\main.py "%compileName%"
+goto ptRename
+:finishBuild
+src\main.py %arg1% %arg2% %arg3% %compileName%
 echo Done.
 pause
 goto top

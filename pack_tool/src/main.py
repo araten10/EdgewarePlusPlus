@@ -36,7 +36,7 @@ def write_json(data: dict, path: Path) -> None:
         json.dump(data, f)
 
 
-def make_media(source: Source, build: Build, compimg: bool, compvid: bool) -> set[str]:
+def make_media(source: Source, build: Build, compimg: bool, compvid: bool, rename: bool) -> set[str]:
     """Returns a set of existing, valid moods"""
 
     media = {}
@@ -83,6 +83,8 @@ def make_media(source: Source, build: Build, compimg: bool, compvid: bool) -> se
 
             if location:
                 location.mkdir(parents=True, exist_ok=True)
+                if rename:
+                    filename = mood + "_" + filename
                 copy(file_path, location / filename)
                 media[mood].append(filename)
             else:
@@ -107,7 +109,6 @@ def compress_image(source: Path, destination: Path) -> None:
         img.save(destination, optimize=True, quality=85)
     except Exception as e:
         logging.warning(f"Error compressing image: {e}")
-
 
 def make_subliminals(source: Source, build: Build) -> None:
     if not source.subliminals.is_dir():
@@ -390,6 +391,7 @@ def main() -> None:
     parser.add_argument("-n", "--new", action="store_true", help="create a new pack template and exit")
     parser.add_argument("-v", "--compvid", action="store_true", help="compresses video files using ffmpeg")
     parser.add_argument("-i", "--compimg", action="store_true", help="compresses image files using pillow")
+    parser.add_argument("-r", "--rename", action="store_true", help="appends mood name to files")
     args = parser.parse_args()
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -400,12 +402,12 @@ def main() -> None:
     if args.new:
         new_pack(source)
     elif not source.root.is_dir():
-        logging.error(f"{source.root} does not exist or is not a direcory")
+        logging.error(f"{source.root} does not exist or is not a directory")
         sys.exit()
 
     try:
         build.root.mkdir(parents=True, exist_ok=True)
-        moods = make_media(source, build, args.compimg, args.compvid)
+        moods = make_media(source, build, args.compimg, args.compvid, args.rename)
         make_subliminals(source, build)
         make_wallpapers(source, build)
         make_icon(source, build)
