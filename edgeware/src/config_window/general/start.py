@@ -263,7 +263,7 @@ class StartTab(Frame):
         theme_demo_popup_label.pack(side="top", ipadx=1, ipady=1)
         theme_demo_popup_tooltip = CreateToolTip(
             theme_demo_popup_label,
-            "NOTE: the test image is very small, buttons and captions will appear proportionally larger here!\n\n" "Also, look! The tooltip changed too!",
+            "NOTE: the test image is very small, buttons and captions will appear proportionally larger here!\n\nAlso, look! The tooltip changed too!",
         )
         Button(theme_demo_popup_label, text="Test~").place(x=-10, y=-10, relx=1, rely=1, anchor="se")
         Label(theme_demo_popup_label, text="Lewd Caption Here!").place(x=5, y=5)

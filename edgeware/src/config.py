@@ -2,12 +2,8 @@ import ast
 import json
 import logging
 import os
-import shutil
-import subprocess
-import sys
 import textwrap
 import webbrowser
-import zipfile
 from pathlib import Path
 from tkinter import (
     CENTER,
@@ -30,7 +26,6 @@ from tkinter import (
     StringVar,
     Text,
     Tk,
-    Toplevel,
     filedialog,
     font,
     messagebox,
@@ -40,10 +35,23 @@ from tkinter import (
 
 import requests
 import ttkwidgets as tw
+from config_window.general.file import FileTab
 from config_window.general.start import StartTab
-from config_window.utils import all_children, get_live_version, set_widget_states, set_widget_states_with_colors
+from config_window.utils import (
+    all_children,
+    clear_launches,
+    confirm_box,
+    export_resource,
+    get_live_version,
+    import_resource,
+    pack_preset,
+    set_widget_states,
+    set_widget_states_with_colors,
+    write_save,
+)
 from config_window.vars import Vars
-from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data, PackPaths, Process
+from pack import Pack
+from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data
 from PIL import Image, ImageTk
 from settings import load_config, load_default_config
 from utils import utils
@@ -51,12 +59,10 @@ from widgets.tooltip import CreateToolTip
 
 PATH = Path(__file__).parent
 
-log_file = utils.init_logging("config")
-
 config = load_config()
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()
-paths = PackPaths(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_PACK_PATH)
+pack = Pack(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_PACK_PATH)
 
 
 # if you are working on this i'm just letting you know there's like almost no documentation for ttkwidgets
@@ -94,10 +100,6 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-PACK_IMPORT_TEXT = 'If you\'re familiar with Edgeware, you may know that by default you can only have one pack imported under "resource". But you can also import multiple packs under "data/packs" using the "Import New Pack" button and choose which one you want to use with the dropdown menu on the left. This way you only need to import each pack once and you can conveniently switch between them. After choosing a pack from the dropdown menu, click the "Save & Refresh" button to update the config window to reflect your choice.\n\nPacks can still be imported and exported the old way using the "Import Default Pack" and "Export Default Pack" buttons, make sure to select "default" from the dropdown if you want to do this!'
-FILE_PRESET_TEXT = (
-    "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
-)
 DEFAULTFILE_INTRO_TEXT = 'Changing these will change the default file EdgeWare++ falls back on when a replacement isn\'t provided by a pack. The files you choose will be stored under "data."'
 INFO_MULTI_TEXT = 'NOTE: If you have multiple packs loaded (via the file tab), make sure to apply the pack you want using the "Save & Refresh" button there! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
 
@@ -151,10 +153,10 @@ INFO_CREATOR_DEFAULT = "Anonymous"
 INFO_VERSION_DEFAULT = "0"
 INFO_DISCORD_DEFAULT = ["[No pack loaded, or the pack does not have a 'discord.dat' file.]", "default"]
 
-if os.path.isfile(paths.info):
+if os.path.isfile(pack.paths.info):
     try:
         info_dict = ""
-        with open(paths.info) as r:
+        with open(pack.paths.info) as r:
             info_dict = json.loads(r.read())
         info_name = info_dict["name"] if info_dict["name"] else "Unnamed Pack"
         info_description = info_dict["description"] if info_dict["description"] else "No description set."
@@ -184,9 +186,9 @@ UNIQUE_ID = "0"
 
 # creating a semi-parseable unique ID for the pack to make mood saving work, if the pack doesn't have an info.json file.
 # probably could have made it so the user manually has to save/load and not worried about this, but here we are
-if info_id == "0" and os.path.exists(paths.root):
+if info_id == "0" and os.path.exists(pack.paths.root):
     try:
-        UNIQUE_ID = utils.compute_mood_id(paths)
+        UNIQUE_ID = utils.compute_mood_id(pack.paths)
         logging.info(f"generated unique ID. {UNIQUE_ID}")
     except Exception as e:
         logging.warning(f"failed to create unique id. {e}")
@@ -196,9 +198,9 @@ if info_id == "0" and os.path.exists(paths.root):
 Data.MOODS.mkdir(parents=True, exist_ok=True)
 MOOD_PATH = "0"
 if config["toggleMoodSet"] != True:
-    if UNIQUE_ID != "0" and os.path.exists(paths.root):
+    if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
         MOOD_PATH = Data.MOODS / f"{UNIQUE_ID}.json"
-    elif UNIQUE_ID == "0" and os.path.exists(paths.root):
+    elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
         MOOD_PATH = Data.MOODS / f"{info_id}.json"
 
     # creating the mood file if it doesn't exist
@@ -209,18 +211,18 @@ if config["toggleMoodSet"] != True:
                 mood_dict = {"media": [], "captions": [], "prompts": [], "web": []}
 
                 try:
-                    if os.path.isfile(paths.media):
+                    if os.path.isfile(pack.paths.media):
                         media_dict = ""
-                        with open(paths.media) as media:
+                        with open(pack.paths.media) as media:
                             media_dict = json.loads(media.read())
                             mood_dict["media"] += media_dict
                 except Exception:
                     logging.warning("media mood extraction failed.")
 
                 try:
-                    if os.path.isfile(paths.captions):
+                    if os.path.isfile(pack.paths.captions):
                         captions_dict = ""
-                        with open(paths.captions) as captions:
+                        with open(pack.paths.captions) as captions:
                             captions_dict = json.loads(captions.read())
                             if "prefix" in captions_dict:
                                 del captions_dict["prefix"]
@@ -235,18 +237,18 @@ if config["toggleMoodSet"] != True:
                     logging.warning("captions mood extraction failed.")
 
                 try:
-                    if os.path.isfile(paths.prompt):
+                    if os.path.isfile(pack.paths.prompt):
                         prompt_dict = ""
-                        with open(paths.prompt) as prompt:
+                        with open(pack.paths.prompt) as prompt:
                             prompt_dict = json.loads(prompt.read())
                             mood_dict["prompts"] += prompt_dict["moods"]
                 except Exception:
                     logging.warning("prompt mood extraction failed.")
 
                 try:
-                    if os.path.isfile(paths.web):
+                    if os.path.isfile(pack.paths.web):
                         web_dict = ""
-                        with open(paths.web) as web:
+                        with open(pack.paths.web) as web:
                             web_dict = json.loads(web.read())
                             for n in web_dict["moods"]:
                                 if n not in mood_dict["web"]:
@@ -280,10 +282,6 @@ class Config(Tk):
         title_font.configure(size=13)
 
         vars = Vars(config)
-
-        if get_presets() is None:
-            write_save(False)
-            save_preset("Default")
 
         # grouping for enable/disable
         hibernate_group = []
@@ -321,7 +319,7 @@ class Config(Tk):
         notebookGeneral = ttk.Notebook(tabSubGeneral)
         tabMaster.add(tabSubGeneral, text="General")
         notebookGeneral.add(StartTab(vars, title_font, message_group, local_version, live_version), text="Start")  # startup screen, info and presets
-        tabFile = ttk.Frame(None)  # file management tab
+        notebookGeneral.add(FileTab(vars, title_font, message_group, pack), text="File/Presets")  # file management tab
         tabPackInfo = ttk.Frame(None)  # pack information
         tabBooru = ttk.Frame(None)  # tab for booru downloader
         tabDefaultFiles = ttk.Frame(None)  # tab for changing default files
@@ -400,248 +398,13 @@ class Config(Tk):
         resourceFrame = Frame(self)
         exportResourcesButton = Button(resourceFrame, text="Export Resource Pack", command=export_resource)
         importResourcesButton = Button(resourceFrame, text="Import Resource Pack", command=lambda: import_resource(self))
-        saveExitButton = Button(self, text="Save & Exit", command=lambda: write_save(True))
+        saveExitButton = Button(self, text="Save & Exit", command=lambda: write_save(vars, True))
 
         # --------------------------------------------------------- #
         # ========================================================= #
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ FILE TAB STARTS HERE}==============#
-        notebookGeneral.add(tabFile, text="File/Presets")
-
-        # save/load
-        def save_and_refresh() -> None:
-            write_save(False)
-            refresh()
-
-        def import_new_pack() -> None:
-            try:
-                pack_zip = filedialog.askopenfile("r", defaultextension=".zip")
-                if not pack_zip:
-                    return
-
-                with zipfile.ZipFile(pack_zip.name, "r") as zip:
-                    pack_name = Path(pack_zip.name).with_suffix("").name
-                    import_location = Data.PACKS / pack_name
-                    import_location.mkdir(parents=True, exist_ok=True)
-                    zip.extractall(import_location)
-
-                messagebox.showinfo("Done", "New pack imported")
-                refresh()
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to import new pack.\n[{e}]")
-
-        Label(tabFile, text="Save/Load", font=title_font, relief=GROOVE).pack(pady=2)
-        packImportMessage = Message(tabFile, text=PACK_IMPORT_TEXT, justify=CENTER, width=675)
-        message_group.append(packImportMessage)
-        importExportFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-        fileSaveButton = Button(tabFile, text="Save Settings", command=lambda: write_save(False))
-        saveAndRefreshButton = Button(tabFile, text="Save & Refresh", command=save_and_refresh)
-
-        packSelectionFrame = Frame(importExportFrame)
-        Data.PACKS.mkdir(parents=True, exist_ok=True)
-        pack_list = ["default"] + os.listdir(Data.PACKS)
-        packDropDown = OptionMenu(packSelectionFrame, vars.pack_path, *pack_list)
-        packDropDown["menu"].insert_separator(1)
-        importButton = Button(packSelectionFrame, text="Import New Pack", command=import_new_pack)
-
-        defaultImportButton = Button(importExportFrame, text="Import Default Pack", command=lambda: import_resource(self))
-        defaultExportButton = Button(importExportFrame, text="Export Default Pack", command=export_resource)
-
-        packImportMessage.pack(fill="both")
-        fileSaveButton.pack(fill="x", pady=2)
-        saveAndRefreshButton.pack(fill="x", pady=2)
-        importExportFrame.pack(fill="x", pady=2)
-        packSelectionFrame.pack(fill="both", pady=2, expand=1)
-        packDropDown.pack(padx=2, fill="x", side="left")
-        importButton.pack(padx=2, fill="x", side="left", expand=1)
-        ttk.Separator(importExportFrame, orient="horizontal").pack(fill="x", pady=2)
-        defaultImportButton.pack(padx=2, pady=2, fill="x", side="left", expand=1)
-        defaultExportButton.pack(padx=2, pady=2, fill="x", side="left", expand=1)
-
-        # mode presets
-        Label(tabFile, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)
-
-        presetMessage = Message(tabFile, text=FILE_PRESET_TEXT, justify=CENTER, width=675)
-        presetMessage.pack(fill="both")
-        # message_group.append(presetMessage)
-
-        presetFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-        dropdownSelectFrame = Frame(presetFrame)
-
-        style_list = [_.split(".")[0].capitalize() for _ in get_presets() if _.endswith(".cfg")]
-        logging.info(f"pulled style_list={style_list}")
-        styleStr = StringVar(self, style_list.pop(0))
-
-        styleDropDown = OptionMenu(dropdownSelectFrame, styleStr, styleStr.get(), *style_list, command=lambda key: changeDescriptText(key))
-
-        def changeDescriptText(key: str):
-            descriptNameLabel.configure(text=f"{key} Description")
-            descriptLabel.configure(text=presetDescriptionWrap.fill(text=get_descript_text(key)))
-
-        def updateHelperFunc(key: str):
-            styleStr.set(key)
-            changeDescriptText(key)
-
-        def doSave() -> bool:
-            name_ = simpledialog.askstring("Save Preset", "Preset name")
-            existed = os.path.exists(Data.PRESETS / f"{name_.lower()}.cfg")
-            if name_ != None and name != "":
-                write_save(False)
-                if existed:
-                    if messagebox.askquestion("Overwrite", "A preset with this name already exists. Overwrite it?") == "no":
-                        return False
-            if save_preset(name_) and not existed:
-                style_list.insert(0, "Default")
-                style_list.append(name_.capitalize())
-                styleStr.set("Default")
-                styleDropDown["menu"].delete(0, "end")
-                for item in style_list:
-                    styleDropDown["menu"].add_command(label=item, command=lambda x=item: updateHelperFunc(x))
-                styleStr.set(style_list[0])
-            return True
-
-        confirmStyleButton = Button(dropdownSelectFrame, text="Load Preset", command=lambda: apply_preset(styleStr.get()))
-        saveStyleButton = Button(dropdownSelectFrame, text="Save Preset", command=doSave)
-
-        presetDescriptFrame = Frame(presetFrame, borderwidth=2, relief=GROOVE)
-
-        descriptNameLabel = Label(presetDescriptFrame, text="Default Description", font="Default 15")
-        presetDescriptionWrap = textwrap.TextWrapper(width=100, max_lines=5)
-        descriptLabel = Label(presetDescriptFrame, text=presetDescriptionWrap.fill(text="Default Text Here"), relief=GROOVE)
-        changeDescriptText("Default")
-
-        dropdownSelectFrame.pack(side="left", fill="x", padx=6)
-        styleDropDown.pack(fill="x", expand=1)
-        confirmStyleButton.pack(fill="both", expand=1)
-        Label(dropdownSelectFrame).pack(fill="both", expand=1)
-        Label(dropdownSelectFrame).pack(fill="both", expand=1)
-        saveStyleButton.pack(fill="both", expand=1)
-
-        presetDescriptFrame.pack(side="right", fill="both", expand=1)
-        descriptNameLabel.pack(fill="y", pady=4)
-        descriptLabel.pack(fill="both", expand=1)
-
-        presetFrame.pack(fill="both", pady=2)
-
-        packConfigPresets = Frame(tabFile, borderwidth=5, relief=RAISED)
-        configPresetsSub1 = Frame(packConfigPresets)
-        configPresetsSub2 = Frame(packConfigPresets)
-        configPresetsButton = Button(
-            configPresetsSub2,
-            text="Load Pack Configuration",
-            cursor="question_arrow",
-            command=lambda: pack_preset("full", vars.preset_danger.get()),
-        )
-        # put the group here instead of with the rest since it's just a single button
-        configpresets_group = []
-        configpresets_group.append(configPresetsButton)
-        if os.path.exists(paths.config):
-            with open(paths.config) as f:
-                try:
-                    l = json.loads(f.read())
-                    if "version" in l:
-                        del l["version"]
-                    if "versionplusplus" in l:
-                        del l["versionplusplus"]
-                    configNum = len(l)
-                except Exception as e:
-                    logging.warning(f"could not load pack suggested settings. Reason: {e}")
-                    configNum = 0
-                    set_widget_states(False, configpresets_group)
-        else:
-            configNum = 0
-            set_widget_states(False, configpresets_group)
-        configPresetsLabel = Label(configPresetsSub1, text=f"Number of suggested config settings: {configNum}")
-        presetsDangerToggle = Checkbutton(configPresetsSub1, text="Toggle on warning failsafes", variable=vars.preset_danger, cursor="question_arrow")
-
-        presetdangerttp = CreateToolTip(
-            presetsDangerToggle,
-            'Toggles on the "Warn if "Dangerous" Settings Active" setting after loading the '
-            "pack configuration file, regardless if it was toggled on or off in those settings.\n\nWhile downloading and loading "
-            "something that could be potentially malicious is a fetish in itself, this provides some peace of mind for those of you "
-            "who are more cautious with unknown files. More information on what these failsafe warnings entail is listed on the relevant "
-            'setting tooltip in the "General" tab.',
-        )
-        configpresetttp = CreateToolTip(
-            configPresetsButton,
-            "In EdgeWare++, the functionality was added for pack creators to add a config file to their pack, "
-            "allowing for quick loading of setting presets tailored to their intended pack experience. It is highly recommended you save your "
-            "personal preset beforehand, as this will overwrite all your current settings.\n\nIt should also be noted that this can potentially "
-            "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
-        )
-
-        packConfigPresets.pack(fill="x", pady=2)
-        configPresetsSub1.pack(fill="both", side="left", expand=1)
-        configPresetsSub2.pack(fill="both", side="left", expand=1)
-        configPresetsLabel.pack(fill="both", side="top")
-        presetsDangerToggle.pack(fill="both", side="top")
-        configPresetsButton.pack(fill="both", expand=1)
-
-        # directories
-        Label(tabFile, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
-
-        logNum = len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
-        logsFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-        lSubFrame1 = Frame(logsFrame)
-        lSubFrame2 = Frame(logsFrame)
-        openLogsButton = Button(lSubFrame2, text="Open Logs Folder", command=lambda: explorer_view(Data.LOGS))
-        clearLogsButton = Button(lSubFrame2, text="Delete All Logs", command=lambda: cleanLogs(), cursor="question_arrow")
-        logStat = Label(lSubFrame1, text=f"Total Logs: {logNum}")
-
-        clearlogsttp = CreateToolTip(clearLogsButton, "This will delete every log (except the log currently being written).")
-
-        def cleanLogs():
-            try:
-                logNum = len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
-                if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete all logs? There are currently {logNum}.", icon="warning") == True:
-                    if os.path.exists(Data.LOGS) and os.listdir(Data.LOGS):
-                        logs = os.listdir(Data.LOGS)
-                        for f in logs:
-                            if os.path.splitext(f)[0] == os.path.splitext(log_file)[0]:
-                                continue
-                            e = os.path.splitext(f)[1].lower()
-                            if e == ".txt":
-                                os.remove(Data.LOGS / f)
-                        logNum = len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
-                        logStat.configure(text=f"Total Logs: {logNum}")
-            except Exception as e:
-                logging.warning(
-                    f"could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}"
-                )
-
-        logsFrame.pack(fill="x", pady=2)
-        lSubFrame1.pack(fill="both", side="left", expand=1)
-        lSubFrame2.pack(fill="both", side="left", expand=1)
-        logStat.pack(fill="both", expand=1)
-        openLogsButton.pack(fill="x", expand=1)
-        clearLogsButton.pack(fill="x", expand=1)
-
-        moodsFileFrame = Frame(tabFile, borderwidth=5, relief=RAISED)
-        mfSubFrame1 = Frame(moodsFileFrame)
-        mfSubFrame2 = Frame(moodsFileFrame)
-        uniqueIDCheck = Label(mfSubFrame1, text=("Using Unique ID?: " + ("✓" if (info_id == "0") else "✗")), fg=("green" if (info_id == "0") else "red"))
-        uniqueIDLabel = Label(mfSubFrame1, text=("Your Unique ID is: " + (UNIQUE_ID if (info_id == "0") else info_id)))
-        openMoodsButton = Button(mfSubFrame2, height=2, text="Open Moods Folder", command=lambda: explorer_view(Data.MOODS), cursor="question_arrow")
-
-        openmoodsttp = CreateToolTip(
-            openMoodsButton,
-            'If your currently loaded pack has a "info.json" file, it can be found under the pack name in this folder.\n\n'
-            "If it does not have this file however, EdgeWare++ will generate a Unique ID for it, so you can still save your mood settings "
-            'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
-        )
-
-        moodsFileFrame.pack(fill="x", pady=2)
-        mfSubFrame1.pack(fill="both", side="left", expand=1)
-        mfSubFrame2.pack(fill="both", side="left", expand=1)
-        uniqueIDCheck.pack(fill="both", expand=1)
-        uniqueIDLabel.pack(fill="both", expand=1)
-        openMoodsButton.pack(fill="x", expand=1)
-
-        openResourcesButton = Button(tabFile, height=2, text="Open Resources Folder", command=lambda: explorer_view(paths.root))
-        openResourcesButton.pack(fill="x", pady=2)
 
         # ==========={EDGEWARE++ "PACK INFO" TAB STARTS HERE}===========#
         notebookGeneral.add(tabPackInfo, text="Pack Info")
@@ -661,14 +424,14 @@ class Config(Tk):
         statusIconFrame = Frame(infoStatusFrame)
         statusCorruptionFrame = Frame(infoStatusFrame)
 
-        if os.path.exists(paths.root):
+        if os.path.exists(pack.paths.root):
             statusPack = True
-            statusAbout = True if os.path.isfile(paths.info) else False
-            statusWallpaper = True if os.path.isfile(paths.wallpaper) else False
-            statusStartup = True if paths.splash else False
-            statusDiscord = True if os.path.isfile(paths.discord) else False
-            statusIcon = True if os.path.isfile(paths.icon) else False
-            statusCorruption = True if os.path.isfile(paths.corruption) else False
+            statusAbout = True if os.path.isfile(pack.paths.info) else False
+            statusWallpaper = True if os.path.isfile(pack.paths.wallpaper) else False
+            statusStartup = True if pack.paths.splash else False
+            statusDiscord = True if os.path.isfile(pack.paths.discord) else False
+            statusIcon = True if os.path.isfile(pack.paths.icon) else False
+            statusCorruption = True if os.path.isfile(pack.paths.corruption) else False
         else:
             statusPack = False
             statusAbout = False
@@ -751,13 +514,13 @@ class Config(Tk):
         captionsStatsFrame = Frame(statsFrame2)
         subliminalsStatsFrame = Frame(statsFrame2)
 
-        imageStat = len(os.listdir(paths.image)) if os.path.exists(paths.image) else 0
-        audioStat = len(os.listdir(paths.audio)) if os.path.exists(paths.audio) else 0
-        videoStat = len(os.listdir(paths.video)) if os.path.exists(paths.video) else 0
+        imageStat = len(os.listdir(pack.paths.image)) if os.path.exists(pack.paths.image) else 0
+        audioStat = len(os.listdir(pack.paths.audio)) if os.path.exists(pack.paths.audio) else 0
+        videoStat = len(os.listdir(pack.paths.video)) if os.path.exists(pack.paths.video) else 0
 
-        if os.path.exists(paths.web):
+        if os.path.exists(pack.paths.web):
             try:
-                with open(paths.web, "r") as f:
+                with open(pack.paths.web, "r") as f:
                     webStat = len(json.loads(f.read())["urls"])
             except Exception as e:
                 logging.warning(f"error in web.json. Aborting preview load. {e}")
@@ -766,10 +529,10 @@ class Config(Tk):
         else:
             webStat = 0
 
-        if os.path.exists(paths.prompt):
+        if os.path.exists(pack.paths.prompt):
             # frankly really ugly but the easiest way I found to do it
             try:
-                with open(paths.prompt, "r") as f:
+                with open(pack.paths.prompt, "r") as f:
                     l = json.loads(f.read())
                     i = 0
                     if "moods" in l:
@@ -794,9 +557,9 @@ class Config(Tk):
         else:
             promptStat = 0
 
-        if os.path.exists(paths.captions):
+        if os.path.exists(pack.paths.captions):
             try:
-                with open(paths.captions, "r") as f:
+                with open(pack.paths.captions, "r") as f:
                     l = json.loads(f.read())
                     i = 0
                     if "prefix" in l:
@@ -817,7 +580,7 @@ class Config(Tk):
         else:
             captionStat = 0
 
-        subliminalStat = len(os.listdir(paths.subliminals)) if os.path.exists(paths.subliminals) else 0
+        subliminalStat = len(os.listdir(pack.paths.subliminals)) if os.path.exists(pack.paths.subliminals) else 0
 
         statsFrame.pack(fill="x", pady=1)
         statsFrame1.pack(fill="x", side="top")
@@ -916,7 +679,7 @@ class Config(Tk):
         discordStatusImageLabel = Label(discordStatusFrame, text="Discord Status Image:", font="Default 10")
         if statusDiscord:
             try:
-                with open((paths.discord), "r") as f:
+                with open((pack.paths.discord), "r") as f:
                     datfile = f.read()
                     if not datfile == "":
                         info_discord = datfile.split("\n")
@@ -1281,7 +1044,7 @@ class Config(Tk):
         )
 
         mistakettp = CreateToolTip(
-            mistakeManual, "The number of allowed mistakes when filling out a prompt.\n\n" "Good for when you can't think straight, or typing with one hand..."
+            mistakeManual, "The number of allowed mistakes when filling out a prompt.\n\nGood for when you can't think straight, or typing with one hand..."
         )
 
         opacityScale = Scale(otherHostFrame, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=vars.opacity)
@@ -1823,9 +1586,9 @@ class Config(Tk):
         mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
         mediaTree.configure(yscroll=mediaScrollbar.set)
 
-        if os.path.exists(paths.media):
+        if os.path.exists(pack.paths.media):
             try:
-                with open(paths.media, "r") as f:
+                with open(pack.paths.media, "r") as f:
                     l = json.loads(f.read())
                     for m in l:
                         if m == "default":
@@ -1845,7 +1608,7 @@ class Config(Tk):
 
         if config["toggleMoodSet"] != True:
             if len(mediaTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(paths.root):
+                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
                         with open(MOOD_PATH, "r") as mood:
                             mood_dict = json.loads(mood.read())
@@ -1865,9 +1628,9 @@ class Config(Tk):
         captionsScrollbar = ttk.Scrollbar(moodsCaptionsFrame, orient=VERTICAL, command=captionsTree.yview)
         captionsTree.configure(yscroll=captionsScrollbar.set)
 
-        if os.path.exists(paths.captions):
+        if os.path.exists(pack.paths.captions):
             try:
-                with open(paths.captions, "r") as f:
+                with open(pack.paths.captions, "r") as f:
                     l = json.loads(f.read())
                     if "prefix" in l:
                         del l["prefix"]
@@ -1895,7 +1658,7 @@ class Config(Tk):
 
         if config["toggleMoodSet"] != True:
             if len(captionsTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(paths.root):
+                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
                         with open(MOOD_PATH, "r") as mood:
                             mood_dict = json.loads(mood.read())
@@ -1915,9 +1678,9 @@ class Config(Tk):
         promptsScrollbar = ttk.Scrollbar(moodsPromptsFrame, orient=VERTICAL, command=promptsTree.yview)
         promptsTree.configure(yscroll=promptsScrollbar.set)
 
-        if os.path.exists(paths.prompt):
+        if os.path.exists(pack.paths.prompt):
             try:
-                with open(paths.prompt, "r") as f:
+                with open(pack.paths.prompt, "r") as f:
                     l = json.loads(f.read())
                     for m in l["moods"]:
                         if m == "default":
@@ -1938,7 +1701,7 @@ class Config(Tk):
 
         if config["toggleMoodSet"] != True:
             if len(promptsTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(paths.root):
+                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
                         with open(MOOD_PATH, "r") as mood:
                             mood_dict = json.loads(mood.read())
@@ -1957,9 +1720,9 @@ class Config(Tk):
         webScrollbar = ttk.Scrollbar(moodsWebFrame, orient=VERTICAL, command=webTree.yview)
         webTree.configure(yscroll=webScrollbar.set)
 
-        if os.path.exists(paths.web):
+        if os.path.exists(pack.paths.web):
             try:
-                with open(paths.web, "r") as f:
+                with open(pack.paths.web, "r") as f:
                     l = json.loads(f.read())
                     webMoodList = ["default"]
                     for m in l["moods"]:
@@ -1984,7 +1747,7 @@ class Config(Tk):
 
         if config["toggleMoodSet"] != True:
             if len(webTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(paths.root):
+                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
                         with open(MOOD_PATH, "r") as mood:
                             mood_dict = json.loads(mood.read())
@@ -2157,7 +1920,7 @@ class Config(Tk):
 
         lowkeyttp = CreateToolTip(
             lowkeyToggle,
-            "Makes popups appear in a corner of the screen instead of the middle.\n\n" "Best used with Popup Timeout or high delay as popups will stack.",
+            "Makes popups appear in a corner of the screen instead of the middle.\n\nBest used with Popup Timeout or high delay as popups will stack.",
         )
 
         lowkey_group.append(lowkeyDropdown)
@@ -2417,7 +2180,7 @@ class Config(Tk):
             text="Recommended Settings",
             cursor="question_arrow",
             height=2,
-            command=lambda: pack_preset("corruption", vars.preset_danger.get()),
+            command=lambda: pack_preset(pack, vars, "corruption", vars.preset_danger.get()),
         )
         corruptionEnabled_group.append(corruptionToggle)
         ctutorialstart_group.append(corruptionStartFrame)
@@ -2646,7 +2409,7 @@ class Config(Tk):
 
         corrwallpaperttp = CreateToolTip(
             corruptionWallpaperToggle,
-            "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to " "a pack defined static one.",
+            "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to a pack defined static one.",
         )
         corrthemettp = CreateToolTip(
             corruptionThemeToggle,
@@ -2730,7 +2493,7 @@ class Config(Tk):
                 set_widget_states(True, ctutorialstart_group)
                 set_widget_states(True, ctutorialtransition_group)
                 triggerHelper(vars.corruption_trigger.get(), False)
-            set_widget_states(os.path.isfile(paths.corruption), corruptionEnabled_group)
+            set_widget_states(os.path.isfile(pack.paths.corruption), corruptionEnabled_group)
 
         corruptionTabMaster.bind("<<NotebookTabChanged>>", corruptionTutorialHelper)
 
@@ -2868,7 +2631,7 @@ class Config(Tk):
         hibernateHelper(vars.hibernate_type.get())
         fadeHelper(vars.corruption_fade.get())
         triggerHelper(vars.corruption_trigger.get(), False)
-        set_widget_states(os.path.isfile(paths.corruption), corruptionEnabled_group)
+        set_widget_states(os.path.isfile(pack.paths.corruption), corruptionEnabled_group)
 
         # messageOff toggle here, for turning off all help messages
         toggle_help(vars.message_off.get(), message_group)
@@ -2897,14 +2660,6 @@ class Config(Tk):
         self.mainloop()
 
 
-def explorer_view(url):
-    try:
-        utils.open_directory(url)
-    except Exception as e:
-        logging.warning(f"failed to open explorer view\n\tReason: {e}")
-        messagebox.showerror("Explorer Error", "Failed to open explorer view.")
-
-
 def pick_zip() -> str:
     # selecting zip
     for dirListObject in os.listdir(PATH):
@@ -2916,186 +2671,7 @@ def pick_zip() -> str:
     return "[No Zip Found]"
 
 
-def export_resource() -> bool:
-    try:
-        logging.info("starting zip export...")
-        saveLocation = filedialog.asksaveasfile("w", defaultextension=".zip")
-        with zipfile.ZipFile(saveLocation.name, "w", compression=zipfile.ZIP_DEFLATED) as zip:
-            beyondRoot = False
-            for root, dirs, files in os.walk(paths.root):
-                for file in files:
-                    logging.info(f"write {file}")
-                    if beyondRoot:
-                        zip.write(os.path.join(root, file), os.path.join(Path(root).name, file))
-                    else:
-                        zip.write(os.path.join(root, file), file)
-                for dir in dirs:
-                    logging.info(f"make dir {dir}")
-                    zip.write(os.path.join(root, dir), dir)
-                beyondRoot = True
-        return True
-    except Exception as e:
-        logging.fatal(f"failed to export zip\n\tReason: {e}")
-        messagebox.showerror("Write Error", "Failed to export resource to zip file.")
-        return False
-
-
-def import_resource(parent: Tk) -> bool:
-    try:
-        openLocation = filedialog.askopenfile("r", defaultextension=".zip")
-        if openLocation == None:
-            return False
-        if os.path.exists(paths.root):
-            resp = confirm_box(
-                parent,
-                "Confirm",
-                "Current resource folder will be deleted and overwritten. Corruption launches will be reset. Is this okay?"
-                "\nNOTE: This might take a while when importing larger packs, please be patient!",
-            )
-            if not resp:
-                logging.info("exited import resource overwrite")
-                return False
-            shutil.rmtree(paths.root)
-            logging.info("removed old resource folder")
-        with zipfile.ZipFile(openLocation.name, "r") as zip:
-            zip.extractall(paths.root)
-            logging.info("extracted all from zip")
-        messagebox.showinfo("Done", "Resource importing completed.")
-        clear_launches(False)
-        refresh()
-        return True
-    except Exception as e:
-        messagebox.showerror("Read Error", f"Failed to import resources from file.\n[{e}]")
-        return False
-
-
-def confirm_box(parent: Tk, btitle: str, message: str) -> bool:
-    allow = False
-    root = Toplevel(parent)
-
-    def complete(state: bool) -> bool:
-        nonlocal allow
-        allow = state
-        root.quit()
-
-    root.geometry("300x150")
-    root.resizable(False, False)
-    root.focus_force()
-    root.title(btitle)
-    Label(root, text=message, wraplength=292).pack(fill="x")
-    # Label(root).pack()
-    Button(root, text="Continue", command=lambda: complete(True)).pack()
-    Button(root, text="Cancel", command=lambda: complete(False)).pack()
-    root.mainloop()
-    try:
-        root.destroy()
-    except Exception:
-        False
-    return allow
-
-
 # helper funcs for lambdas =======================================================
-def write_save(exit_at_end: bool) -> None:
-    if vars.safe_mode.get() and exit_at_end and not safe_check():
-        return
-
-    logging.info("starting config save write...")
-    temp = config.copy()
-    temp["wallpaperDat"] = str(config["wallpaperDat"])
-
-    utils.toggle_run_at_startup(vars.run_at_startup.get())
-
-    for key, var in vars.entries.items():
-        value = var.get()
-        if key == "packPath":
-            value = value if value != "default" else None
-        temp[key] = (1 if value else 0) if type(value) is bool else value
-
-    with open(Data.CONFIG, "w") as file:
-        file.write(json.dumps(temp))
-        logging.info(f"wrote config file: {json.dumps(temp)}")
-
-    if not (len(sys.argv) > 1 and sys.argv[1] == "--first-launch-configure") and vars.run_on_save_quit.get() and exit_at_end:
-        subprocess.Popen([sys.executable, Process.MAIN])
-
-    if exit_at_end:
-        logging.info("exiting config")
-        os.kill(os.getpid(), 9)
-    else:
-        messagebox.showinfo("Success!", "Settings saved successfully!")
-
-
-# i'm sure there's a better way to do this but I also have a habit of taking the easy way out
-def safe_check() -> bool:
-    dangersList = []
-    numDangers = 0
-    logging.info("running through danger list...")
-    if vars.replace_images.get():
-        logging.info("extreme dangers found.")
-        dangersList.append("\n\nExtreme:")
-        if vars.replace_images.get():
-            numDangers += 1
-            dangersList.append(
-                '\n•Replace Images is enabled! THIS WILL DELETE FILES ON YOUR COMPUTER! Only enable this willingly and cautiously! Read the documentation in the "About" tab!'
-            )
-    if vars.run_at_startup.get() or vars.fill_drive.get():
-        logging.info("major dangers found.")
-        dangersList.append("\n\nMajor:")
-        if vars.run_at_startup.get():
-            numDangers += 1
-            dangersList.append("\n•Launch on Startup is enabled! This will run EdgeWare when you start your computer! (Note: Timer mode enables this setting!)")
-        if vars.fill_drive.get():
-            numDangers += 1
-            dangersList.append(
-                "\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
-            )
-    if (
-        vars.timer_mode.get()
-        or vars.mitosis_mode.get()
-        or vars.show_on_discord.get()
-        or (vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30))
-    ):
-        logging.info("medium dangers found.")
-        dangersList.append("\n\nMedium:")
-        if vars.timer_mode.get():
-            numDangers += 1
-            dangersList.append("\n•Timer mode is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!")
-        if vars.mitosis_mode.get():
-            numDangers += 1
-            dangersList.append("\n•Mitosis mode is enabled! With high popup rates, this could create a chain reaction, causing lag!")
-        if vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30):
-            numDangers += 1
-            dangersList.append("\n•You are running hibernate mode with a short cooldown! You might experience lag if a bunch of hibernate modes overlap!")
-        if vars.show_on_discord.get():
-            numDangers += 1
-            dangersList.append("\n•Show on Discord is enabled! This could lead to potential embarassment if you're on your main account!")
-    if vars.panic_disabled.get() or vars.run_on_save_quit.get():
-        logging.info("minor dangers found.")
-        dangersList.append("\n\nMinor:")
-        if vars.panic_disabled.get():
-            numDangers += 1
-            dangersList.append(
-                "\n•Panic Hotkey is disabled! If you want to easily close EdgeWare, read the tooltip in the Annoyance tab for other ways to panic!"
-            )
-        if vars.run_on_save_quit.get():
-            numDangers += 1
-            dangersList.append("\n•EdgeWare will run on Save & Exit (AKA: when you hit Yes!)")
-    dangers = " ".join(dangersList)
-    if numDangers > 0:
-        logging.info("safe mode intercepted save! asking user...")
-        if (
-            messagebox.askyesno(
-                "Dangerous Setting Detected!",
-                f"There are {numDangers} potentially dangerous settings detected! Do you want to save these settings anyways? {dangers}",
-                icon="warning",
-            )
-            == False
-        ):
-            logging.info("user cancelled save.")
-            return False
-    return True
-
-
 def validate_booru(name: str) -> bool:
     return requests.get(BOORU_URL.replace(BOORU_FLAG, name)).status_code == 200
 
@@ -3173,7 +2749,7 @@ def auto_import_wallpapers(tk_list_obj: Listbox):
                 tk_list_obj.delete(1)
             except Exception:
                 break
-        for file in os.listdir(paths.root):
+        for file in os.listdir(pack.paths.root):
             if (file.endswith(".png") or file.endswith(".jpg") or file.endswith(".jpeg")) and file != "wallpaper.png":
                 name_ = file.split(".")[0]
                 tk_list_obj.insert(1, name_)
@@ -3196,11 +2772,6 @@ def update_text(obj_list: Entry or Label, var: str, var_label: str):
         print("idk what would cause this but just in case uwu")
 
 
-def refresh():
-    subprocess.Popen([sys.executable, Process.CONFIG])
-    os.kill(os.getpid(), 9)
-
-
 def assign_json(key: str, var: int or str):
     config[key] = var
     with open(Data.CONFIG, "w") as f:
@@ -3215,51 +2786,12 @@ def assign(obj: StringVar or IntVar or BooleanVar, var: str or int or bool):
         # no assignment
 
 
-def get_presets() -> list[str]:
-    if not os.path.exists(Data.PRESETS):
-        os.mkdir(Data.PRESETS)
-    return os.listdir(Data.PRESETS) if len(os.listdir(Data.PRESETS)) > 0 else None
-
-
-def apply_preset(name: str):
-    try:
-        shutil.copyfile(Data.PRESETS / f"{name.lower()}.cfg", Data.CONFIG)
-        refresh()
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to load preset.\n\n{e}")
-
-
-def save_preset(name: str) -> bool:
-    try:
-        if name is not None and name != "":
-            shutil.copyfile(Data.CONFIG, Data.PRESETS / f"{name.lower()}.cfg")
-            with open(Data.PRESETS / f"{name.lower()}.cfg", "rw") as file:
-                file_json = json.loads(file.readline())
-                file_json["drivePath"] = "C:/Users/"
-                file.write(json.dumps(file_json))
-            return True
-        return False
-    except Exception:
-        return True
-
-
-def get_descript_text(name: str) -> str:
-    try:
-        with open(Data.PRESETS / f"{name}.txt", "r") as file:
-            text = ""
-            for line in file.readlines():
-                text += line
-            return text
-    except Exception:
-        return "This preset has no description file."
-
-
 def update_moods(type: str, id: str, check: bool):
     try:
         if config["toggleMoodSet"] != True:
-            if UNIQUE_ID != "0" and os.path.exists(paths.root):
+            if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
                 moodUpdatePath = Data.MOODS / f"{UNIQUE_ID}.json"
-            elif UNIQUE_ID == "0" and os.path.exists(paths.root):
+            elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
                 moodUpdatePath = Data.MOODS / f"{info_id}.json"
             with open(moodUpdatePath, "r") as mood:
                 mood_dict = json.loads(mood.read())
@@ -3452,70 +2984,6 @@ def theme_change(theme: str, root, style, mfont, tfont):
             style.configure("TNotebook.Tab", background="lightpink", foreground="deep pink")
             mfont.configure(family="Constantia")
             tfont.configure(family="Constantia")
-
-
-# applyPreset already exists, but there's a reason i'm not using it. I want the per-pack preset to not include every setting unless specified to do so, and
-# I also want the settings to not automatically be saved in case the user does not like what the pack sets.
-def pack_preset(preset_type: str, danger: bool):
-    with open(paths.config) as f:
-        try:
-            l = json.loads(f.read())
-            print(l)
-            if "version" in l:
-                del l["version"]
-            if "versionplusplus" in l:
-                del l["versionplusplus"]
-            if "packPath" in l:
-                del l["packPath"]
-            filter = []
-            num = 0
-            if preset_type == "full":
-                filter = vars.entries.keys()
-            if preset_type == "corruption":
-                filter = ["corruptionMode", "corruptionTime", "corruptionFadeType"]
-            for c in l:
-                if c in filter:
-                    num += 1
-                    print(f"{c} matches. Looking for list number...")
-                    var = vars.entries[c]
-                    if isinstance(var, IntVar):
-                        var.set(int(l[c]))
-                    if isinstance(var, BooleanVar):
-                        var.set(l[c] == 1)
-                    if isinstance(var, StringVar):
-                        var.set(l[c].strip())
-            messagebox.showinfo(
-                "Load Completed",
-                f"Pack config settings have been loaded successfully. There were {num} settings loaded."
-                "\n\nChanges have not been automatically saved. You may choose to look over the new settings before either saving or exiting the program.",
-            )
-            if danger:
-                vars.safe_mode.set(True)
-        except Exception as e:
-            logging.warning(f"could not load pack suggested settings. Reason: {e}")
-            messagebox.showwarning("Error Loading File", f"There was an issue loading the pack config file. {e}")
-
-
-def clear_launches(confirmation: bool):
-    try:
-        if os.path.exists(Data.CORRUPTION_LAUNCHES):
-            os.remove(Data.CORRUPTION_LAUNCHES)
-            if confirmation:
-                messagebox.showinfo(
-                    "Cleaning Completed",
-                    "The file that manages corruption launches has been deleted," " and will be remade next time you start EdgeWare with corruption on!",
-                )
-        else:
-            if confirmation:
-                messagebox.showinfo(
-                    "No launches file!",
-                    "There is no launches file to delete!\n\nThe launches file is used"
-                    " for the launch transition mode, and is automatically deleted when you load a new pack. To generate a new"
-                    " one, simply start EdgeWare with the corruption setting on!",
-                )
-    except Exception as e:
-        print(f"failed to clear launches. {e}")
-        logging.warning(f"could not delete the corruption launches file. {e}")
 
 
 def toggle_help(state: bool, messages: list):

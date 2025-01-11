@@ -52,7 +52,7 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
     ) as bat:
         bat.writelines(
             [
-                "@echo off\n" 'set SCRIPT="%TEMP%\\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"\n',
+                '@echo off\nset SCRIPT="%TEMP%\\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"\n',
                 'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%\n',
                 'echo sLinkFile = "' + str(file) + '" >> %SCRIPT%\n',
                 "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%\n",
