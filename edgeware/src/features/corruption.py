@@ -104,7 +104,7 @@ def launch(settings: Settings, pack: Pack, state: State) -> None:
             f.write(str(launches + 1))
             f.truncate()
     else:
-        apply_corruption_level(pack, state)
+        apply_corruption_level(settings, pack, state)
         with open(Data.CORRUPTION_LAUNCHES, "w") as f:
             f.seek(0)
             f.write(str(1))
