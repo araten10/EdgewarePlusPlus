@@ -9,6 +9,8 @@
 
 **Since last version...**
 
+•*Added a renaming tool to the pack creator, which renames files to start with the mood they're in (for caption purposes)*
+
 **Version 14.2**
 
 Marigold added a very useful feature: the ability to load multiple packs at once! This doesn't combine them into one mega-pack, instead it allows you to quickly switch between them using the config window. If packs are gigabytes huge, this will also save on the time it takes to unzip them!
