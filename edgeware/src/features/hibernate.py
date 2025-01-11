@@ -125,7 +125,7 @@ def start_main_hibernate(root: Tk, settings: Settings, pack: Pack, state: State,
     if not settings.hibernate_fix_wallpaper:
         handle_wallpaper(root, settings, pack, state)
 
-    observer = lambda: reset_wallpaper(settings, state)
+    observer = lambda: reset_wallpaper(settings, state)  # noqa: E731
     state._popup_number.attach(observer)
     state._hibernate_active.attach(observer)
 

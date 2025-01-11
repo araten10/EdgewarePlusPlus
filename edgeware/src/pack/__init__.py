@@ -37,7 +37,7 @@ class Pack:
         self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
 
     def filter_media(self, media_list: list[Path]) -> list[Path]:
-        filter_function = lambda media: media.mood is None or media.mood in self.active_moods.media
+        filter_function = lambda media: media.mood is None or media.mood in self.active_moods.media  # noqa: E731
         return list(filter(filter_function, media_list)) if self.active_moods.exists else media_list
 
     def has_image(self) -> bool:
@@ -64,7 +64,7 @@ class Pack:
         return CustomAssets.subliminal_overlay()
 
     def filter_captions(self) -> list[CaptionMood]:
-        filter_function = lambda c: c.mood in self.active_moods.captions
+        filter_function = lambda c: c.mood in self.active_moods.captions  # noqa: E731
         return list(filter(filter_function, self.captions.moods)) if self.active_moods.exists else self.captions.moods
 
     def caption_mood_of_media(self, media: Path) -> CaptionMood | None:
@@ -109,7 +109,7 @@ class Pack:
         return random.choice(self.captions.denial)  # Guaranteed to be non-empty
 
     def filter_prompts(self) -> list[PromptMood]:
-        filter_function = lambda p: p.mood in self.active_moods.prompts
+        filter_function = lambda p: p.mood in self.active_moods.prompts  # noqa: E731
         return list(filter(filter_function, self.prompts.moods)) if self.active_moods.exists else self.prompts.moods
 
     def has_prompts(self) -> bool:
@@ -127,7 +127,7 @@ class Pack:
         return prompt.strip()
 
     def filter_web(self) -> list[Web]:
-        filter_function = lambda w: w.mood is None or w.mood in self.active_moods.web
+        filter_function = lambda w: w.mood is None or w.mood in self.active_moods.web  # noqa: E731
         return list(filter(filter_function, self.web)) if self.active_moods.exists else self.web
 
     def has_web(self) -> bool:

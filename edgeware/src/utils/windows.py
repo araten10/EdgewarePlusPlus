@@ -12,7 +12,7 @@ try:
     import vlc
 except FileNotFoundError:
     # Defined for type hints
-    class vlc:
+    class vlc:  # noqa: N801
         MediaPlayer = None
 
 
