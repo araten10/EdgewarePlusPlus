@@ -158,8 +158,6 @@ class Settings:
         self.hibernate_delay_max = int(self.config["hibernateMax"]) * 1000  # Milliseconds
         self.hibernate_activity = int(self.config["wakeupActivity"])
         self.hibernate_activity_length = int(self.config["hibernateLength"]) * 1000  # Milliseconds
-        # TODO: Pump-scare audio
-        # self.pump_scare_offset = int(self.config["pumpScareOffset"])  # Seconds
 
         # Corruption mode
         self.corruption_mode = bool(self.config["corruptionMode"])

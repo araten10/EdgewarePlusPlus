@@ -105,7 +105,7 @@ INFO_MULTI_TEXT = 'NOTE: If you have multiple packs loaded (via the file tab), m
 
 POPUP_INTRO_TEXT = 'Here is where you can change the most important settings of Edgeware: the frequency and behaviour of popups. The "Popup Timer Delay" is how long a popup takes to spawn, and the overall "Popup Chance" then rolls to see if the popup spawns. Keeping the chance at 100% allows for a consistent experience, while lowering it makes for a more random one.\n\nOnce ready to spawn, a popup can be many things: A regular image, a website link (opens in your default browser), a prompt you need to fill out, autoplaying audio or videos, or a subliminal message. All of these are rolled for corresponding to their respective frequency settings, which can be found in the "Audio/Video" tab, "Captions" tab, and this tab as well. There are also plenty of other settings there to configure popups to your liking~! '
 POPUP_OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
-AUDVID_PLAYBACK_TEXT = '"Pump-Scare Offset" is directly tied to the hibernate mode of the same name. In said mode, audio will briefly play as a popup flashes on screen. Due to the large filesize of some audio files, an offset option has been added to delay the popup so the audio has time to properly load in before it cuts out. If you don\'t have hibernate mode enabled or have the hibernate type set to Pump-Scare, you can completely ignore this setting and leave it at 0.\n\nAs for the VLC option, it is highly recommended to set up VLC and enable this setting. While it is an external download and could have it\'s own share of troubleshooting, it will massively increase performance and also fix a potential issue of videos having no audio. More details on this are listed in the hover tooltip for the "Use VLC to play videos" setting.'
+AUDVID_PLAYBACK_TEXT = 'It is highly recommended to set up VLC and enable this setting. While it is an external download and could have it\'s own share of troubleshooting, it will massively increase performance and also fix a potential issue of videos having no audio. More details on this are listed in the hover tooltip for the "Use VLC to play videos" setting.'
 CAPTION_INTRO_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
 CAPTION_ADV_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
 CAPTION_SUB_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. "Use Subliminal specific mood" allows for this without interfering with other captions, as it uses the special mood "subliminals" which don\'t appear in the regular caption pool. However, these subliminals are set by the pack creator, so if none are set the default will be used instead.'
@@ -1276,41 +1276,19 @@ class Config(Tk):
         message_group.append(audVidPlaybackMessage)
 
         playbackFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
-        playbackFrameL = Frame(playbackFrame)
-        playbackFrameR = Frame(playbackFrame)
-
-        offsetSlider = Scale(playbackFrameL, label="Pump-Scare Offset", orient="horizontal", variable=vars.pump_scare_offset, to=50, width=10)
-        scareOffsetButton = Button(
-            playbackFrameL,
-            text="Manual offset...",
-            command=lambda: assign(vars.pump_scare_offset, simpledialog.askinteger("Offset for Pump-Scare Audio (seconds)", prompt="[0-50]: ")),
-            cursor="question_arrow",
-        )
-
-        toggleVLC = Checkbutton(playbackFrameR, text="Use VLC to play videos", variable=vars.vlc_mode, cursor="question_arrow")
+        toggleVLC = Checkbutton(playbackFrame, text="Use VLC to play videos", variable=vars.vlc_mode, cursor="question_arrow")
         VLCNotice = Label(
-            playbackFrameR,
+            playbackFrame,
             text="NOTE: Installing VLC is required for this option!\nMake sure you download the version your OS supports!\nIf you have a 64 bit OS, download x64!",
             width=10,
         )
-        installVLCButton = Button(playbackFrameR, text="Go to VLC's website", command=lambda: webbrowser.open("https://www.videolan.org/vlc/"))
+        installVLCButton = Button(playbackFrame, text="Go to VLC's website", command=lambda: webbrowser.open("https://www.videolan.org/vlc/"))
 
         playbackFrame.pack(fill="x")
-        playbackFrameL.pack(fill="both", side="left", expand=1)
-        offsetSlider.pack(fill="both", side="top", padx=2, expand=1)
-        scareOffsetButton.pack(fill="x", side="top", padx=2)
-        playbackFrameR.pack(fill="both", side="left", expand=1)
         toggleVLC.pack(fill="both", side="top", expand=1, padx=2)
         VLCNotice.pack(fill="both", side="top", expand=1, padx=2)
         installVLCButton.pack(fill="both", side="top", padx=2)
 
-        psoffsetttp = CreateToolTip(
-            scareOffsetButton,
-            'Pump-Scare is a hibernate mode type where an image "jump-scares" you by appearing suddenly then disappears seconds later. However, '
-            "sometimes audio files are large enough that the audio won't even have a chance to load in before the image disappears.\n\nThis setting allows you to let the audio "
-            "start playing earlier so it has time to load properly. Maybe you also have an audio file that builds up to a horny crecendo and want the image to appear at that point? "
-            "You could get creative with this!",
-        )
         vlcttp = CreateToolTip(
             toggleVLC,
             "Going to get a bit technical here:\n\nBy default, EdgeWare loads videos by taking the source file, turning every frame into an image, and then playing the images in "

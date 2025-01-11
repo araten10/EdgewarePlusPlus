@@ -99,8 +99,6 @@ class Vars:
         self.corruption_themes = self.make(BooleanVar, "corruptionThemeCycle")
         self.corruption_purity = self.make(BooleanVar, "corruptionPurityMode")
 
-        self.pump_scare_offset = self.make(IntVar, "pumpScareOffset")
-
         self.vlc_mode = self.make(BooleanVar, "vlcMode")
         self.multi_click_popups = self.make(BooleanVar, "multiClick")
 
