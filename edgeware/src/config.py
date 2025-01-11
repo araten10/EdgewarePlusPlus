@@ -138,7 +138,6 @@ FILE_TEXT = 'The file tab is for all your file management needs, whether it be s
 CINTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and help like this elsewhere, but I realize that this is probably the most complex and in-depth feature to be added to EdgeWare. Don't worry, we'll work through it together!\n\nEach tab will go over a feature of corruption, while also highlighting where the settings are for reference. Any additional details not covered here can be found in the \"About\" tab!"
 CSTART_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
 CTRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
-errors_list = []
 
 # all booru consts
 BOORU_FLAG = "<BOORU_INSERT>"  # flag to replace w/ booru name
@@ -169,7 +168,6 @@ if os.path.isfile(pack.paths.info):
             info_id = "0"
     except Exception as e:
         logging.warning(f"error copying info.json data to pack info page. {e}")
-        errors_list.append("Could not use the info.json file for pack info!\n")
         info_name = INFO_NAME_DEFAULT
         info_description = INFO_DESCRIPTION_DEFAULT
         info_creator = INFO_CREATOR_DEFAULT
@@ -192,7 +190,6 @@ if info_id == "0" and os.path.exists(pack.paths.root):
         logging.info(f"generated unique ID. {UNIQUE_ID}")
     except Exception as e:
         logging.warning(f"failed to create unique id. {e}")
-        errors_list.append("Could not create the pack unique ID! Mood settings might not save!\n")
 
 
 Data.MOODS.mkdir(parents=True, exist_ok=True)
@@ -259,7 +256,6 @@ if config["toggleMoodSet"] != True:
                 mood.write(json.dumps(mood_dict))
         except Exception as e:
             logging.warning(f"error creating/populating mood json. {e}")
-            errors_list.append("Could not create the mood json file!\n")
 
 
 class Config(Tk):
@@ -524,7 +520,6 @@ class Config(Tk):
                     webStat = len(json.loads(f.read())["urls"])
             except Exception as e:
                 logging.warning(f"error in web.json. Aborting preview load. {e}")
-                errors_list.append("Something is wrong with the currently loaded web.json file!\n")
                 webStat = 0
         else:
             webStat = 0
@@ -552,7 +547,6 @@ class Config(Tk):
                     promptStat = i
             except Exception as e:
                 logging.warning(f"error in prompt.json. Aborting preview load. {e}")
-                errors_list.append("Something is wrong with the currently loaded prompt.json file!\n")
                 promptStat = 0
         else:
             promptStat = 0
@@ -575,7 +569,6 @@ class Config(Tk):
                     captionStat = i
             except Exception as e:
                 logging.warning(f"error in captions.json. Aborting preview load. {e}")
-                errors_list.append("Something is wrong with the currently loaded captions.json file!\n")
                 captionStat = 0
         else:
             captionStat = 0
@@ -687,7 +680,6 @@ class Config(Tk):
                             info_discord.append(INFO_DISCORD_DEFAULT[1])
             except Exception as e:
                 logging.warning(f"error in discord.dat. Aborting preview load. {e}")
-                errors_list.append("Something is wrong with the currently loaded discord.dat file!\n")
                 info_discord = INFO_DISCORD_DEFAULT.copy()
         else:
             info_discord = INFO_DISCORD_DEFAULT.copy()
@@ -1577,7 +1569,6 @@ class Config(Tk):
 
             except Exception as e:
                 logging.warning(f"error in media.json. Aborting treeview load. {e}")
-                errors_list.append("The media.json treeview couldn't load properly!\n")
                 mediaTree.insert("", "end", id="NAer", text="Pack doesn't support media moods, \nor they're improperly configured!")
                 mediaTree.change_state("NAer", "disabled")
         if len(mediaTree.get_children()) == 0:
@@ -1596,7 +1587,6 @@ class Config(Tk):
                                     mediaTree.change_state(value[0], "checked")
                     except Exception as e:
                         logging.warning(f"error checking media treeview nodes. {e}")
-                        errors_list.append("The media treeview nodes couldn't finish their checking setup!\n")
 
         mediaTree.pack(side="left", fill="both", expand=1)
         mediaScrollbar.pack(side="left", fill="y")
@@ -1627,7 +1617,6 @@ class Config(Tk):
 
             except Exception as e:
                 logging.warning(f"error in captions.json. Aborting treeview load. {e}")
-                errors_list.append("The captions.json treeview couldn't load properly!\n")
                 captionsTree.insert("", "end", iid="NAer", text="Pack doesn't support caption moods, \nor they're improperly configured!")
                 captionsTree.change_state("NAer", "disabled")
         if len(captionsTree.get_children()) == 0:
@@ -1646,7 +1635,6 @@ class Config(Tk):
                                     captionsTree.change_state(value[0], "checked")
                     except Exception as e:
                         logging.warning(f"error checking caption treeview nodes. {e}")
-                        errors_list.append("The captions treeview nodes couldn't finish their checking setup!\n")
 
         captionsTree.pack(side="left", fill="both", expand=1)
         captionsScrollbar.pack(side="left", fill="y")
@@ -1669,7 +1657,6 @@ class Config(Tk):
 
             except Exception as e:
                 logging.warning(f"error in prompt.json. Aborting treeview load. {e}")
-                errors_list.append("The prompt.json treeview couldn't load properly!\n")
                 promptsTree.insert("", "end", iid="NAer", text="Pack doesn't support prompt moods, \nor they're improperly configured!")
                 promptsTree.change_state("NAer", "disabled")
 
@@ -1689,7 +1676,6 @@ class Config(Tk):
                                     promptsTree.change_state(value[0], "checked")
                     except Exception as e:
                         logging.warning(f"error checking prompt treeview nodes. {e}")
-                        errors_list.append("The prompt treeview nodes couldn't finish their checking setup!\n")
 
         promptsTree.pack(side="left", fill="both", expand=1)
         promptsScrollbar.pack(side="left", fill="y")
@@ -1715,7 +1701,6 @@ class Config(Tk):
 
             except Exception as e:
                 logging.warning(f"error in web.json. Aborting treeview load. {e}")
-                errors_list.append("The web.json treeview couldn't load properly!\n")
                 webTree.insert("", "end", iid="NAer", text="Pack doesn't support web moods, \nor they're improperly configured!")
                 webTree.change_state("NAer", "disabled")
 
@@ -1735,7 +1720,6 @@ class Config(Tk):
                                     webTree.change_state(value[0], "checked")
                     except Exception as e:
                         logging.warning(f"error checking web treeview nodes. {e}")
-                        errors_list.append("The web treeview nodes couldn't finish their checking setup!\n")
 
         webTree.pack(side="left", fill="both", expand=1)
         webScrollbar.pack(side="left", fill="y")
@@ -2436,7 +2420,6 @@ class Config(Tk):
         #
         #     except Exception as e:
         #         logging.warning(f'error in corruption.json. Aborting preview load. {e}')
-        #         errors_list.append('Something is wrong with the currently loaded corruption.json file!\n')
         #     try:
         #         for level in corruptionList:
         #             if sum(len(i) for i in level) > lineWidth:
@@ -2444,7 +2427,6 @@ class Config(Tk):
         #             pathTree.insert('', 'end', values=level)
         #     except Exception as e:
         #         logging.warning(f'error in loading corruption treeview. {e}')
-        #         errors_list.append('The corruption treeview could not load properly!\n')
 
         # just doing a magic number, long story short treeview is butts for horizontal scrolling
         pathTree.column("moods", anchor="w", stretch=True, minwidth=int(lineWidth * 5.5))
@@ -2539,26 +2521,6 @@ class Config(Tk):
             "In situations like this, I recommend creating a info file with a pack name, but if you're unsure how to do that or just don't want to"
             " deal with all this mood business, you can disable the mood saving feature here.",
         )
-
-        Label(tabAdvanced, text="Errors", font=title_font, relief=GROOVE).pack(pady=2)
-        errorsFrame = Frame(tabAdvanced, borderwidth=5, relief=GROOVE)
-        errorsFrame.pack(fill="x")
-        Label(
-            errorsFrame,
-            text="These errors have been found while starting up EdgeWare Config. While they are usually caused by older packs not\n having EdgeWare++ features "
-            "and can be ignored, there is still a chance they might affect the main program.\n"
-            "Likewise, there might be bugs that don't show up here but prevent EdgeWare itself from running "
-            "properly.\nTry running EdgeWare regardless if errors show up here, and check the logs subfolder for more details if things don't work.",
-        ).pack()
-        if errors_list:
-            errorsText = Text(errorsFrame, height=10, fg="red")
-            errorsText.pack(pady=2, padx=2, fill="x")
-            for i in errors_list:
-                errorsText.insert(END, i)
-        else:
-            errorsText = Text(errorsFrame, height=10, fg="green")
-            errorsText.pack(pady=2, padx=2, fill="x")
-            errorsText.insert(END, "No errors detected! (´◡`)")
 
         tabMaster.add(tabInfo, text="About")
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
