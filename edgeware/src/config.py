@@ -2,12 +2,10 @@ import ast
 import json
 import logging
 import os
-import textwrap
 import webbrowser
 from pathlib import Path
 from tkinter import (
     CENTER,
-    END,
     GROOVE,
     RAISED,
     SINGLE,
@@ -36,6 +34,7 @@ from tkinter import (
 import requests
 import ttkwidgets as tw
 from config_window.general.file import FileTab
+from config_window.general.info import InfoTab
 from config_window.general.start import StartTab
 from config_window.utils import (
     all_children,
@@ -54,7 +53,6 @@ from pack import Pack
 from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data
 from PIL import Image, ImageTk
 from settings import load_config, load_default_config
-from utils import utils
 from widgets.tooltip import CreateToolTip
 
 PATH = Path(__file__).parent
@@ -101,7 +99,6 @@ pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
 DEFAULTFILE_INTRO_TEXT = 'Changing these will change the default file EdgeWare++ falls back on when a replacement isn\'t provided by a pack. The files you choose will be stored under "data."'
-INFO_MULTI_TEXT = 'NOTE: If you have multiple packs loaded (via the file tab), make sure to apply the pack you want using the "Save & Refresh" button there! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
 
 POPUP_INTRO_TEXT = 'Here is where you can change the most important settings of Edgeware: the frequency and behaviour of popups. The "Popup Timer Delay" is how long a popup takes to spawn, and the overall "Popup Chance" then rolls to see if the popup spawns. Keeping the chance at 100% allows for a consistent experience, while lowering it makes for a more random one.\n\nOnce ready to spawn, a popup can be many things: A regular image, a website link (opens in your default browser), a prompt you need to fill out, autoplaying audio or videos, or a subliminal message. All of these are rolled for corresponding to their respective frequency settings, which can be found in the "Audio/Video" tab, "Captions" tab, and this tab as well. There are also plenty of other settings there to configure popups to your liking~! '
 POPUP_OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
@@ -145,51 +142,7 @@ BOORU_URL = f"https://{BOORU_FLAG}.booru.org/index.php?page=post&s=list&tags="  
 BOORU_VIEW = f"https://{BOORU_FLAG}.booru.org/index.php?page=post&s=view&id="  # post view url
 BOORU_PTAG = "&pid="  # page id tag
 
-# info defaults & vars
-INFO_NAME_DEFAULT = "N/A"
-INFO_DESCRIPTION_DEFAULT = "No pack loaded, or the pack does not have an 'info.json' file."
-INFO_CREATOR_DEFAULT = "Anonymous"
-INFO_VERSION_DEFAULT = "0"
-INFO_DISCORD_DEFAULT = ["[No pack loaded, or the pack does not have a 'discord.dat' file.]", "default"]
-
-if os.path.isfile(pack.paths.info):
-    try:
-        info_dict = ""
-        with open(pack.paths.info) as r:
-            info_dict = json.loads(r.read())
-        info_name = info_dict["name"] if info_dict["name"] else "Unnamed Pack"
-        info_description = info_dict["description"] if info_dict["description"] else "No description set."
-        info_creator = info_dict["creator"] if info_dict["creator"] else "Anonymous"
-        info_version = info_dict["version"] if info_dict["version"] else "1.0"
-        # id was added in later version, want to keep it backwards compatible without crashing and burning
-        if "id" in info_dict:
-            info_id = info_dict["id"] if info_dict["id"] else "0"
-        else:
-            info_id = "0"
-    except Exception as e:
-        logging.warning(f"error copying info.json data to pack info page. {e}")
-        info_name = INFO_NAME_DEFAULT
-        info_description = INFO_DESCRIPTION_DEFAULT
-        info_creator = INFO_CREATOR_DEFAULT
-        info_version = INFO_VERSION_DEFAULT
-        info_id = "0"
-else:
-    info_name = INFO_NAME_DEFAULT
-    info_description = INFO_DESCRIPTION_DEFAULT
-    info_creator = INFO_CREATOR_DEFAULT
-    info_version = INFO_VERSION_DEFAULT
-    info_id = "0"
-
-UNIQUE_ID = "0"
-
-# creating a semi-parseable unique ID for the pack to make mood saving work, if the pack doesn't have an info.json file.
-# probably could have made it so the user manually has to save/load and not worried about this, but here we are
-if info_id == "0" and os.path.exists(pack.paths.root):
-    try:
-        UNIQUE_ID = utils.compute_mood_id(pack.paths)
-        logging.info(f"generated unique ID. {UNIQUE_ID}")
-    except Exception as e:
-        logging.warning(f"failed to create unique id. {e}")
+UNIQUE_ID = pack.info.mood_file.with_suffix("").name
 
 
 Data.MOODS.mkdir(parents=True, exist_ok=True)
@@ -296,8 +249,6 @@ class Config(Tk):
         maxAudio_group = []
         maxVideo_group = []
         subliminals_group = []
-        info_group = []
-        discord_group = []
         ctime_group = []
         cpopup_group = []
         claunch_group = []
@@ -316,7 +267,7 @@ class Config(Tk):
         tabMaster.add(tabSubGeneral, text="General")
         notebookGeneral.add(StartTab(vars, title_font, message_group, local_version, live_version), text="Start")  # startup screen, info and presets
         notebookGeneral.add(FileTab(vars, title_font, message_group, pack), text="File/Presets")  # file management tab
-        tabPackInfo = ttk.Frame(None)  # pack information
+        notebookGeneral.add(InfoTab(vars, title_font, message_group, pack), text="Pack Info")  # pack information
         tabBooru = ttk.Frame(None)  # tab for booru downloader
         tabDefaultFiles = ttk.Frame(None)  # tab for changing default files
 
@@ -401,316 +352,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ "PACK INFO" TAB STARTS HERE}===========#
-        notebookGeneral.add(tabPackInfo, text="Pack Info")
-
-        infoMultiMessage = Message(tabPackInfo, text=INFO_MULTI_TEXT, justify=CENTER, width=675)
-        infoMultiMessage.pack(fill="both")
-        message_group.append(infoMultiMessage)
-
-        # Stats
-        Label(tabPackInfo, text="Stats", font=title_font, relief=GROOVE).pack(pady=2)
-        infoStatusFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
-        statusPackFrame = Frame(infoStatusFrame)
-        statusAboutFrame = Frame(infoStatusFrame)
-        statusWallpaperFrame = Frame(infoStatusFrame)
-        statusStartupFrame = Frame(infoStatusFrame)
-        statusDiscordFrame = Frame(infoStatusFrame)
-        statusIconFrame = Frame(infoStatusFrame)
-        statusCorruptionFrame = Frame(infoStatusFrame)
-
-        if os.path.exists(pack.paths.root):
-            statusPack = True
-            statusAbout = True if os.path.isfile(pack.paths.info) else False
-            statusWallpaper = True if os.path.isfile(pack.paths.wallpaper) else False
-            statusStartup = True if pack.paths.splash else False
-            statusDiscord = True if os.path.isfile(pack.paths.discord) else False
-            statusIcon = True if os.path.isfile(pack.paths.icon) else False
-            statusCorruption = True if os.path.isfile(pack.paths.corruption) else False
-        else:
-            statusPack = False
-            statusAbout = False
-            statusWallpaper = False
-            statusStartup = False
-            statusDiscord = False
-            statusIcon = False
-            statusCorruption = False
-
-        statusPackFrameVarLabel = Label(statusPackFrame, text=("✓" if statusPack else "✗"), font="Default 14", fg=("green" if statusPack else "red"))
-        statusAboutFrameVarLabel = Label(statusAboutFrame, text=("✓" if statusAbout else "✗"), font="Default 14", fg=("green" if statusAbout else "red"))
-        statusWallpaperFrameVarLabel = Label(
-            statusWallpaperFrame, text=("✓" if statusWallpaper else "✗"), font="Default 14", fg=("green" if statusWallpaper else "red")
-        )
-        statusStartupFrameVarLabel = Label(
-            statusStartupFrame, text=("✓" if statusStartup else "✗"), font="Default 14", fg=("green" if statusStartup else "red"), cursor="question_arrow"
-        )
-        statusDiscordFrameVarLabel = Label(
-            statusDiscordFrame, text=("✓" if statusDiscord else "✗"), font="Default 14", fg=("green" if statusDiscord else "red")
-        )
-        statusIconFrameVarLabel = Label(
-            statusIconFrame, text=("✓" if statusIcon else "✗"), font="Default 14", fg=("green" if statusIcon else "red"), cursor="question_arrow"
-        )
-        statusCorruptionFrameVarLabel = Label(
-            statusCorruptionFrame,
-            text=("✓" if statusCorruption else "✗"),
-            font="Default 14",
-            fg=("green" if statusCorruption else "red"),
-            cursor="question_arrow",
-        )
-
-        infoStatusFrame.pack(fill="x", padx=3)
-        statusPackFrame.pack(fill="x", side="left", expand=1)
-        Label(statusPackFrame, text="Pack Loaded", font="Default 10").pack(padx=2, pady=2, side="top")
-        statusPackFrameVarLabel.pack(padx=2, pady=2, side="top")
-        statusAboutFrame.pack(fill="x", side="left", expand=1)
-        Label(statusAboutFrame, text="Info File", font="Default 10").pack(padx=2, pady=2, side="top")
-        statusAboutFrameVarLabel.pack(padx=2, pady=2, side="top")
-        statusWallpaperFrame.pack(fill="x", side="left", expand=1)
-        Label(statusWallpaperFrame, text="Pack has Wallpaper", font="Default 10").pack(padx=2, pady=2, side="top")
-        statusWallpaperFrameVarLabel.pack(padx=2, pady=2, side="top")
-        statusStartupFrame.pack(fill="x", side="left", expand=1)
-        Label(statusStartupFrame, text="Custom Startup", font="Default 10").pack(padx=2, pady=2, side="top")
-        statusStartupFrameVarLabel.pack(padx=2, pady=2, side="top")
-        statusDiscordFrame.pack(fill="x", side="left", expand=1)
-        Label(statusDiscordFrame, text="Custom Discord Status", font="Default 10").pack(padx=2, pady=2, side="top")
-        statusDiscordFrameVarLabel.pack(padx=2, pady=2, side="top")
-        statusIconFrame.pack(fill="x", side="left", expand=1)
-        Label(statusIconFrame, text="Custom Icon", font="Default 10").pack(padx=2, pady=2, side="top")
-        statusIconFrameVarLabel.pack(padx=2, pady=2, side="top")
-        statusCorruptionFrame.pack(fill="x", side="left", expand=1)
-        Label(statusCorruptionFrame, text="Corruption", font="Default 10").pack(padx=2, pady=2, side="top")
-        statusCorruptionFrameVarLabel.pack(padx=2, pady=2, side="top")
-
-        statusStartupttp = CreateToolTip(
-            statusStartupFrameVarLabel,
-            "If you are looking to add this to packs made before EdgeWare++,"
-            ' put the desired file in /resource/ and name it "loading_splash.png" (also supports .gif, .bmp and .jpg/jpeg).',
-        )
-        statusIconttp = CreateToolTip(
-            statusIconFrameVarLabel,
-            "If you are looking to add this to packs made before EdgeWare++,"
-            ' put the desired file in /resource/ and name it "icon.ico". (the file must be'
-            " a .ico file! make sure you convert properly!)",
-        )
-        corruptionttp = CreateToolTip(
-            statusCorruptionFrameVarLabel,
-            "An EdgeWare++ feature that is kind of hard to describe in a single tooltip.\n\n"
-            'For more information, check the "About" tab for a detailed writeup.',
-        )
-
-        statsFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
-        statsFrame1 = Frame(statsFrame)
-        statsFrame2 = Frame(statsFrame)
-        imageStatsFrame = Frame(statsFrame1)
-        audioStatsFrame = Frame(statsFrame1)
-        videoStatsFrame = Frame(statsFrame1)
-        webStatsFrame = Frame(statsFrame1)
-        promptStatsFrame = Frame(statsFrame2)
-        captionsStatsFrame = Frame(statsFrame2)
-        subliminalsStatsFrame = Frame(statsFrame2)
-
-        imageStat = len(os.listdir(pack.paths.image)) if os.path.exists(pack.paths.image) else 0
-        audioStat = len(os.listdir(pack.paths.audio)) if os.path.exists(pack.paths.audio) else 0
-        videoStat = len(os.listdir(pack.paths.video)) if os.path.exists(pack.paths.video) else 0
-
-        if os.path.exists(pack.paths.web):
-            try:
-                with open(pack.paths.web, "r") as f:
-                    webStat = len(json.loads(f.read())["urls"])
-            except Exception as e:
-                logging.warning(f"error in web.json. Aborting preview load. {e}")
-                webStat = 0
-        else:
-            webStat = 0
-
-        if os.path.exists(pack.paths.prompt):
-            # frankly really ugly but the easiest way I found to do it
-            try:
-                with open(pack.paths.prompt, "r") as f:
-                    l = json.loads(f.read())
-                    i = 0
-                    if "moods" in l:
-                        del l["moods"]
-                    if "minLen" in l:
-                        del l["minLen"]
-                    if "maxLen" in l:
-                        del l["maxLen"]
-                    if "freqList" in l:
-                        del l["freqList"]
-                    if "subtext" in l:
-                        del l["subtext"]
-                    if "commandtext" in l:
-                        del l["commandtext"]
-                    for x in l:
-                        i += len(l[x])
-                    promptStat = i
-            except Exception as e:
-                logging.warning(f"error in prompt.json. Aborting preview load. {e}")
-                promptStat = 0
-        else:
-            promptStat = 0
-
-        if os.path.exists(pack.paths.captions):
-            try:
-                with open(pack.paths.captions, "r") as f:
-                    l = json.loads(f.read())
-                    i = 0
-                    if "prefix" in l:
-                        del l["prefix"]
-                    if "subtext" in l:
-                        del l["subtext"]
-                    if "subliminal" in l:
-                        del l["subliminal"]
-                    if "prefix_settings" in l:
-                        del l["prefix_settings"]
-                    for x in l:
-                        i += len(l[x])
-                    captionStat = i
-            except Exception as e:
-                logging.warning(f"error in captions.json. Aborting preview load. {e}")
-                captionStat = 0
-        else:
-            captionStat = 0
-
-        subliminalStat = len(os.listdir(pack.paths.subliminals)) if os.path.exists(pack.paths.subliminals) else 0
-
-        statsFrame.pack(fill="x", pady=1)
-        statsFrame1.pack(fill="x", side="top")
-        imageStatsFrame.pack(fill="x", side="left", expand=1)
-        Label(imageStatsFrame, text="Images", font="Default 10").pack(pady=2, side="top")
-        ttk.Separator(imageStatsFrame, orient="horizontal").pack(fill="x", side="top", padx=10)
-        Label(imageStatsFrame, text=f"{imageStat}").pack(pady=2, side="top")
-        audioStatsFrame.pack(fill="x", side="left", expand=1)
-        Label(audioStatsFrame, text="Audio Files", font="Default 10").pack(pady=2, side="top")
-        ttk.Separator(audioStatsFrame, orient="horizontal").pack(fill="x", side="top", padx=10)
-        Label(audioStatsFrame, text=f"{audioStat}").pack(pady=2, side="top")
-        videoStatsFrame.pack(fill="x", side="left", expand=1)
-        Label(videoStatsFrame, text="Videos", font="Default 10").pack(pady=2, side="top")
-        ttk.Separator(videoStatsFrame, orient="horizontal").pack(fill="x", side="top", padx=10)
-        Label(videoStatsFrame, text=f"{videoStat}").pack(pady=2, side="top")
-        webStatsFrame.pack(fill="x", side="left", expand=1)
-        Label(webStatsFrame, text="Web Links", font="Default 10").pack(pady=2, side="top")
-        ttk.Separator(webStatsFrame, orient="horizontal").pack(fill="x", side="top", padx=10)
-        Label(webStatsFrame, text=f"{webStat}").pack(pady=2, side="top")
-
-        statsFrame2.pack(fill="x", side="top", pady=1)
-        promptStatsFrame.pack(fill="x", side="left", expand=1)
-        Label(promptStatsFrame, text="Prompts", font="Default 10").pack(pady=2, side="top")
-        ttk.Separator(promptStatsFrame, orient="horizontal").pack(fill="x", side="top", padx=20)
-        Label(promptStatsFrame, text=f"{promptStat}").pack(pady=2, side="top")
-        captionsStatsFrame.pack(fill="x", side="left", expand=1)
-        Label(captionsStatsFrame, text="Captions", font="Default 10").pack(pady=2, side="top")
-        ttk.Separator(captionsStatsFrame, orient="horizontal").pack(fill="x", side="top", padx=20)
-        Label(captionsStatsFrame, text=f"{captionStat}").pack(pady=2, side="top")
-        subliminalsStatsFrame.pack(fill="x", side="left", expand=1)
-        Label(subliminalsStatsFrame, text="Subliminals", font="Default 10").pack(pady=2, side="top")
-        ttk.Separator(subliminalsStatsFrame, orient="horizontal").pack(fill="x", side="top", padx=20)
-        Label(subliminalsStatsFrame, text=f"{subliminalStat}").pack(pady=2, side="top")
-
-        # Information
-        Label(tabPackInfo, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
-        infoDescFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
-        subInfoFrame = Frame(infoDescFrame, borderwidth=2, relief=GROOVE)
-        descriptionFrame = Frame(infoDescFrame, borderwidth=2, relief=GROOVE)
-
-        nameFrame = Frame(subInfoFrame)
-        nameLabel = Label(nameFrame, text="Pack Name:", font="Default 10")
-        nameVarLabel = Label(nameFrame, text=f"{info_name}")
-        creatorFrame = Frame(subInfoFrame)
-        creatorLabel = Label(creatorFrame, text="Author Name:", font="Default 10")
-        creatorVarLabel = Label(creatorFrame, text=f"{info_creator}")
-        versionFrame = Frame(subInfoFrame)
-        versionLabel = Label(versionFrame, text="Version:", font="Default 10")
-        versionVarLabel = Label(versionFrame, text=f"{info_version}")
-        descriptionLabel = Label(descriptionFrame, text="Description", font="Default 10")
-        infoDescriptionWrap = textwrap.TextWrapper(width=80, max_lines=5)
-        descriptionVarLabel = Label(descriptionFrame, text=infoDescriptionWrap.fill(text=f"{info_description}"))
-
-        infoDescFrame.pack(fill="x", pady=2)
-        subInfoFrame.pack(fill="x", side="left", expand=1)
-
-        nameFrame.pack(fill="x")
-        nameLabel.pack(padx=6, pady=2, side="left")
-        ttk.Separator(nameFrame, orient="vertical").pack(fill="y", side="left")
-        nameVarLabel.pack(padx=2, pady=2, side="left")
-        ttk.Separator(subInfoFrame, orient="horizontal").pack(fill="x")
-
-        creatorFrame.pack(fill="x")
-        creatorLabel.pack(padx=2, pady=2, side="left")
-        ttk.Separator(creatorFrame, orient="vertical").pack(fill="y", side="left")
-        creatorVarLabel.pack(padx=2, pady=2, side="left")
-        ttk.Separator(subInfoFrame, orient="horizontal").pack(fill="x")
-
-        versionFrame.pack(fill="x")
-        versionLabel.pack(padx=18, pady=2, side="left")
-        ttk.Separator(versionFrame, orient="vertical").pack(fill="y", side="left")
-        versionVarLabel.pack(padx=2, pady=2, side="left")
-
-        descriptionFrame.pack(fill="both", side="right")
-        descriptionLabel.pack(padx=2, pady=2, side="top")
-        ttk.Separator(descriptionFrame, orient="horizontal").pack(fill="x", side="top")
-        descriptionVarLabel.pack(padx=2, pady=2, side="top")
-
-        info_group.append(infoDescFrame)
-        info_group.append(nameFrame)
-        info_group.append(nameLabel)
-        info_group.append(nameVarLabel)
-        info_group.append(creatorFrame)
-        info_group.append(creatorLabel)
-        info_group.append(creatorVarLabel)
-        info_group.append(descriptionFrame)
-        info_group.append(descriptionLabel)
-        info_group.append(descriptionVarLabel)
-        info_group.append(versionFrame)
-        info_group.append(versionLabel)
-        info_group.append(versionVarLabel)
-        set_widget_states(statusAbout, info_group)
-
-        discordStatusFrame = Frame(tabPackInfo, borderwidth=5, relief=RAISED)
-        discordStatusLabel = Label(discordStatusFrame, text="Custom Discord Status:", font="Default 10")
-        discordStatusImageLabel = Label(discordStatusFrame, text="Discord Status Image:", font="Default 10")
-        if statusDiscord:
-            try:
-                with open((pack.paths.discord), "r") as f:
-                    datfile = f.read()
-                    if not datfile == "":
-                        info_discord = datfile.split("\n")
-                        if len(info_discord) < 2:
-                            info_discord.append(INFO_DISCORD_DEFAULT[1])
-            except Exception as e:
-                logging.warning(f"error in discord.dat. Aborting preview load. {e}")
-                info_discord = INFO_DISCORD_DEFAULT.copy()
-        else:
-            info_discord = INFO_DISCORD_DEFAULT.copy()
-
-        discordStatusVarLabel = Label(discordStatusFrame, text=f"{info_discord[0]}")
-        discordStatusImageVarLabel = Label(discordStatusFrame, text=f"{info_discord[1]}", cursor="question_arrow")
-
-        discordStatusFrame.pack(fill="x", pady=2)
-        discordStatusLabel.pack(padx=2, pady=2, side="left")
-        ttk.Separator(discordStatusFrame, orient="vertical").pack(fill="y", side="left")
-        discordStatusVarLabel.pack(padx=2, pady=2, side="left", expand=1)
-        ttk.Separator(discordStatusFrame, orient="vertical").pack(fill="y", side="left")
-        discordStatusImageLabel.pack(padx=2, pady=2, side="left")
-        ttk.Separator(discordStatusFrame, orient="vertical").pack(fill="y", side="left")
-        discordStatusImageVarLabel.pack(padx=2, pady=2, side="left")
-
-        discord_group.append(discordStatusFrame)
-        discord_group.append(discordStatusLabel)
-        discord_group.append(discordStatusImageLabel)
-        discord_group.append(discordStatusVarLabel)
-        discord_group.append(discordStatusImageVarLabel)
-        set_widget_states(statusDiscord, discord_group)
-
-        discordimagettp = CreateToolTip(
-            discordStatusImageVarLabel,
-            "As much as I would like to show you this image, it's fetched from the discord "
-            "application API- which I cannot access without permissions, as far as i'm aware.\n\n"
-            "Because of this, only packs created by the original EdgeWare creator, PetitTournesol, have custom status images.\n\n"
-            "Nevertheless, I have decided to put this here not only for those packs, but also for other "
-            "packs that tap in to the same image IDs.",
-        )
 
         # ==========={EDGEWARE++ "BOORU" TAB STARTS HERE}===========#
         notebookGeneral.add(tabBooru, text="Booru Downloader")
