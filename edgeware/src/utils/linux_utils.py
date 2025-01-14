@@ -55,6 +55,7 @@ def get_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
         "windowmaker": [f'wmsetbg -s -u "{wallpaper}"'],
         "sway": [f'swaybg -o "*" -i "{wallpaper}" -m fill'],
         "hyprland": [f'hyprctl hyprpaper preload "{wallpaper}"', f'hyprctl hyprpaper wallpaper ",{wallpaper}"'],
+        "kde": [f'plasma-apply-wallpaperimage "{wallpaper}"'],
         **dict.fromkeys(
             ["gnome", "unity", "cinnamon"],
             [
