@@ -31,19 +31,23 @@ from tkinter import (
     ttk,
 )
 
-import requests
 import ttkwidgets as tw
+from config_window.general.booru import BooruTab
 from config_window.general.file import FileTab
 from config_window.general.info import InfoTab
 from config_window.general.start import StartTab
 from config_window.utils import (
+    add_list,
     all_children,
     clear_launches,
+    config,
     confirm_box,
     export_resource,
     get_live_version,
     import_resource,
     pack_preset,
+    remove_list,
+    reset_list,
     set_widget_states,
     set_widget_states_with_colors,
     write_save,
@@ -52,12 +56,11 @@ from config_window.vars import Vars
 from pack import Pack
 from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data
 from PIL import Image, ImageTk
-from settings import load_config, load_default_config
+from settings import load_default_config
 from widgets.tooltip import CreateToolTip
 
 PATH = Path(__file__).parent
 
-config = load_config()
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()
 pack = Pack(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_PACK_PATH)
@@ -135,12 +138,6 @@ FILE_TEXT = 'The file tab is for all your file management needs, whether it be s
 CINTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and help like this elsewhere, but I realize that this is probably the most complex and in-depth feature to be added to EdgeWare. Don't worry, we'll work through it together!\n\nEach tab will go over a feature of corruption, while also highlighting where the settings are for reference. Any additional details not covered here can be found in the \"About\" tab!"
 CSTART_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
 CTRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
-
-# all booru consts
-BOORU_FLAG = "<BOORU_INSERT>"  # flag to replace w/ booru name
-BOORU_URL = f"https://{BOORU_FLAG}.booru.org/index.php?page=post&s=list&tags="  # basic url
-BOORU_VIEW = f"https://{BOORU_FLAG}.booru.org/index.php?page=post&s=view&id="  # post view url
-BOORU_PTAG = "&pid="  # page id tag
 
 UNIQUE_ID = pack.info.mood_file.with_suffix("").name
 
@@ -242,7 +239,6 @@ class Config(Tk):
         mitosis_cGroup = []
         wallpaper_group = []
         timeout_group = []
-        download_group = []
         timer_group = []
         lowkey_group = []
         denial_group = []
@@ -268,7 +264,7 @@ class Config(Tk):
         notebookGeneral.add(StartTab(vars, title_font, message_group, local_version, live_version), text="Start")  # startup screen, info and presets
         notebookGeneral.add(FileTab(vars, title_font, message_group, pack), text="File/Presets")  # file management tab
         notebookGeneral.add(InfoTab(vars, title_font, message_group, pack), text="Pack Info")  # pack information
-        tabBooru = ttk.Frame(None)  # tab for booru downloader
+        notebookGeneral.add(BooruTab(vars, title_font), text="Booru Downloader")  # tab for booru downloader
         tabDefaultFiles = ttk.Frame(None)  # tab for changing default files
 
         tabSubAnnoyance = ttk.Frame(tabMaster)
@@ -352,68 +348,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ "BOORU" TAB STARTS HERE}===========#
-        notebookGeneral.add(tabBooru, text="Booru Downloader")
-
-        downloadHostFrame = Frame(tabBooru, borderwidth=5, relief=RAISED)
-        otherFrame = Frame(downloadHostFrame)
-        tagFrame = Frame(downloadHostFrame)
-        booruFrame = Frame(downloadHostFrame)
-        booruNameEntry = Entry(booruFrame, textvariable=vars.booru_name)
-        downloadEnabled = Checkbutton(
-            otherFrame,
-            text="Download from Booru",
-            variable=vars.booru_download,
-            command=lambda: (set_widget_states_with_colors(vars.booru_download.get(), download_group, "white", "gray25")),
-        )
-        minScoreSlider = Scale(booruFrame, from_=-50, to=100, orient="horizontal", variable=vars.min_score, label="Minimum Score")
-
-        booruValidate = Button(
-            booruFrame,
-            text="Validate",
-            command=lambda: (
-                messagebox.showinfo("Success!", "Booru is valid.")
-                if validate_booru(vars.booru_name.get())
-                else messagebox.showerror("Failed", "Booru is invalid.")
-            ),
-        )
-
-        tagListBox = Listbox(tagFrame, selectmode=SINGLE)
-        for tag in config["tagList"].split(">"):
-            tagListBox.insert(1, tag)
-        addTag = Button(tagFrame, text="Add Tag", command=lambda: add_list(tagListBox, "tagList", "New Tag", "Enter Tag(s)"))
-        removeTag = Button(
-            tagFrame,
-            text="Remove Tag",
-            command=lambda: remove_list_(tagListBox, "tagList", "Remove Failed", 'Cannot remove all tags. To download without a tag, use "all" as the tag.'),
-        )
-        resetTag = Button(tagFrame, text="Reset Tags", command=lambda: reset_list(tagListBox, "tagList", "all"))
-
-        download_group.append(booruNameEntry)
-        download_group.append(booruValidate)
-        download_group.append(tagListBox)
-        download_group.append(addTag)
-        download_group.append(removeTag)
-        download_group.append(resetTag)
-        download_group.append(minScoreSlider)
-
-        Label(tabBooru, text="Image Download Settings").pack(fill="x")
-        tagFrame.pack(fill="y", side="left")
-        booruFrame.pack(fill="y", side="left")
-        otherFrame.pack(fill="both", side="right")
-
-        downloadEnabled.pack()
-        downloadHostFrame.pack(fill="both")
-        tagListBox.pack(fill="x")
-        addTag.pack(fill="x")
-        removeTag.pack(fill="x")
-        resetTag.pack(fill="x")
-        Label(booruFrame, text="Booru Name").pack(fill="x")
-        booruNameEntry.pack(fill="x")
-        booruValidate.pack(fill="x")
-        Label(booruFrame, text="Download Mode").pack(fill="x")
-        minScoreSlider.pack(fill="x")
 
         # ==========={EDGEWARE++ CHANGE DEFAULTS TAB STARTS HERE}==============#
         notebookGeneral.add(tabDefaultFiles, text="Change Default Files")
@@ -2203,7 +2137,6 @@ class Config(Tk):
         set_widget_states(vars.timeout_enabled.get(), timeout_group)
         set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
         set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
-        set_widget_states_with_colors(vars.booru_download.get(), download_group, "white", "gray25")
         set_widget_states(vars.timer_mode.get(), timer_group)
         set_widget_states(vars.lowkey_mode.get(), lowkey_group)
         set_widget_states(vars.denial_mode.get(), denial_group)
@@ -2253,53 +2186,6 @@ def pick_zip() -> str:
 
 
 # helper funcs for lambdas =======================================================
-def validate_booru(name: str) -> bool:
-    return requests.get(BOORU_URL.replace(BOORU_FLAG, name)).status_code == 200
-
-
-def add_list(tk_list_obj: Listbox, key: str, title: str, text: str):
-    name = simpledialog.askstring(title, text)
-    if name != "" and name != None:
-        config[key] = f"{config[key]}>{name}"
-        tk_list_obj.insert(2, name)
-
-
-def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
-    index = int(tk_list_obj.curselection()[0])
-    itemName = tk_list_obj.get(index)
-    if index > 0:
-        config[key] = config[key].replace(f">{itemName}", "")
-        tk_list_obj.delete(tk_list_obj.curselection())
-    else:
-        messagebox.showwarning(title, text)
-
-
-def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str):
-    index = int(tk_list_obj.curselection()[0])
-    itemName = tk_list_obj.get(index)
-    print(config[key])
-    print(itemName)
-    print(len(config[key].split(">")))
-    if len(config[key].split(">")) > 1:
-        if index > 0:
-            config[key] = config[key].replace(f">{itemName}", "")
-        else:
-            config[key] = config[key].replace(f"{itemName}>", "")
-        tk_list_obj.delete(tk_list_obj.curselection())
-    else:
-        messagebox.showwarning(title, text)
-
-
-def reset_list(tk_list_obj: Listbox, key: str, default):
-    try:
-        tk_list_obj.delete(0, 999)
-    except Exception as e:
-        print(e)
-    config[key] = default
-    for setting in config[key].split(">"):
-        tk_list_obj.insert(1, setting)
-
-
 def add_wallpaper(tk_list_obj: Listbox):
     file = filedialog.askopenfile("r", filetypes=[("image file", ".jpg .jpeg .png")])
     if not isinstance(file, type(None)):
@@ -2573,7 +2459,6 @@ def toggle_help(state: bool, messages: list):
             for widget in messages:
                 widget.destroy()
         except Exception as e:
-            print(f"failed to toggle help off. {e}")
             logging.warning(f"could not properly turn help off. {e}")
 
 

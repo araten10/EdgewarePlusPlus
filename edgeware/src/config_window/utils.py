@@ -7,7 +7,7 @@ import sys
 import urllib
 import zipfile
 from pathlib import Path
-from tkinter import BooleanVar, Button, Frame, IntVar, Label, StringVar, Tk, Toplevel, Widget, filedialog, messagebox
+from tkinter import BooleanVar, Button, Frame, IntVar, Label, Listbox, StringVar, Tk, Toplevel, Widget, filedialog, messagebox, simpledialog
 
 from config_window.vars import Vars
 from pack import Pack
@@ -283,6 +283,49 @@ def clear_launches(confirmation: bool):
     except Exception as e:
         print(f"failed to clear launches. {e}")
         logging.warning(f"could not delete the corruption launches file. {e}")
+
+
+def add_list(tk_list_obj: Listbox, key: str, title: str, text: str):
+    name = simpledialog.askstring(title, text)
+    if name != "" and name != None:
+        config[key] = f"{config[key]}>{name}"
+        tk_list_obj.insert(2, name)
+
+
+def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
+    index = int(tk_list_obj.curselection()[0])
+    itemName = tk_list_obj.get(index)
+    if index > 0:
+        config[key] = config[key].replace(f">{itemName}", "")
+        tk_list_obj.delete(tk_list_obj.curselection())
+    else:
+        messagebox.showwarning(title, text)
+
+
+def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str):
+    index = int(tk_list_obj.curselection()[0])
+    itemName = tk_list_obj.get(index)
+    print(config[key])
+    print(itemName)
+    print(len(config[key].split(">")))
+    if len(config[key].split(">")) > 1:
+        if index > 0:
+            config[key] = config[key].replace(f">{itemName}", "")
+        else:
+            config[key] = config[key].replace(f"{itemName}>", "")
+        tk_list_obj.delete(tk_list_obj.curselection())
+    else:
+        messagebox.showwarning(title, text)
+
+
+def reset_list(tk_list_obj: Listbox, key: str, default):
+    try:
+        tk_list_obj.delete(0, 999)
+    except Exception as e:
+        print(e)
+    config[key] = default
+    for setting in config[key].split(">"):
+        tk_list_obj.insert(1, setting)
 
 
 def set_widget_states(state: bool, widgets: list[Widget], demo: bool = False) -> None:
