@@ -24,7 +24,7 @@ from paths import CustomAssets
 from PIL import ImageTk
 from widgets.tooltip import CreateToolTip
 
-START_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
+INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
 PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
 
 
@@ -49,9 +49,9 @@ class StartTab(Frame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: str, live_version: str):
         super().__init__()
 
-        start_message = Message(self, text=START_TEXT, justify=CENTER, width=675)
-        start_message.pack(fill="both")
-        message_group.append(start_message)
+        intro_message = Message(self, text=INTRO_TEXT, justify=CENTER, width=675)
+        intro_message.pack(fill="both")
+        message_group.append(intro_message)
 
         # Information
         Label(self, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
