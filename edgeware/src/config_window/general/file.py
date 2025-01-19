@@ -36,6 +36,7 @@ from config_window.vars import Vars
 from pack import Pack
 from paths import Data
 from utils import utils
+from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
 PACK_IMPORT_TEXT = 'If you\'re familiar with Edgeware, you may know that by default you can only have one pack imported under "resource". But you can also import multiple packs under "data/packs" using the "Import New Pack" button and choose which one you want to use with the dropdown menu on the left. This way you only need to import each pack once and you can conveniently switch between them. After choosing a pack from the dropdown menu, click the "Save & Refresh" button to update the config window to reflect your choice.\n\nPacks can still be imported and exported the old way using the "Import Default Pack" and "Export Default Pack" buttons, make sure to select "default" from the dropdown if you want to do this!'
@@ -154,23 +155,23 @@ def open_directory(url):
         messagebox.showerror("Explorer Error", "Failed to open explorer view.")
 
 
-class FileTab(Frame):
+class FileTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack):
         super().__init__()
 
         # TODO: Save default preset if there are none?
 
         # Save/load
-        Label(self, text="Save/Load", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Save/Load", font=title_font, relief=GROOVE).pack(pady=2)
 
-        pack_import_message = Message(self, text=PACK_IMPORT_TEXT, justify=CENTER, width=675)
+        pack_import_message = Message(self.viewPort, text=PACK_IMPORT_TEXT, justify=CENTER, width=675)
         message_group.append(pack_import_message)
         pack_import_message.pack(fill="both")
 
-        Button(self, text="Save Settings", command=lambda: write_save(vars)).pack(fill="x", pady=2)
-        Button(self, text="Save & Refresh", command=lambda: save_and_refresh(vars)).pack(fill="x", pady=2)
+        Button(self.viewPort, text="Save Settings", command=lambda: write_save(vars)).pack(fill="x", pady=2)
+        Button(self.viewPort, text="Save & Refresh", command=lambda: save_and_refresh(vars)).pack(fill="x", pady=2)
 
-        import_export_frame = Frame(self, borderwidth=5, relief=RAISED)
+        import_export_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         import_export_frame.pack(fill="x", pady=2)
 
         pack_selection_frame = Frame(import_export_frame)
@@ -183,11 +184,13 @@ class FileTab(Frame):
         Button(pack_selection_frame, text="Import New Pack", command=import_new_pack).pack(padx=2, fill="x", side="left", expand=1)
 
         ttk.Separator(import_export_frame, orient="horizontal").pack(fill="x", pady=2)
-        Button(import_export_frame, text="Import Default Pack", command=lambda: import_resource(self)).pack(padx=2, pady=2, fill="x", side="left", expand=1)
+        Button(import_export_frame, text="Import Default Pack", command=lambda: import_resource(self.viewPort)).pack(
+            padx=2, pady=2, fill="x", side="left", expand=1
+        )
         Button(import_export_frame, text="Export Default Pack", command=export_resource).pack(padx=2, pady=2, fill="x", side="left", expand=1)
 
         # Presets
-        Label(self, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)
 
         # TODO: Move these functions
         def change_description_text(key: str):
@@ -216,16 +219,16 @@ class FileTab(Frame):
                 preset_var.set(preset_list[0])
             return True
 
-        preset_message = Message(self, text=PRESET_TEXT, justify=CENTER, width=675)
+        preset_message = Message(self.viewPort, text=PRESET_TEXT, justify=CENTER, width=675)
         preset_message.pack(fill="both")
         # TODO: Is this commented out on purpose?
         # message_group.append(preset_message)
 
-        preset_frame = Frame(self, borderwidth=5, relief=RAISED)
+        preset_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         preset_frame.pack(fill="both", pady=2)
 
         preset_list = [_.split(".")[0].capitalize() for _ in get_presets() if _.endswith(".cfg")]
-        preset_var = StringVar(self, preset_list.pop(0))
+        preset_var = StringVar(self.viewPort, preset_list.pop(0))
 
         preset_selection_frame = Frame(preset_frame)
         preset_selection_frame.pack(side="left", fill="x", padx=6)
@@ -245,7 +248,7 @@ class FileTab(Frame):
         preset_description_label.pack(fill="both", expand=1)
         change_description_text("Default")
 
-        pack_preset_frame = Frame(self, borderwidth=5, relief=RAISED)
+        pack_preset_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         pack_preset_frame.pack(fill="x", pady=2)
 
         pack_preset_col_1 = Frame(pack_preset_frame)
@@ -285,9 +288,9 @@ class FileTab(Frame):
             set_widget_states(False, pack_preset_group)
 
         # Directories
-        Label(self, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
 
-        logs_frame = Frame(self, borderwidth=5, relief=RAISED)
+        logs_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         logs_frame.pack(fill="x", pady=2)
 
         logs_col_1 = Frame(logs_frame)
@@ -302,7 +305,7 @@ class FileTab(Frame):
         delete_logs_button.pack(fill="x", expand=1)
         CreateToolTip(delete_logs_button, "This will delete every log (except the log currently being written).")
 
-        moods_frame = Frame(self, borderwidth=5, relief=RAISED)
+        moods_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         moods_frame.pack(fill="x", pady=2)
 
         moods_col_1 = Frame(moods_frame)
@@ -323,4 +326,4 @@ class FileTab(Frame):
             'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
         )
 
-        Button(self, height=2, text="Open Pack Folder", command=lambda: open_directory(pack.paths.root)).pack(fill="x", pady=2)
+        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: open_directory(pack.paths.root)).pack(fill="x", pady=2)

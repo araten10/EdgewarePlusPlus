@@ -14,6 +14,7 @@ from tkinter.font import Font
 from config_window.utils import set_widget_states
 from config_window.vars import Vars
 from pack import Pack
+from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
 MULTI_PACK_TEXT = 'NOTE: If you have multiple packs loaded (via the file tab), make sure to apply the pack you want using the "Save & Refresh" button there! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
@@ -45,18 +46,18 @@ class StatsItem(Frame):
         Label(self, text=f"{number}").pack(pady=2, side="top")
 
 
-class InfoTab(Frame):
+class InfoTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack):
         super().__init__()
 
-        multi_pack_message = Message(self, text=MULTI_PACK_TEXT, justify=CENTER, width=675)
+        multi_pack_message = Message(self.viewPort, text=MULTI_PACK_TEXT, justify=CENTER, width=675)
         multi_pack_message.pack(fill="both")
         message_group.append(multi_pack_message)
 
         # Stats
-        Label(self, text="Stats", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Stats", font=title_font, relief=GROOVE).pack(pady=2)
 
-        status_frame = Frame(self, borderwidth=5, relief=RAISED)
+        status_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         status_frame.pack(fill="x", padx=3)
         StatusItem(status_frame, "Pack Loaded", pack.paths.root.exists())
         StatusItem(status_frame, "Info File", pack.paths.info.is_file())
@@ -86,7 +87,7 @@ class InfoTab(Frame):
             'For more information, check the "About" tab for a detailed writeup.',
         )
 
-        stats_frame = Frame(self, borderwidth=5, relief=RAISED)
+        stats_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         stats_frame.pack(fill="x", pady=1)
 
         stats_row_1 = Frame(stats_frame)
@@ -103,9 +104,9 @@ class InfoTab(Frame):
         StatsItem(stats_row_2, "Subliminals", len(pack.subliminal_overlays))
 
         # Information
-        Label(self, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
 
-        info_frame = Frame(self, borderwidth=5, relief=RAISED)
+        info_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         info_frame.pack(fill="x", pady=2)
 
         description_frame = Frame(info_frame, borderwidth=2, relief=GROOVE)
@@ -167,7 +168,7 @@ class InfoTab(Frame):
             ],
         )
 
-        discord_frame = Frame(self, borderwidth=5, relief=RAISED)
+        discord_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         discord_frame.pack(fill="x", pady=2)
         discord_status_title = Label(discord_frame, text="Custom Discord Status:", font="Default 10")
         discord_status_title.pack(padx=2, pady=2, side="left")

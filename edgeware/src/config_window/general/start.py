@@ -22,6 +22,7 @@ from config_window.vars import Vars
 from panic import send_panic
 from paths import CustomAssets
 from PIL import ImageTk
+from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
 INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
@@ -45,18 +46,18 @@ def request_panic_key(button: Button, var: StringVar) -> None:
     Label(window, text="Press any key or exit").pack(expand=1, fill="both")
 
 
-class StartTab(Frame):
+class StartTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: str, live_version: str):
         super().__init__()
 
-        intro_message = Message(self, text=INTRO_TEXT, justify=CENTER, width=675)
+        intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)
         intro_message.pack(fill="both")
         message_group.append(intro_message)
 
         # Information
-        Label(self, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
 
-        information_frame = Frame(self, borderwidth=5, relief=RAISED)
+        information_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         information_frame.pack(fill="x")
 
         github_frame = Frame(information_frame)
@@ -72,7 +73,7 @@ class StartTab(Frame):
         Label(version_frame, text=f"EdgeWare++ Github Version:\n{live_version}", bg=(BUTTON_FACE if (local_version == live_version) else "red")).pack(fill="x")
 
         # Theme
-        Label(self, text="Theme", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Theme", font=title_font, relief=GROOVE).pack(pady=2)
 
         # TODO: Use Theme object
         def theme_helper(theme):
@@ -237,7 +238,7 @@ class StartTab(Frame):
 
         theme_types = ["Original", "Dark", "The One", "Ransom", "Goth", "Bimbo"]
 
-        theme_frame = Frame(self, borderwidth=5, relief=RAISED)
+        theme_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         theme_frame.pack(fill="x")
 
         theme_selection_frame = Frame(theme_frame)
@@ -256,9 +257,9 @@ class StartTab(Frame):
         theme_demo_popup_frame.pack(fill="both", side="left", padx=1)
         theme_demo_popup_title = Label(theme_demo_popup_frame, text="Popup")
         theme_demo_popup_title.pack(side="top")
-        self.demo_popup_image = ImageTk.PhotoImage(file=CustomAssets.theme_demo())  # Stored to avoid garbage collection
+        self.viewPort.demo_popup_image = ImageTk.PhotoImage(file=CustomAssets.theme_demo())  # Stored to avoid garbage collection
         theme_demo_popup_label = Label(
-            theme_demo_popup_frame, image=self.demo_popup_image, width=150, height=75, borderwidth=2, relief=GROOVE, cursor="question_arrow"
+            theme_demo_popup_frame, image=self.viewPort.demo_popup_image, width=150, height=75, borderwidth=2, relief=GROOVE, cursor="question_arrow"
         )
         theme_demo_popup_label.pack(side="top", ipadx=1, ipady=1)
         theme_demo_popup_tooltip = CreateToolTip(
@@ -300,16 +301,16 @@ class StartTab(Frame):
         set_widget_states(False, test_group)
 
         Checkbutton(theme_demo_config_body, text="Check").pack(fill="y")
-        theme_demo_config_dropdown = OptionMenu(theme_demo_config_body, StringVar(self, "Option"), *["Option", "Menu"])
+        theme_demo_config_dropdown = OptionMenu(theme_demo_config_body, StringVar(self.viewPort, "Option"), *["Option", "Menu"])
         theme_demo_config_dropdown.config(highlightthickness=0)
         theme_demo_config_dropdown.pack(fill="y")
 
         theme_helper(vars.theme.get())
 
         # Other
-        Label(self, text="Other", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Other", font=title_font, relief=GROOVE).pack(pady=2)
 
-        other_frame = Frame(self, borderwidth=5, relief=RAISED)
+        other_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         other_frame.pack(fill="x")
 
         other_col_1 = Frame(other_frame)
@@ -341,13 +342,13 @@ class StartTab(Frame):
         Checkbutton(other_frame, text="Disable Config Help Messages\n(requires save & restart)", variable=vars.message_off).pack(fill="both", expand=1)
 
         # Panic
-        Label(self, text="Panic Settings", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Panic Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
-        panic_message = Message(self, text=PANIC_TEXT, justify=CENTER, width=675)
+        panic_message = Message(self.viewPort, text=PANIC_TEXT, justify=CENTER, width=675)
         panic_message.pack(fill="both")
         message_group.append(panic_message)
 
-        panic_frame = Frame(self, borderwidth=5, relief=RAISED)
+        panic_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         panic_frame.pack(fill="x")
 
         set_panic_key_button = Button(

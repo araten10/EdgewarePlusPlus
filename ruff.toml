@@ -1,5 +1,5 @@
 extend-include = ["__init__.py"]
-exclude = ["tooltip.py"]
+exclude = ["scroll_frame.py", "tooltip.py"]
 line-length = 160
 
 [lint]

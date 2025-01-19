@@ -73,6 +73,13 @@ def write_save(vars: Vars, exit_at_end: bool = False) -> None:
         messagebox.showinfo("Success!", "Settings saved successfully!")
 
 
+def assign(obj: StringVar | IntVar | BooleanVar, var: str | int | bool):
+    try:
+        obj.set(var)
+    except Exception as e:
+        logging.warning(f"Failed to assign variable. Reason: {e}")
+
+
 def safe_check(vars: Vars) -> bool:
     dangersList = []
     numDangers = 0

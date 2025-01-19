@@ -10,12 +10,11 @@ from tkinter import (
     RAISED,
     SINGLE,
     VERTICAL,
-    BooleanVar,
     Button,
+    Canvas,
     Checkbutton,
     Entry,
     Frame,
-    IntVar,
     Label,
     Listbox,
     Message,
@@ -32,6 +31,7 @@ from tkinter import (
 )
 
 import ttkwidgets as tw
+from config_window.annoyance.popup import PopupTab
 from config_window.general.booru import BooruTab
 from config_window.general.default_file import DefaultFileTab
 from config_window.general.file import FileTab
@@ -40,6 +40,7 @@ from config_window.general.start import StartTab
 from config_window.utils import (
     add_list,
     all_children,
+    assign,
     clear_launches,
     config,
     confirm_box,
@@ -102,8 +103,6 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-POPUP_INTRO_TEXT = 'Here is where you can change the most important settings of Edgeware: the frequency and behaviour of popups. The "Popup Timer Delay" is how long a popup takes to spawn, and the overall "Popup Chance" then rolls to see if the popup spawns. Keeping the chance at 100% allows for a consistent experience, while lowering it makes for a more random one.\n\nOnce ready to spawn, a popup can be many things: A regular image, a website link (opens in your default browser), a prompt you need to fill out, autoplaying audio or videos, or a subliminal message. All of these are rolled for corresponding to their respective frequency settings, which can be found in the "Audio/Video" tab, "Captions" tab, and this tab as well. There are also plenty of other settings there to configure popups to your liking~! '
-POPUP_OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
 AUDVID_PLAYBACK_TEXT = 'It is highly recommended to set up VLC and enable this setting. While it is an external download and could have it\'s own share of troubleshooting, it will massively increase performance and also fix a potential issue of videos having no audio. More details on this are listed in the hover tooltip for the "Use VLC to play videos" setting.'
 CAPTION_INTRO_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
 CAPTION_ADV_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
@@ -237,13 +236,10 @@ class Config(Tk):
         mitosis_group = []
         mitosis_cGroup = []
         wallpaper_group = []
-        timeout_group = []
         timer_group = []
         lowkey_group = []
-        denial_group = []
         maxAudio_group = []
         maxVideo_group = []
-        subliminals_group = []
         ctime_group = []
         cpopup_group = []
         claunch_group = []
@@ -266,10 +262,10 @@ class Config(Tk):
         general_notebook.add(BooruTab(vars, title_font), text="Booru Downloader")  # tab for booru downloader
         general_notebook.add(DefaultFileTab(vars, message_group), text="Change Default Files")  # tab for changing default files
 
-        tabSubAnnoyance = ttk.Frame(notebook)
-        notebook.add(tabSubAnnoyance, text="Annoyance/Runtime")
-        notebookAnnoyance = ttk.Notebook(tabSubAnnoyance)
-        tabPopups = ttk.Frame(None)  # tab for popup settings
+        annoyance_tab = ttk.Frame(notebook)
+        notebook.add(annoyance_tab, text="Annoyance/Runtime")
+        annoyance_notebook = ttk.Notebook(annoyance_tab)
+        annoyance_notebook.add(PopupTab(vars, title_font, message_group, mitosis_group), text="Popups")  # tab for popup settings
         tabWallpaper = ttk.Frame(None)  # tab for wallpaper rotation settings
         tabAudioVideo = ttk.Frame(None)  # tab for managing audio and video settings
         tabCaptions = ttk.Frame(None)  # tab for caption settings
@@ -348,214 +344,8 @@ class Config(Tk):
         # ========================================================= #
         # --------------------------------------------------------- #
 
-        # ==========={EDGEWARE++ "POPUPS" TAB STARTS HERE}===========#
-        notebookAnnoyance.add(tabPopups, text="Popups")
-
-        popupMessage = Message(tabPopups, text=POPUP_INTRO_TEXT, justify=CENTER, width=675)
-        popupMessage.pack(fill="both")
-        message_group.append(popupMessage)
-
-        delayModeFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-        delayFrame = Frame(delayModeFrame)
-        popChanceFrame = Frame(delayModeFrame)
-
-        delayScale = Scale(delayFrame, label="Popup Timer Delay (ms)", from_=10, to=60000, orient="horizontal", variable=vars.delay)
-        delayManual = Button(
-            delayFrame, text="Manual delay...", command=lambda: assign(vars.delay, simpledialog.askinteger("Manual Delay", prompt="[10-60000]: "))
-        )
-
-        popupScale = Scale(popChanceFrame, label="Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=vars.image_chance)
-        popupManual = Button(
-            popChanceFrame,
-            text="Manual popup chance...",
-            command=lambda: assign(vars.image_chance, simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: ")),
-        )
-
-        delayModeFrame.pack(fill="x")
-
-        delayScale.pack(fill="x", expand=1)
-        delayManual.pack(fill="x", expand=1)
-
-        delayFrame.pack(fill="x", side="left", padx=(3, 0), expand=1)
-        popChanceFrame.pack(fill="x", side="left", padx=(0, 3))
-        popupScale.pack(fill="x")
-        popupManual.pack(fill="x")
-
-        # other start
-        otherHostFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-
-        webFrame = Frame(otherHostFrame)
-        promptFrame = Frame(otherHostFrame)
-        mistakeFrame = Frame(otherHostFrame)
-
-        webScale = Scale(webFrame, label="Website Freq (%)", from_=0, to=100, orient="horizontal", variable=vars.web_chance)
-        webManual = Button(webFrame, text="Manual web...", command=lambda: assign(vars.web_chance, simpledialog.askinteger("Web Chance", prompt="[0-100]: ")))
-
-        promptScale = Scale(promptFrame, label="Prompt Freq (%)", from_=0, to=100, orient="horizontal", variable=vars.prompt_chance)
-        promptManual = Button(
-            promptFrame, text="Manual prompt...", command=lambda: assign(vars.prompt_chance, simpledialog.askinteger("Manual Prompt", prompt="[0-100]: "))
-        )
-
-        mistakeScale = Scale(mistakeFrame, label="Prompt Mistakes", from_=0, to=150, orient="horizontal", variable=vars.prompt_max_mistakes)
-        mistakeManual = Button(
-            mistakeFrame,
-            text="Manual mistakes...",
-            command=lambda: assign(vars.prompt_max_mistakes, simpledialog.askinteger("Max Mistakes", prompt="Max mistakes allowed in prompt text\n[0-150]: ")),
-            cursor="question_arrow",
-        )
-
-        mistakettp = CreateToolTip(
-            mistakeManual, "The number of allowed mistakes when filling out a prompt.\n\nGood for when you can't think straight, or typing with one hand..."
-        )
-
-        opacityScale = Scale(otherHostFrame, label="Popup Opacity (%)", from_=5, to=100, orient="horizontal", variable=vars.opacity)
-
-        timeoutFrame = Frame(otherHostFrame)
-
-        timeoutToggle = Checkbutton(
-            timeoutFrame,
-            text="Popup Timeout",
-            variable=vars.timeout_enabled,
-            command=lambda: set_widget_states(vars.timeout_enabled.get(), timeout_group),
-        )
-        timeoutSlider = Scale(timeoutFrame, label="Time (sec)", from_=1, to=120, orient="horizontal", variable=vars.timeout)
-
-        timeout_group.append(timeoutSlider)
-
-        webFrame.pack(fill="y", side="left", padx=3, expand=1)
-        webScale.pack(fill="x")
-        webManual.pack(fill="x")
-
-        promptFrame.pack(fill="y", side="left", padx=(3, 0), expand=1)
-        promptScale.pack(fill="x")
-        promptManual.pack(fill="x")
-        mistakeFrame.pack(fill="y", side="left", padx=(0, 3), expand=1)
-        mistakeScale.pack(fill="x")
-        mistakeManual.pack(fill="x")
-        ttk.Separator(otherHostFrame, orient="vertical").pack(fill="y", side="left")
-        opacityScale.pack(fill="both", side="left", padx=3, expand=1)
-        timeoutSlider.pack(fill="x")
-        timeoutToggle.pack(fill="x")
-        timeoutFrame.pack(fill="y", side="left", padx=3, expand=1)
-        otherHostFrame.pack(fill="x")
-
-        # additional popup options, mostly edgeware++ stuff
-        popupOptionsFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-
-        popupWebToggle = Checkbutton(popupOptionsFrame, text="Popup close opens web page", variable=vars.web_on_popup_close)
-        toggleEasierButton = Checkbutton(popupOptionsFrame, text="Buttonless Closing Popups", variable=vars.buttonless, cursor="question_arrow")
-        toggleSingleButton = Checkbutton(popupOptionsFrame, text="Single Roll Per Popup", variable=vars.single_mode, cursor="question_arrow")
-
-        buttonlessttp = CreateToolTip(
-            toggleEasierButton,
-            'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
-            "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
-        )
-        singlettp = CreateToolTip(
-            toggleSingleButton,
-            'The randomization in EdgeWare does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
-            "For example, if you have audio, videos, and prompts all turned on, there's a very real chance you will get all of them popping up at the same "
-            "time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It "
-            "delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: In this mode, the chance of a popup appearing "
-            "is used as a weight to choose a single popup type to spawn.",
-        )
-
-        popupOptionsFrame.pack(fill="x")
-        popupWebToggle.pack(fill="x", side="left", expand=1)
-        toggleEasierButton.pack(fill="x", side="left", expand=1)
-        toggleSingleButton.pack(fill="x", side="left", expand=1)
-
-        # overlay start
-        Label(tabPopups, text="Popup Overlays", font=title_font, relief=GROOVE).pack(pady=2)
-
-        overlayMessage = Message(tabPopups, text=POPUP_OVERLAY_TEXT, justify=CENTER, width=675)
-        overlayMessage.pack(fill="both")
-        message_group.append(overlayMessage)
-
-        overlayFrame = Frame(tabPopups, borderwidth=5, relief=RAISED)
-
-        subliminalsFrame = Frame(overlayFrame)
-        denialFrame = Frame(overlayFrame)
-
-        subliminalsChanceFrame = Frame(subliminalsFrame)
-        subliminalsAlphaFrame = Frame(subliminalsFrame)
-        maxSubliminalsFrame = Frame(subliminalsFrame)
-
-        toggleSubliminalButton = Checkbutton(
-            subliminalsFrame,
-            text="Subliminal Overlays",
-            variable=vars.popup_subliminals,
-            command=lambda: set_widget_states(vars.popup_subliminals.get(), subliminals_group),
-        )
-
-        subliminalsChanceScale = Scale(
-            subliminalsChanceFrame, label="Sublim. Chance (%)", from_=1, to=100, orient="horizontal", variable=vars.subliminal_chance
-        )
-        subliminalsChanceManual = Button(
-            subliminalsChanceFrame,
-            text="Manual Sub Chance...",
-            command=lambda: assign(vars.subliminal_chance, simpledialog.askinteger("Manual Subliminal Chance", prompt="[1-100]: ")),
-        )
-
-        subliminals_group.append(subliminalsChanceScale)
-        subliminals_group.append(subliminalsChanceManual)
-
-        subliminalsAlphaScale = Scale(subliminalsAlphaFrame, label="Sublim. Alpha (%)", from_=1, to=99, orient="horizontal", variable=vars.subliminal_opacity)
-        subliminalsAlphaManual = Button(
-            subliminalsAlphaFrame,
-            text="Manual Sub Alpha...",
-            command=lambda: assign(vars.subliminal_opacity, simpledialog.askinteger("Manual Subliminal Chance", prompt="[1-99]: ")),
-        )
-
-        subliminals_group.append(subliminalsAlphaScale)
-        subliminals_group.append(subliminalsAlphaManual)
-
-        maxSubliminalsScale = Scale(maxSubliminalsFrame, label="Max Subliminals", from_=1, to=200, orient="horizontal", variable=vars.max_subliminals)
-        maxSubliminalsManual = Button(
-            maxSubliminalsFrame,
-            text="Manual Max Sub...",
-            command=lambda: assign(vars.max_subliminals, simpledialog.askinteger("Manual Max Subliminals", prompt="[1-200]: ")),
-        )
-
-        subliminals_group.append(maxSubliminalsScale)
-        subliminals_group.append(maxSubliminalsManual)
-
-        denialSlider = Scale(denialFrame, label="Denial Chance", orient="horizontal", variable=vars.denial_chance)
-        denialToggle = Checkbutton(
-            denialFrame, text="Denial Overlays", variable=vars.denial_mode, command=lambda: set_widget_states(vars.denial_mode.get(), denial_group)
-        )
-        denialChanceManual = Button(
-            denialFrame,
-            text="Manual Denial Chance...",
-            command=lambda: assign(vars.denial_chance, simpledialog.askinteger("Manual Denial Chance", prompt="[1-100]: ")),
-        )
-        denial_group.append(denialSlider)
-        denial_group.append(denialChanceManual)
-
-        overlayFrame.pack(fill="x")
-
-        subliminalsFrame.pack(fill="x", side="left", padx=(3, 0))
-        toggleSubliminalButton.pack(fill="x")
-
-        subliminalsChanceFrame.pack(fill="x", side="left", padx=3)
-        subliminalsChanceScale.pack(fill="x")
-        subliminalsChanceManual.pack(fill="x")
-
-        subliminalsAlphaFrame.pack(fill="x", side="left", padx=3)
-        subliminalsAlphaScale.pack(fill="x")
-        subliminalsAlphaManual.pack(fill="x")
-
-        maxSubliminalsFrame.pack(fill="x", side="left", padx=3)
-        maxSubliminalsScale.pack(fill="x")
-        maxSubliminalsManual.pack(fill="x")
-
-        denialFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        denialToggle.pack(fill="x")
-        denialSlider.pack(fill="x", padx=1, expand=1)
-        denialChanceManual.pack(fill="x")
-
         # ==========={EDGEWARE++ AUDIO/VIDEO TAB STARTS HERE}==============#
-        notebookAnnoyance.add(tabAudioVideo, text="Audio/Video")
+        annoyance_notebook.add(tabAudioVideo, text="Audio/Video")
         # Audio
         Label(tabAudioVideo, text="Audio", font=title_font, relief=GROOVE).pack(pady=2)
 
@@ -661,7 +451,7 @@ class Config(Tk):
         )
 
         # ==========={EDGEWARE++ CAPTIONS TAB STARTS HERE}==============#
-        notebookAnnoyance.add(tabCaptions, text="Captions")
+        annoyance_notebook.add(tabCaptions, text="Captions")
 
         Label(tabCaptions, text="Captions", font=title_font, relief=GROOVE).pack(pady=2)
 
@@ -806,7 +596,7 @@ class Config(Tk):
         notificationImageManual.pack(fill="x")
 
         # ==========={WALLPAPER TAB ITEMS} ========================#
-        notebookAnnoyance.add(tabWallpaper, text="Wallpaper")
+        annoyance_notebook.add(tabWallpaper, text="Wallpaper")
         wallpaperMessage = Message(tabWallpaper, text=WALLPAPER_ROTATE_TEXT, justify=CENTER, width=675)
         wallpaperMessage.pack(fill="both")
         message_group.append(wallpaperMessage)
@@ -891,7 +681,7 @@ class Config(Tk):
         panicWallpaperLabel.pack()
 
         # ==========={EDGEWARE++ MOODS TAB STARTS HERE}==============#
-        notebookAnnoyance.add(tabMoods, text="Moods")
+        annoyance_notebook.add(tabMoods, text="Moods")
 
         Label(tabMoods, text="Moods", font=title_font, relief=GROOVE).pack(pady=2)
 
@@ -1098,7 +888,7 @@ class Config(Tk):
         moodsFrame.grid_rowconfigure(0, weight=1)
 
         # ==========={EDGEWARE++ "DANGEROUS SETTINGS" TAB STARTS HERE}===========#
-        notebookAnnoyance.add(tabDangerous, text="Dangerous Settings")
+        annoyance_notebook.add(tabDangerous, text="Dangerous Settings")
 
         Label(tabDangerous, text="Hard Drive Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
@@ -1324,9 +1114,6 @@ class Config(Tk):
 
         Label(tabDangerModes, text="Mitosis Mode", font=title_font, relief=GROOVE).pack(pady=2)
         mitosisFrame = Frame(tabDangerModes, borderwidth=5, relief=RAISED)
-
-        mitosis_group.append(popupScale)
-        mitosis_group.append(popupManual)
 
         def toggleMitosis():
             set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
@@ -1928,14 +1715,11 @@ class Config(Tk):
         set_widget_states(vars.fill_drive.get(), fill_group)
         set_widget_states(vars.replace_images.get(), replace_group)
         set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group)
-        set_widget_states(vars.timeout_enabled.get(), timeout_group)
         set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
         set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
         set_widget_states(vars.timer_mode.get(), timer_group)
         set_widget_states(vars.lowkey_mode.get(), lowkey_group)
-        set_widget_states(vars.denial_mode.get(), denial_group)
         set_widget_states(vars.max_video_enabled.get(), maxVideo_group)
-        set_widget_states(vars.popup_subliminals.get(), subliminals_group)
         hibernateHelper(vars.hibernate_type.get())
         fadeHelper(vars.corruption_fade.get())
         triggerHelper(vars.corruption_trigger.get(), False)
@@ -1946,7 +1730,7 @@ class Config(Tk):
 
         notebook.pack(expand=1, fill="both")
         general_notebook.pack(expand=1, fill="both")
-        notebookAnnoyance.pack(expand=1, fill="both")
+        annoyance_notebook.pack(expand=1, fill="both")
         notebookModes.pack(expand=1, fill="both")
         tabInfoExpound.pack(expand=1, fill="both")
         resourceFrame.pack(fill="x")
@@ -2039,14 +1823,6 @@ def assign_json(key: str, var: int or str):
         f.write(json.dumps(config))
 
 
-def assign(obj: StringVar or IntVar or BooleanVar, var: str or int or bool):
-    try:
-        obj.set(var)
-    except Exception:
-        pass
-        # no assignment
-
-
 def update_moods(type: str, id: str, check: bool):
     try:
         if config["toggleMoodSet"] != True:
@@ -2109,7 +1885,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
     else:
         if theme == "Dark":
             for widget in all_children(root):
-                if isinstance(widget, Frame):
+                if isinstance(widget, Frame) or isinstance(widget, Canvas):
                     widget.configure(bg="#282c34")
                 if isinstance(widget, Button):
                     widget.configure(bg="#282c34", fg="ghost white", activebackground="#282c34", activeforeground="ghost white")
@@ -2135,7 +1911,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
             style.configure("TNotebook.Tab", background="#1b1d23", foreground="#f9faff")
         if theme == "The One":
             for widget in all_children(root):
-                if isinstance(widget, Frame):
+                if isinstance(widget, Frame) or isinstance(widget, Canvas):
                     widget.configure(bg="#282c34")
                 if isinstance(widget, Button):
                     widget.configure(bg="#282c34", fg="#00ff41", activebackground="#1b1d23", activeforeground="#00ff41")
@@ -2163,7 +1939,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
             tfont.configure(family="Consolas")
         if theme == "Ransom":
             for widget in all_children(root):
-                if isinstance(widget, Frame):
+                if isinstance(widget, Frame) or isinstance(widget, Canvas):
                     widget.configure(bg="#841212")
                 if isinstance(widget, Button):
                     widget.configure(bg="#841212", fg="yellow", activebackground="#841212", activeforeground="yellow")
@@ -2191,7 +1967,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
             tfont.configure(family="Arial Bold")
         if theme == "Goth":
             for widget in all_children(root):
-                if isinstance(widget, Frame):
+                if isinstance(widget, Frame) or isinstance(widget, Canvas):
                     widget.configure(bg="#282c34")
                 if isinstance(widget, Button):
                     widget.configure(bg="#282c34", fg="MediumPurple1", activebackground="#282c34", activeforeground="MediumPurple1")
@@ -2219,7 +1995,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
             tfont.configure(family="Constantia")
         if theme == "Bimbo":
             for widget in all_children(root):
-                if isinstance(widget, Frame):
+                if isinstance(widget, Frame) or isinstance(widget, Canvas):
                     widget.configure(bg="pink")
                 if isinstance(widget, Button):
                     widget.configure(bg="pink", fg="deep pink", activebackground="hot pink", activeforeground="deep pink")

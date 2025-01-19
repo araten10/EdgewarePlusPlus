@@ -14,6 +14,7 @@ from tkinter import (
 from config_window.vars import Vars
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
+from widgets.scroll_frame import ScrollFrame
 
 INTRO_TEXT = 'Changing these will change the default file EdgeWare++ falls back on when a replacement isn\'t provided by a pack. The files you choose will be stored under "data."'
 
@@ -66,15 +67,15 @@ class DefaultImageFrame(Frame):
         return image.resize((int(self.winfo_screenwidth() * self.scale), int(self.winfo_screenwidth() * self.scale)), Image.NEAREST) if self.scale else image
 
 
-class DefaultFileTab(Frame):
+class DefaultFileTab(ScrollFrame):
     def __init__(self, vars: Vars, message_group: list[Message]):
         super().__init__()
 
-        intro_message = Message(self, text=INTRO_TEXT, justify=CENTER, width=675)
+        intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)
         intro_message.pack(fill="both")
         message_group.append(intro_message)
 
-        row_1 = Frame(self)
+        row_1 = Frame(self.viewPort)
         row_1.pack(fill="x")
         DefaultImageFrame(
             row_1,
@@ -98,7 +99,7 @@ class DefaultFileTab(Frame):
             "THEME DEMO:\n\nUsed in the \"Start\" tab, supports .jpg or .png. Must be 150x75! If you don't crop your image to that, you'll have a bad time!!",
         )
 
-        row_2 = Frame(self)
+        row_2 = Frame(self.viewPort)
         row_2.pack(fill="x")
         DefaultImageFrame(
             row_2,
@@ -131,7 +132,7 @@ class DefaultFileTab(Frame):
             "PANIC ICON:\n\nUsed in desktop shortcuts. Only supports .ico files.",
         )
 
-        row_3 = Frame(self)
+        row_3 = Frame(self.viewPort)
         row_3.pack(fill="x")
         DefaultImageFrame(
             row_3,

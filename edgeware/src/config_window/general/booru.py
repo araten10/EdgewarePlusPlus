@@ -21,6 +21,7 @@ from config_window.utils import (
     set_widget_states_with_colors,
 )
 from config_window.vars import Vars
+from widgets.scroll_frame import ScrollFrame
 
 BOORU_FLAG = "<BOORU_INSERT>"  # flag to replace w/ booru name
 BOORU_URL = f"https://{BOORU_FLAG}.booru.org/index.php?page=post&s=list&tags="  # basic url
@@ -32,13 +33,13 @@ def validate_booru(name: str) -> bool:
     return requests.get(BOORU_URL.replace(BOORU_FLAG, name)).status_code == 200
 
 
-class BooruTab(Frame):
+class BooruTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font):
         super().__init__()
 
-        Label(self, text="Image Download Settings", font=title_font, relief=GROOVE).pack(pady=2)
+        Label(self.viewPort, text="Image Download Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
-        download_frame = Frame(self, borderwidth=5, relief=RAISED)
+        download_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         download_frame.pack(fill="both")
 
         tag_frame = Frame(download_frame)
