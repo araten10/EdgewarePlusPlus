@@ -87,12 +87,16 @@ def activity_loop(
     activity(root, settings, targets, lambda: run)
 
 
+def hibernate(root: Tk, settings: Settings, pack: Pack, state: State, targets: list[RollTarget]) -> None:
+    delay = random.randint(settings.hibernate_delay_min, settings.hibernate_delay_max)
+    state.hibernate_id = root.after(delay, lambda: main_hibernate(root, settings, pack, state, targets))
+
+
 def main_hibernate(root: Tk, settings: Settings, pack: Pack, state: State, targets: list[RollTarget]) -> None:
     def on_end() -> None:
         state.hibernate_active = False
         state.pump_scare = False
-        delay = random.randint(settings.hibernate_delay_min, settings.hibernate_delay_max)
-        state.hibernate_id = root.after(delay, lambda: main_hibernate(root, settings, pack, state, targets))
+        hibernate(root, settings, pack, state, targets)
 
     state.hibernate_active = True
     type = settings.hibernate_type if settings.hibernate_type != "Chaos" else random.choice(["Original", "Spaced", "Glitch", "Ramp", "Pump-Scare"])
@@ -129,4 +133,4 @@ def start_main_hibernate(root: Tk, settings: Settings, pack: Pack, state: State,
     state._popup_number.attach(observer)
     state._hibernate_active.attach(observer)
 
-    main_hibernate(root, settings, pack, state, targets)
+    hibernate(root, settings, pack, state, targets)
