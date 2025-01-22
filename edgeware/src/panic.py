@@ -14,7 +14,7 @@ PANIC_MESSAGE = "panic"
 
 
 def panic(root: Tk, settings: Settings, state: State, key: str | None = None) -> None:
-    if settings.panic_disabled or (key and key != settings.panic_key):
+    if key and (settings.panic_disabled or key != settings.panic_key):
         return
 
     if settings.timer_mode and state.timer_active:
