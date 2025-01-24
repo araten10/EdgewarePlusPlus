@@ -9,7 +9,7 @@ from typing import TypeVar
 
 from paths import Data, PackPaths
 from utils import utils
-from voluptuous import All, Any, Equal, In, Length, Number, Range, Required, Schema, ALLOW_EXTRA
+from voluptuous import ALLOW_EXTRA, All, Any, Equal, In, Length, Number, Range, Required, Schema
 from voluptuous.error import Invalid
 
 from pack.data import CorruptionLevel, Default, Discord, Index, Info, Mood, MoodBase, MoodSet, UniversalSet, Web

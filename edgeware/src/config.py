@@ -142,7 +142,7 @@ UNIQUE_ID = pack.info.mood_file.with_suffix("").name
 
 Data.MOODS.mkdir(parents=True, exist_ok=True)
 MOOD_PATH = "0"
-if config["toggleMoodSet"] != True:
+if config["toggleMoodSet"] is not True:
     if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
         MOOD_PATH = Data.MOODS / f"{UNIQUE_ID}.json"
     elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
@@ -219,7 +219,6 @@ class Config(Tk):
             logging.info("set iconbitmap.")
         except Exception:
             logging.warning("failed to set iconbitmap.")
-        fail_loop = 0
 
         windowFont = font.nametofont("TkDefaultFont")
         title_font = font.Font(font="Default")
@@ -279,10 +278,7 @@ class Config(Tk):
         tabDangerModes = ttk.Frame(None)  # tab for timer mode
         tabHibernate = ttk.Frame(None)  # tab for hibernate mode
         tabCorruption = ttk.Frame(None)  # tab for corruption mode
-        tabMitosis = ttk.Frame(None)
 
-        tabDrive = ttk.Frame(None)  # tab for drive settings
-        tabJSON = ttk.Frame(None)  # tab for JSON editor (unused)
         tabAdvanced = ttk.Frame(None)  # advanced tab, will have settings pertaining to startup, hibernation mode settings
         tabInfo = ttk.Frame(None)  # info, github, version, about, etc.
 
@@ -440,7 +436,7 @@ class Config(Tk):
         VLCNotice.pack(fill="both", side="top", expand=1, padx=2)
         installVLCButton.pack(fill="both", side="top", padx=2)
 
-        vlcttp = CreateToolTip(
+        CreateToolTip(
             toggleVLC,
             "Going to get a bit technical here:\n\nBy default, EdgeWare loads videos by taking the source file, turning every frame into an image, and then playing the images in "
             "sequence at the specified framerate. The upside to this is it requires no additional dependencies, but it has multiple downsides. Firstly, it's very slow: you may have "
@@ -473,12 +469,12 @@ class Config(Tk):
         toggleFilenameButton = Checkbutton(captionsFrame, text="Use filename for caption moods", variable=vars.filename_caption_moods, cursor="question_arrow")
         toggleMultiClickButton = Checkbutton(captionsFrame, text="Multi-Click popups", variable=vars.multi_click_popups, cursor="question_arrow")
 
-        multiclickttp = CreateToolTip(
+        CreateToolTip(
             toggleMultiClickButton,
             "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
             "to close. This feature must be set-up beforehand and won't do anything if not supported.",
         )
-        captionfilenamettp = CreateToolTip(
+        CreateToolTip(
             toggleFilenameButton,
             "When enabled, captions will try and match the filename of the image they attach to.\n\n"
             'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
@@ -637,7 +633,7 @@ class Config(Tk):
         panicWallpaperButton = Button(panicWPFrameL, text="Change Panic Wallpaper", command=updatePanicPaper, cursor="question_arrow")
         panicWallpaperLabel = Label(panicWPFrameR, text="Current Panic Wallpaper", image=panicWallpaperImage)
 
-        panicWallpaperttp = CreateToolTip(
+        CreateToolTip(
             panicWallpaperButton,
             "When you use panic, the wallpaper will be set to this image.\n\n"
             "This is useful since most packs have a custom wallpaper, which is usually porn...!\n\n"
@@ -720,7 +716,7 @@ class Config(Tk):
             mediaTree.insert("", "0", iid="NAmi", text="No media moods found in pack!")
             mediaTree.change_state("NAmi", "disabled")
 
-        if config["toggleMoodSet"] != True:
+        if config["toggleMoodSet"] is not True:
             if len(mediaTree.get_children()) != 0:
                 if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
@@ -768,7 +764,7 @@ class Config(Tk):
             captionsTree.insert("", "0", iid="NAmi", text="No caption moods found in pack!")
             captionsTree.change_state("NAmi", "disabled")
 
-        if config["toggleMoodSet"] != True:
+        if config["toggleMoodSet"] is not True:
             if len(captionsTree.get_children()) != 0:
                 if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
@@ -809,7 +805,7 @@ class Config(Tk):
             promptsTree.insert("", "0", iid="NAmi", text="No prompt moods found in pack!")
             promptsTree.change_state("NAmi", "disabled")
 
-        if config["toggleMoodSet"] != True:
+        if config["toggleMoodSet"] is not True:
             if len(promptsTree.get_children()) != 0:
                 if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
@@ -853,7 +849,7 @@ class Config(Tk):
             webTree.insert("", "0", iid="NAmi", text="No web moods found in pack!")
             webTree.change_state("NAmi", "disabled")
 
-        if config["toggleMoodSet"] != True:
+        if config["toggleMoodSet"] is not True:
             if len(webTree.get_children()) != 0:
                 if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
                     try:
@@ -913,7 +909,7 @@ class Config(Tk):
         )
         fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=vars.fill_delay)
 
-        fillttp = CreateToolTip(
+        CreateToolTip(
             fillBox,
             '"Fill Drive" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. '
             'It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a "." or have their '
@@ -933,7 +929,7 @@ class Config(Tk):
         )
         replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=vars.replace_threshold)
 
-        replacettp = CreateToolTip(
+        CreateToolTip(
             replaceBox,
             "Seeks out folders with more images than the threshold value, then replaces all of them. No, there is no automated backup!\n\n"
             'I am begging you to read the full documentation in the "About" tab before even thinking about enabling this feature!\n\n'
@@ -990,7 +986,7 @@ class Config(Tk):
         toggleStartupButton = Checkbutton(dangerOtherFrame, text="Launch on PC Startup", variable=vars.run_at_startup)
         toggleDiscordButton = Checkbutton(dangerOtherFrame, text="Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
 
-        disablePanicttp = CreateToolTip(
+        CreateToolTip(
             panicDisableButton,
             "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
             "If you want to use Panic after this, you can still:\n"
@@ -998,9 +994,7 @@ class Config(Tk):
             '•Keep the config window open and press "Perform Panic"\n'
             "•Use the panic desktop icon (if you kept those enabled)",
         )
-        discordttp = CreateToolTip(
-            toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator."
-        )
+        CreateToolTip(toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator.")
         dangerOtherFrame.pack(fill="x")
         panicDisableButton.pack(fill="x", side="left", expand=1)
         toggleStartupButton.pack(fill="x", side="left", expand=1)
@@ -1025,7 +1019,7 @@ class Config(Tk):
             cursor="question_arrow",
         )
 
-        lowkeyttp = CreateToolTip(
+        CreateToolTip(
             lowkeyToggle,
             "Makes popups appear in a corner of the screen instead of the middle.\n\nBest used with Popup Timeout or high delay as popups will stack.",
         )
@@ -1043,12 +1037,12 @@ class Config(Tk):
         movingSlider = Scale(moveChanceFrame, label="Moving Chance", orient="horizontal", variable=vars.moving_chance, cursor="question_arrow")
         movingRandToggle = Checkbutton(moveChanceFrame, text="Random Direction", variable=vars.moving_random, cursor="question_arrow")
 
-        movingttp = CreateToolTip(
+        CreateToolTip(
             movingSlider,
             'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
             "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
         )
-        moverandomttp = CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
+        CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
 
         speedFrame = Frame(movementFrame)
         movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed)
@@ -1077,7 +1071,7 @@ class Config(Tk):
         def timerHelper():
             set_widget_states(vars.timer_mode.get(), timer_group)
 
-        timerttp = CreateToolTip(
+        CreateToolTip(
             timerToggle,
             'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
             '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
@@ -1108,7 +1102,7 @@ class Config(Tk):
         mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=vars.mitosis_mode, command=toggleMitosis, cursor="question_arrow")
         mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=vars.mitosis_strength)
 
-        mitosisttp = CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
+        CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
 
         mitosis_cGroup.append(mitosisStren)
 
@@ -1218,14 +1212,14 @@ class Config(Tk):
             command=lambda: assign(vars.hibernate_activity_length, simpledialog.askinteger("Manual Hibernate Length", prompt="[5-300]: ")),
         )
 
-        hibernatettp = CreateToolTip(
+        CreateToolTip(
             toggleHibernateButton,
             "Runs EdgeWare silently without any popups.\n\n"
             "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
             'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
             'Check the "About" tab for more detailed information on each hibernate type.',
         )
-        fixwallpaperttp = CreateToolTip(
+        CreateToolTip(
             fixWallpaperButton,
             '"fixes" your wallpaper after hibernate is finished by changing it to'
             " your panic wallpaper. If left off, it will keep the pack's wallpaper on until you panic"
@@ -1301,7 +1295,7 @@ class Config(Tk):
         corruptionFullToggle.pack(fill="x", expand=1)
         corruptionRecommendedToggle.pack(fill="x", padx=2, pady=2)
 
-        corruptionmodettp = CreateToolTip(
+        CreateToolTip(
             corruptionToggle,
             "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
             " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
@@ -1309,10 +1303,8 @@ class Config(Tk):
             ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
             ' EdgeWare.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
         )
-        corruptionfullttp = CreateToolTip(
-            corruptionFullToggle, "This setting allows corruption mode to change config settings as it goes through corruption levels."
-        )
-        corruptionsettingsttp = CreateToolTip(
+        CreateToolTip(corruptionFullToggle, "This setting allows corruption mode to change config settings as it goes through corruption levels.")
+        CreateToolTip(
             corruptionRecommendedToggle,
             'Pack creators can set "default corruption settings" for their pack, to give'
             " users a more designed and consistent experience. This setting turns those on (if they exist)."
@@ -1511,21 +1503,21 @@ class Config(Tk):
         corruptionPurityToggle.pack(fill="x", side="top")
         corruptionDevToggle.pack(fill="x", side="top")
 
-        corrwallpaperttp = CreateToolTip(
+        CreateToolTip(
             corruptionWallpaperToggle,
             "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to a pack defined static one.",
         )
-        corrthemettp = CreateToolTip(
+        CreateToolTip(
             corruptionThemeToggle,
             "Prevents the theme from cycling as you go through corruption levels, instead staying as "
             'the theme you set in the "General" tab of the config window.',
         )
-        corrpurityttp = CreateToolTip(
+        CreateToolTip(
             corruptionPurityToggle,
             "Starts corruption mode at the highest corruption level, then works backwards to level 1. "
             "Retains all of your other settings for this mode, if applicable.",
         )
-        corruptiondevttp = CreateToolTip(
+        CreateToolTip(
             corruptionDevToggle,
             "Enables captions on popups that show various info.\n\n Mood: the mood in which the popup belongs to\n"
             "Valid Level: the corruption levels in which the popup spawns\nCurrent Level: the current corruption level\n\n"
@@ -1549,7 +1541,6 @@ class Config(Tk):
         pathTree.column("level", width=40, stretch=False, anchor="center")
         pathTree.heading("moods", text="MOODS", anchor="w")
 
-        corruptionList = []
         lineWidth = 0
         # if os.path.isfile(pack.CORRUPTION):
         #     try:
@@ -1582,7 +1573,7 @@ class Config(Tk):
 
         def corruptionTutorialHelper(event):
             tab = event.widget.tab("current")["text"]
-            th = config["themeType"].strip()
+            config["themeType"].strip()
             if tab == "Start":
                 set_widget_states_with_colors(True, ctutorialstart_group, "lime green", "forest green")
                 set_widget_states(True, ctutorialtransition_group)
@@ -1642,18 +1633,18 @@ class Config(Tk):
         toggleHibernateSkip.pack(fill="x", side="top")
         toggleMoodSettings.pack(fill="x", side="top")
 
-        internetttp = CreateToolTip(
+        CreateToolTip(
             toggleInternetSetting,
             "In some cases, having a slow internet connection can cause the config window to delay opening for a long time.\n\n"
             "EdgeWare connects to Github just to check if there's a new update, but sometimes even this can take a while.\n\n"
             "If you have noticed this, try enabling this setting- it will disable all connections to Github on future launches.",
         )
-        hibernateskipttp = CreateToolTip(
+        CreateToolTip(
             toggleHibernateSkip,
             "Want to test out how hibernate mode works with your current settings, and hate waiting for the minimum time? Me too!\n\n"
             "This adds a feature in the tray that allows you to skip to the start of hibernate.",
         )
-        moodtogglettp = CreateToolTip(
+        CreateToolTip(
             toggleMoodSettings,
             "If your pack does not have a 'info.json' file with a valid pack name, it will generate a mood setting file based on a unique identifier.\n\n"
             "This unique identifier is created by taking a bunch of values from your pack and putting them all together, including the amount of images,"
@@ -1811,7 +1802,7 @@ def assign_json(key: str, var: int or str):
 
 def update_moods(type: str, id: str, check: bool):
     try:
-        if config["toggleMoodSet"] != True:
+        if config["toggleMoodSet"] is not True:
             if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
                 moodUpdatePath = Data.MOODS / f"{UNIQUE_ID}.json"
             elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
@@ -1860,7 +1851,7 @@ def update_moods(type: str, id: str, check: bool):
 
 
 def theme_change(theme: str, root, style, mfont, tfont):
-    if theme == "Original" or config["themeNoConfig"] == True:
+    if theme == "Original" or config["themeNoConfig"] is True:
         for widget in all_children(root):
             if isinstance(widget, Message):
                 widget.configure(font=(mfont, 8))
@@ -2010,7 +2001,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
 
 
 def toggle_help(state: bool, messages: list):
-    if state == True:
+    if state is True:
         try:
             for widget in messages:
                 widget.destroy()

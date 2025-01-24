@@ -204,7 +204,7 @@ class FileTab(ScrollFrame):
         def do_save() -> bool:
             name_ = simpledialog.askstring("Save Preset", "Preset name")
             existed = os.path.exists(Data.PRESETS / f"{name_.lower()}.cfg")
-            if name_ != None and name_ != "":
+            if name_ is not None and name_ != "":
                 write_save(vars)
                 if existed:
                     if messagebox.askquestion("Overwrite", "A preset with this name already exists. Overwrite it?") == "no":

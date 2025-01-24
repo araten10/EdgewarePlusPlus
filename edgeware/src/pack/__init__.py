@@ -3,7 +3,6 @@ from pathlib import Path
 
 import filetype
 from paths import Assets, CustomAssets, PackPaths
-from settings import Settings
 
 from pack.data import MoodBase
 from pack.load import list_media, load_active_moods, load_corruption, load_discord, load_index, load_info
