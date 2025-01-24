@@ -503,17 +503,6 @@ class Config(Tk):
         # I am not messing about with the variables on this in case users want to import their old settings.
         # (however, the name was awful and needed to be changed so people could actually understand it)
         subMessageOptionsFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-        toggleCaptionMood = Checkbutton(
-            subMessageOptionsFrame, text="Use Subliminal specific mood", variable=vars.subliminal_caption_mood, cursor="question_arrow"
-        )
-
-        capmoodttp = CreateToolTip(
-            toggleCaptionMood,
-            'Subliminal Message Popups have the option to use a special mood in the captions.json file called "subliminals". This mood doesn\'t '
-            "normally appear like other captions, and is meant for short, fast messages that will blink at you very quickly.\n\n"
-            "If your pack doesn't support subliminals, this "
-            "setting doesn't need to be disabled- it will automatically switch to using regular captions.",
-        )
 
         capPopFrame = Frame(subMessageOptionsFrame)
         capPopOpacityFrame = Frame(subMessageOptionsFrame)
@@ -545,7 +534,6 @@ class Config(Tk):
         )
 
         subMessageOptionsFrame.pack(fill="x")
-        toggleCaptionMood.pack(fill="y", side="left")
 
         capPopFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
         captionsPopupSlider.pack(fill="x", padx=1, expand=1)
@@ -564,7 +552,6 @@ class Config(Tk):
         message_group.append(captionsNotifMessage)
 
         notificationFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-        notificationMoodToggle = Checkbutton(notificationFrame, text="Use Notification specific mood", variable=vars.notification_mood)
 
         notificationChanceFrame = Frame(notificationFrame)
         notificationChanceSlider = Scale(
@@ -587,7 +574,6 @@ class Config(Tk):
         )
 
         notificationFrame.pack(fill="x")
-        notificationMoodToggle.pack(fill="y", side="left")
         notificationChanceFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
         notificationChanceSlider.pack(fill="x", padx=1, expand=1)
         notificationChanceManual.pack(fill="x")

@@ -87,10 +87,8 @@
   "capPopChance": 0,
   "capPopOpacity": 100,
   "capPopTimer": 300,
-  "capPopMood": 1,
   "subliminalsAlpha": 20,
   "messageOff": 0,
-  "notificationMood": 0,
   "notificationChance": 0,
   "notificationImageChance": 50,
   "packPath": null
