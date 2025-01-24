@@ -26,27 +26,31 @@ from utils import utils
 def play_audio(pack: Pack) -> None:
     # Pygame will not stop additional sounds from being played when the max is
     # reached, so we need to check if there are empty channels
-    if pack.has_audio() and mixer.find_channel():
-        sound = mixer.Sound(str(pack.random_audio()))
+    audio = pack.random_audio()
+    if audio and mixer.find_channel():
+        sound = mixer.Sound(str(audio))
         # TODO POTENTIAL SETTINGS: Volume, fadein, fadeout, separating music from sounds
         # https://www.pygame.org/docs/ref/mixer.html#pygame.mixer.Sound
         sound.play()
 
 
 def open_web(pack: Pack) -> None:
-    if pack.has_web():
-        webbrowser.open(pack.random_web())
+    web = pack.random_web()
+    if web:
+        webbrowser.open(web)
 
 
 def display_notification(settings: Settings, pack: Pack) -> None:
-    if not pack.has_notifications(settings):
+    notification = pack.random_notification()
+    if not notification:
         return
 
+    image = pack.random_image()
     notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(pack.icon))
     notifier.send(
         title=pack.info.name,
-        message=pack.random_notification(settings),
-        attachment=Attachment(pack.random_image()) if roll(settings.notification_image_chance) and pack.has_image() else None,
+        message=notification,
+        attachment=Attachment(image) if roll(settings.notification_image_chance) and image else None,
     )
 
 

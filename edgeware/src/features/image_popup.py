@@ -14,14 +14,14 @@ from widgets.image_label import GifLike, ImageLabel
 
 class ImagePopup(Popup):
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State):
+        self.media = pack.random_image()
         self.subliminal = roll(settings.subliminal_chance)
-        if not self.should_init(settings, pack, state):
+        if not self.should_init(settings, state):
             return
         super().__init__(root, settings, pack, state)
 
         self.denial = roll(self.settings.denial_chance)
 
-        self.media = self.pack.random_image()
         # TODO: Better way to use downloaded images
         if settings.download_path.is_dir() and self.settings.booru_download and roll(50):
             dir = settings.download_path
@@ -36,8 +36,8 @@ class ImagePopup(Popup):
         self.try_denial_text()
         self.init_finish()
 
-    def should_init(self, settings: Settings, pack: Pack, state: State) -> bool:
-        if not pack.has_image():
+    def should_init(self, settings: Settings, state: State) -> bool:
+        if not self.media:
             return False
 
         if not self.subliminal:

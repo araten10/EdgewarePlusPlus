@@ -10,8 +10,9 @@ from utils import utils
 
 class Prompt(Toplevel):
     def __init__(self, settings: Settings, pack: Pack, state: State):
+        self.prompt = pack.random_prompt()
         self.state = state
-        if not self.should_init(pack):
+        if not self.should_init():
             return
         super().__init__()
 
@@ -28,17 +29,16 @@ class Prompt(Toplevel):
         y = monitor.y + (monitor.height - height) // 2
         self.geometry(f"{width}x{height}+{x}+{y}")
 
-        Label(self, text="\n" + pack.prompts.command_text + "\n", fg=self.theme.fg, bg=self.theme.bg).pack()
+        Label(self, text="\n" + pack.index.default.prompt_command + "\n", fg=self.theme.fg, bg=self.theme.bg).pack()
 
-        prompt = pack.random_prompt()
-        Label(self, text=prompt, wraplength=width, fg=self.theme.fg, bg=self.theme.bg).pack()
+        Label(self, text=self.prompt, wraplength=width, fg=self.theme.fg, bg=self.theme.bg).pack()
 
         input = Text(self, fg=self.theme.text_fg, bg=self.theme.text_bg)
         input.pack()
         button = Button(
             self,
-            text=pack.prompts.submit_text,
-            command=lambda: self.submit(settings.prompt_max_mistakes, prompt, input.get(1.0, "end-1c")),
+            text=pack.index.default.prompt_submit,
+            command=lambda: self.submit(settings.prompt_max_mistakes, self.prompt, input.get(1.0, "end-1c")),
             fg=self.theme.fg,
             bg=self.theme.bg,
             activeforeground=self.theme.fg,
@@ -46,8 +46,8 @@ class Prompt(Toplevel):
         )
         button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 
-    def should_init(self, pack: Pack) -> bool:
-        if not self.state.prompt_active and pack.has_prompts():
+    def should_init(self) -> bool:
+        if not self.state.prompt_active and self.prompt:
             self.state.prompt_active = True
             return True
         return False

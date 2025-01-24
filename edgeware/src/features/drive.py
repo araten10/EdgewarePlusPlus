@@ -37,6 +37,8 @@ def fill_drive(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         path = paths.pop(0)
         for n in range(random.randint(3, 6)):
             image = pack.random_image()
+            if not image:
+                continue
 
             file = hashlib.md5((str(time.time()) + str(image.absolute())).encode()).hexdigest()
             location = path / (file + image.suffix)
@@ -64,7 +66,11 @@ def replace_images(root: Tk, settings: Settings, pack: Pack) -> None:
 
         if len(images) >= settings.replace_threshold:
             for image in images:
+                replacement = pack.random_image()
+                if not replacement:
+                    continue
+
                 backup = backups / image.relative_to(Path(settings.drive_path))
                 backup.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(image, backup)
-                shutil.copyfile(pack.random_image(), image)
+                shutil.copyfile(replacement, image)
