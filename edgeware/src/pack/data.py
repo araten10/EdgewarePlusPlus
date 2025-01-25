@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -35,34 +35,34 @@ class Web:
 
 @dataclass
 class MoodBase:
-    max_clicks: int
-    captions: list[str]
-    denial: list[str]
-    subliminals: list[str]
-    notifications: list[str]
-    prompts: list[str]
-    web: list[Web]
+    max_clicks: int = 1
+    captions: list[str] = field(default_factory=list)
+    denial: list[str] = field(default_factory=list)
+    subliminals: list[str] = field(default_factory=list)
+    notifications: list[str] = field(default_factory=list)
+    prompts: list[str] = field(default_factory=list)
+    web: list[Web] = field(default_factory=list)
 
 
 @dataclass
 class Default(MoodBase):
-    popup_close: str
-    prompt_command: str
-    prompt_submit: str
-    prompt_min_length: int
-    prompt_max_length: int
+    popup_close: str = "I Submit <3"
+    prompt_command: str = "Type for me, slut~"
+    prompt_submit: str = "I Submit <3"
+    prompt_min_length: int = 1
+    prompt_max_length: int = 1
 
 
 @dataclass
 class Mood(MoodBase):
-    name: str
+    name: str | None = None
 
 
 @dataclass
 class Index:
-    default: Default
-    moods: list[Mood]
-    media_moods: dict[str, str]
+    default: Default = field(default_factory=Default)
+    moods: list[Mood] = field(default_factory=list)
+    media_moods: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass

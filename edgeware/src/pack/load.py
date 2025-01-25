@@ -9,7 +9,7 @@ from typing import TypeVar
 
 from paths import Data, PackPaths
 from utils import utils
-from voluptuous import ALLOW_EXTRA, All, Any, Equal, In, Length, Number, Range, Required, Schema
+from voluptuous import ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Equal, In, Length, Number, Optional, Range, Required, Schema, Url
 from voluptuous.error import Invalid
 
 from pack.data import CorruptionLevel, Default, Discord, Index, Info, Mood, MoodBase, MoodSet, UniversalSet, Web
@@ -92,7 +92,7 @@ def load_discord(paths: PackPaths) -> Discord:
     return try_load(paths.discord, load) or default
 
 
-def load_index(paths: PackPaths) -> Index | None:
+def load_index(paths: PackPaths) -> Index:
     def load(content: str) -> Index:
         index = json.loads(content)
 
@@ -104,7 +104,7 @@ def load_index(paths: PackPaths) -> Index | None:
                 "subliminals": [str],
                 "notifications": [str],
                 "prompts": [str],
-                "web": [str],
+                "web": [Url()],
                 "webArgs": [[str]],
             },
             extra=ALLOW_EXTRA,
@@ -177,7 +177,7 @@ def load_index(paths: PackPaths) -> Index | None:
             {file: mood["mood"] for mood in moods for file in mood.get("media", [])},
         )
 
-    return try_load(paths.index, load)
+    return try_load(paths.index, load) or load_index_fallback(paths)
 
 
 def load_info(paths: PackPaths) -> Info:
@@ -206,117 +206,145 @@ def list_media(dir: Path, is_valid: Callable[[str], bool]) -> list[Path]:
     return [(dir / file) for file in os.listdir(dir) if is_valid(dir / file)] if dir.is_dir() else []
 
 
-# def load_captions(paths: PackPaths) -> Captions:
-#     default = Captions()
+def load_index_fallback(paths: PackPaths) -> Index:
+    index = Index(media_moods=load_media(paths))
 
-#     def load(content: str) -> Captions:
-#         captions = json.loads(content)
+    captions = load_captions(paths)
+    prompts = load_prompts(paths)
+    web = load_web(paths)
 
-#         schema = Schema(
-#             {
-#                 "prefix": [str],
-#                 Optional("prefix_settings"): {
-#                     Optional(str): {
-#                         Optional("caption"): str,
-#                         Optional("images"): str,
-#                         Optional("chance"): All(Any(int, float), Range(min=0, max=100, min_included=False)),
-#                         Optional("max"): All(int, Range(min=1)),
-#                     }
-#                 },
-#                 Optional("subtext"): str,
-#                 Optional("denial"): All([str], Length(min=1)),
-#                 Optional("subliminals"): All([str], Length(min=1)),
-#                 Optional("notifications"): All([str], Length(min=1)),
-#                 "default": [str],
-#             },
-#             required=True,
-#             extra=ALLOW_EXTRA,
-#         )
+    def get_or_add_mood(name: str) -> Mood:
+        mood = next((mood for mood in index.moods if mood.name == name), None)
+        if not mood:
+            mood = Mood(name=name)
+            index.moods.append(mood)
+        return mood
 
-#         schema(captions)
-#         schema.extend(dict.fromkeys(captions["prefix"], All([str], Length(min=1))), extra=PREVENT_EXTRA)(captions)
+    # Media
+    for mood_name in set(index.media_moods.values()):
+        if mood_name == "default":
+            continue
 
-#         moods = []
-#         for prefix in captions["prefix"]:
-#             prefix_settings = captions.get("prefix_settings", {}).get(prefix, {})
-#             moods.append(CaptionMood(prefix, prefix_settings.get("max", 1), captions[prefix]))
+        get_or_add_mood(mood_name)
 
-#         return Captions(
-#             moods,
-#             captions.get("subtext", default.close_text),
-#             captions.get("denial", default.denial),
-#             captions.get("subliminals", default.subliminal),
-#             captions.get("notifications", default.notification),
-#             captions["default"],
-#         )
+    # Captions
+    index.default.captions = captions.get("default", [])
+    index.default.denial = captions.get("denial", [])
+    index.default.subliminals = captions.get("subliminals", [])
+    index.default.notifications = captions.get("notifications", [])
+    index.default.popup_close = captions.get("subtext") or index.default.popup_close
 
-#     return try_load(paths.captions, load) or default
+    for mood_name in captions.get("prefix", {}):
+        if mood_name != "default":
+            mood = get_or_add_mood(mood_name)
+            mood.captions = captions[mood_name]
+            mood.max_clicks = captions.get("prefix_settings", {}).get(mood_name, {}).get("max", 1)
 
+    # Prompts
+    index.default.prompts = prompts.get("default", [])
+    index.default.prompt_command = prompts.get("commandtext") or index.default.prompt_command
+    index.default.prompt_submit = prompts.get("subtext") or index.default.prompt_submit
+    index.default.prompt_min_length = prompts.get("minLen", 1)
+    index.default.prompt_max_length = prompts.get("maxLen", 1)
 
-# def load_media(paths: PackPaths) -> dict[str, str]:
-#     def load(content: str) -> dict[str, str]:
-#         media = json.loads(content)
+    for mood_name in prompts["moods"]:
+        if mood_name != "default":
+            get_or_add_mood(mood_name).prompts = prompts[mood_name]
 
-#         Schema({str: All([str], Length(min=1))})(media)
+    # Web
+    indices = range(len(web.get("urls", [])))
+    web_moods = web.get("moods", [None for i in indices])
+    for i in indices:
+        web_url = Web(web["urls"][i], web["args"][i].split(","))
 
-#         # Mapping from media to moods
-#         media_moods = {}
-#         for mood, files in media.items():
-#             for file in files:
-#                 media_moods[file] = mood
+        mood_name = web_moods[i]
+        if mood_name is None or mood_name == "default":
+            index.default.web.append(web_url)
+        else:
+            get_or_add_mood(mood_name).web.append(web_url)
 
-#         return media_moods
-
-#     return try_load(paths.media, load) or {}
+    return index
 
 
-# def load_prompt(paths: PackPaths) -> Prompts:
-#     default = Prompts()
+def load_media(paths: PackPaths) -> dict[str, str]:
+    def load(content: str) -> dict[str, str]:
+        media = json.loads(content)
+        Schema({str: All([str], Length(min=1))})(media)
+        return {file: mood for mood, files in media.items() for file in files if mood != "default"}
 
-#     def load(content: str) -> Prompts:
-#         prompt = json.loads(content)
-
-#         schema = Schema(
-#             {
-#                 "moods": All([str], Length(min=1)),
-#                 "freqList": All([All(Any(int, float), Range(min=0, min_included=False))], Length(min=1)),
-#                 "minLen": All(int, Range(min=1)),
-#                 "maxLen": All(int, Range(min=1)),
-#                 Optional("subtext"): str,
-#                 Optional("commandtext"): str,
-#             },
-#             required=True,
-#             extra=ALLOW_EXTRA,
-#         )
-
-#         schema(prompt)
-#         length_equal_to(prompt, "freqList", "moods")
-#         Schema(Range(min=prompt["minLen"], msg='"maxLen" must be greater than or equal to "minLen"'))(prompt["maxLen"])
-#         schema.extend(dict.fromkeys(prompt["moods"], All([str], Length(min=1))), extra=PREVENT_EXTRA)(prompt)
-
-#         moods = []
-#         for i in range(len(prompt["moods"])):
-#             mood = prompt["moods"][i]
-#             moods.append(PromptMood(mood, prompt["freqList"][i], prompt[mood]))
-#         return Prompts(moods, prompt["minLen"], prompt["maxLen"], prompt.get("commandtext", default.command_text), prompt.get("subtext", default.submit_text))
-
-#     return try_load(paths.prompt, load) or default
+    return try_load(paths.media, load) or {}
 
 
-# def load_web(paths: PackPaths) -> list[Web]:
-#     def load(content: str) -> list[Web]:
-#         web = json.loads(content)
+def load_captions(paths: PackPaths) -> dict:
+    def load(content: str) -> dict:
+        captions = json.loads(content)
 
-#         Schema({"urls": All([Url()], Length(min=1)), "args": All([str], Length(min=1)), Optional("moods"): All([str], Length(min=1))}, required=True)(web)
+        schema = Schema(
+            {
+                "prefix": [str],
+                Optional("prefix_settings"): {
+                    Optional(str): {
+                        Optional("caption"): str,
+                        Optional("images"): str,
+                        Optional("chance"): All(Any(int, float), Range(min=0, max=100, min_included=False)),
+                        Optional("max"): All(int, Range(min=1)),
+                    }
+                },
+                Optional("subtext"): str,
+                Optional("denial"): All([str], Length(min=1)),
+                Optional("subliminals"): All([str], Length(min=1)),
+                Optional("notifications"): All([str], Length(min=1)),
+                "default": [str],
+            },
+            required=True,
+            extra=ALLOW_EXTRA,
+        )
 
-#         length_equal_to(web, "args", "urls")
-#         if "moods" in web:
-#             length_equal_to(web, "moods", "urls")
+        schema(captions)
+        schema.extend(dict.fromkeys(captions["prefix"], All([str], Length(min=1))), extra=PREVENT_EXTRA)(captions)
 
-#         web_list = []
-#         for i in range(len(web["urls"])):
-#             web_list.append(Web(web["urls"][i], web["args"][i].split(",")))
+        return captions
 
-#         return web_list
+    return try_load(paths.captions, load) or {}
 
-#     return try_load(paths.web, load) or []
+
+def load_prompts(paths: PackPaths) -> dict:
+    def load(content: str) -> dict:
+        prompts = json.loads(content)
+
+        schema = Schema(
+            {
+                "moods": All([str], Length(min=1)),
+                "freqList": All([All(Any(int, float), Range(min=0, min_included=False))], Length(min=1)),
+                "minLen": All(int, Range(min=1)),
+                "maxLen": All(int, Range(min=1)),
+                Optional("subtext"): str,
+                Optional("commandtext"): str,
+            },
+            required=True,
+            extra=ALLOW_EXTRA,
+        )
+
+        schema(prompts)
+        length_equal_to(prompts, "freqList", "moods")
+        Schema(Range(min=prompts["minLen"], msg='"maxLen" must be greater than or equal to "minLen"'))(prompts["maxLen"])
+        schema.extend(dict.fromkeys(prompts["moods"], All([str], Length(min=1))), extra=PREVENT_EXTRA)(prompts)
+
+        return prompts
+
+    return try_load(paths.prompt, load) or {}
+
+
+def load_web(paths: PackPaths) -> dict:
+    def load(content: str) -> dict:
+        web = json.loads(content)
+
+        Schema({"urls": All([Url()], Length(min=1)), "args": All([str], Length(min=1)), Optional("moods"): All([str], Length(min=1))}, required=True)(web)
+
+        length_equal_to(web, "args", "urls")
+        if "moods" in web:
+            length_equal_to(web, "moods", "urls")
+
+        return web
+
+    return try_load(paths.web, load) or {}

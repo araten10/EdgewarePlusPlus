@@ -17,13 +17,6 @@ class Pack:
         self.discord = load_discord(self.paths)
         self.index = load_index(self.paths)
         self.info = load_info(self.paths)
-        if not self.index:
-            pass
-            # TODO: Compute index
-            # self.captions = load_captions(self.paths)
-            # self.media_moods = load_media(self.paths)
-            # self.prompts = load_prompt(self.paths)
-            # self.web = load_web(self.paths)
 
         # Data files
         self.active_moods = load_active_moods(self.info.mood_file)
