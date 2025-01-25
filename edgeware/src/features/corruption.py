@@ -42,7 +42,7 @@ def corruption_danger_check(settings: Settings, pack: Pack) -> None:
 
 def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     level = pack.corruption_levels[state.corruption_level - 1]
-    pack.active_moods.media = level.moods.copy()
+    pack.active_moods = level.moods.copy()
 
     if settings.corruption_wallpaper:
         utils.set_wallpaper(pack.paths.root / (level.wallpaper or pack.wallpaper))

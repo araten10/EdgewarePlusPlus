@@ -33,7 +33,7 @@ class Pack:
         self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
 
     def filter_media(self, media_list: list[Path]) -> list[Path]:
-        return list(filter(lambda media: self.index.media_moods.get(media) in self.active_moods, media_list))
+        return list(filter(lambda media: self.index.media_moods.get(media.name) in self.active_moods, media_list))
 
     def random_image(self) -> Path | None:
         return random.choice(self.filter_media(self.images) or [None])
