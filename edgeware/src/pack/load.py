@@ -247,7 +247,7 @@ def load_index_fallback(paths: PackPaths) -> Index:
     index.default.prompt_min_length = prompts.get("minLen", 1)
     index.default.prompt_max_length = prompts.get("maxLen", 1)
 
-    for mood_name in prompts["moods"]:
+    for mood_name in prompts.get("moods", []):
         if mood_name != "default":
             get_or_add_mood(mood_name).prompts = prompts[mood_name]
 
