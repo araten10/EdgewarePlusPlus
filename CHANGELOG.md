@@ -11,6 +11,17 @@
 
 •*Added a renaming tool to the pack creator, which renames files to start with the mood they're in (for caption purposes)*
 
+The config refactor is here! Maybe you are reading this because you noticed that the version checker is broken on your older version- in that case the config refactor is in progress still... But if you're here when version 15 is officially out, guess what- it's done!
+
+This includes:
+
+•*Better backend code for more sane editing*
+
+•*I have chosen to remove the troubleshooting console error window, since it just caused a lot of confusion*
+>Nothing of value was lost, if you need to troubleshoot config window errors, use the debug tab or look at the logs
+
+•*A scrollbar has been added so users with smaller monitors won't have the import/export options slide off the face of the earth!*
+
 **Version 14.2**
 
 Marigold added a very useful feature: the ability to load multiple packs at once! This doesn't combine them into one mega-pack, instead it allows you to quickly switch between them using the config window. If packs are gigabytes huge, this will also save on the time it takes to unzip them!
