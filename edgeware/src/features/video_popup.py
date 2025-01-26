@@ -1,4 +1,4 @@
-from tkinter import Tk
+from tkinter import Label, Tk
 
 from features.popup import Popup
 from pack import Pack
@@ -20,7 +20,9 @@ class VideoPopup(Popup):
 
         self.compute_geometry(properties["width"], properties["height"])
         self.wait_visibility()
-        self.player = VideoPlayer(self, video, (self.width, self.height), self.settings.video_volume, self.settings.vlc_mode)
+        label = Label(self, width=self.width, height=self.height)
+        label.pack()
+        self.player = VideoPlayer(label, video, (self.width, self.height), self.settings.video_volume, self.settings.vlc_mode)
 
         self.init_finish()
 
