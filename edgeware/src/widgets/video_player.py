@@ -19,14 +19,19 @@ class VideoPlayer:
     def __init__(self, master: Toplevel, video: Path, size: tuple[int, int], volume: int, vlc_mode: bool):
         self.vlc_mode = vlc_mode
         if self.vlc_mode:
-            # Max repeat value. This is hacky but seems to be the easiest way to loop the video.
-            self.player = vlc.Instance("--input-repeat=65535").media_player_new()
-            utils.set_vlc_window(self.player, master.winfo_id())
-            self.player.video_set_mouse_input(False)
-            self.player.video_set_key_input(False)
-            self.player.audio_set_volume(volume)
-            self.player.set_media(vlc.Media(video))
-            self.player.play()
+            try:
+                #potential TODO: add support for --video-filter, fun stuff in there
+
+                # Max repeat value. This is hacky but seems to be the easiest way to loop the video.
+                self.player = vlc.Instance("--input-repeat=65535").media_player_new()
+                utils.set_vlc_window(self.player, master.winfo_id())
+                self.player.video_set_mouse_input(False)
+                self.player.video_set_key_input(False)
+                self.player.audio_set_volume(volume)
+                self.player.set_media(vlc.Media(video))
+                self.player.play()
+            except Exception as e:
+                print(f"error in video player. {e}")
         else:
             self.label = Label(master)
             self.label.pack()
