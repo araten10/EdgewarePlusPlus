@@ -20,6 +20,10 @@ from widgets.tooltip import CreateToolTip
 MULTI_PACK_TEXT = 'NOTE: If you have multiple packs loaded (via the file tab), make sure to apply the pack you want using the "Save & Refresh" button there! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
 
 
+def list_length(pack: Pack, attr: str) -> list:
+    return len(getattr(pack.index.default, attr)) + sum([len(getattr(mood, attr)) for mood in pack.index.moods])
+
+
 class StatusItem(Frame):
     def __init__(self, master: Misc, text: str, includes: bool, tooltip: str | None = None):
         super().__init__(master)
@@ -95,12 +99,12 @@ class InfoTab(ScrollFrame):
         StatsItem(stats_row_1, "Images", len(pack.images))
         StatsItem(stats_row_1, "Audio Files", len(pack.audio))
         StatsItem(stats_row_1, "Videos", len(pack.videos))
-        StatsItem(stats_row_1, "Web Links", len(pack.web))
+        StatsItem(stats_row_1, "Web Links", list_length(pack, "web"))
 
         stats_row_2 = Frame(stats_frame)
         stats_row_2.pack(fill="x", side="top", pady=1)
-        StatsItem(stats_row_2, "Prompts", sum([len(mood.prompts) for mood in pack.prompts.moods]))
-        StatsItem(stats_row_2, "Captions", len(pack.captions.default) + sum([len(mood.captions) for mood in pack.captions.moods]))
+        StatsItem(stats_row_2, "Prompts", list_length(pack, "prompts"))
+        StatsItem(stats_row_2, "Captions", list_length(pack, "captions"))
         StatsItem(stats_row_2, "Subliminals", len(pack.subliminal_overlays))
 
         # Information

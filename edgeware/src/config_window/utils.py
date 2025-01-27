@@ -143,7 +143,7 @@ def safe_check(vars: Vars) -> bool:
                 f"There are {numDangers} potentially dangerous settings detected! Do you want to save these settings anyways? {dangers}",
                 icon="warning",
             )
-            == False
+            is False
         ):
             logging.info("user cancelled save.")
             return False
@@ -177,7 +177,7 @@ def export_resource() -> bool:
 def import_resource(parent: Tk) -> bool:
     try:
         openLocation = filedialog.askopenfile("r", defaultextension=".zip")
-        if openLocation == None:
+        if openLocation is None:
             return False
         if os.path.exists(DEFAULT_PACK_PATH):
             resp = confirm_box(
@@ -294,7 +294,7 @@ def clear_launches(confirmation: bool):
 
 def add_list(tk_list_obj: Listbox, key: str, title: str, text: str):
     name = simpledialog.askstring(title, text)
-    if name != "" and name != None:
+    if name != "" and name is not None:
         config[key] = f"{config[key]}>{name}"
         tk_list_obj.insert(2, name)
 

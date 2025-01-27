@@ -1,5 +1,6 @@
 import random
 import time
+from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
@@ -15,6 +16,8 @@ from utils import utils
 
 
 class Popup(Toplevel):
+    media: Path  # Defined by subclasses
+
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State):
         state.popup_number += 1
         super().__init__(bg="black")
@@ -69,8 +72,9 @@ class Popup(Toplevel):
             self.y = random.randint(self.monitor.y, self.monitor.y + self.monitor.height - self.height)
 
     def try_caption(self) -> None:
-        if self.settings.captions_in_popups and self.pack.has_captions(self.settings, self.media):
-            label = Label(self, text=self.pack.random_caption(self.settings, self.media), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg)
+        caption = self.pack.random_caption(self.media)
+        if self.settings.captions_in_popups and caption:
+            label = Label(self, text=caption, wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg)
             label.place(x=5, y=5)
 
     def try_corruption_dev(self) -> None:
@@ -95,7 +99,7 @@ class Popup(Toplevel):
         else:
             button = Button(
                 self,
-                text=self.pack.captions.close_text,
+                text=self.pack.index.default.popup_close,
                 command=self.click,
                 fg=self.theme.fg,
                 bg=self.theme.bg,

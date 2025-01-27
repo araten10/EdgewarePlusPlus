@@ -114,8 +114,6 @@ class Vars:
         self.subliminal_message_popup_chance = self.make(IntVar, "capPopChance")
         self.subliminal_message_popup_opacity = self.make(IntVar, "capPopOpacity")
         self.subliminal_message_popup_timeout = self.make(IntVar, "capPopTimer")
-        self.subliminal_caption_mood = self.make(BooleanVar, "capPopMood")
-        self.notification_mood = self.make(BooleanVar, "notificationMood")
         self.notification_chance = self.make(IntVar, "notificationChance")
         self.notification_image_chance = self.make(IntVar, "notificationImageChance")
 

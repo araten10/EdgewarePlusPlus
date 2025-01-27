@@ -56,6 +56,7 @@ from config_window.utils import (
 )
 from config_window.vars import Vars
 from pack import Pack
+from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data
 from PIL import Image, ImageTk
 from settings import load_default_config
@@ -137,73 +138,11 @@ CINTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and
 CSTART_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
 CTRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
 
-UNIQUE_ID = pack.info.mood_file.with_suffix("").name
-
-
-Data.MOODS.mkdir(parents=True, exist_ok=True)
-MOOD_PATH = "0"
-if config["toggleMoodSet"] != True:
-    if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
-        MOOD_PATH = Data.MOODS / f"{UNIQUE_ID}.json"
-    elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
-        MOOD_PATH = Data.MOODS / f"{info_id}.json"
-
-    # creating the mood file if it doesn't exist
-    if MOOD_PATH != "0" and not os.path.isfile(MOOD_PATH):
-        logging.info(f"moods file does not exist, creating one using unique id {UNIQUE_ID}")
-        try:
-            with open(MOOD_PATH, "w+") as mood:
-                mood_dict = {"media": [], "captions": [], "prompts": [], "web": []}
-
-                try:
-                    if os.path.isfile(pack.paths.media):
-                        media_dict = ""
-                        with open(pack.paths.media) as media:
-                            media_dict = json.loads(media.read())
-                            mood_dict["media"] += media_dict
-                except Exception:
-                    logging.warning("media mood extraction failed.")
-
-                try:
-                    if os.path.isfile(pack.paths.captions):
-                        captions_dict = ""
-                        with open(pack.paths.captions) as captions:
-                            captions_dict = json.loads(captions.read())
-                            if "prefix" in captions_dict:
-                                del captions_dict["prefix"]
-                            if "subtext" in captions_dict:
-                                del captions_dict["subtext"]
-                            if "subliminal" in captions_dict:
-                                del captions_dict["subliminal"]
-                            if "prefix_settings" in captions_dict:
-                                del captions_dict["prefix_settings"]
-                            mood_dict["captions"] += captions_dict
-                except Exception:
-                    logging.warning("captions mood extraction failed.")
-
-                try:
-                    if os.path.isfile(pack.paths.prompt):
-                        prompt_dict = ""
-                        with open(pack.paths.prompt) as prompt:
-                            prompt_dict = json.loads(prompt.read())
-                            mood_dict["prompts"] += prompt_dict["moods"]
-                except Exception:
-                    logging.warning("prompt mood extraction failed.")
-
-                try:
-                    if os.path.isfile(pack.paths.web):
-                        web_dict = ""
-                        with open(pack.paths.web) as web:
-                            web_dict = json.loads(web.read())
-                            for n in web_dict["moods"]:
-                                if n not in mood_dict["web"]:
-                                    mood_dict["web"].append(n)
-                except Exception:
-                    logging.warning("web mood extraction failed.")
-
-                mood.write(json.dumps(mood_dict))
-        except Exception as e:
-            logging.warning(f"error creating/populating mood json. {e}")
+# Generate mood file if it doesn't exist or is invalid
+if not pack.info.mood_file.is_file() or isinstance(pack.active_moods, UniversalSet):
+    Data.MOODS.mkdir(parents=True, exist_ok=True)
+    with open(pack.info.mood_file, "w+") as f:
+        f.write(json.dumps({"active": list(map(lambda mood: mood.name, pack.index.moods))}))
 
 
 class Config(Tk):
@@ -219,7 +158,6 @@ class Config(Tk):
             logging.info("set iconbitmap.")
         except Exception:
             logging.warning("failed to set iconbitmap.")
-        fail_loop = 0
 
         windowFont = font.nametofont("TkDefaultFont")
         title_font = font.Font(font="Default")
@@ -279,10 +217,7 @@ class Config(Tk):
         tabDangerModes = ttk.Frame(None)  # tab for timer mode
         tabHibernate = ttk.Frame(None)  # tab for hibernate mode
         tabCorruption = ttk.Frame(None)  # tab for corruption mode
-        tabMitosis = ttk.Frame(None)
 
-        tabDrive = ttk.Frame(None)  # tab for drive settings
-        tabJSON = ttk.Frame(None)  # tab for JSON editor (unused)
         tabAdvanced = ttk.Frame(None)  # advanced tab, will have settings pertaining to startup, hibernation mode settings
         tabInfo = ttk.Frame(None)  # info, github, version, about, etc.
 
@@ -440,7 +375,7 @@ class Config(Tk):
         VLCNotice.pack(fill="both", side="top", expand=1, padx=2)
         installVLCButton.pack(fill="both", side="top", padx=2)
 
-        vlcttp = CreateToolTip(
+        CreateToolTip(
             toggleVLC,
             "Going to get a bit technical here:\n\nBy default, EdgeWare loads videos by taking the source file, turning every frame into an image, and then playing the images in "
             "sequence at the specified framerate. The upside to this is it requires no additional dependencies, but it has multiple downsides. Firstly, it's very slow: you may have "
@@ -473,12 +408,12 @@ class Config(Tk):
         toggleFilenameButton = Checkbutton(captionsFrame, text="Use filename for caption moods", variable=vars.filename_caption_moods, cursor="question_arrow")
         toggleMultiClickButton = Checkbutton(captionsFrame, text="Multi-Click popups", variable=vars.multi_click_popups, cursor="question_arrow")
 
-        multiclickttp = CreateToolTip(
+        CreateToolTip(
             toggleMultiClickButton,
             "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
             "to close. This feature must be set-up beforehand and won't do anything if not supported.",
         )
-        captionfilenamettp = CreateToolTip(
+        CreateToolTip(
             toggleFilenameButton,
             "When enabled, captions will try and match the filename of the image they attach to.\n\n"
             'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
@@ -503,17 +438,6 @@ class Config(Tk):
         # I am not messing about with the variables on this in case users want to import their old settings.
         # (however, the name was awful and needed to be changed so people could actually understand it)
         subMessageOptionsFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-        toggleCaptionMood = Checkbutton(
-            subMessageOptionsFrame, text="Use Subliminal specific mood", variable=vars.subliminal_caption_mood, cursor="question_arrow"
-        )
-
-        capmoodttp = CreateToolTip(
-            toggleCaptionMood,
-            'Subliminal Message Popups have the option to use a special mood in the captions.json file called "subliminals". This mood doesn\'t '
-            "normally appear like other captions, and is meant for short, fast messages that will blink at you very quickly.\n\n"
-            "If your pack doesn't support subliminals, this "
-            "setting doesn't need to be disabled- it will automatically switch to using regular captions.",
-        )
 
         capPopFrame = Frame(subMessageOptionsFrame)
         capPopOpacityFrame = Frame(subMessageOptionsFrame)
@@ -545,7 +469,6 @@ class Config(Tk):
         )
 
         subMessageOptionsFrame.pack(fill="x")
-        toggleCaptionMood.pack(fill="y", side="left")
 
         capPopFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
         captionsPopupSlider.pack(fill="x", padx=1, expand=1)
@@ -564,7 +487,6 @@ class Config(Tk):
         message_group.append(captionsNotifMessage)
 
         notificationFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-        notificationMoodToggle = Checkbutton(notificationFrame, text="Use Notification specific mood", variable=vars.notification_mood)
 
         notificationChanceFrame = Frame(notificationFrame)
         notificationChanceSlider = Scale(
@@ -587,7 +509,6 @@ class Config(Tk):
         )
 
         notificationFrame.pack(fill="x")
-        notificationMoodToggle.pack(fill="y", side="left")
         notificationChanceFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
         notificationChanceSlider.pack(fill="x", padx=1, expand=1)
         notificationChanceManual.pack(fill="x")
@@ -651,7 +572,7 @@ class Config(Tk):
         panicWallpaperButton = Button(panicWPFrameL, text="Change Panic Wallpaper", command=updatePanicPaper, cursor="question_arrow")
         panicWallpaperLabel = Label(panicWPFrameR, text="Current Panic Wallpaper", image=panicWallpaperImage)
 
-        panicWallpaperttp = CreateToolTip(
+        CreateToolTip(
             panicWallpaperButton,
             "When you use panic, the wallpaper will be set to this image.\n\n"
             "This is useful since most packs have a custom wallpaper, which is usually porn...!\n\n"
@@ -693,195 +614,43 @@ class Config(Tk):
         moodsListFrame = Frame(moodsFrame)
         tabMoodsMaster = ttk.Notebook(moodsListFrame)
         moodsMediaFrame = Frame(tabMoodsMaster)
-        moodsCaptionsFrame = Frame(tabMoodsMaster)
-        moodsPromptsFrame = Frame(tabMoodsMaster)
-        moodsWebFrame = Frame(tabMoodsMaster)
 
         moodsFrame.pack(fill="x")
         moodsListFrame.pack(fill="x")
         tabMoodsMaster.pack(fill="x")
         moodsMediaFrame.pack(fill="both")
-        moodsCaptionsFrame.pack(fill="both")
-        moodsPromptsFrame.pack(fill="both")
-        moodsWebFrame.pack(fill="both")
 
-        tabMoodsMaster.add(moodsMediaFrame, text="Media")
-        tabMoodsMaster.add(moodsCaptionsFrame, text="Captions")
-        tabMoodsMaster.add(moodsPromptsFrame, text="Prompts")
-        tabMoodsMaster.add(moodsWebFrame, text="Web")
+        tabMoodsMaster.add(moodsMediaFrame, text="Active Moods")
 
         # Media frame
         mediaTree = CheckboxTreeview(moodsMediaFrame, height=15, show="tree", name="mediaTree")
         mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
         mediaTree.configure(yscroll=mediaScrollbar.set)
 
-        if os.path.exists(pack.paths.media):
-            try:
-                with open(pack.paths.media, "r") as f:
-                    l = json.loads(f.read())
-                    for m in l:
-                        if m == "default":
-                            continue
-                        parent = mediaTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                        mediaTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} media related to this mood."))
-                        mediaTree.change_state((f"{m}desc"), "disabled")
+        for mood in pack.index.moods:
+            parent = mediaTree.insert("", "end", iid=str(mood.name), values=str(mood.name), text=str(mood.name))
+            # TODO: Display all mood information
+            mediaTree.insert(parent, "end", iid=(f"{mood.name}desc"), text="Under construction, mood information goes here")
+            mediaTree.change_state((f"{mood.name}desc"), "disabled")
 
-            except Exception as e:
-                logging.warning(f"error in media.json. Aborting treeview load. {e}")
-                mediaTree.insert("", "end", id="NAer", text="Pack doesn't support media moods, \nor they're improperly configured!")
-                mediaTree.change_state("NAer", "disabled")
         if len(mediaTree.get_children()) == 0:
-            mediaTree.insert("", "0", iid="NAmi", text="No media moods found in pack!")
+            mediaTree.insert("", "0", iid="NAmi", text="No moods found in pack!")
             mediaTree.change_state("NAmi", "disabled")
 
-        if config["toggleMoodSet"] != True:
+        if config["toggleMoodSet"] is not True:
             if len(mediaTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in mediaTree.get_children():
-                                value = mediaTree.item(c, "values")
-                                if value[0] in mood_dict["media"]:
-                                    mediaTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking media treeview nodes. {e}")
+                try:
+                    with open(pack.info.mood_file, "r") as f:
+                        moods = json.loads(f.read())
+                        for c in mediaTree.get_children():
+                            value = mediaTree.item(c, "values")
+                            if value[0] in moods["active"]:
+                                mediaTree.change_state(value[0], "checked")
+                except Exception as e:
+                    logging.warning(f"error checking media treeview nodes. {e}")
 
         mediaTree.pack(side="left", fill="both", expand=1)
         mediaScrollbar.pack(side="left", fill="y")
-
-        # Captions frame
-        captionsTree = CheckboxTreeview(moodsCaptionsFrame, height=7, show="tree", name="captionsTree")
-        captionsScrollbar = ttk.Scrollbar(moodsCaptionsFrame, orient=VERTICAL, command=captionsTree.yview)
-        captionsTree.configure(yscroll=captionsScrollbar.set)
-
-        if os.path.exists(pack.paths.captions):
-            try:
-                with open(pack.paths.captions, "r") as f:
-                    l = json.loads(f.read())
-                    if "prefix" in l:
-                        del l["prefix"]
-                    if "subtext" in l:
-                        del l["subtext"]
-                    if "subliminal" in l:
-                        del l["subliminal"]
-                    if "prefix_settings" in l:
-                        del l["prefix_settings"]
-                    for m in l:
-                        if m == "default":
-                            continue
-                        parent = captionsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                        captionsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} captions related to this mood."))
-                        captionsTree.change_state((f"{m}desc"), "disabled")
-
-            except Exception as e:
-                logging.warning(f"error in captions.json. Aborting treeview load. {e}")
-                captionsTree.insert("", "end", iid="NAer", text="Pack doesn't support caption moods, \nor they're improperly configured!")
-                captionsTree.change_state("NAer", "disabled")
-        if len(captionsTree.get_children()) == 0:
-            captionsTree.insert("", "0", iid="NAmi", text="No caption moods found in pack!")
-            captionsTree.change_state("NAmi", "disabled")
-
-        if config["toggleMoodSet"] != True:
-            if len(captionsTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in captionsTree.get_children():
-                                value = captionsTree.item(c, "values")
-                                if value[0] in mood_dict["captions"]:
-                                    captionsTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking caption treeview nodes. {e}")
-
-        captionsTree.pack(side="left", fill="both", expand=1)
-        captionsScrollbar.pack(side="left", fill="y")
-
-        # Prompts frame
-        promptsTree = CheckboxTreeview(moodsPromptsFrame, height=15, show="tree", name="promptsTree")
-        promptsScrollbar = ttk.Scrollbar(moodsPromptsFrame, orient=VERTICAL, command=promptsTree.yview)
-        promptsTree.configure(yscroll=promptsScrollbar.set)
-
-        if os.path.exists(pack.paths.prompt):
-            try:
-                with open(pack.paths.prompt, "r") as f:
-                    l = json.loads(f.read())
-                    for m in l["moods"]:
-                        if m == "default":
-                            continue
-                        parent = promptsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                        promptsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} prompts related to this mood."))
-                        promptsTree.change_state((f"{m}desc"), "disabled")
-
-            except Exception as e:
-                logging.warning(f"error in prompt.json. Aborting treeview load. {e}")
-                promptsTree.insert("", "end", iid="NAer", text="Pack doesn't support prompt moods, \nor they're improperly configured!")
-                promptsTree.change_state("NAer", "disabled")
-
-        if len(promptsTree.get_children()) == 0:
-            promptsTree.insert("", "0", iid="NAmi", text="No prompt moods found in pack!")
-            promptsTree.change_state("NAmi", "disabled")
-
-        if config["toggleMoodSet"] != True:
-            if len(promptsTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in promptsTree.get_children():
-                                value = promptsTree.item(c, "values")
-                                if value[0] in mood_dict["prompts"]:
-                                    promptsTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking prompt treeview nodes. {e}")
-
-        promptsTree.pack(side="left", fill="both", expand=1)
-        promptsScrollbar.pack(side="left", fill="y")
-        # Web frame
-        webTree = CheckboxTreeview(moodsWebFrame, height=15, show="tree", name="webTree")
-        webScrollbar = ttk.Scrollbar(moodsWebFrame, orient=VERTICAL, command=webTree.yview)
-        webTree.configure(yscroll=webScrollbar.set)
-
-        if os.path.exists(pack.paths.web):
-            try:
-                with open(pack.paths.web, "r") as f:
-                    l = json.loads(f.read())
-                    webMoodList = ["default"]
-                    for m in l["moods"]:
-                        if m == "default":
-                            continue
-                        if m not in webMoodList:
-                            parent = webTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                            mCount = l["moods"].count(m)
-                            webTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{mCount} web links related to this mood."))
-                            webTree.change_state((f"{m}desc"), "disabled")
-                            webMoodList.append(m)
-
-            except Exception as e:
-                logging.warning(f"error in web.json. Aborting treeview load. {e}")
-                webTree.insert("", "end", iid="NAer", text="Pack doesn't support web moods, \nor they're improperly configured!")
-                webTree.change_state("NAer", "disabled")
-
-        if len(webTree.get_children()) == 0:
-            webTree.insert("", "0", iid="NAmi", text="No web moods found in pack!")
-            webTree.change_state("NAmi", "disabled")
-
-        if config["toggleMoodSet"] != True:
-            if len(webTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in webTree.get_children():
-                                value = webTree.item(c, "values")
-                                if value[0] in mood_dict["web"]:
-                                    webTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking web treeview nodes. {e}")
-
-        webTree.pack(side="left", fill="both", expand=1)
-        webScrollbar.pack(side="left", fill="y")
 
         moodsFrame.grid_columnconfigure(0, weight=1, uniform="group1")
         moodsFrame.grid_columnconfigure(1, weight=1, uniform="group1")
@@ -927,7 +696,7 @@ class Config(Tk):
         )
         fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=vars.fill_delay)
 
-        fillttp = CreateToolTip(
+        CreateToolTip(
             fillBox,
             '"Fill Drive" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. '
             'It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a "." or have their '
@@ -947,7 +716,7 @@ class Config(Tk):
         )
         replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=vars.replace_threshold)
 
-        replacettp = CreateToolTip(
+        CreateToolTip(
             replaceBox,
             "Seeks out folders with more images than the threshold value, then replaces all of them. No, there is no automated backup!\n\n"
             'I am begging you to read the full documentation in the "About" tab before even thinking about enabling this feature!\n\n'
@@ -1004,7 +773,7 @@ class Config(Tk):
         toggleStartupButton = Checkbutton(dangerOtherFrame, text="Launch on PC Startup", variable=vars.run_at_startup)
         toggleDiscordButton = Checkbutton(dangerOtherFrame, text="Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
 
-        disablePanicttp = CreateToolTip(
+        CreateToolTip(
             panicDisableButton,
             "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
             "If you want to use Panic after this, you can still:\n"
@@ -1012,9 +781,7 @@ class Config(Tk):
             '•Keep the config window open and press "Perform Panic"\n'
             "•Use the panic desktop icon (if you kept those enabled)",
         )
-        discordttp = CreateToolTip(
-            toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator."
-        )
+        CreateToolTip(toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator.")
         dangerOtherFrame.pack(fill="x")
         panicDisableButton.pack(fill="x", side="left", expand=1)
         toggleStartupButton.pack(fill="x", side="left", expand=1)
@@ -1039,7 +806,7 @@ class Config(Tk):
             cursor="question_arrow",
         )
 
-        lowkeyttp = CreateToolTip(
+        CreateToolTip(
             lowkeyToggle,
             "Makes popups appear in a corner of the screen instead of the middle.\n\nBest used with Popup Timeout or high delay as popups will stack.",
         )
@@ -1057,12 +824,12 @@ class Config(Tk):
         movingSlider = Scale(moveChanceFrame, label="Moving Chance", orient="horizontal", variable=vars.moving_chance, cursor="question_arrow")
         movingRandToggle = Checkbutton(moveChanceFrame, text="Random Direction", variable=vars.moving_random, cursor="question_arrow")
 
-        movingttp = CreateToolTip(
+        CreateToolTip(
             movingSlider,
             'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
             "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
         )
-        moverandomttp = CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
+        CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
 
         speedFrame = Frame(movementFrame)
         movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed)
@@ -1091,7 +858,7 @@ class Config(Tk):
         def timerHelper():
             set_widget_states(vars.timer_mode.get(), timer_group)
 
-        timerttp = CreateToolTip(
+        CreateToolTip(
             timerToggle,
             'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
             '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
@@ -1122,7 +889,7 @@ class Config(Tk):
         mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=vars.mitosis_mode, command=toggleMitosis, cursor="question_arrow")
         mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=vars.mitosis_strength)
 
-        mitosisttp = CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
+        CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
 
         mitosis_cGroup.append(mitosisStren)
 
@@ -1232,14 +999,14 @@ class Config(Tk):
             command=lambda: assign(vars.hibernate_activity_length, simpledialog.askinteger("Manual Hibernate Length", prompt="[5-300]: ")),
         )
 
-        hibernatettp = CreateToolTip(
+        CreateToolTip(
             toggleHibernateButton,
             "Runs EdgeWare silently without any popups.\n\n"
             "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
             'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
             'Check the "About" tab for more detailed information on each hibernate type.',
         )
-        fixwallpaperttp = CreateToolTip(
+        CreateToolTip(
             fixWallpaperButton,
             '"fixes" your wallpaper after hibernate is finished by changing it to'
             " your panic wallpaper. If left off, it will keep the pack's wallpaper on until you panic"
@@ -1315,7 +1082,7 @@ class Config(Tk):
         corruptionFullToggle.pack(fill="x", expand=1)
         corruptionRecommendedToggle.pack(fill="x", padx=2, pady=2)
 
-        corruptionmodettp = CreateToolTip(
+        CreateToolTip(
             corruptionToggle,
             "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
             " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
@@ -1323,10 +1090,8 @@ class Config(Tk):
             ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
             ' EdgeWare.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
         )
-        corruptionfullttp = CreateToolTip(
-            corruptionFullToggle, "This setting allows corruption mode to change config settings as it goes through corruption levels."
-        )
-        corruptionsettingsttp = CreateToolTip(
+        CreateToolTip(corruptionFullToggle, "This setting allows corruption mode to change config settings as it goes through corruption levels.")
+        CreateToolTip(
             corruptionRecommendedToggle,
             'Pack creators can set "default corruption settings" for their pack, to give'
             " users a more designed and consistent experience. This setting turns those on (if they exist)."
@@ -1525,21 +1290,21 @@ class Config(Tk):
         corruptionPurityToggle.pack(fill="x", side="top")
         corruptionDevToggle.pack(fill="x", side="top")
 
-        corrwallpaperttp = CreateToolTip(
+        CreateToolTip(
             corruptionWallpaperToggle,
             "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to a pack defined static one.",
         )
-        corrthemettp = CreateToolTip(
+        CreateToolTip(
             corruptionThemeToggle,
             "Prevents the theme from cycling as you go through corruption levels, instead staying as "
             'the theme you set in the "General" tab of the config window.',
         )
-        corrpurityttp = CreateToolTip(
+        CreateToolTip(
             corruptionPurityToggle,
             "Starts corruption mode at the highest corruption level, then works backwards to level 1. "
             "Retains all of your other settings for this mode, if applicable.",
         )
-        corruptiondevttp = CreateToolTip(
+        CreateToolTip(
             corruptionDevToggle,
             "Enables captions on popups that show various info.\n\n Mood: the mood in which the popup belongs to\n"
             "Valid Level: the corruption levels in which the popup spawns\nCurrent Level: the current corruption level\n\n"
@@ -1563,7 +1328,6 @@ class Config(Tk):
         pathTree.column("level", width=40, stretch=False, anchor="center")
         pathTree.heading("moods", text="MOODS", anchor="w")
 
-        corruptionList = []
         lineWidth = 0
         # if os.path.isfile(pack.CORRUPTION):
         #     try:
@@ -1596,7 +1360,7 @@ class Config(Tk):
 
         def corruptionTutorialHelper(event):
             tab = event.widget.tab("current")["text"]
-            th = config["themeType"].strip()
+            config["themeType"].strip()
             if tab == "Start":
                 set_widget_states_with_colors(True, ctutorialstart_group, "lime green", "forest green")
                 set_widget_states(True, ctutorialtransition_group)
@@ -1656,18 +1420,18 @@ class Config(Tk):
         toggleHibernateSkip.pack(fill="x", side="top")
         toggleMoodSettings.pack(fill="x", side="top")
 
-        internetttp = CreateToolTip(
+        CreateToolTip(
             toggleInternetSetting,
             "In some cases, having a slow internet connection can cause the config window to delay opening for a long time.\n\n"
             "EdgeWare connects to Github just to check if there's a new update, but sometimes even this can take a while.\n\n"
             "If you have noticed this, try enabling this setting- it will disable all connections to Github on future launches.",
         )
-        hibernateskipttp = CreateToolTip(
+        CreateToolTip(
             toggleHibernateSkip,
             "Want to test out how hibernate mode works with your current settings, and hate waiting for the minimum time? Me too!\n\n"
             "This adds a feature in the tray that allows you to skip to the start of hibernate.",
         )
-        moodtogglettp = CreateToolTip(
+        CreateToolTip(
             toggleMoodSettings,
             "If your pack does not have a 'info.json' file with a valid pack name, it will generate a mood setting file based on a unique identifier.\n\n"
             "This unique identifier is created by taking a bunch of values from your pack and putting them all together, including the amount of images,"
@@ -1825,56 +1589,21 @@ def assign_json(key: str, var: int or str):
 
 def update_moods(type: str, id: str, check: bool):
     try:
-        if config["toggleMoodSet"] != True:
-            if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
-                moodUpdatePath = Data.MOODS / f"{UNIQUE_ID}.json"
-            elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
-                moodUpdatePath = Data.MOODS / f"{info_id}.json"
-            with open(moodUpdatePath, "r") as mood:
+        if config["toggleMoodSet"] is not True:
+            with open(pack.info.mood_file, "r") as mood:
                 mood_dict = json.loads(mood.read())
                 if check:
-                    if type == "mediaTree":
-                        logging.info("mediaTree")
-                        if id not in mood_dict["media"]:
-                            mood_dict["media"].append(id)
-                    if type == "captionsTree":
-                        # logging.info('captionsTree')
-                        if id not in mood_dict["captions"]:
-                            mood_dict["captions"].append(id)
-                    if type == "promptsTree":
-                        # logging.info('promptsTree')
-                        if id not in mood_dict["prompts"]:
-                            mood_dict["prompts"].append(id)
-                    if type == "webTree":
-                        # logging.info('promptsTree')
-                        if id not in mood_dict["web"]:
-                            mood_dict["web"].append(id)
+                    mood_dict["active"].append(id)
                 else:
-                    if type == "mediaTree":
-                        logging.info("mediaTree uncheck")
-                        if id in mood_dict["media"]:
-                            mood_dict["media"].remove(id)
-                    if type == "captionsTree":
-                        # logging.info('captionsTree uncheck')
-                        if id in mood_dict["captions"]:
-                            mood_dict["captions"].remove(id)
-                    if type == "promptsTree":
-                        # logging.info('promptsTree uncheck')
-                        if id in mood_dict["prompts"]:
-                            mood_dict["prompts"].remove(id)
-                    if type == "webTree":
-                        # logging.info('webTree uncheck')
-                        if id in mood_dict["web"]:
-                            mood_dict["web"].remove(id)
-            with open(moodUpdatePath, "w") as mood:
-                # logging.info(mood_dict)
+                    mood_dict["active"].remove(id)
+            with open(pack.info.mood_file, "w") as mood:
                 mood.write(json.dumps(mood_dict))
     except Exception as e:
         logging.warning(f"error updating mood files. {e}")
 
 
 def theme_change(theme: str, root, style, mfont, tfont):
-    if theme == "Original" or config["themeNoConfig"] == True:
+    if theme == "Original" or config["themeNoConfig"] is True:
         for widget in all_children(root):
             if isinstance(widget, Message):
                 widget.configure(font=(mfont, 8))
@@ -2024,7 +1753,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
 
 
 def toggle_help(state: bool, messages: list):
-    if state == True:
+    if state is True:
         try:
             for widget in messages:
                 widget.destroy()

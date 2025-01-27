@@ -2,26 +2,21 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-@dataclass
-class CaptionMood:
-    mood: str
-    max_clicks: int
-    captions: list[str]
+# "mood in set" additionally return True if "mood" is the default one
+class MoodSet(set):
+    def __contains__(self, o: object) -> bool:
+        return o is None or super().__contains__(o)
 
 
-@dataclass
-class Captions:
-    moods: list[CaptionMood] = field(default_factory=list)
-    close_text: str = "I Submit <3"
-    denial: list[str] = field(default_factory=lambda: ["Not for you~"])
-    subliminal: list[str] = field(default_factory=list)
-    notification: list[str] = field(default_factory=list)
-    default: list[str] = field(default_factory=list)
+# "mood in set" always returns True, used when a mood file can't be used
+class UniversalSet(set):
+    def __contains__(self, o: object) -> bool:
+        return True
 
 
 @dataclass
 class CorruptionLevel:
-    moods: set[str]
+    moods: MoodSet[str]
     wallpaper: str | None
     config: dict[str, str | int]
 
@@ -33,47 +28,47 @@ class Discord:
 
 
 @dataclass
+class Web:
+    url: str
+    args: list[str]
+
+
+@dataclass
+class MoodBase:
+    max_clicks: int = 1
+    captions: list[str] = field(default_factory=list)
+    denial: list[str] = field(default_factory=list)
+    subliminals: list[str] = field(default_factory=list)
+    notifications: list[str] = field(default_factory=list)
+    prompts: list[str] = field(default_factory=list)
+    web: list[Web] = field(default_factory=list)
+
+
+@dataclass
+class Default(MoodBase):
+    popup_close: str = "I Submit <3"
+    prompt_command: str = "Type for me, slut~"
+    prompt_submit: str = "I Submit <3"
+    prompt_min_length: int = 1
+    prompt_max_length: int = 1
+
+
+@dataclass
+class Mood(MoodBase):
+    name: str | None = None
+
+
+@dataclass
+class Index:
+    default: Default = field(default_factory=Default)
+    moods: list[Mood] = field(default_factory=list)
+    media_moods: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass
 class Info:
     name: str = "Unnamed Pack"
     mood_file: Path = Path()
     creator: str = "Anonymous"
     version: str = "1.0"
     description: str = "No description set."
-
-
-@dataclass
-class PromptMood:
-    mood: str
-    weight: float
-    prompts: list[str]
-
-
-@dataclass
-class Prompts:
-    moods: list[PromptMood] = field(default_factory=list)
-    min_length: int = 1
-    max_length: int = 1
-    command_text: str = "Type for me, slut~"
-    submit_text: str = "I Submit <3"
-
-
-@dataclass
-class Web:
-    url: str
-    args: list[str]
-    mood: str | None
-
-
-@dataclass
-class ActiveMoods:
-    exists: bool = False
-    media: set[str] = field(default_factory=lambda: set(["default"]))
-    captions: set[str] = field(default_factory=lambda: set(["default"]))
-    prompts: set[str] = field(default_factory=lambda: set(["default"]))
-    web: set[str] = field(default_factory=set)
-
-
-@dataclass
-class Media:
-    path: Path
-    mood: str

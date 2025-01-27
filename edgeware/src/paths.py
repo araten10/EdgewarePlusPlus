@@ -100,14 +100,17 @@ class PackPaths:
         self.video = self.root / "vid"
 
         # Files
-        self.captions = self.root / "captions.json"
         self.config = self.root / "config.json"
         self.corruption = self.root / "corruption.json"
         self.discord = self.root / "discord.dat"
         self.icon = self.root / "icon.ico"
+        self.index = self.root / "index.json"
         self.info = self.root / "info.json"
         self.splash = [self.root / f"loading_splash.{extension}" for extension in ["png", "gif", "jpg", "jpeg", "bmp"]]
+        self.wallpaper = self.root / "wallpaper.png"
+
+        # Deprecated fallback options
+        self.captions = self.root / "captions.json"
         self.media = self.root / "media.json"
         self.prompt = self.root / "prompt.json"
-        self.wallpaper = self.root / "wallpaper.png"
         self.web = self.root / "web.json"

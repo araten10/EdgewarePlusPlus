@@ -10,7 +10,8 @@ from utils import utils
 
 class SubliminalMessagePopup(Toplevel):
     def __init__(self, settings: Settings, pack: Pack):
-        if not self.should_init(settings, pack):
+        self.subliminal_message = pack.random_subliminal_message()
+        if not self.should_init():
             return
         super().__init__()
 
@@ -27,7 +28,7 @@ class SubliminalMessagePopup(Toplevel):
         font = (self.theme.font, min(monitor.width, monitor.height) // 10)
         label = Label(
             self,
-            text=pack.random_subliminal_message(settings),
+            text=self.subliminal_message,
             font=font,
             wraplength=monitor.width / 1.5,
             fg=self.theme.fg,
@@ -41,5 +42,5 @@ class SubliminalMessagePopup(Toplevel):
         self.geometry(f"+{x}+{y}")
         self.after(settings.subliminal_message_popup_timeout, self.destroy)
 
-    def should_init(self, settings: Settings, pack: Pack) -> bool:
-        return pack.has_subliminal_messages(settings)
+    def should_init(self) -> bool:
+        return self.subliminal_message
