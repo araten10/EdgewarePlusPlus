@@ -4,6 +4,7 @@ import os
 import platform
 import sys
 import time
+from hashlib import md5
 
 from paths import Data, PackPaths
 
@@ -29,15 +30,11 @@ def init_logging(filename: str) -> str:
 
 
 def compute_mood_id(paths: PackPaths) -> str:
-    im = str(len(os.listdir(paths.image))) if paths.image.is_dir() else "0"
-    au = str(len(os.listdir(paths.audio))) if paths.audio.is_dir() else "0"
-    vi = str(len(os.listdir(paths.video))) if paths.video.is_dir() else "0"
-    wa = "w" if paths.wallpaper.is_file() else "x"
-    sp = "s" if paths.splash else "x"
-    di = "d" if paths.discord.is_file() else "x"
-    ic = "i" if paths.icon.is_file() else "x"
-    co = "c" if paths.corruption.is_file() else "x"
-    return im + au + vi + wa + sp + di + ic + co
+    data = []
+    for path, dirs, files in os.walk(paths.root):
+        data.append(sorted(files))
+
+    return md5(str(sorted(data)).encode()).hexdigest()
 
 
 def is_linux():

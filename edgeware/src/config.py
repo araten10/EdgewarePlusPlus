@@ -56,6 +56,7 @@ from config_window.utils import (
 )
 from config_window.vars import Vars
 from pack import Pack
+from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data
 from PIL import Image, ImageTk
 from settings import load_default_config
@@ -137,73 +138,11 @@ CINTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and
 CSTART_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
 CTRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
 
-UNIQUE_ID = pack.info.mood_file.with_suffix("").name
-
-
-Data.MOODS.mkdir(parents=True, exist_ok=True)
-MOOD_PATH = "0"
-if config["toggleMoodSet"] is not True:
-    if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
-        MOOD_PATH = Data.MOODS / f"{UNIQUE_ID}.json"
-    elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
-        MOOD_PATH = Data.MOODS / f"{info_id}.json"
-
-    # creating the mood file if it doesn't exist
-    if MOOD_PATH != "0" and not os.path.isfile(MOOD_PATH):
-        logging.info(f"moods file does not exist, creating one using unique id {UNIQUE_ID}")
-        try:
-            with open(MOOD_PATH, "w+") as mood:
-                mood_dict = {"media": [], "captions": [], "prompts": [], "web": []}
-
-                try:
-                    if os.path.isfile(pack.paths.media):
-                        media_dict = ""
-                        with open(pack.paths.media) as media:
-                            media_dict = json.loads(media.read())
-                            mood_dict["media"] += media_dict
-                except Exception:
-                    logging.warning("media mood extraction failed.")
-
-                try:
-                    if os.path.isfile(pack.paths.captions):
-                        captions_dict = ""
-                        with open(pack.paths.captions) as captions:
-                            captions_dict = json.loads(captions.read())
-                            if "prefix" in captions_dict:
-                                del captions_dict["prefix"]
-                            if "subtext" in captions_dict:
-                                del captions_dict["subtext"]
-                            if "subliminal" in captions_dict:
-                                del captions_dict["subliminal"]
-                            if "prefix_settings" in captions_dict:
-                                del captions_dict["prefix_settings"]
-                            mood_dict["captions"] += captions_dict
-                except Exception:
-                    logging.warning("captions mood extraction failed.")
-
-                try:
-                    if os.path.isfile(pack.paths.prompt):
-                        prompt_dict = ""
-                        with open(pack.paths.prompt) as prompt:
-                            prompt_dict = json.loads(prompt.read())
-                            mood_dict["prompts"] += prompt_dict["moods"]
-                except Exception:
-                    logging.warning("prompt mood extraction failed.")
-
-                try:
-                    if os.path.isfile(pack.paths.web):
-                        web_dict = ""
-                        with open(pack.paths.web) as web:
-                            web_dict = json.loads(web.read())
-                            for n in web_dict["moods"]:
-                                if n not in mood_dict["web"]:
-                                    mood_dict["web"].append(n)
-                except Exception:
-                    logging.warning("web mood extraction failed.")
-
-                mood.write(json.dumps(mood_dict))
-        except Exception as e:
-            logging.warning(f"error creating/populating mood json. {e}")
+# Generate mood file if it doesn't exist or is invalid
+if not pack.info.mood_file.is_file() or isinstance(pack.active_moods, UniversalSet):
+    Data.MOODS.mkdir(parents=True, exist_ok=True)
+    with open(pack.info.mood_file, "w+") as f:
+        f.write(json.dumps({"active": list(map(lambda mood: mood.name, pack.index.moods))}))
 
 
 class Config(Tk):
@@ -675,195 +614,43 @@ class Config(Tk):
         moodsListFrame = Frame(moodsFrame)
         tabMoodsMaster = ttk.Notebook(moodsListFrame)
         moodsMediaFrame = Frame(tabMoodsMaster)
-        moodsCaptionsFrame = Frame(tabMoodsMaster)
-        moodsPromptsFrame = Frame(tabMoodsMaster)
-        moodsWebFrame = Frame(tabMoodsMaster)
 
         moodsFrame.pack(fill="x")
         moodsListFrame.pack(fill="x")
         tabMoodsMaster.pack(fill="x")
         moodsMediaFrame.pack(fill="both")
-        moodsCaptionsFrame.pack(fill="both")
-        moodsPromptsFrame.pack(fill="both")
-        moodsWebFrame.pack(fill="both")
 
-        tabMoodsMaster.add(moodsMediaFrame, text="Media")
-        tabMoodsMaster.add(moodsCaptionsFrame, text="Captions")
-        tabMoodsMaster.add(moodsPromptsFrame, text="Prompts")
-        tabMoodsMaster.add(moodsWebFrame, text="Web")
+        tabMoodsMaster.add(moodsMediaFrame, text="Active Moods")
 
         # Media frame
         mediaTree = CheckboxTreeview(moodsMediaFrame, height=15, show="tree", name="mediaTree")
         mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
         mediaTree.configure(yscroll=mediaScrollbar.set)
 
-        if os.path.exists(pack.paths.media):
-            try:
-                with open(pack.paths.media, "r") as f:
-                    l = json.loads(f.read())
-                    for m in l:
-                        if m == "default":
-                            continue
-                        parent = mediaTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                        mediaTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} media related to this mood."))
-                        mediaTree.change_state((f"{m}desc"), "disabled")
+        for mood in pack.index.moods:
+            parent = mediaTree.insert("", "end", iid=str(mood.name), values=str(mood.name), text=str(mood.name))
+            # TODO: Display all mood information
+            mediaTree.insert(parent, "end", iid=(f"{mood.name}desc"), text="Under construction, mood information goes here")
+            mediaTree.change_state((f"{mood.name}desc"), "disabled")
 
-            except Exception as e:
-                logging.warning(f"error in media.json. Aborting treeview load. {e}")
-                mediaTree.insert("", "end", id="NAer", text="Pack doesn't support media moods, \nor they're improperly configured!")
-                mediaTree.change_state("NAer", "disabled")
         if len(mediaTree.get_children()) == 0:
-            mediaTree.insert("", "0", iid="NAmi", text="No media moods found in pack!")
+            mediaTree.insert("", "0", iid="NAmi", text="No moods found in pack!")
             mediaTree.change_state("NAmi", "disabled")
 
         if config["toggleMoodSet"] is not True:
             if len(mediaTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in mediaTree.get_children():
-                                value = mediaTree.item(c, "values")
-                                if value[0] in mood_dict["media"]:
-                                    mediaTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking media treeview nodes. {e}")
+                try:
+                    with open(pack.info.mood_file, "r") as f:
+                        moods = json.loads(f.read())
+                        for c in mediaTree.get_children():
+                            value = mediaTree.item(c, "values")
+                            if value[0] in moods["active"]:
+                                mediaTree.change_state(value[0], "checked")
+                except Exception as e:
+                    logging.warning(f"error checking media treeview nodes. {e}")
 
         mediaTree.pack(side="left", fill="both", expand=1)
         mediaScrollbar.pack(side="left", fill="y")
-
-        # Captions frame
-        captionsTree = CheckboxTreeview(moodsCaptionsFrame, height=7, show="tree", name="captionsTree")
-        captionsScrollbar = ttk.Scrollbar(moodsCaptionsFrame, orient=VERTICAL, command=captionsTree.yview)
-        captionsTree.configure(yscroll=captionsScrollbar.set)
-
-        if os.path.exists(pack.paths.captions):
-            try:
-                with open(pack.paths.captions, "r") as f:
-                    l = json.loads(f.read())
-                    if "prefix" in l:
-                        del l["prefix"]
-                    if "subtext" in l:
-                        del l["subtext"]
-                    if "subliminal" in l:
-                        del l["subliminal"]
-                    if "prefix_settings" in l:
-                        del l["prefix_settings"]
-                    for m in l:
-                        if m == "default":
-                            continue
-                        parent = captionsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                        captionsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} captions related to this mood."))
-                        captionsTree.change_state((f"{m}desc"), "disabled")
-
-            except Exception as e:
-                logging.warning(f"error in captions.json. Aborting treeview load. {e}")
-                captionsTree.insert("", "end", iid="NAer", text="Pack doesn't support caption moods, \nor they're improperly configured!")
-                captionsTree.change_state("NAer", "disabled")
-        if len(captionsTree.get_children()) == 0:
-            captionsTree.insert("", "0", iid="NAmi", text="No caption moods found in pack!")
-            captionsTree.change_state("NAmi", "disabled")
-
-        if config["toggleMoodSet"] is not True:
-            if len(captionsTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in captionsTree.get_children():
-                                value = captionsTree.item(c, "values")
-                                if value[0] in mood_dict["captions"]:
-                                    captionsTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking caption treeview nodes. {e}")
-
-        captionsTree.pack(side="left", fill="both", expand=1)
-        captionsScrollbar.pack(side="left", fill="y")
-
-        # Prompts frame
-        promptsTree = CheckboxTreeview(moodsPromptsFrame, height=15, show="tree", name="promptsTree")
-        promptsScrollbar = ttk.Scrollbar(moodsPromptsFrame, orient=VERTICAL, command=promptsTree.yview)
-        promptsTree.configure(yscroll=promptsScrollbar.set)
-
-        if os.path.exists(pack.paths.prompt):
-            try:
-                with open(pack.paths.prompt, "r") as f:
-                    l = json.loads(f.read())
-                    for m in l["moods"]:
-                        if m == "default":
-                            continue
-                        parent = promptsTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                        promptsTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{len(l[m])} prompts related to this mood."))
-                        promptsTree.change_state((f"{m}desc"), "disabled")
-
-            except Exception as e:
-                logging.warning(f"error in prompt.json. Aborting treeview load. {e}")
-                promptsTree.insert("", "end", iid="NAer", text="Pack doesn't support prompt moods, \nor they're improperly configured!")
-                promptsTree.change_state("NAer", "disabled")
-
-        if len(promptsTree.get_children()) == 0:
-            promptsTree.insert("", "0", iid="NAmi", text="No prompt moods found in pack!")
-            promptsTree.change_state("NAmi", "disabled")
-
-        if config["toggleMoodSet"] is not True:
-            if len(promptsTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in promptsTree.get_children():
-                                value = promptsTree.item(c, "values")
-                                if value[0] in mood_dict["prompts"]:
-                                    promptsTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking prompt treeview nodes. {e}")
-
-        promptsTree.pack(side="left", fill="both", expand=1)
-        promptsScrollbar.pack(side="left", fill="y")
-        # Web frame
-        webTree = CheckboxTreeview(moodsWebFrame, height=15, show="tree", name="webTree")
-        webScrollbar = ttk.Scrollbar(moodsWebFrame, orient=VERTICAL, command=webTree.yview)
-        webTree.configure(yscroll=webScrollbar.set)
-
-        if os.path.exists(pack.paths.web):
-            try:
-                with open(pack.paths.web, "r") as f:
-                    l = json.loads(f.read())
-                    webMoodList = ["default"]
-                    for m in l["moods"]:
-                        if m == "default":
-                            continue
-                        if m not in webMoodList:
-                            parent = webTree.insert("", "end", iid=str(m), values=str(m), text=str(m))
-                            mCount = l["moods"].count(m)
-                            webTree.insert(parent, "end", iid=(f"{m}desc"), text=(f"{mCount} web links related to this mood."))
-                            webTree.change_state((f"{m}desc"), "disabled")
-                            webMoodList.append(m)
-
-            except Exception as e:
-                logging.warning(f"error in web.json. Aborting treeview load. {e}")
-                webTree.insert("", "end", iid="NAer", text="Pack doesn't support web moods, \nor they're improperly configured!")
-                webTree.change_state("NAer", "disabled")
-
-        if len(webTree.get_children()) == 0:
-            webTree.insert("", "0", iid="NAmi", text="No web moods found in pack!")
-            webTree.change_state("NAmi", "disabled")
-
-        if config["toggleMoodSet"] is not True:
-            if len(webTree.get_children()) != 0:
-                if MOOD_PATH != "0" and os.path.exists(pack.paths.root):
-                    try:
-                        with open(MOOD_PATH, "r") as mood:
-                            mood_dict = json.loads(mood.read())
-                            for c in webTree.get_children():
-                                value = webTree.item(c, "values")
-                                if value[0] in mood_dict["web"]:
-                                    webTree.change_state(value[0], "checked")
-                    except Exception as e:
-                        logging.warning(f"error checking web treeview nodes. {e}")
-
-        webTree.pack(side="left", fill="both", expand=1)
-        webScrollbar.pack(side="left", fill="y")
 
         moodsFrame.grid_columnconfigure(0, weight=1, uniform="group1")
         moodsFrame.grid_columnconfigure(1, weight=1, uniform="group1")
@@ -1803,48 +1590,13 @@ def assign_json(key: str, var: int or str):
 def update_moods(type: str, id: str, check: bool):
     try:
         if config["toggleMoodSet"] is not True:
-            if UNIQUE_ID != "0" and os.path.exists(pack.paths.root):
-                moodUpdatePath = Data.MOODS / f"{UNIQUE_ID}.json"
-            elif UNIQUE_ID == "0" and os.path.exists(pack.paths.root):
-                moodUpdatePath = Data.MOODS / f"{info_id}.json"
-            with open(moodUpdatePath, "r") as mood:
+            with open(pack.info.mood_file, "r") as mood:
                 mood_dict = json.loads(mood.read())
                 if check:
-                    if type == "mediaTree":
-                        logging.info("mediaTree")
-                        if id not in mood_dict["media"]:
-                            mood_dict["media"].append(id)
-                    if type == "captionsTree":
-                        # logging.info('captionsTree')
-                        if id not in mood_dict["captions"]:
-                            mood_dict["captions"].append(id)
-                    if type == "promptsTree":
-                        # logging.info('promptsTree')
-                        if id not in mood_dict["prompts"]:
-                            mood_dict["prompts"].append(id)
-                    if type == "webTree":
-                        # logging.info('promptsTree')
-                        if id not in mood_dict["web"]:
-                            mood_dict["web"].append(id)
+                    mood_dict["active"].append(id)
                 else:
-                    if type == "mediaTree":
-                        logging.info("mediaTree uncheck")
-                        if id in mood_dict["media"]:
-                            mood_dict["media"].remove(id)
-                    if type == "captionsTree":
-                        # logging.info('captionsTree uncheck')
-                        if id in mood_dict["captions"]:
-                            mood_dict["captions"].remove(id)
-                    if type == "promptsTree":
-                        # logging.info('promptsTree uncheck')
-                        if id in mood_dict["prompts"]:
-                            mood_dict["prompts"].remove(id)
-                    if type == "webTree":
-                        # logging.info('webTree uncheck')
-                        if id in mood_dict["web"]:
-                            mood_dict["web"].remove(id)
-            with open(moodUpdatePath, "w") as mood:
-                # logging.info(mood_dict)
+                    mood_dict["active"].remove(id)
+            with open(pack.info.mood_file, "w") as mood:
                 mood.write(json.dumps(mood_dict))
     except Exception as e:
         logging.warning(f"error updating mood files. {e}")

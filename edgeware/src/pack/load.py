@@ -181,14 +181,15 @@ def load_index(paths: PackPaths) -> Index:
 
 
 def load_info(paths: PackPaths) -> Info:
-    default = Info(mood_file=Data.MOODS / f"{utils.compute_mood_id(paths)}.json")
+    mood_id = utils.compute_mood_id(paths)
+    default = Info(mood_file=Data.MOODS / f"{mood_id}.json")
 
     def load(content: str) -> Info:
         info = json.loads(content)
 
         Schema({"name": str, "id": str, "creator": str, "version": str, "description": str}, required=True)(info)
 
-        return Info(info["name"], Data.MOODS / f"{info['id']}.json", info["creator"], info["version"], info["description"])
+        return Info(info["name"], Data.MOODS / f"{info['id']}.{mood_id}.json", info["creator"], info["version"], info["description"])
 
     return try_load(paths.info, load) or default
 
