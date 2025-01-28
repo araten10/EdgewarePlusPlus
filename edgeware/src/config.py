@@ -31,6 +31,7 @@ from tkinter import (
 
 import ttkwidgets as tw
 from config_window.annoyance.audio_video import AudioVideoTab
+from config_window.annoyance.captions import CaptionsTab
 from config_window.annoyance.popup import PopupTab
 from config_window.general.booru import BooruTab
 from config_window.general.default_file import DefaultFileTab
@@ -104,10 +105,6 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-CAPTION_INTRO_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
-CAPTION_ADV_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
-CAPTION_SUB_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. "Use Subliminal specific mood" allows for this without interfering with other captions, as it uses the special mood "subliminals" which don\'t appear in the regular caption pool. However, these subliminals are set by the pack creator, so if none are set the default will be used instead.'
-CAPTION_NOTIF_TEXT = 'These are a special type of caption-centric popup that uses your operating system\'s notification feature. For examples, this system is usually used for things like alerts ("You may now safely remove your USB device") or web browser notifications if you have those enabled. ("User XYZ has liked your youtube comment")'
 WALLPAPER_ROTATE_TEXT = "Turning on wallpaper rotate disables built-in pack wallpapers, allowing you to cycle through your own instead. Keep in mind some packs use the corruption feature to rotate wallpapers without this setting enabled."
 WALLPAPER_PANIC_TEXT = "This is the panic wallpaper, make sure to set it to your default wallpaper ASAP! Otherwise quitting edgeware via panic will leave you with a nice and generic windows one instead."
 MOOD_TEXT = 'Moods are a very important part of edgeware, but also something completely optional to the end-user. Every piece of media has a mood attached to it, and edgeware checks to see if that mood is enabled before deciding to show it. Think of moods like booru tags, categories, or genres.\n\nIn this tab you can disable or enable moods. Don\'t like a particular fetish included in a pack? Turn it off! By default, all moods are turned on...\n\n...Except for packs that utilize corruption. A more in-depth explanation can be found on the "corruption" tab (under modes), but the quick summary is that corruption turns on and off moods automatically over a period of time.\n\nPS: Moods date back all the way to the original edgeware- they just had no purpose. Because of this, every pack is "compatible" with the moods feature- but most older ones just have everything set to "default", which might not show up in this window.'
@@ -202,8 +199,8 @@ class Config(Tk):
         annoyance_notebook = ttk.Notebook(annoyance_tab)
         annoyance_notebook.add(PopupTab(vars, title_font, message_group, mitosis_group), text="Popups")  # tab for popup settings
         annoyance_notebook.add(AudioVideoTab(vars, title_font, message_group), text="Audio/Video")  # tab for managing audio and video settings
+        annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
         tabWallpaper = ttk.Frame(None)  # tab for wallpaper rotation settings
-        tabCaptions = ttk.Frame(None)  # tab for caption settings
         tabMoods = ttk.Frame(None)  # tab for mood settings
         tabDangerous = ttk.Frame(None)  # tab for potentially dangerous settings
 
@@ -275,137 +272,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ CAPTIONS TAB STARTS HERE}==============#
-        annoyance_notebook.add(tabCaptions, text="Captions")
-
-        Label(tabCaptions, text="Captions", font=title_font, relief=GROOVE).pack(pady=2)
-
-        captionsIntroMessage = Message(tabCaptions, text=CAPTION_INTRO_TEXT, justify=CENTER, width=675)
-        captionsIntroMessage.pack(fill="both")
-        message_group.append(captionsIntroMessage)
-
-        enableCaptionsFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-        toggleCaptionsButton = Checkbutton(enableCaptionsFrame, text="Enable Popup Captions", variable=vars.captions_in_popups)
-
-        enableCaptionsFrame.pack(fill="x", pady=(0, 5))
-        toggleCaptionsButton.pack(fill="both", expand=1)
-
-        captionsAdvancedMessage = Message(tabCaptions, text=CAPTION_ADV_TEXT, justify=CENTER, width=675)
-        captionsAdvancedMessage.pack(fill="both")
-        message_group.append(captionsAdvancedMessage)
-
-        captionsFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-        toggleFilenameButton = Checkbutton(captionsFrame, text="Use filename for caption moods", variable=vars.filename_caption_moods, cursor="question_arrow")
-        toggleMultiClickButton = Checkbutton(captionsFrame, text="Multi-Click popups", variable=vars.multi_click_popups, cursor="question_arrow")
-
-        CreateToolTip(
-            toggleMultiClickButton,
-            "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
-            "to close. This feature must be set-up beforehand and won't do anything if not supported.",
-        )
-        CreateToolTip(
-            toggleFilenameButton,
-            "When enabled, captions will try and match the filename of the image they attach to.\n\n"
-            'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
-            'of images named things like "goon300242", "goon-love", "goon_ytur8843", etc.\n\n'
-            "This is how EdgeWare processed captions before moods were implemented fully in EdgeWare++. The reason you'd turn this off, however, "
-            "is that if the mood doesn't match the filename, it won't display at all.\n\n For example, if you had a mood named \"succubus\", but "
-            'no filtered files started with "succubus", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
-            "the pack supports it.",
-        )
-
-        captionsFrame.pack(fill="x")
-        toggleFilenameButton.pack(fill="y", side="left", expand=1)
-        toggleMultiClickButton.pack(fill="y", side="left", expand=1)
-
-        Label(tabCaptions, text="Subliminal Message Popups", font=title_font, relief=GROOVE).pack(pady=2)
-
-        captionsSubMessage = Message(tabCaptions, text=CAPTION_SUB_TEXT, justify=CENTER, width=675)
-        captionsSubMessage.pack(fill="both")
-        message_group.append(captionsSubMessage)
-
-        # NOTE: subliminal message popups used to be called "capPop" back when all of this was compressed to a single page and there was little space.
-        # I am not messing about with the variables on this in case users want to import their old settings.
-        # (however, the name was awful and needed to be changed so people could actually understand it)
-        subMessageOptionsFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-
-        capPopFrame = Frame(subMessageOptionsFrame)
-        capPopOpacityFrame = Frame(subMessageOptionsFrame)
-        capPopTimerFrame = Frame(subMessageOptionsFrame)
-
-        captionsPopupSlider = Scale(
-            capPopFrame, label="Subliminal Message Chance", from_=0, to=100, orient="horizontal", variable=vars.subliminal_message_popup_chance
-        )
-        captionsPopupManual = Button(
-            capPopFrame,
-            text="Manual Subliminal...",
-            command=lambda: assign(vars.subliminal_message_popup_chance, simpledialog.askinteger("Manual Caption Popup Chance (%)", prompt="[0-100]: ")),
-        )
-        capPopOpacitySlider = Scale(
-            capPopOpacityFrame, label="Subliminal Message Opacity", from_=1, to=100, orient="horizontal", variable=vars.subliminal_message_popup_opacity
-        )
-        capPopOpacityManual = Button(
-            capPopOpacityFrame,
-            text="Manual Opacity...",
-            command=lambda: assign(vars.subliminal_message_popup_opacity, simpledialog.askinteger("Manual Caption Popup Opacity (%)", prompt="[1-100]: ")),
-        )
-        capPopTimerSlider = Scale(
-            capPopTimerFrame, label="Subliminal Message Timer (ms)", from_=1, to=1000, orient="horizontal", variable=vars.subliminal_message_popup_timeout
-        )
-        capPopTimerManual = Button(
-            capPopTimerFrame,
-            text="Manual Timer...",
-            command=lambda: assign(vars.subliminal_message_popup_timeout, simpledialog.askinteger("Manual Subliminal Message Timer (ms)", prompt="[1-1000]: ")),
-        )
-
-        subMessageOptionsFrame.pack(fill="x")
-
-        capPopFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        captionsPopupSlider.pack(fill="x", padx=1, expand=1)
-        captionsPopupManual.pack(fill="x")
-        capPopOpacityFrame.pack(fill="x", side="left", expand=1)
-        capPopOpacitySlider.pack(fill="x", padx=1, expand=1)
-        capPopOpacityManual.pack(fill="x")
-        capPopTimerFrame.pack(fill="x", side="left", padx=(3, 0), expand=1)
-        capPopTimerSlider.pack(fill="x", padx=1, expand=1)
-        capPopTimerManual.pack(fill="x")
-
-        Label(tabCaptions, text="Notifications", font=title_font, relief=GROOVE).pack(pady=2)
-
-        captionsNotifMessage = Message(tabCaptions, text=CAPTION_NOTIF_TEXT, justify=CENTER, width=675)
-        captionsNotifMessage.pack(fill="both")
-        message_group.append(captionsNotifMessage)
-
-        notificationFrame = Frame(tabCaptions, borderwidth=5, relief=RAISED)
-
-        notificationChanceFrame = Frame(notificationFrame)
-        notificationChanceSlider = Scale(
-            notificationChanceFrame, label="Notification Chance", from_=0, to=100, orient="horizontal", variable=vars.notification_chance
-        )
-        notificationChanceManual = Button(
-            notificationChanceFrame,
-            text="Manual Notification...",
-            command=lambda: assign(vars.notification_chance, simpledialog.askinteger("Manual Notification Chance (%)", prompt="[0-100]: ")),
-        )
-
-        notificationImageFrame = Frame(notificationFrame)
-        notificationImageSlider = Scale(
-            notificationImageFrame, label="Notification Image Chance", from_=0, to=100, orient="horizontal", variable=vars.notification_image_chance
-        )
-        notificationImageManual = Button(
-            notificationImageFrame,
-            text="Manual Notification Image...",
-            command=lambda: assign(vars.notification_image_chance, simpledialog.askinteger("Manual Notification Image Chance (%)", prompt="[0-100]: ")),
-        )
-
-        notificationFrame.pack(fill="x")
-        notificationChanceFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        notificationChanceSlider.pack(fill="x", padx=1, expand=1)
-        notificationChanceManual.pack(fill="x")
-        notificationImageFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        notificationImageSlider.pack(fill="x", padx=1, expand=1)
-        notificationImageManual.pack(fill="x")
 
         # ==========={WALLPAPER TAB ITEMS} ========================#
         annoyance_notebook.add(tabWallpaper, text="Wallpaper")
