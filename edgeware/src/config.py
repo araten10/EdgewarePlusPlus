@@ -2,7 +2,6 @@ import ast
 import json
 import logging
 import os
-import webbrowser
 from pathlib import Path
 from tkinter import (
     CENTER,
@@ -31,6 +30,7 @@ from tkinter import (
 )
 
 import ttkwidgets as tw
+from config_window.annoyance.audio_video import AudioVideoTab
 from config_window.annoyance.popup import PopupTab
 from config_window.general.booru import BooruTab
 from config_window.general.default_file import DefaultFileTab
@@ -104,7 +104,6 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-AUDVID_PLAYBACK_TEXT = 'It is highly recommended to set up VLC and enable this setting. While it is an external download and could have it\'s own share of troubleshooting, it will massively increase performance and also fix a potential issue of videos having no audio. More details on this are listed in the hover tooltip for the "Use VLC to play videos" setting.'
 CAPTION_INTRO_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
 CAPTION_ADV_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
 CAPTION_SUB_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. "Use Subliminal specific mood" allows for this without interfering with other captions, as it uses the special mood "subliminals" which don\'t appear in the regular caption pool. However, these subliminals are set by the pack creator, so if none are set the default will be used instead.'
@@ -176,8 +175,6 @@ class Config(Tk):
         wallpaper_group = []
         timer_group = []
         lowkey_group = []
-        maxAudio_group = []
-        maxVideo_group = []
         ctime_group = []
         cpopup_group = []
         claunch_group = []
@@ -204,8 +201,8 @@ class Config(Tk):
         notebook.add(annoyance_tab, text="Annoyance/Runtime")
         annoyance_notebook = ttk.Notebook(annoyance_tab)
         annoyance_notebook.add(PopupTab(vars, title_font, message_group, mitosis_group), text="Popups")  # tab for popup settings
+        annoyance_notebook.add(AudioVideoTab(vars, title_font, message_group), text="Audio/Video")  # tab for managing audio and video settings
         tabWallpaper = ttk.Frame(None)  # tab for wallpaper rotation settings
-        tabAudioVideo = ttk.Frame(None)  # tab for managing audio and video settings
         tabCaptions = ttk.Frame(None)  # tab for caption settings
         tabMoods = ttk.Frame(None)  # tab for mood settings
         tabDangerous = ttk.Frame(None)  # tab for potentially dangerous settings
@@ -278,112 +275,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ AUDIO/VIDEO TAB STARTS HERE}==============#
-        annoyance_notebook.add(tabAudioVideo, text="Audio/Video")
-        # Audio
-        Label(tabAudioVideo, text="Audio", font=title_font, relief=GROOVE).pack(pady=2)
-
-        audioFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
-        audioSubFrame = Frame(audioFrame)
-        audioScale = Scale(audioSubFrame, label="Audio Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=vars.audio_chance)
-        audioManual = Button(
-            audioSubFrame, text="Manual audio chance...", command=lambda: assign(vars.audio_chance, simpledialog.askinteger("Manual Audio", prompt="[0-100]: "))
-        )
-
-        maxAudioFrame = Frame(audioFrame)
-        maxAudioScale = Scale(maxAudioFrame, label="Max Audio Popups", from_=1, to=50, orient="horizontal", variable=vars.max_audio)
-        maxAudioManual = Button(
-            maxAudioFrame, text="Manual Max Audio...", command=lambda: assign(vars.max_audio, simpledialog.askinteger("Manual Max Audio", prompt="[1-50]: "))
-        )
-
-        audioFrame.pack(fill="x")
-        audioSubFrame.pack(fill="x", side="left", padx=(3, 0), expand=1)
-        audioScale.pack(fill="x", expand=1)
-        audioManual.pack(fill="x")
-
-        maxAudioFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        maxAudioScale.pack(fill="x", expand=1)
-        maxAudioManual.pack(fill="x")
-
-        maxAudio_group.append(maxAudioScale)
-        maxAudio_group.append(maxAudioManual)
-
-        # Video
-        Label(tabAudioVideo, text="Video", font=title_font, relief=GROOVE).pack(pady=2)
-
-        videoFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
-        vidFrameL = Frame(videoFrame)
-        vidFrameR = Frame(videoFrame)
-
-        vidScale = Scale(vidFrameL, label="Video Popup Chance (%)", from_=0, to=100, orient="horizontal", variable=vars.video_chance)
-        vidManual = Button(
-            vidFrameL, text="Manual video chance...", command=lambda: assign(vars.video_chance, simpledialog.askinteger("Video Chance", prompt="[0-100]: "))
-        )
-        vidVolumeScale = Scale(vidFrameR, label="Video Volume", from_=0, to=100, orient="horizontal", variable=vars.video_volume)
-        vidVolumeManual = Button(
-            vidFrameR, text="Manual volume...", command=lambda: assign(vars.video_volume, simpledialog.askinteger("Video Volume", prompt="[0-100]: "))
-        )
-
-        maxVideoFrame = Frame(videoFrame)
-        maxVideoToggle = Checkbutton(
-            maxVideoFrame,
-            text="Cap Videos",
-            variable=vars.max_video_enabled,
-            command=lambda: set_widget_states(vars.max_video_enabled.get(), maxVideo_group),
-        )
-        maxVideoScale = Scale(maxVideoFrame, label="Max Video Popups", from_=1, to=50, orient="horizontal", variable=vars.max_video)
-        maxVideoManual = Button(
-            maxVideoFrame, text="Manual Max Videos...", command=lambda: assign(vars.max_video, simpledialog.askinteger("Manual Max Videos", prompt="[1-50]: "))
-        )
-
-        videoFrame.pack(fill="x")
-        vidFrameL.pack(fill="x", side="left", padx=(3, 0), expand=1)
-        vidScale.pack(fill="x", pady=(25, 0))
-        vidManual.pack(fill="x")
-
-        vidFrameR.pack(fill="x", side="left", expand=1)
-        vidVolumeScale.pack(fill="x", pady=(25, 0))
-        vidVolumeManual.pack(fill="x")
-
-        maxVideoFrame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        maxVideoToggle.pack(fill="x")
-        maxVideoScale.pack(fill="x", expand=1)
-        maxVideoManual.pack(fill="x")
-
-        maxVideo_group.append(maxVideoScale)
-        maxVideo_group.append(maxVideoManual)
-
-        # playback options
-        Label(tabAudioVideo, text="Playback Options", font=title_font, relief=GROOVE).pack(pady=2)
-
-        audVidPlaybackMessage = Message(tabAudioVideo, text=AUDVID_PLAYBACK_TEXT, justify=CENTER, width=675)
-        audVidPlaybackMessage.pack(fill="both")
-        message_group.append(audVidPlaybackMessage)
-
-        playbackFrame = Frame(tabAudioVideo, borderwidth=5, relief=RAISED)
-        toggleVLC = Checkbutton(playbackFrame, text="Use VLC to play videos", variable=vars.vlc_mode, cursor="question_arrow")
-        VLCNotice = Label(
-            playbackFrame,
-            text="NOTE: Installing VLC is required for this option!\nMake sure you download the version your OS supports!\nIf you have a 64 bit OS, download x64!",
-            width=10,
-        )
-        installVLCButton = Button(playbackFrame, text="Go to VLC's website", command=lambda: webbrowser.open("https://www.videolan.org/vlc/"))
-
-        playbackFrame.pack(fill="x")
-        toggleVLC.pack(fill="both", side="top", expand=1, padx=2)
-        VLCNotice.pack(fill="both", side="top", expand=1, padx=2)
-        installVLCButton.pack(fill="both", side="top", padx=2)
-
-        CreateToolTip(
-            toggleVLC,
-            "Going to get a bit technical here:\n\nBy default, EdgeWare loads videos by taking the source file, turning every frame into an image, and then playing the images in "
-            "sequence at the specified framerate. The upside to this is it requires no additional dependencies, but it has multiple downsides. Firstly, it's very slow: you may have "
-            "noticed that videos take a while to load and also cause excessive memory usage. Secondly, there is a bug that can cause certain users to not have audio while playing videos."
-            "\n\nSo here's an alternative: by installing VLC to your computer and using this option, you can make videos play much faster and use less memory by using libvlc. "
-            "If videos were silent for you this will hopefully fix that as well.\n\nPlease note that this feature has the potential to break in the future as VLC is a program independent "
-            "from EdgeWare. For posterity's sake, the current version of VLC as of writing this tooltip is 3.0.20.",
-        )
 
         # ==========={EDGEWARE++ CAPTIONS TAB STARTS HERE}==============#
         annoyance_notebook.add(tabCaptions, text="Captions")
@@ -1483,7 +1374,6 @@ class Config(Tk):
         set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
         set_widget_states(vars.timer_mode.get(), timer_group)
         set_widget_states(vars.lowkey_mode.get(), lowkey_group)
-        set_widget_states(vars.max_video_enabled.get(), maxVideo_group)
         hibernateHelper(vars.hibernate_type.get())
         fadeHelper(vars.corruption_fade.get())
         triggerHelper(vars.corruption_trigger.get(), False)
