@@ -11,8 +11,12 @@
 
 •*Added a renaming tool to the pack creator, which renames files to start with the mood they're in (for caption purposes)*
 
+•*Fixed issue with corruption dev mode*
+
 •*Fixed issue with video popups on windows where buttons and captions wouldn't appear*
 >Why did nobody tell me this was happening to a lot of people!!!!! I would have made fixing it higher priority, I just thought it was on my laptop and nobody else...
+
+•*Finally added in the "Fade" feature to corruption*
 
 The config refactor is here! Maybe you are reading this because you noticed that the version checker is broken on your older version- in that case the config refactor is in progress still... But if you're here when version 15 is officially out, guess what- it's done!
 

@@ -1,8 +1,12 @@
 import logging
 import sys
+import time
+from random import random
 from tkinter import Tk, messagebox
 
 from features.corruption_config import CorruptionConfig
+from features.drive import fill_drive
+from roll import RollTarget, roll_targets
 from pack import Pack
 from paths import Data
 from settings import Settings
@@ -67,9 +71,53 @@ def update_corruption_level(settings: Settings, pack: Pack, state: State) -> Non
         state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
     apply_corruption_level(settings, pack, state)
 
+def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets: list[RollTarget]) -> None:
+    if roll_fade(settings, state):
+        # If roll succeeds, set corruption level to one higher (or lower) than normal
+        if settings.corruption_purity:
+            state.corruption_level -= 1 if state.corruption_level > 1 else 0
+        else:
+            state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
+
+        # Bandaid fix, do something better when i'm not about to go to sleep
+        settings.corruption_wallpaper = False
+
+        apply_corruption_level(settings, pack, state)
+        # Roll and spawn popup as normal, now with new corruption level
+        roll_targets(settings, targets)
+        # Revert back to original corruption level and apply
+        if settings.corruption_purity:
+            state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
+        else:
+            state.corruption_level -= 1 if state.corruption_level > 1 else 0
+        apply_corruption_level(settings, pack, state)
+        
+        # Bandaid fix, do something better when i'm not about to go to sleep
+        settings.corruption_wallpaper = True
+    else:
+        roll_targets(settings, targets)
+
+def roll_fade(settings: Settings, state: State) -> bool:
+    match settings.corruption_trigger:
+        case "Timed":
+            fade_percentage = (time.time() - state.corruption_time_start) / (settings.corruption_time/1000)
+            if settings.corruption_dev_mode:
+                print(f"Current next mood chance: {fade_percentage:.1%}")
+        case _:
+            logging.error(f"Unknown corruption trigger {settings.corruption_trigger}.")
+    # Take results and roll them
+    match settings.corruption_fade:
+        case "Normal":
+            if fade_percentage > random():
+                return True
+            else:
+                return False
+        case _:
+            logging.error(f"Unknown corruption fade {settings.corruption_fade}.")
 
 def timed(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     update_corruption_level(settings, pack, state)
+    state.corruption_time_start = time.time()
     root.after(settings.corruption_time, lambda: timed(root, settings, pack, state))
 
 
@@ -121,6 +169,7 @@ def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) ->
     match settings.corruption_trigger:
         case "Timed":
             apply_corruption_level(settings, pack, state)
+            state.corruption_time_start = time.time()
             root.after(settings.corruption_time, lambda: timed(root, settings, pack, state))
         case "Popup":
             apply_corruption_level(settings, pack, state)

@@ -1,7 +1,7 @@
 from threading import Thread
 from tkinter import Tk
 
-from features.corruption import corruption_danger_check, handle_corruption
+from features.corruption import corruption_danger_check, handle_corruption, handle_corruption_fade
 from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
 from features.image_popup import ImagePopup
@@ -31,7 +31,12 @@ from utils import utils
 
 
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
-    roll_targets(settings, targets)
+    if settings.corruption_fade != "Abrupt" and settings.corruption_mode:
+        handle_corruption_fade(settings, pack, state, targets)
+    else:
+        roll_targets(settings, targets)
+    # Is fill drive mood dependent? if not, would it be a good idea to make it such for corruption purposes?
+    # if so, move into if else rather than after fade is handled. maybe not worth the effort?
     Thread(target=lambda: fill_drive(root, settings, pack, state), daemon=True).start()  # Thread for performance reasons
     root.after(settings.delay, lambda: main(root, settings, pack, targets))
 

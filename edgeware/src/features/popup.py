@@ -80,7 +80,7 @@ class Popup(Toplevel):
     def try_corruption_dev(self) -> None:
         if self.settings.corruption_dev_mode:
             levels = []
-            mood = self.pack.media_moods.get(self.media.name, None)
+            mood = self.pack.index.media_moods.get(self.media.name, None)
             for level in self.pack.corruption_levels:
                 if mood in level.moods:
                     levels.append(self.pack.corruption_levels.index(level) + 1)

@@ -160,7 +160,7 @@ class Settings:
         # Corruption mode
         self.corruption_mode = bool(self.config["corruptionMode"])
         self.corruption_full = bool(self.config["corruptionFullPerm"])
-        # self.corruption_fade = self.config["corruptionFadeType"]
+        self.corruption_fade = self.config["corruptionFadeType"]
         self.corruption_trigger = self.config["corruptionTrigger"]
         self.corruption_time = int(self.config["corruptionTime"]) * 1000  # Milliseconds
         self.corruption_popups = int(self.config["corruptionPopups"])
