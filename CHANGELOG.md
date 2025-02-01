@@ -11,8 +11,6 @@
 
 •*Added a renaming tool to the pack creator, which renames files to start with the mood they're in (for caption purposes)*
 
-•*Fixed issue with corruption dev mode*
-
 •*Fixed issue with video popups on windows where buttons and captions wouldn't appear*
 >Why did nobody tell me this was happening to a lot of people!!!!! I would have made fixing it higher priority, I just thought it was on my laptop and nobody else...
 
