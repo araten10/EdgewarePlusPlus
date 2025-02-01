@@ -5,10 +5,9 @@ from random import random
 from tkinter import Tk, messagebox
 
 from features.corruption_config import CorruptionConfig
-from features.drive import fill_drive
-from roll import RollTarget, roll_targets
 from pack import Pack
 from paths import Data
+from roll import RollTarget, roll_targets
 from settings import Settings
 from state import State
 from utils import utils
@@ -71,6 +70,7 @@ def update_corruption_level(settings: Settings, pack: Pack, state: State) -> Non
         state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
     apply_corruption_level(settings, pack, state)
 
+
 def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets: list[RollTarget]) -> None:
     if roll_fade(settings, state):
         # If roll succeeds, set corruption level to one higher (or lower) than normal
@@ -97,10 +97,11 @@ def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets
     else:
         roll_targets(settings, targets)
 
+
 def roll_fade(settings: Settings, state: State) -> bool:
     match settings.corruption_trigger:
         case "Timed":
-            fade_percentage = (time.time() - state.corruption_time_start) / (settings.corruption_time/1000)
+            fade_percentage = (time.time() - state.corruption_time_start) / (settings.corruption_time / 1000)
         case "Popup":
             fade_percentage = state.corruption_popup_number / settings.corruption_popups
         case "Launch":
@@ -118,6 +119,7 @@ def roll_fade(settings: Settings, state: State) -> bool:
                 return False
         case _:
             logging.error(f"Unknown corruption fade {settings.corruption_fade}.")
+
 
 def timed(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     update_corruption_level(settings, pack, state)
