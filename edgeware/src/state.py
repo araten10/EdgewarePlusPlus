@@ -28,6 +28,8 @@ class State:
     timer_active = False
 
     corruption_time_start = 0
+    corruption_popup_number = 0
+    corruption_launches_number = 0
 
     _hibernate_active = Subject(False)
     hibernate_id = None

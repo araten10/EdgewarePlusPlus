@@ -91,7 +91,7 @@ def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets
         else:
             state.corruption_level -= 1 if state.corruption_level > 1 else 0
         apply_corruption_level(settings, pack, state)
-        
+
         # Bandaid fix, do something better when i'm not about to go to sleep
         settings.corruption_wallpaper = True
     else:
@@ -101,10 +101,14 @@ def roll_fade(settings: Settings, state: State) -> bool:
     match settings.corruption_trigger:
         case "Timed":
             fade_percentage = (time.time() - state.corruption_time_start) / (settings.corruption_time/1000)
-            if settings.corruption_dev_mode:
-                print(f"Current next mood chance: {fade_percentage:.1%}")
+        case "Popup":
+            fade_percentage = state.corruption_popup_number / settings.corruption_popups
+        case "Launch":
+            fade_percentage = state.corruption_launches_number / (settings.corruption_launches * state.corruption_level)
         case _:
             logging.error(f"Unknown corruption trigger {settings.corruption_trigger}.")
+    if settings.corruption_dev_mode and fade_percentage:
+        print(f"Current next mood chance: {fade_percentage:.1%}")
     # Take results and roll them
     match settings.corruption_fade:
         case "Normal":
@@ -136,6 +140,8 @@ def popup(settings: Settings, pack: Pack, state: State) -> None:
             update_corruption_level(settings, pack, state)
             total_popup_number = 0
 
+        state.corruption_popup_number = total_popup_number
+
     state._popup_number.attach(observer)
 
 
@@ -151,12 +157,14 @@ def launch(settings: Settings, pack: Pack, state: State) -> None:
             f.seek(0)
             f.write(str(launches + 1))
             f.truncate()
+            state.corruption_launches_number = launches
     else:
         apply_corruption_level(settings, pack, state)
         with open(Data.CORRUPTION_LAUNCHES, "w") as f:
             f.seek(0)
             f.write(str(1))
             f.truncate()
+        state.corruption_launches_number = 1
 
 
 def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
