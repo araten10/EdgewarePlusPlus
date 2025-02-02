@@ -81,7 +81,7 @@ def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets
 
         # Bandaid fix, do something better
         true_wallpaper_setting = settings.corruption_wallpaper
-        if true_wallpaper_setting = True:
+        if true_wallpaper_setting == True:
             settings.corruption_wallpaper = False
 
         apply_corruption_level(settings, pack, state)
@@ -95,7 +95,7 @@ def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets
         apply_corruption_level(settings, pack, state)
 
         # Bandaid fix, do something better
-        if true_wallpaper_setting = True:
+        if true_wallpaper_setting == True:
             settings.corruption_wallpaper = True
     else:
         roll_targets(settings, targets)
