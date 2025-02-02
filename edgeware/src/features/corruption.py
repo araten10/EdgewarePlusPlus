@@ -79,8 +79,10 @@ def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets
         else:
             state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
 
-        # Bandaid fix, do something better when i'm not about to go to sleep
-        settings.corruption_wallpaper = False
+        # Bandaid fix, do something better
+        true_wallpaper_setting = settings.corruption_wallpaper
+        if true_wallpaper_setting = True:
+            settings.corruption_wallpaper = False
 
         apply_corruption_level(settings, pack, state)
         # Roll and spawn popup as normal, now with new corruption level
@@ -92,8 +94,9 @@ def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets
             state.corruption_level -= 1 if state.corruption_level > 1 else 0
         apply_corruption_level(settings, pack, state)
 
-        # Bandaid fix, do something better when i'm not about to go to sleep
-        settings.corruption_wallpaper = True
+        # Bandaid fix, do something better
+        if true_wallpaper_setting = True:
+            settings.corruption_wallpaper = True
     else:
         roll_targets(settings, targets)
 
