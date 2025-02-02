@@ -33,6 +33,7 @@ import ttkwidgets as tw
 from config_window.annoyance.audio_video import AudioVideoTab
 from config_window.annoyance.captions import CaptionsTab
 from config_window.annoyance.popup import PopupTab
+from config_window.annoyance.wallpaper import WallpaperTab
 from config_window.general.booru import BooruTab
 from config_window.general.default_file import DefaultFileTab
 from config_window.general.file import FileTab
@@ -44,7 +45,6 @@ from config_window.utils import (
     assign,
     clear_launches,
     config,
-    confirm_box,
     export_resource,
     get_live_version,
     import_resource,
@@ -59,7 +59,7 @@ from config_window.vars import Vars
 from pack import Pack
 from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, Assets, CustomAssets, Data
-from PIL import Image, ImageTk
+from PIL import ImageTk
 from settings import load_default_config
 from widgets.tooltip import CreateToolTip
 
@@ -105,8 +105,6 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-WALLPAPER_ROTATE_TEXT = "Turning on wallpaper rotate disables built-in pack wallpapers, allowing you to cycle through your own instead. Keep in mind some packs use the corruption feature to rotate wallpapers without this setting enabled."
-WALLPAPER_PANIC_TEXT = "This is the panic wallpaper, make sure to set it to your default wallpaper ASAP! Otherwise quitting edgeware via panic will leave you with a nice and generic windows one instead."
 MOOD_TEXT = 'Moods are a very important part of edgeware, but also something completely optional to the end-user. Every piece of media has a mood attached to it, and edgeware checks to see if that mood is enabled before deciding to show it. Think of moods like booru tags, categories, or genres.\n\nIn this tab you can disable or enable moods. Don\'t like a particular fetish included in a pack? Turn it off! By default, all moods are turned on...\n\n...Except for packs that utilize corruption. A more in-depth explanation can be found on the "corruption" tab (under modes), but the quick summary is that corruption turns on and off moods automatically over a period of time.\n\nPS: Moods date back all the way to the original edgeware- they just had no purpose. Because of this, every pack is "compatible" with the moods feature- but most older ones just have everything set to "default", which might not show up in this window.'
 DANGER_INTRO_TEXT = "This tab is for settings that could potentially delete or alter files on your computer, or make Edgeware run in undesired ways. Please note that with certain combinations of settings not listed here, Edgeware can also be potentially dangerous (low popup delay, high hibernate payload)- these settings are just particularly explicit in their destructive potential."
 DANGER_DRIVE_TEXT = 'There are two main features in this section: "Fill Drive" and "Replace Images". This explanation might be long, but these features are very dangerous, so please pay attention if you plan to use them!\n\nFill drive will attempt to fill your computer with as much porn from the currently loaded pack as possible. It does, however, have some restrictions, which are further explained in the hover tooltip. Fill delay is a forced delay on saving, as when not properly configured it can fill your drive VERY quickly.\n\nReplace images will seek out folders with large numbers of pre-existing images (more than the threshold value) and when it finds one, it will replace ALL of the images with images from the currently loaded pack. For example, you could point it at certain steam directories to have all of your game preview/banner images replaced with porn. Please, please, please, backup any important images before using this setting... Edgeware will attempt to backup any replaced images under /data/backups, but nobody involved with any Edgeware version past, present, or future, is responsible for any lost images. Don\'t solely rely on the included backup feature... do the smart thing and make personal backups as well!\n\nI understand techdom and gooning are both fetishes about making irresponsible decisions, but at least understand the risks and take a moment to decide on how you want to use these features. Set up blacklists and make backups if you wish to proceed, but to echo the inadequate sex-ed public schools dole out: abstinence is the safest option.'
@@ -169,7 +167,6 @@ class Config(Tk):
         replace_group = []
         mitosis_group = []
         mitosis_cGroup = []
-        wallpaper_group = []
         timer_group = []
         lowkey_group = []
         ctime_group = []
@@ -200,7 +197,7 @@ class Config(Tk):
         annoyance_notebook.add(PopupTab(vars, title_font, message_group, mitosis_group), text="Popups")  # tab for popup settings
         annoyance_notebook.add(AudioVideoTab(vars, title_font, message_group), text="Audio/Video")  # tab for managing audio and video settings
         annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
-        tabWallpaper = ttk.Frame(None)  # tab for wallpaper rotation settings
+        annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         tabMoods = ttk.Frame(None)  # tab for mood settings
         tabDangerous = ttk.Frame(None)  # tab for potentially dangerous settings
 
@@ -272,91 +269,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={WALLPAPER TAB ITEMS} ========================#
-        annoyance_notebook.add(tabWallpaper, text="Wallpaper")
-        wallpaperMessage = Message(tabWallpaper, text=WALLPAPER_ROTATE_TEXT, justify=CENTER, width=675)
-        wallpaperMessage.pack(fill="both")
-        message_group.append(wallpaperMessage)
-        rotateCheckbox = Checkbutton(
-            tabWallpaper,
-            text="Rotate Wallpapers",
-            variable=vars.rotate_wallpaper,
-            command=lambda: set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group),
-        )
-        wpList = Listbox(tabWallpaper, selectmode=SINGLE)
-        for key in config["wallpaperDat"]:
-            wpList.insert(1, key)
-        addWPButton = Button(tabWallpaper, text="Add/Edit Wallpaper", command=lambda: add_wallpaper(wpList))
-        remWPButton = Button(tabWallpaper, text="Remove Wallpaper", command=lambda: remove_wallpaper(wpList))
-        autoImport = Button(tabWallpaper, text="Auto Import", command=lambda: auto_import_wallpapers(wpList))
-        varSlider = Scale(
-            tabWallpaper, orient="horizontal", label="Rotate Variation (sec)", from_=0, to=(vars.wallpaper_timer.get() - 1), variable=vars.wallpaper_variance
-        )
-        wpDelaySlider = Scale(
-            tabWallpaper,
-            orient="horizontal",
-            label="Rotate Timer (sec)",
-            from_=5,
-            to=300,
-            variable=vars.wallpaper_timer,
-            command=lambda val: update_max(varSlider, int(val) - 1),
-        )
-
-        pHoldImageR = Image.open(CustomAssets.panic_wallpaper()).resize(
-            (int(self.winfo_screenwidth() * 0.13), int(self.winfo_screenheight() * 0.13)), Image.NEAREST
-        )
-
-        def updatePanicPaper():
-            nonlocal pHoldImageR
-            selectedFile = filedialog.askopenfile("rb", filetypes=[("image file", ".jpg .jpeg .png")])
-            if not isinstance(selectedFile, type(None)):
-                try:
-                    img = Image.open(selectedFile.name).convert("RGB")
-                    img.save(Data.PANIC_WALLPAPER)
-                    pHoldImageR = ImageTk.PhotoImage(img.resize((int(self.winfo_screenwidth() * 0.13), int(self.winfo_screenheight() * 0.13)), Image.NEAREST))
-                    panicWallpaperLabel.config(image=pHoldImageR)
-                    panicWallpaperLabel.update_idletasks()
-                except Exception as e:
-                    logging.warning(f"failed to open/change default wallpaper\n{e}")
-
-        panicWallMessage = Message(tabWallpaper, text=WALLPAPER_PANIC_TEXT, justify=CENTER, width=675)
-        message_group.append(panicWallMessage)
-        panicWPFrame = Frame(tabWallpaper)
-        panicWPFrameL = Frame(panicWPFrame)
-        panicWPFrameR = Frame(panicWPFrame)
-        panicWallpaperImage = ImageTk.PhotoImage(pHoldImageR)
-        panicWallpaperButton = Button(panicWPFrameL, text="Change Panic Wallpaper", command=updatePanicPaper, cursor="question_arrow")
-        panicWallpaperLabel = Label(panicWPFrameR, text="Current Panic Wallpaper", image=panicWallpaperImage)
-
-        CreateToolTip(
-            panicWallpaperButton,
-            "When you use panic, the wallpaper will be set to this image.\n\n"
-            "This is useful since most packs have a custom wallpaper, which is usually porn...!\n\n"
-            "It is recommended to find your preferred/original desktop wallpaper and set it to that.",
-        )
-
-        wallpaper_group.append(wpList)
-        wallpaper_group.append(addWPButton)
-        wallpaper_group.append(remWPButton)
-        wallpaper_group.append(wpDelaySlider)
-        wallpaper_group.append(autoImport)
-        wallpaper_group.append(varSlider)
-
-        rotateCheckbox.pack(fill="x")
-        wpList.pack(fill="x")
-        addWPButton.pack(fill="x")
-        remWPButton.pack(fill="x")
-        autoImport.pack(fill="x")
-        wpDelaySlider.pack(fill="x")
-        varSlider.pack(fill="x")
-        panicWallMessage.pack(fill="both")
-        panicWPFrame.pack(fill="x", expand=1)
-        panicWPFrameL.pack(side="left", fill="y")
-        panicWPFrameR.pack(side="right", fill="x", expand=1)
-        panicWallpaperButton.pack(fill="x", padx=5, pady=5, expand=1)
-        Label(panicWPFrameR, text="Current Panic Wallpaper").pack(fill="x")
-        panicWallpaperLabel.pack()
 
         # ==========={EDGEWARE++ MOODS TAB STARTS HERE}==============#
         annoyance_notebook.add(tabMoods, text="Moods")
@@ -1235,7 +1147,6 @@ class Config(Tk):
 
         set_widget_states(vars.fill_drive.get(), fill_group)
         set_widget_states(vars.replace_images.get(), replace_group)
-        set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group)
         set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
         set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
         set_widget_states(vars.timer_mode.get(), timer_group)
@@ -1284,43 +1195,6 @@ def pick_zip() -> str:
 
 
 # helper funcs for lambdas =======================================================
-def add_wallpaper(tk_list_obj: Listbox):
-    file = filedialog.askopenfile("r", filetypes=[("image file", ".jpg .jpeg .png")])
-    if not isinstance(file, type(None)):
-        lname = simpledialog.askstring("Wallpaper Name", "Wallpaper Label\n(Name displayed in list)")
-        if not isinstance(lname, type(None)):
-            print(file.name.split("/")[-1])
-            config["wallpaperDat"][lname] = file.name.split("/")[-1]
-            tk_list_obj.insert(1, lname)
-
-
-def remove_wallpaper(tk_list_obj):
-    index = int(tk_list_obj.curselection()[0])
-    itemName = tk_list_obj.get(index)
-    if index > 0:
-        del config["wallpaperDat"][itemName]
-        tk_list_obj.delete(tk_list_obj.curselection())
-    else:
-        messagebox.showwarning("Remove Default", "You cannot remove the default wallpaper.")
-
-
-def auto_import_wallpapers(tk_list_obj: Listbox):
-    allow_ = confirm_box(tk_list_obj, "Confirm", "Current list will be cleared before new list is imported from the /resource folder. Is that okay?")
-    if allow_:
-        # clear list
-        while True:
-            try:
-                del config["wallpaperDat"][tk_list_obj.get(1)]
-                tk_list_obj.delete(1)
-            except Exception:
-                break
-        for file in os.listdir(pack.paths.root):
-            if (file.endswith(".png") or file.endswith(".jpg") or file.endswith(".jpeg")) and file != "wallpaper.png":
-                name_ = file.split(".")[0]
-                tk_list_obj.insert(1, name_)
-                config["wallpaperDat"][name_] = file
-
-
 def update_max(obj, value: int):
     obj.configure(to=int(value))
 
