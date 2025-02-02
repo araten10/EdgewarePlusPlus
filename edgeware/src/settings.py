@@ -166,6 +166,6 @@ class Settings:
         self.corruption_popups = int(self.config["corruptionPopups"])
         self.corruption_launches = int(self.config["corruptionLaunches"])
         self.corruption_wallpaper = not bool(self.config["corruptionWallpaperCycle"])
-        # self.corruption_themes = not bool(self.config["corruptionThemeCycle"])
+        self.corruption_themes = not bool(self.config["corruptionThemeCycle"])
         self.corruption_purity = bool(self.config["corruptionPurityMode"])
         self.corruption_dev_mode = bool(self.config["corruptionDevMode"])

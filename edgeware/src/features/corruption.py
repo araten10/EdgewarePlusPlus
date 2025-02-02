@@ -55,6 +55,10 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
             if key in CorruptionConfig.BLACKLIST:
                 continue
 
+            if not settings.corruption_themes:
+                if key == "themeType":
+                    continue
+
             if settings.corruption_dev_mode:
                 logging.info(f"Changing {key} to {value}")
             settings.config[key] = value
