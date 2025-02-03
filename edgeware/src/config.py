@@ -780,7 +780,6 @@ class Config(Tk):
         fadeDescription.configure(height=3, width=22)
         fadeImageNormal = ImageTk.PhotoImage(file=Assets.CORRUPTION_DEFAULT)
         fadeImageAbrupt = ImageTk.PhotoImage(file=Assets.CORRUPTION_ABRUPT)
-        fadeImageNoise = ImageTk.PhotoImage(file=Assets.CORRUPTION_NOISE)
         fadeImageContainer = Label(fadeSubInfo, image=fadeImageNormal, borderwidth=2, relief=GROOVE)
         trigger_types = ["Timed", "Popup", "Launch"]
         triggerDropdown = OptionMenu(triggerSubInfo, vars.corruption_trigger, *trigger_types, command=lambda key: triggerHelper(key, False))

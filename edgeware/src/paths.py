@@ -20,7 +20,6 @@ class Assets:
 
     CORRUPTION_ABRUPT = ROOT / "corruption_abruptfade.png"
     CORRUPTION_DEFAULT = ROOT / "corruption_defaultfade.png"
-    CORRUPTION_NOISE = ROOT / "corruption_noisefade.png"
 
     # Unchangeable defaults
     DEFAULT_CONFIG = ROOT / "default_config.json"
