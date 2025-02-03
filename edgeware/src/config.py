@@ -773,7 +773,7 @@ class Config(Tk):
         triggerInfoFrame = Frame(corruptionFadeFrame)
         triggerSubInfo = Frame(triggerInfoFrame)
 
-        fade_types = ["Normal", "Abrupt", "Noise"]
+        fade_types = ["Normal", "Abrupt"]
         fadeDropdown = OptionMenu(fadeSubInfo, vars.corruption_fade, *fade_types, command=lambda key: fadeHelper(key))
         fadeDropdown.configure(width=9, highlightthickness=0)
         fadeDescription = Label(fadeInfoFrame, text="Error loading fade description!", borderwidth=2, relief=GROOVE, wraplength=150)
@@ -870,9 +870,6 @@ class Config(Tk):
             if key == "Abrupt":
                 fadeDescription.configure(text="Immediately switches to new level upon timer completion.")
                 fadeImageContainer.configure(image=fadeImageAbrupt)
-            if key == "Noise":
-                fadeDescription.configure(text="Scatters levels randomly across the time range.")
-                fadeImageContainer.configure(image=fadeImageNoise)
 
         def triggerHelper(key, tutorialMode):
             if key == "Timed":
