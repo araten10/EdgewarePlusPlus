@@ -4,7 +4,7 @@ from pathlib import Path
 import filetype
 from paths import Assets, CustomAssets, PackPaths
 
-from pack.data import MoodBase
+from pack.data import MoodBase, MoodSet
 from pack.load import list_media, load_active_moods, load_corruption, load_discord, load_index, load_info
 
 
@@ -20,6 +20,7 @@ class Pack:
 
         # Data files
         self.active_moods = load_active_moods(self.info.mood_file)
+        self.block_corruption_moods()
 
         # Media
         self.images = list_media(self.paths.image, filetype.is_image)
@@ -31,6 +32,11 @@ class Pack:
         self.icon = self.paths.icon if self.paths.icon.is_file() else CustomAssets.icon()
         self.wallpaper = self.paths.wallpaper if self.paths.wallpaper.is_file() else Assets.DEFAULT_WALLPAPER
         self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
+
+    def block_corruption_moods(self) -> None:
+        for level in self.corruption_levels:
+            active_moods = self.active_moods()
+            level.moods = MoodSet([mood for mood in level.moods if mood in active_moods])
 
     def filter_media(self, media_list: list[Path]) -> list[Path]:
         active_moods = self.active_moods()
