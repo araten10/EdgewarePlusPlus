@@ -7,7 +7,7 @@ from tkinter import Tk, messagebox
 from features.corruption_config import CorruptionConfig
 from pack import Pack
 from paths import Data
-from roll import RollTarget, roll_targets
+from roll import RollTarget, roll_targets, roll
 from settings import Settings
 from state import State
 from utils import utils
@@ -52,12 +52,8 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
 
     if settings.corruption_full:
         for key, value in level.config.items():
-            if key in CorruptionConfig.BLACKLIST:
+            if key in CorruptionConfig.BLACKLIST or (not settings.corruption_themes and key == "themeType"):
                 continue
-
-            if not settings.corruption_themes:
-                if key == "themeType":
-                    continue
 
             if settings.corruption_dev_mode:
                 logging.info(f"Changing {key} to {value}")
@@ -76,7 +72,7 @@ def update_corruption_level(settings: Settings, pack: Pack, state: State) -> Non
 
 
 def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets: list[RollTarget]) -> None:
-    if roll_fade(settings, state):
+    if roll(fade_chance(settings, state)):
         # If roll succeeds, set corruption level to one higher (or lower) than normal
         if settings.corruption_purity:
             state.corruption_level -= 1 if state.corruption_level > 1 else 0
@@ -105,27 +101,31 @@ def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets
         roll_targets(settings, targets)
 
 
-def roll_fade(settings: Settings, state: State) -> bool:
-    match settings.corruption_trigger:
-        case "Timed":
-            fade_percentage = (time.time() - state.corruption_time_start) / (settings.corruption_time / 1000)
-        case "Popup":
-            fade_percentage = state.corruption_popup_number / settings.corruption_popups
-        case "Launch":
-            fade_percentage = state.corruption_launches_number / (settings.corruption_launches * state.corruption_level)
-        case _:
-            logging.error(f"Unknown corruption trigger {settings.corruption_trigger}.")
-    if settings.corruption_dev_mode and fade_percentage:
-        print(f"Current next mood chance: {fade_percentage:.1%}")
-    # Take results and roll them
+def fade_chance(settings: Settings, state: State) -> float:
     match settings.corruption_fade:
         case "Normal":
-            if fade_percentage > random():
-                return True
-            else:
-                return False
+            chance = corruption_level_progress(settings, state)
+            if settings.corruption_dev_mode:
+                logging.info(f"Current next mood chance: {chance:.1%}")
+            return chance
+        case "Abrupt":
+            return 0
         case _:
-            logging.error(f"Unknown corruption fade {settings.corruption_fade}.")
+            logging.warning(f"Unknown corruption fade {settings.corruption_fade}.")
+            return 0
+
+
+def corruption_level_progress(settings: Settings, state: State) -> float:
+    match settings.corruption_trigger:
+        case "Timed":
+            return (time.time() - state.corruption_time_start) / (settings.corruption_time / 1000)
+        case "Popup":
+            return state.corruption_popup_number / settings.corruption_popups
+        case "Launch":
+            return state.corruption_launches_number / (settings.corruption_launches * state.corruption_level)
+        case _:
+            logging.warning(f"Unknown corruption trigger {settings.corruption_trigger}.")
+            return 0
 
 
 def timed(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
@@ -136,20 +136,17 @@ def timed(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
 
 def popup(settings: Settings, pack: Pack, state: State) -> None:
     previous_popup_number = 0
-    total_popup_number = 0
 
     def observer() -> None:
-        nonlocal previous_popup_number, total_popup_number
+        nonlocal previous_popup_number
         if state.popup_number > previous_popup_number:
-            total_popup_number += 1
+            state.corruption_popup_number += 1
 
         previous_popup_number = state.popup_number
 
-        if total_popup_number >= settings.corruption_popups:
+        if state.corruption_popup_number >= settings.corruption_popups:
             update_corruption_level(settings, pack, state)
-            total_popup_number = 0
-
-        state.corruption_popup_number = total_popup_number
+            state.corruption_popup_number = 0
 
     state._popup_number.attach(observer)
 
@@ -159,6 +156,7 @@ def launch(settings: Settings, pack: Pack, state: State) -> None:
         with open(Data.CORRUPTION_LAUNCHES, "r+") as f:
             launches = int(f.readline())
 
+            state.corruption_launches_number = launches
             for i in range(len(pack.corruption_levels)):
                 if launches >= (settings.corruption_launches * i):
                     update_corruption_level(settings, pack, state)
@@ -166,14 +164,12 @@ def launch(settings: Settings, pack: Pack, state: State) -> None:
             f.seek(0)
             f.write(str(launches + 1))
             f.truncate()
-            state.corruption_launches_number = launches
     else:
         apply_corruption_level(settings, pack, state)
         with open(Data.CORRUPTION_LAUNCHES, "w") as f:
             f.seek(0)
             f.write(str(1))
             f.truncate()
-        state.corruption_launches_number = 1
 
 
 def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) -> None:

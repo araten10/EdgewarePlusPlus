@@ -27,5 +27,6 @@ def roll_targets(settings: Settings, targets: list[RollTarget]) -> None:
             target.roll()
 
 
-def roll(chance: int) -> bool:
-    return random.randint(1, 100) <= chance
+def roll(chance: int | float) -> bool:
+    """Chance is either an integer between 0 and 100 or a float between 0 and 1"""
+    return (random.randint(1, 100) if isinstance(chance, int) else random.random()) <= chance
