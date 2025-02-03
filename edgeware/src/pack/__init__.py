@@ -33,7 +33,8 @@ class Pack:
         self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
 
     def filter_media(self, media_list: list[Path]) -> list[Path]:
-        return list(filter(lambda media: self.index.media_moods.get(media.name) in self.active_moods, media_list))
+        active_moods = self.active_moods()
+        return list(filter(lambda media: self.index.media_moods.get(media.name) in active_moods, media_list))
 
     def random_image(self) -> Path | None:
         return random.choice(self.filter_media(self.images) or [None])
@@ -48,7 +49,8 @@ class Pack:
         return random.choice(self.subliminal_overlays)  # Guaranteed to be non-empty
 
     def find_list(self, attr: str) -> list:
-        moods = list(filter(lambda mood: mood.name in self.active_moods, self.index.moods))
+        active_moods = self.active_moods()
+        moods = list(filter(lambda mood: mood.name in active_moods, self.index.moods))
         lists = [getattr(self.index.default, attr)] + list(map(lambda mood: getattr(mood, attr), moods))
         return [item for list in lists for item in list]
 

@@ -27,15 +27,14 @@ class State:
 
     timer_active = False
 
-    corruption_time_start = 0  # Milliseconds
-    corruption_popup_number = 0
-    corruption_launches_number = 1
-
     _hibernate_active = Subject(False)
     hibernate_id = None
     pump_scare = False
 
     corruption_level = 1
+    corruption_time_start = 0  # Milliseconds
+    corruption_popup_number = 0
+    corruption_launches_number = 1
 
     gallery_dl_process = None
 

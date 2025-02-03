@@ -194,13 +194,14 @@ def load_info(paths: PackPaths) -> Info:
     return try_load(paths.info, load) or default
 
 
-def load_active_moods(mood_file: Path) -> set[str]:
-    def load(content: str) -> set[str]:
+def load_active_moods(mood_file: Path) -> Callable[[], set[str]]:
+    def load(content: str) -> Callable[[], set[str]]:
         moods = json.loads(content)
         Schema({Required("active"): [str]})(moods)
-        return MoodSet(moods["active"])
+        mood_set = MoodSet(moods["active"])
+        return lambda: mood_set
 
-    return try_load(mood_file, load) or UniversalSet()
+    return try_load(mood_file, load) or (lambda: UniversalSet())
 
 
 def list_media(dir: Path, is_valid: Callable[[str], bool]) -> list[Path]:

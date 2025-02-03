@@ -1,13 +1,12 @@
 import logging
 import sys
 import time
-from random import random
 from tkinter import Tk, messagebox
 
 from features.corruption_config import CorruptionConfig
 from pack import Pack
 from paths import Data
-from roll import RollTarget, roll_targets, roll
+from roll import roll
 from settings import Settings
 from state import State
 from utils import utils
@@ -43,9 +42,15 @@ def corruption_danger_check(settings: Settings, pack: Pack) -> None:
             sys.exit()
 
 
+def next_corruption_level(settings: Settings, pack: Pack, state: State) -> int:
+    if settings.corruption_purity:
+        return state.corruption_level - (1 if state.corruption_level > 1 else 0)
+    else:
+        return state.corruption_level + (1 if state.corruption_level < len(pack.corruption_levels) else 0)
+
+
 def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     level = pack.corruption_levels[state.corruption_level - 1]
-    pack.active_moods = level.moods.copy()
 
     if settings.corruption_wallpaper:
         utils.set_wallpaper(pack.paths.root / (level.wallpaper or pack.wallpaper))
@@ -64,41 +69,8 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
 
 
 def update_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
-    if settings.corruption_purity:
-        state.corruption_level -= 1 if state.corruption_level > 1 else 0
-    else:
-        state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
+    state.corruption_level = next_corruption_level(settings, pack, state)
     apply_corruption_level(settings, pack, state)
-
-
-def handle_corruption_fade(settings: Settings, pack: Pack, state: State, targets: list[RollTarget]) -> None:
-    if roll(fade_chance(settings, state)):
-        # If roll succeeds, set corruption level to one higher (or lower) than normal
-        if settings.corruption_purity:
-            state.corruption_level -= 1 if state.corruption_level > 1 else 0
-        else:
-            state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
-
-        # Bandaid fix, do something better
-        true_wallpaper_setting = settings.corruption_wallpaper
-        if true_wallpaper_setting == True:
-            settings.corruption_wallpaper = False
-
-        apply_corruption_level(settings, pack, state)
-        # Roll and spawn popup as normal, now with new corruption level
-        roll_targets(settings, targets)
-        # Revert back to original corruption level and apply
-        if settings.corruption_purity:
-            state.corruption_level += 1 if state.corruption_level < len(pack.corruption_levels) else 0
-        else:
-            state.corruption_level -= 1 if state.corruption_level > 1 else 0
-        apply_corruption_level(settings, pack, state)
-
-        # Bandaid fix, do something better
-        if true_wallpaper_setting == True:
-            settings.corruption_wallpaper = True
-    else:
-        roll_targets(settings, targets)
 
 
 def fade_chance(settings: Settings, state: State) -> float:
@@ -178,6 +150,10 @@ def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) ->
 
     if settings.corruption_purity:
         state.corruption_level = len(pack.corruption_levels)
+
+    pack.active_moods = lambda: pack.corruption_levels[
+        (next_corruption_level(settings, pack, state) if roll(fade_chance(settings, state)) else state.corruption_level) - 1
+    ].moods
 
     match settings.corruption_trigger:
         case "Timed":
