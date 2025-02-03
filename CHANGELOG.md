@@ -19,6 +19,8 @@
 
 •*Also added in the feature to block switching themes from corruption "full permissions" mode*
 
+•*You should now be able to block moods while in corruption mode*
+
 The config refactor is here! Maybe you are reading this because you noticed that the version checker is broken on your older version- in that case the config refactor is in progress still... But if you're here when version 15 is officially out, guess what- it's done!
 
 This includes:
