@@ -22,7 +22,7 @@
 
 •*You should now be able to block moods while in corruption mode*
 
-•*All of the different moods (media, captions, etc) have been unified under a single file format, "index.json". The old format is still supported, and we have no documentation or examples of the new file yet.*
+•*All of the different moods (media, captions, etc) have been unified to a single universal mood system. This is accompanied by a new `index.json` file for packs to fix existing issues in the old JSON formats. The old formats are still supported, and we have no documentation or examples of the new file yet.*
 >Feel free to keep making packs and using the old mood format, we do not plan to deprecate it in the future. This is still being worked on and more examples will be given in the future. Our goal is to make moods less of a headache with less files to worry about!
 
 •*Changing wallpapers should now be possible on KDE for Linux users.*
