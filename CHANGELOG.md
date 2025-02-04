@@ -18,19 +18,33 @@
 >This will allow two moods to blend over a period of time, rather than an abrupt transition. Try it out for a more gradual experience!
 
 •*Also added in the feature to block switching themes from corruption "full permissions" mode*
+>At this point, every originally planned feature for corruption is now implemented. I am planning to continue work on it, but we've finally reached the point I wanted to be at half a year ago!
 
 •*You should now be able to block moods while in corruption mode*
 
-The config refactor is here! Maybe you are reading this because you noticed that the version checker is broken on your older version- in that case the config refactor is in progress still... But if you're here when version 15 is officially out, guess what- it's done!
+•*All of the different moods (media, captions, etc) have been unified under a single file format, "index.json". The old format is still supported, and we have no documentation or examples of the new file yet.*
+>Feel free to keep making packs and using the old mood format, we do not plan to deprecate it in the future. This is still being worked on and more examples will be given in the future. Our goal is to make moods less of a headache with less files to worry about!
 
-This includes:
+•*Changing wallpapers should now be possible on KDE for Linux users.*
 
-•*Better backend code for more sane editing*
+•*Fixed a bug where the "disable panic hotkey" option disabled all panic sources.*
+
+•*Fixed an error with the launch corruption trigger*
+
+Marigold has started on refactoring the config window! I've pitched in on suggesting things to move around or get rid of while it's in progress, so some settings might be different. In the future, we'd like to make the config window a lot less difficult to navigate for new users; we haven't fully come to a consensus on what that entails yet, but hopefully it will be better for everyone!
+
+So far, the refactor includes:
+
+•*Better backend code for more sane editing in some tabs*
 
 •*I have chosen to remove the troubleshooting console error window, since it just caused a lot of confusion*
 >Nothing of value was lost, if you need to troubleshoot config window errors, use the debug tab or look at the logs
 
 •*A scrollbar has been added so users with smaller monitors won't have the import/export options slide off the face of the earth!*
+
+KNOWN ISSUES:
+
+•*Importing pack config settings that swap modes or toggle on settings will cause linked settings to remain greyed out in the config window, saving and relaunching or "turning them off and on again" will fix this and allow you to edit them yourself*
 
 **Version 14.2**
 
