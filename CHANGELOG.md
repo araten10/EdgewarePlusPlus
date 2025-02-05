@@ -9,6 +9,10 @@
 
 **Since last version...**
 
+**Version 14.7**
+
+Lots of small changes, as well as things that will lead in to huge overhauls! Corruption is finally finished as was originally planned!
+
 •*Added a renaming tool to the pack creator, which renames files to start with the mood they're in (for caption purposes)*
 
 •*Fixed issue with video popups on windows where buttons and captions wouldn't appear*
@@ -19,6 +23,8 @@
 
 •*Also added in the feature to block switching themes from corruption "full permissions" mode*
 >At this point, every originally planned feature for corruption is now implemented. I am planning to continue work on it, but we've finally reached the point I wanted to be at half a year ago!
+
+•*A new demo pack has been added to the main github page to show off the fade feature... as well as exploit your kink curiosity~*
 
 •*You should now be able to block moods while in corruption mode*
 

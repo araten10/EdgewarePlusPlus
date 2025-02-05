@@ -94,9 +94,17 @@ Planned additions, as well as currently known issues, can now be found on the [i
 
 ## Packs
 
+For most of these packs, we will include a pack config file so you're able to easily test relevant settings. To apply these settings, you can go into the "File" tab once you've imported the pack, and press the "Load Pack Configuration" button. Once they've been loaded, you're free to take a look around and change anything you see fit, as the packs usually will only change a few settings. Make sure you save before you exit!
+
+Reminder: Check out the "Pack Info" tab for more information on these packs once you download them~
+
 [**EdgeWare++ Test Pack**](https://mega.nz/file/VbsEmbLD#gCLx6Ftv161oT7u3yiU8altS07QSElTz-Xo9kRmcugM)
-**Version: 2**
-A test pack featuring a sampler of most (finished) features found in EdgeWare++, and the pack i've been using to test functionality in. Some features are not complete and will be patched in as time goes on.
+**Version: 2** *[17MB]*
+The original test pack for EdgeWare++! It's fairly old, and i'm not sure how much i'll be updating it in the future. However, it's completely SFW, has examples for most features up to version ~13, and is extremely small in the filesize department. This is a good place to start if you just want to test running EdgeWare, or learn how to make a basic pack!
+
+[**Furry Therapy**](https://mega.nz/file/dakhzYqS#kHO61V6pEwaXqtTXE7SGVHVdHjUkxtXE6Vyg2uw-FPA)
+**Version: 1.5** *[398MB]*
+Meant to demo corruption and the corruption "fade" feature, this pack is for people who love hentai. That's it! There's no tricks or traps in here, nope, definitely not at all... The pack configuration will only change the corruption and corruption fade settings, so feel free to edit the rest of the payload to what you personally enjoy. And try not to stare for too long, it might have adverse effects~
 
 ## Frequently Asked Questions
 
