@@ -8,7 +8,6 @@ from tkinter import (
     GROOVE,
     RAISED,
     SINGLE,
-    VERTICAL,
     Button,
     Canvas,
     Checkbutton,
@@ -29,9 +28,9 @@ from tkinter import (
     ttk,
 )
 
-import ttkwidgets as tw
 from config_window.annoyance.audio_video import AudioVideoTab
 from config_window.annoyance.captions import CaptionsTab
+from config_window.annoyance.moods import MoodsTab
 from config_window.annoyance.popup import PopupTab
 from config_window.annoyance.wallpaper import WallpaperTab
 from config_window.general.booru import BooruTab
@@ -70,42 +69,10 @@ default_config = load_default_config()
 pack = Pack(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_PACK_PATH)
 
 
-# if you are working on this i'm just letting you know there's like almost no documentation for ttkwidgets
-# source code is here https://github.com/TkinterEP/ttkwidgets/blob/master/ttkwidgets/checkboxtreeview.py
-class CheckboxTreeview(tw.CheckboxTreeview):
-    def __init__(self, master=None, **kw):
-        tw.CheckboxTreeview.__init__(self, master, **kw)
-        # disabled tag to mar disabled items
-        self.tag_configure("disabled", foreground="grey")
-        if kw["name"]:
-            self.name = kw["name"]
-
-    def _box_click(self, event):
-        """Check or uncheck box when clicked."""
-        x, y, widget = event.x, event.y, event.widget
-        elem = widget.identify("element", x, y)
-        if "image" in elem:
-            # a box was clicked
-            item = self.identify_row(y)
-            if self.tag_has("disabled", item):
-                return  # do nothing when disabled
-            if self.tag_has("unchecked", item) or self.tag_has("tristate", item):
-                self.change_state(item, "checked")
-                update_moods(self.name, item, True)
-                # self._check_ancestor(item)
-                # self._check_descendant(item)
-            elif self.tag_has("checked"):
-                self.change_state(item, "unchecked")
-                update_moods(self.name, item, False)
-                # self._uncheck_descendant(item)
-                # self._uncheck_ancestor(item)
-
-
 pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-MOOD_TEXT = 'Moods are a very important part of edgeware, but also something completely optional to the end-user. Every piece of media has a mood attached to it, and edgeware checks to see if that mood is enabled before deciding to show it. Think of moods like booru tags, categories, or genres.\n\nIn this tab you can disable or enable moods. Don\'t like a particular fetish included in a pack? Turn it off! By default, all moods are turned on...\n\n...Except for packs that utilize corruption. A more in-depth explanation can be found on the "corruption" tab (under modes), but the quick summary is that corruption turns on and off moods automatically over a period of time.\n\nPS: Moods date back all the way to the original edgeware- they just had no purpose. Because of this, every pack is "compatible" with the moods feature- but most older ones just have everything set to "default", which might not show up in this window.'
 DANGER_INTRO_TEXT = "This tab is for settings that could potentially delete or alter files on your computer, or make Edgeware run in undesired ways. Please note that with certain combinations of settings not listed here, Edgeware can also be potentially dangerous (low popup delay, high hibernate payload)- these settings are just particularly explicit in their destructive potential."
 DANGER_DRIVE_TEXT = 'There are two main features in this section: "Fill Drive" and "Replace Images". This explanation might be long, but these features are very dangerous, so please pay attention if you plan to use them!\n\nFill drive will attempt to fill your computer with as much porn from the currently loaded pack as possible. It does, however, have some restrictions, which are further explained in the hover tooltip. Fill delay is a forced delay on saving, as when not properly configured it can fill your drive VERY quickly.\n\nReplace images will seek out folders with large numbers of pre-existing images (more than the threshold value) and when it finds one, it will replace ALL of the images with images from the currently loaded pack. For example, you could point it at certain steam directories to have all of your game preview/banner images replaced with porn. Please, please, please, backup any important images before using this setting... Edgeware will attempt to backup any replaced images under /data/backups, but nobody involved with any Edgeware version past, present, or future, is responsible for any lost images. Don\'t solely rely on the included backup feature... do the smart thing and make personal backups as well!\n\nI understand techdom and gooning are both fetishes about making irresponsible decisions, but at least understand the risks and take a moment to decide on how you want to use these features. Set up blacklists and make backups if you wish to proceed, but to echo the inadequate sex-ed public schools dole out: abstinence is the safest option.'
 DANGER_MISC_TEXT = "These settings are less destructive on your PC, but will either cause embarrassment or give you less control over Edgeware.\n\nDisable Panic Hotkey disables both the panic hotkey and system tray panic. A full list of panic alternatives can be found in the hover tooltip.\nLaunch on PC Startup is self explanatory, but keep caution on this if you're running Edgeware with a strong payload.\nShow on Discord will give you a status on discord while you run Edgeware. There's actually a decent amount of customization for this option, and packs can have their own status. However, this setting could definitely be \"socially destructive\", or at least cause you great (unerotic) shame, so be careful with enabling it."
@@ -198,7 +165,7 @@ class Config(Tk):
         annoyance_notebook.add(AudioVideoTab(vars, title_font, message_group), text="Audio/Video")  # tab for managing audio and video settings
         annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
-        tabMoods = ttk.Frame(None)  # tab for mood settings
+        annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
         tabDangerous = ttk.Frame(None)  # tab for potentially dangerous settings
 
         tabSubModes = ttk.Frame(notebook)
@@ -269,61 +236,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ MOODS TAB STARTS HERE}==============#
-        annoyance_notebook.add(tabMoods, text="Moods")
-
-        Label(tabMoods, text="Moods", font=title_font, relief=GROOVE).pack(pady=2)
-
-        moodsMessage = Message(tabMoods, text=MOOD_TEXT, justify=CENTER, width=675)
-        moodsMessage.pack(fill="both")
-        message_group.append(moodsMessage)
-
-        moodsFrame = Frame(tabMoods, borderwidth=5, relief=RAISED)
-        moodsListFrame = Frame(moodsFrame)
-        tabMoodsMaster = ttk.Notebook(moodsListFrame)
-        moodsMediaFrame = Frame(tabMoodsMaster)
-
-        moodsFrame.pack(fill="x")
-        moodsListFrame.pack(fill="x")
-        tabMoodsMaster.pack(fill="x")
-        moodsMediaFrame.pack(fill="both")
-
-        tabMoodsMaster.add(moodsMediaFrame, text="Active Moods")
-
-        # Media frame
-        mediaTree = CheckboxTreeview(moodsMediaFrame, height=15, show="tree", name="mediaTree")
-        mediaScrollbar = ttk.Scrollbar(moodsMediaFrame, orient=VERTICAL, command=mediaTree.yview)
-        mediaTree.configure(yscroll=mediaScrollbar.set)
-
-        for mood in pack.index.moods:
-            parent = mediaTree.insert("", "end", iid=str(mood.name), values=str(mood.name), text=str(mood.name))
-            # TODO: Display all mood information
-            mediaTree.insert(parent, "end", iid=(f"{mood.name}desc"), text="Under construction, mood information goes here")
-            mediaTree.change_state((f"{mood.name}desc"), "disabled")
-
-        if len(mediaTree.get_children()) == 0:
-            mediaTree.insert("", "0", iid="NAmi", text="No moods found in pack!")
-            mediaTree.change_state("NAmi", "disabled")
-
-        if config["toggleMoodSet"] is not True:
-            if len(mediaTree.get_children()) != 0:
-                try:
-                    with open(pack.info.mood_file, "r") as f:
-                        moods = json.loads(f.read())
-                        for c in mediaTree.get_children():
-                            value = mediaTree.item(c, "values")
-                            if value[0] in moods["active"]:
-                                mediaTree.change_state(value[0], "checked")
-                except Exception as e:
-                    logging.warning(f"error checking media treeview nodes. {e}")
-
-        mediaTree.pack(side="left", fill="both", expand=1)
-        mediaScrollbar.pack(side="left", fill="y")
-
-        moodsFrame.grid_columnconfigure(0, weight=1, uniform="group1")
-        moodsFrame.grid_columnconfigure(1, weight=1, uniform="group1")
-        moodsFrame.grid_rowconfigure(0, weight=1)
 
         # ==========={EDGEWARE++ "DANGEROUS SETTINGS" TAB STARTS HERE}===========#
         annoyance_notebook.add(tabDangerous, text="Dangerous Settings")
@@ -1211,21 +1123,6 @@ def assign_json(key: str, var: int or str):
     config[key] = var
     with open(Data.CONFIG, "w") as f:
         f.write(json.dumps(config))
-
-
-def update_moods(type: str, id: str, check: bool):
-    try:
-        if config["toggleMoodSet"] is not True:
-            with open(pack.info.mood_file, "r") as mood:
-                mood_dict = json.loads(mood.read())
-                if check:
-                    mood_dict["active"].append(id)
-                else:
-                    mood_dict["active"].remove(id)
-            with open(pack.info.mood_file, "w") as mood:
-                mood.write(json.dumps(mood_dict))
-    except Exception as e:
-        logging.warning(f"error updating mood files. {e}")
 
 
 def theme_change(theme: str, root, style, mfont, tfont):
