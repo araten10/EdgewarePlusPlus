@@ -956,29 +956,7 @@ class Config(Tk):
 
         # ==========={IN HERE IS ADVANCED TAB ITEM INITS}===========#
         notebook.add(tabAdvanced, text="Troubleshooting")
-        itemList = []
-        for settingName in config:
-            itemList.append(settingName)
-        dropdownObj = StringVar(self, itemList[0])
-        textObj = StringVar(self, config[dropdownObj.get()])
-        advPanel = Frame(tabAdvanced)
-        textInput = Entry(advPanel)
-        textInput.insert(1, textObj.get())
-        expectedLabel = Label(tabAdvanced, text=f"Expected value: {default_config[dropdownObj.get()]}")
-        dropdownMenu = OptionMenu(advPanel, dropdownObj, *itemList, command=lambda a: update_text([textInput, expectedLabel], config[a], a))
-        dropdownMenu.configure(width=10)
-        applyButton = Button(advPanel, text="Apply", command=lambda: assign_json(dropdownObj.get(), textInput.get()))
-        Label(tabAdvanced, text="Debug Config Edit", font=title_font, relief=GROOVE).pack(pady=2)
-        Label(
-            tabAdvanced,
-            text="Be careful messing with some of these; improper configuring can cause\nproblems when running, or potentially cause unintended damage to files.",
-        ).pack()
-        advPanel.pack(fill="x", padx=2)
-        dropdownMenu.pack(padx=2, side="left")
-        textInput.pack(padx=2, fill="x", expand=1, side="left")
-        applyButton.pack(padx=2, fill="x", side="right")
-        expectedLabel.pack()
-        # ==========={HERE ENDS  ADVANCED TAB ITEM INITS}===========#
+
         Label(tabAdvanced, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)
         troubleshootingHostFrame = Frame(tabAdvanced, borderwidth=5, relief=RAISED)
         troubleshootingFrame1 = Frame(troubleshootingHostFrame)
@@ -1019,8 +997,8 @@ class Config(Tk):
             " deal with all this mood business, you can disable the mood saving feature here.",
         )
 
-        notebook.add(tabInfo, text="About")
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
+        notebook.add(tabInfo, text="About")
         tabInfoExpound.add(tab_annoyance, text="Annoyance")
         Label(tab_annoyance, text=ANNOYANCE_TEXT, anchor="nw", wraplength=460).pack()
         tabInfoExpound.add(tab_drive, text="Hard Drive")
