@@ -4,24 +4,20 @@ import logging
 import os
 from pathlib import Path
 from tkinter import (
-    CENTER,
     GROOVE,
     RAISED,
-    SINGLE,
     Button,
     Canvas,
     Checkbutton,
     Entry,
     Frame,
     Label,
-    Listbox,
     Message,
     OptionMenu,
     Scale,
     StringVar,
     Text,
     Tk,
-    filedialog,
     font,
     messagebox,
     simpledialog,
@@ -30,6 +26,7 @@ from tkinter import (
 
 from config_window.annoyance.audio_video import AudioVideoTab
 from config_window.annoyance.captions import CaptionsTab
+from config_window.annoyance.dangerous_settings import DangerousSettingsTab
 from config_window.annoyance.moods import MoodsTab
 from config_window.annoyance.popup import PopupTab
 from config_window.annoyance.wallpaper import WallpaperTab
@@ -39,7 +36,6 @@ from config_window.general.file import FileTab
 from config_window.general.info import InfoTab
 from config_window.general.start import StartTab
 from config_window.utils import (
-    add_list,
     all_children,
     assign,
     clear_launches,
@@ -48,8 +44,6 @@ from config_window.utils import (
     get_live_version,
     import_resource,
     pack_preset,
-    remove_list,
-    reset_list,
     set_widget_states,
     set_widget_states_with_colors,
     write_save,
@@ -73,10 +67,6 @@ pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
 # description text for each tab
-DANGER_INTRO_TEXT = "This tab is for settings that could potentially delete or alter files on your computer, or make Edgeware run in undesired ways. Please note that with certain combinations of settings not listed here, Edgeware can also be potentially dangerous (low popup delay, high hibernate payload)- these settings are just particularly explicit in their destructive potential."
-DANGER_DRIVE_TEXT = 'There are two main features in this section: "Fill Drive" and "Replace Images". This explanation might be long, but these features are very dangerous, so please pay attention if you plan to use them!\n\nFill drive will attempt to fill your computer with as much porn from the currently loaded pack as possible. It does, however, have some restrictions, which are further explained in the hover tooltip. Fill delay is a forced delay on saving, as when not properly configured it can fill your drive VERY quickly.\n\nReplace images will seek out folders with large numbers of pre-existing images (more than the threshold value) and when it finds one, it will replace ALL of the images with images from the currently loaded pack. For example, you could point it at certain steam directories to have all of your game preview/banner images replaced with porn. Please, please, please, backup any important images before using this setting... Edgeware will attempt to backup any replaced images under /data/backups, but nobody involved with any Edgeware version past, present, or future, is responsible for any lost images. Don\'t solely rely on the included backup feature... do the smart thing and make personal backups as well!\n\nI understand techdom and gooning are both fetishes about making irresponsible decisions, but at least understand the risks and take a moment to decide on how you want to use these features. Set up blacklists and make backups if you wish to proceed, but to echo the inadequate sex-ed public schools dole out: abstinence is the safest option.'
-DANGER_MISC_TEXT = "These settings are less destructive on your PC, but will either cause embarrassment or give you less control over Edgeware.\n\nDisable Panic Hotkey disables both the panic hotkey and system tray panic. A full list of panic alternatives can be found in the hover tooltip.\nLaunch on PC Startup is self explanatory, but keep caution on this if you're running Edgeware with a strong payload.\nShow on Discord will give you a status on discord while you run Edgeware. There's actually a decent amount of customization for this option, and packs can have their own status. However, this setting could definitely be \"socially destructive\", or at least cause you great (unerotic) shame, so be careful with enabling it."
-
 LOWKEY_TEXT = 'Lowkey mode makes it so all window-based popups will spawn in a corner of your screen rather than random locations. This is meant for more passive use as it generally makes popups interrupt other actions less often.\n\nBest used with the "Popup Timeout" feature along with a relatively high delay, as popups will stack on top of eachother.'
 
 # text for the about tab
@@ -130,8 +120,6 @@ class Config(Tk):
         hibernate_group = []
         hlength_group = []
         hactivity_group = []
-        fill_group = []
-        replace_group = []
         mitosis_group = []
         mitosis_cGroup = []
         timer_group = []
@@ -166,7 +154,7 @@ class Config(Tk):
         annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
-        tabDangerous = ttk.Frame(None)  # tab for potentially dangerous settings
+        annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
 
         tabSubModes = ttk.Frame(notebook)
         notebook.add(tabSubModes, text="Modes")
@@ -236,137 +224,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ "DANGEROUS SETTINGS" TAB STARTS HERE}===========#
-        annoyance_notebook.add(tabDangerous, text="Dangerous Settings")
-
-        Label(tabDangerous, text="Hard Drive Settings", font=title_font, relief=GROOVE).pack(pady=2)
-
-        dangerDriveMessage = Message(tabDangerous, text=DANGER_DRIVE_TEXT, justify=CENTER, width=675)
-        dangerDriveMessage.pack(fill="both")
-        message_group.append(dangerDriveMessage)
-
-        hardDriveFrame = Frame(tabDangerous, borderwidth=5, relief=RAISED)
-
-        pathFrame = Frame(hardDriveFrame)
-        fillFrame = Frame(hardDriveFrame)
-        replaceFrame = Frame(hardDriveFrame)
-
-        def local_assignPath():
-            path_ = str(filedialog.askdirectory(initialdir="/", title="Select Parent Folder"))
-            if path_ != "":
-                config["drivePath"] = path_
-                pathBox.configure(state="normal")
-                pathBox.delete(0, 9999)
-                pathBox.insert(1, path_)
-                pathBox.configure(state="disabled")
-                vars.drive_path.set(str(pathBox.get()))
-
-        pathBox = Entry(pathFrame)
-        pathButton = Button(pathFrame, text="Select", command=local_assignPath)
-
-        pathBox.insert(1, config["drivePath"])
-        pathBox.configure(state="disabled")
-
-        fillBox = Checkbutton(
-            fillFrame,
-            text="Fill Drive",
-            variable=vars.fill_drive,
-            command=lambda: set_widget_states(vars.fill_drive.get(), fill_group),
-            cursor="question_arrow",
-        )
-        fillDelay = Scale(fillFrame, label="Fill Delay (10ms)", from_=0, to=250, orient="horizontal", variable=vars.fill_delay)
-
-        CreateToolTip(
-            fillBox,
-            '"Fill Drive" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. '
-            'It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a "." or have their '
-            "names listed in the folder name blacklist.\nIt will also ONLY place images into the User folder and its subfolders.\nFill drive has "
-            "one modifier, which is its own forced delay. Because it runs with between 1 and 8 threads at any given time, when improperly configured it can "
-            "fill your drive VERY quickly. To ensure that you get that nice slow fill, you can adjust the delay between each folder sweep it performs.",
-        )
-
-        fill_group.append(fillDelay)
-
-        replaceBox = Checkbutton(
-            fillFrame,
-            text="Replace Images",
-            variable=vars.replace_images,
-            command=lambda: set_widget_states(vars.replace_images.get(), replace_group),
-            cursor="question_arrow",
-        )
-        replaceThreshScale = Scale(fillFrame, label="Image Threshold", from_=1, to=1000, orient="horizontal", variable=vars.replace_threshold)
-
-        CreateToolTip(
-            replaceBox,
-            "Seeks out folders with more images than the threshold value, then replaces all of them. No, there is no automated backup!\n\n"
-            'I am begging you to read the full documentation in the "About" tab before even thinking about enabling this feature!\n\n'
-            "We are not responsible for any pain, suffering, miserere, or despondence caused by your files being deleted! "
-            "At the very least, back them up and use the blacklist!",
-        )
-
-        replace_group.append(replaceThreshScale)
-
-        avoidHostFrame = Frame(hardDriveFrame)
-
-        avoidListBox = Listbox(avoidHostFrame, selectmode=SINGLE)
-        for name in config["avoidList"].split(">"):
-            avoidListBox.insert(2, name)
-        addName = Button(
-            avoidHostFrame,
-            text="Add Name",
-            command=lambda: add_list(avoidListBox, "avoidList", "Folder Name", "Fill/replace will skip any folder with given name."),
-        )
-        removeName = Button(
-            avoidHostFrame,
-            text="Remove Name",
-            command=lambda: remove_list(avoidListBox, "avoidList", "Remove EdgeWare", "You cannot remove the EdgeWare folder exception."),
-        )
-        resetName = Button(avoidHostFrame, text="Reset", command=lambda: reset_list(avoidListBox, "avoidList", "EdgeWare>AppData"))
-
-        avoidHostFrame.pack(fill="y", side="left")
-        Label(avoidHostFrame, text="Folder Name Blacklist").pack(fill="x")
-        avoidListBox.pack(fill="x")
-        addName.pack(fill="x")
-        removeName.pack(fill="x")
-        resetName.pack(fill="x")
-
-        hardDriveFrame.pack(fill="x")
-        fillFrame.pack(fill="y", side="left")
-        fillBox.pack()
-        fillDelay.pack()
-        replaceFrame.pack(fill="y", side="left")
-        replaceBox.pack()
-        replaceThreshScale.pack()
-        pathFrame.pack(fill="x")
-        Label(pathFrame, text="Fill/Replace Start Folder").pack(fill="x")
-        pathBox.pack(fill="x")
-        pathButton.pack(fill="x")
-
-        Label(tabDangerous, text="Misc. Settings", font=title_font, relief=GROOVE).pack(pady=2)
-
-        dangerMiscMessage = Message(tabDangerous, text=DANGER_MISC_TEXT, justify=CENTER, width=675)
-        dangerMiscMessage.pack(fill="both")
-        message_group.append(dangerMiscMessage)
-
-        dangerOtherFrame = Frame(tabDangerous, borderwidth=5, relief=RAISED)
-        panicDisableButton = Checkbutton(dangerOtherFrame, text="Disable Panic Hotkey", variable=vars.panic_disabled, cursor="question_arrow")
-        toggleStartupButton = Checkbutton(dangerOtherFrame, text="Launch on PC Startup", variable=vars.run_at_startup)
-        toggleDiscordButton = Checkbutton(dangerOtherFrame, text="Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
-
-        CreateToolTip(
-            panicDisableButton,
-            "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
-            "If you want to use Panic after this, you can still:\n"
-            '•Directly run "panic.pyw"\n'
-            '•Keep the config window open and press "Perform Panic"\n'
-            "•Use the panic desktop icon (if you kept those enabled)",
-        )
-        CreateToolTip(toggleDiscordButton, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator.")
-        dangerOtherFrame.pack(fill="x")
-        panicDisableButton.pack(fill="x", side="left", expand=1)
-        toggleStartupButton.pack(fill="x", side="left", expand=1)
-        toggleDiscordButton.pack(fill="x", side="left", expand=1)
 
         # ==========={EDGEWARE++ "BASIC MODES" TAB STARTS HERE}===========#
         notebookModes.add(tabBasicModes, text="Basic Modes")
@@ -1031,8 +888,6 @@ class Config(Tk):
         # ==========={TOGGLE ASSOCIATE SETTINGS}===========#
         # all toggleAssociateSettings goes here, because it is rendered after the appropriate theme change
 
-        set_widget_states(vars.fill_drive.get(), fill_group)
-        set_widget_states(vars.replace_images.get(), replace_group)
         set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
         set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
         set_widget_states(vars.timer_mode.get(), timer_group)
