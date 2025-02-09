@@ -78,15 +78,16 @@ class PopupTab(ScrollFrame):
         prompt_mistakes_frame = Frame(popup_frame_2)
         prompt_mistakes_frame.pack(fill="y", side="left", padx=(0, 3), expand=1)
         Scale(prompt_mistakes_frame, label="Prompt Mistakes", from_=0, to=150, orient="horizontal", variable=vars.prompt_max_mistakes).pack(fill="x")
-        mistakeManual = Button(
+        prompt_mistakes_manual = Button(
             prompt_mistakes_frame,
             text="Manual mistakes...",
             command=lambda: assign(vars.prompt_max_mistakes, simpledialog.askinteger("Max Mistakes", prompt="Max mistakes allowed in prompt text\n[0-150]: ")),
             cursor="question_arrow",
         )
-        mistakeManual.pack(fill="x")
+        prompt_mistakes_manual.pack(fill="x")
         CreateToolTip(
-            mistakeManual, "The number of allowed mistakes when filling out a prompt.\n\nGood for when you can't think straight, or typing with one hand..."
+            prompt_mistakes_manual,
+            "The number of allowed mistakes when filling out a prompt.\n\nGood for when you can't think straight, or typing with one hand...",
         )
 
         ttk.Separator(popup_frame_2, orient="vertical").pack(fill="y", side="left")

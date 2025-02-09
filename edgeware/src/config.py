@@ -156,15 +156,15 @@ class Config(Tk):
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
         annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
 
-        tabSubModes = ttk.Frame(notebook)
-        notebook.add(tabSubModes, text="Modes")
-        notebookModes = ttk.Notebook(tabSubModes)
+        mode_tab = ttk.Frame(notebook)
+        notebook.add(mode_tab, text="Modes")
+        notebookModes = ttk.Notebook(mode_tab)
         tabBasicModes = ttk.Frame(None)  # tab for basic popup modes
         tabDangerModes = ttk.Frame(None)  # tab for timer mode
         tabHibernate = ttk.Frame(None)  # tab for hibernate mode
         tabCorruption = ttk.Frame(None)  # tab for corruption mode
 
-        tabAdvanced = ttk.Frame(None)  # advanced tab, will have settings pertaining to startup, hibernation mode settings
+        troubleshooting_tab = ttk.Frame(None)  # tab for miscellaneous settings with niche use cases
         tabInfo = ttk.Frame(None)  # info, github, version, about, etc.
 
         style = ttk.Style(self)  # style setting for left aligned tabs
@@ -543,7 +543,7 @@ class Config(Tk):
         triggerSubInfo = Frame(triggerInfoFrame)
 
         fade_types = ["Normal", "Abrupt"]
-        fadeDropdown = OptionMenu(fadeSubInfo, vars.corruption_fade, *fade_types, command=lambda key: fadeHelper(key))
+        fadeDropdown = OptionMenu(fadeSubInfo, vars.corruption_fade, *fade_types, command=lambda key: fade_helper(key))
         fadeDropdown.configure(width=9, highlightthickness=0)
         fadeDescription = Label(fadeInfoFrame, text="Error loading fade description!", borderwidth=2, relief=GROOVE, wraplength=150)
         fadeDescription.configure(height=3, width=22)
@@ -551,7 +551,7 @@ class Config(Tk):
         fadeImageAbrupt = ImageTk.PhotoImage(file=Assets.CORRUPTION_ABRUPT)
         fadeImageContainer = Label(fadeSubInfo, image=fadeImageNormal, borderwidth=2, relief=GROOVE)
         trigger_types = ["Timed", "Popup", "Launch"]
-        triggerDropdown = OptionMenu(triggerSubInfo, vars.corruption_trigger, *trigger_types, command=lambda key: triggerHelper(key, False))
+        triggerDropdown = OptionMenu(triggerSubInfo, vars.corruption_trigger, *trigger_types, command=lambda key: trigger_helper(key, False))
         triggerDropdown.configure(width=9, highlightthickness=0)
         triggerDescription = Label(triggerInfoFrame, text="Error loading trigger description!", borderwidth=2, relief=GROOVE, wraplength=150)
         triggerDescription.configure(height=3, width=22)
@@ -631,7 +631,7 @@ class Config(Tk):
         claunch_group.append(corruptionLaunchesButton)
         claunch_group.append(corruptionLaunchesScale)
 
-        def fadeHelper(key):
+        def fade_helper(key):
             if key == "Normal":
                 fadeDescription.configure(text="Gradually transitions between corruption levels.")
                 fadeImageContainer.configure(image=fadeImageNormal)
@@ -639,7 +639,7 @@ class Config(Tk):
                 fadeDescription.configure(text="Immediately switches to new level upon timer completion.")
                 fadeImageContainer.configure(image=fadeImageAbrupt)
 
-        def triggerHelper(key, tutorialMode):
+        def trigger_helper(key, tutorialMode):
             if key == "Timed":
                 triggerDescription.configure(text="Transitions based on time elapsed in current session.")
                 if tutorialMode:
@@ -798,24 +798,24 @@ class Config(Tk):
             if tab == "Start":
                 set_widget_states_with_colors(True, ctutorialstart_group, "lime green", "forest green")
                 set_widget_states(True, ctutorialtransition_group)
-                triggerHelper(vars.corruption_trigger.get(), False)
+                trigger_helper(vars.corruption_trigger.get(), False)
             elif tab == "Transitions":
                 set_widget_states_with_colors(True, ctutorialtransition_group, "lime green", "forest green")
                 set_widget_states(True, ctutorialstart_group)
-                triggerHelper(vars.corruption_trigger.get(), True)
+                trigger_helper(vars.corruption_trigger.get(), True)
             else:
                 set_widget_states(True, ctutorialstart_group)
                 set_widget_states(True, ctutorialtransition_group)
-                triggerHelper(vars.corruption_trigger.get(), False)
+                trigger_helper(vars.corruption_trigger.get(), False)
             set_widget_states(os.path.isfile(pack.paths.corruption), corruptionEnabled_group)
 
         corruptionTabMaster.bind("<<NotebookTabChanged>>", corruptionTutorialHelper)
 
         # ==========={IN HERE IS ADVANCED TAB ITEM INITS}===========#
-        notebook.add(tabAdvanced, text="Troubleshooting")
+        notebook.add(troubleshooting_tab, text="Troubleshooting")
 
-        Label(tabAdvanced, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)
-        troubleshootingHostFrame = Frame(tabAdvanced, borderwidth=5, relief=RAISED)
+        Label(troubleshooting_tab, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)
+        troubleshootingHostFrame = Frame(troubleshooting_tab, borderwidth=5, relief=RAISED)
         troubleshootingFrame1 = Frame(troubleshootingHostFrame)
         troubleshootingFrame2 = Frame(troubleshootingHostFrame)
 
@@ -893,8 +893,8 @@ class Config(Tk):
         set_widget_states(vars.timer_mode.get(), timer_group)
         set_widget_states(vars.lowkey_mode.get(), lowkey_group)
         hibernateHelper(vars.hibernate_type.get())
-        fadeHelper(vars.corruption_fade.get())
-        triggerHelper(vars.corruption_trigger.get(), False)
+        fade_helper(vars.corruption_fade.get())
+        trigger_helper(vars.corruption_trigger.get(), False)
         set_widget_states(os.path.isfile(pack.paths.corruption), corruptionEnabled_group)
 
         # messageOff toggle here, for turning off all help messages
@@ -924,40 +924,7 @@ class Config(Tk):
         self.mainloop()
 
 
-def pick_zip() -> str:
-    # selecting zip
-    for dirListObject in os.listdir(PATH):
-        try:
-            if dirListObject.split(".")[-1].lower() == "zip":
-                return dirListObject.split(".")[0]
-        except Exception:
-            print("{} is not a zip file.".format(dirListObject))
-    return "[No Zip Found]"
-
-
 # helper funcs for lambdas =======================================================
-def update_max(obj, value: int):
-    obj.configure(to=int(value))
-
-
-def update_text(obj_list: Entry or Label, var: str, var_label: str):
-    try:
-        for obj in obj_list:
-            if isinstance(obj, Entry):
-                obj.delete(0, 9999)
-                obj.insert(1, var)
-            elif isinstance(obj, Label):
-                obj.configure(text=f"Expected value: {default_config[var_label]}")
-    except Exception:
-        print("idk what would cause this but just in case uwu")
-
-
-def assign_json(key: str, var: int or str):
-    config[key] = var
-    with open(Data.CONFIG, "w") as f:
-        f.write(json.dumps(config))
-
-
 def theme_change(theme: str, root, style, mfont, tfont):
     if theme == "Original" or config["themeNoConfig"] is True:
         for widget in all_children(root):

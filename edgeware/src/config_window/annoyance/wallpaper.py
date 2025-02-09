@@ -11,6 +11,8 @@ from tkinter import (
     Message,
     Scale,
     filedialog,
+    messagebox,
+    simpledialog,
 )
 
 from config_window.utils import (
@@ -27,6 +29,10 @@ from widgets.tooltip import CreateToolTip
 
 ROTATE_TEXT = "Turning on wallpaper rotate disables built-in pack wallpapers, allowing you to cycle through your own instead. Keep in mind some packs use the corruption feature to rotate wallpapers without this setting enabled."
 PANIC_TEXT = "This is the panic wallpaper, make sure to set it to your default wallpaper ASAP! Otherwise quitting edgeware via panic will leave you with a nice and generic windows one instead."
+
+
+def update_max(obj, value: int):
+    obj.configure(to=int(value))
 
 
 class WallpaperTab(ScrollFrame):
@@ -113,9 +119,9 @@ class WallpaperTab(ScrollFrame):
 
     def remove_wallpaper(self) -> None:
         index = int(self.wallpaper_list.curselection()[0])
-        itemName = self.wallpaper_list.get(index)
+        item_name = self.wallpaper_list.get(index)
         if index > 0:
-            del config["wallpaperDat"][itemName]
+            del config["wallpaperDat"][item_name]
             self.wallpaper_list.delete(self.wallpaper_list.curselection())
         else:
             messagebox.showwarning("Remove Default", "You cannot remove the default wallpaper.")

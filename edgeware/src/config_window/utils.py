@@ -36,8 +36,8 @@ def get_live_version() -> str:
         return "Version check disabled!"
 
     try:
-        with open(urllib.request.urlretrieve(url)[0], "r") as liveDCfg:
-            return json.loads(liveDCfg.read())["versionplusplus"]
+        with open(urllib.request.urlretrieve(url)[0], "r") as live_config:
+            return json.loads(live_config.read())["versionplusplus"]
     except Exception as e:
         logging.warning(f"Failed to fetch version on GitHub.\n\tReason: {e}")
         return "Could not check version."
@@ -81,26 +81,22 @@ def assign(obj: StringVar | IntVar | BooleanVar, var: str | int | bool):
 
 
 def safe_check(vars: Vars) -> bool:
-    dangersList = []
-    numDangers = 0
+    dangers = []
     logging.info("running through danger list...")
     if vars.replace_images.get():
         logging.info("extreme dangers found.")
-        dangersList.append("\n\nExtreme:")
+        dangers.append("\n\nExtreme:")
         if vars.replace_images.get():
-            numDangers += 1
-            dangersList.append(
+            dangers.append(
                 '\n•Replace Images is enabled! THIS WILL DELETE FILES ON YOUR COMPUTER! Only enable this willingly and cautiously! Read the documentation in the "About" tab!'
             )
     if vars.run_at_startup.get() or vars.fill_drive.get():
         logging.info("major dangers found.")
-        dangersList.append("\n\nMajor:")
+        dangers.append("\n\nMajor:")
         if vars.run_at_startup.get():
-            numDangers += 1
-            dangersList.append("\n•Launch on Startup is enabled! This will run EdgeWare when you start your computer! (Note: Timer mode enables this setting!)")
+            dangers.append("\n•Launch on Startup is enabled! This will run EdgeWare when you start your computer! (Note: Timer mode enables this setting!)")
         if vars.fill_drive.get():
-            numDangers += 1
-            dangersList.append(
+            dangers.append(
                 "\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
             )
     if (
@@ -110,37 +106,29 @@ def safe_check(vars: Vars) -> bool:
         or (vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30))
     ):
         logging.info("medium dangers found.")
-        dangersList.append("\n\nMedium:")
+        dangers.append("\n\nMedium:")
         if vars.timer_mode.get():
-            numDangers += 1
-            dangersList.append("\n•Timer mode is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!")
+            dangers.append("\n•Timer mode is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!")
         if vars.mitosis_mode.get():
-            numDangers += 1
-            dangersList.append("\n•Mitosis mode is enabled! With high popup rates, this could create a chain reaction, causing lag!")
+            dangers.append("\n•Mitosis mode is enabled! With high popup rates, this could create a chain reaction, causing lag!")
         if vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30):
-            numDangers += 1
-            dangersList.append("\n•You are running hibernate mode with a short cooldown! You might experience lag if a bunch of hibernate modes overlap!")
+            dangers.append("\n•You are running hibernate mode with a short cooldown! You might experience lag if a bunch of hibernate modes overlap!")
         if vars.show_on_discord.get():
-            numDangers += 1
-            dangersList.append("\n•Show on Discord is enabled! This could lead to potential embarassment if you're on your main account!")
+            dangers.append("\n•Show on Discord is enabled! This could lead to potential embarassment if you're on your main account!")
     if vars.panic_disabled.get() or vars.run_on_save_quit.get():
         logging.info("minor dangers found.")
-        dangersList.append("\n\nMinor:")
+        dangers.append("\n\nMinor:")
         if vars.panic_disabled.get():
-            numDangers += 1
-            dangersList.append(
-                "\n•Panic Hotkey is disabled! If you want to easily close EdgeWare, read the tooltip in the Annoyance tab for other ways to panic!"
-            )
+            dangers.append("\n•Panic Hotkey is disabled! If you want to easily close EdgeWare, read the tooltip in the Annoyance tab for other ways to panic!")
         if vars.run_on_save_quit.get():
-            numDangers += 1
-            dangersList.append("\n•EdgeWare will run on Save & Exit (AKA: when you hit Yes!)")
-    dangers = " ".join(dangersList)
-    if numDangers > 0:
+            dangers.append("\n•EdgeWare will run on Save & Exit (AKA: when you hit Yes!)")
+    dangers = " ".join(dangers)
+    if len(dangers):
         logging.info("safe mode intercepted save! asking user...")
         if (
             messagebox.askyesno(
                 "Dangerous Setting Detected!",
-                f"There are {numDangers} potentially dangerous settings detected! Do you want to save these settings anyways? {dangers}",
+                f"There are {len(dangers)} potentially dangerous settings detected! Do you want to save these settings anyways? {dangers}",
                 icon="warning",
             )
             is False
@@ -153,20 +141,20 @@ def safe_check(vars: Vars) -> bool:
 def export_resource() -> bool:
     try:
         logging.info("starting zip export...")
-        saveLocation = filedialog.asksaveasfile("w", defaultextension=".zip")
-        with zipfile.ZipFile(saveLocation.name, "w", compression=zipfile.ZIP_DEFLATED) as zip:
-            beyondRoot = False
+        save_location = filedialog.asksaveasfile("w", defaultextension=".zip")
+        with zipfile.ZipFile(save_location.name, "w", compression=zipfile.ZIP_DEFLATED) as zip:
+            beyond_root = False
             for root, dirs, files in os.walk(DEFAULT_PACK_PATH):
                 for file in files:
                     logging.info(f"write {file}")
-                    if beyondRoot:
+                    if beyond_root:
                         zip.write(os.path.join(root, file), os.path.join(Path(root).name, file))
                     else:
                         zip.write(os.path.join(root, file), file)
                 for dir in dirs:
                     logging.info(f"make dir {dir}")
                     zip.write(os.path.join(root, dir), dir)
-                beyondRoot = True
+                beyond_root = True
         return True
     except Exception as e:
         logging.fatal(f"failed to export zip\n\tReason: {e}")
@@ -176,8 +164,8 @@ def export_resource() -> bool:
 
 def import_resource(parent: Tk) -> bool:
     try:
-        openLocation = filedialog.askopenfile("r", defaultextension=".zip")
-        if openLocation is None:
+        open_location = filedialog.askopenfile("r", defaultextension=".zip")
+        if open_location is None:
             return False
         if os.path.exists(DEFAULT_PACK_PATH):
             resp = confirm_box(
@@ -191,7 +179,7 @@ def import_resource(parent: Tk) -> bool:
                 return False
             shutil.rmtree(DEFAULT_PACK_PATH)
             logging.info("removed old resource folder")
-        with zipfile.ZipFile(openLocation.name, "r") as zip:
+        with zipfile.ZipFile(open_location.name, "r") as zip:
             zip.extractall(DEFAULT_PACK_PATH)
             logging.info("extracted all from zip")
         messagebox.showinfo("Done", "Resource importing completed.")
@@ -208,31 +196,31 @@ def import_resource(parent: Tk) -> bool:
 def pack_preset(pack: Pack, vars: Vars, preset_type: str, danger: bool):
     with open(pack.paths.config) as f:
         try:
-            l = json.loads(f.read())
-            print(l)
-            if "version" in l:
-                del l["version"]
-            if "versionplusplus" in l:
-                del l["versionplusplus"]
-            if "packPath" in l:
-                del l["packPath"]
+            pack_config = json.loads(f.read())
+            print(pack_config)
+            if "version" in pack_config:
+                del pack_config["version"]
+            if "versionplusplus" in pack_config:
+                del pack_config["versionplusplus"]
+            if "packPath" in pack_config:
+                del pack_config["packPath"]
             filter = []
             num = 0
             if preset_type == "full":
                 filter = vars.entries.keys()
             if preset_type == "corruption":
                 filter = ["corruptionMode", "corruptionTime", "corruptionFadeType"]
-            for c in l:
+            for c in pack_config:
                 if c in filter:
                     num += 1
                     print(f"{c} matches. Looking for list number...")
                     var = vars.entries[c]
                     if isinstance(var, IntVar):
-                        var.set(int(l[c]))
+                        var.set(int(pack_config[c]))
                     if isinstance(var, BooleanVar):
-                        var.set(l[c] == 1)
+                        var.set(pack_config[c] == 1)
                     if isinstance(var, StringVar):
-                        var.set(l[c].strip())
+                        var.set(pack_config[c].strip())
             messagebox.showinfo(
                 "Load Completed",
                 f"Pack config settings have been loaded successfully. There were {num} settings loaded."
@@ -301,9 +289,9 @@ def add_list(tk_list_obj: Listbox, key: str, title: str, text: str):
 
 def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
     index = int(tk_list_obj.curselection()[0])
-    itemName = tk_list_obj.get(index)
+    item_name = tk_list_obj.get(index)
     if index > 0:
-        config[key] = config[key].replace(f">{itemName}", "")
+        config[key] = config[key].replace(f">{item_name}", "")
         tk_list_obj.delete(tk_list_obj.curselection())
     else:
         messagebox.showwarning(title, text)
@@ -311,15 +299,15 @@ def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
 
 def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str):
     index = int(tk_list_obj.curselection()[0])
-    itemName = tk_list_obj.get(index)
+    item_name = tk_list_obj.get(index)
     print(config[key])
-    print(itemName)
+    print(item_name)
     print(len(config[key].split(">")))
     if len(config[key].split(">")) > 1:
         if index > 0:
-            config[key] = config[key].replace(f">{itemName}", "")
+            config[key] = config[key].replace(f">{item_name}", "")
         else:
-            config[key] = config[key].replace(f"{itemName}>", "")
+            config[key] = config[key].replace(f"{item_name}>", "")
         tk_list_obj.delete(tk_list_obj.curselection())
     else:
         messagebox.showwarning(title, text)
