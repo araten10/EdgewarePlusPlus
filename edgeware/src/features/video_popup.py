@@ -22,6 +22,7 @@ class VideoPopup(Popup):
         self.wait_visibility()
         label = Label(self, width=self.width, height=self.height)
         label.pack()
+        label.wait_visibility()
         self.player = VideoPlayer(label, video, (self.width, self.height), self.settings.video_volume, self.settings.vlc_mode)
 
         self.init_finish()
