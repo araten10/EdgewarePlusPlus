@@ -5,7 +5,6 @@ from tkinter import (
     Entry,
     Frame,
     Label,
-    Message,
     Scale,
 )
 from tkinter.font import Font
@@ -17,7 +16,7 @@ from widgets.tooltip import CreateToolTip
 
 
 class DangerousModesTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]):
+    def __init__(self, vars: Vars, title_font: Font):
         super().__init__()
 
         # Timer

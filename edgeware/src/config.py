@@ -35,6 +35,7 @@ from config_window.general.info import InfoTab
 from config_window.general.start import StartTab
 from config_window.modes.basic import BasicModesTab
 from config_window.modes.dangerous_modes import DangerousModesTab
+from config_window.modes.hibernate import HibernateModeTab
 from config_window.troubleshooting import TroubleshootingTab
 from config_window.utils import (
     all_children,
@@ -115,10 +116,6 @@ class Config(Tk):
         vars = Vars(config)
 
         # grouping for enable/disable
-        hibernate_group = []
-        hlength_group = []
-        hactivity_group = []
-        lowkey_group = []
         ctime_group = []
         cpopup_group = []
         claunch_group = []
@@ -155,8 +152,8 @@ class Config(Tk):
         notebook.add(modes_tab, text="Modes")
         modes_notebook = ttk.Notebook(modes_tab)
         modes_notebook.add(BasicModesTab(vars, title_font), text="Basic Modes")  # tab for basic popup modes
-        modes_notebook.add(DangerousModesTab(vars, title_font, message_group), text="Dangerous Modes")  # tab for timer mode
-        tabHibernate = ttk.Frame(None)  # tab for hibernate mode
+        modes_notebook.add(DangerousModesTab(vars, title_font), text="Dangerous Modes")  # tab for timer mode
+        modes_notebook.add(HibernateModeTab(vars, title_font), text="Hibernate")  # tab for hibernate mode
         tabCorruption = ttk.Frame(None)  # tab for corruption mode
 
         notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
@@ -219,155 +216,6 @@ class Config(Tk):
         # ===================={BEGIN TABS HERE}==================== #
         # ========================================================= #
         # --------------------------------------------------------- #
-
-        # ==========={EDGEWARE++ "HIBERNATE" TAB STARTS HERE}===========#
-        modes_notebook.add(tabHibernate, text="Hibernate")
-        # init
-        hibernate_types = ["Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos"]
-
-        hibernateHostFrame = Frame(tabHibernate, borderwidth=5, relief=RAISED)
-        hibernateTypeFrame = Frame(hibernateHostFrame)
-        hibernateTypeDescriptionFrame = Frame(hibernateHostFrame, borderwidth=2, relief=GROOVE)
-        hibernateFrame = Frame(hibernateHostFrame)
-        hibernateMinFrame = Frame(hibernateHostFrame)
-        hibernateMaxFrame = Frame(hibernateHostFrame)
-        hibernateActivityFrame = Frame(hibernateHostFrame)
-        hibernateLengthFrame = Frame(hibernateHostFrame)
-
-        toggleHibernateButton = Checkbutton(
-            hibernateTypeFrame,
-            text="Hibernate Mode",
-            variable=vars.hibernate_mode,
-            command=lambda: hibernateHelper(vars.hibernate_type.get()),
-            cursor="question_arrow",
-        )
-        fixWallpaperButton = Checkbutton(hibernateTypeFrame, text="Fix Wallpaper", variable=vars.hibernate_fix_wallpaper, cursor="question_arrow")
-        hibernateTypeDropdown = OptionMenu(hibernateTypeFrame, vars.hibernate_type, *hibernate_types, command=lambda key: hibernateHelper(key))
-        hibernateTypeDescription = Label(hibernateTypeDescriptionFrame, text="Error loading Hibernate Description!", wraplength=175)
-
-        def hibernateHelper(key: str):
-            if key == "Original":
-                hibernateTypeDescription.configure(text="Creates an immediate quantity of popups on wakeup based on the awaken activity.\n\n")
-                if vars.hibernate_mode.get():
-                    set_widget_states(False, hlength_group)
-                    set_widget_states(True, hactivity_group)
-                    set_widget_states(True, hibernate_group)
-            if key == "Spaced":
-                hibernateTypeDescription.configure(text="Creates popups consistently over the hibernate length, based on popup delay.\n\n")
-                if vars.hibernate_mode.get():
-                    set_widget_states(False, hactivity_group)
-                    set_widget_states(True, hlength_group)
-                    set_widget_states(True, hibernate_group)
-            if key == "Glitch":
-                hibernateTypeDescription.configure(
-                    text="Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.\n"
-                )
-                if vars.hibernate_mode.get():
-                    set_widget_states(True, hlength_group)
-                    set_widget_states(True, hactivity_group)
-                    set_widget_states(True, hibernate_group)
-            if key == "Ramp":
-                hibernateTypeDescription.configure(
-                    text="Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay."
-                )
-                if vars.hibernate_mode.get():
-                    set_widget_states(True, hlength_group)
-                    set_widget_states(True, hactivity_group)
-                    set_widget_states(True, hibernate_group)
-            if key == "Pump-Scare":
-                hibernateTypeDescription.configure(
-                    text="Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?"
-                )
-                if vars.hibernate_mode.get():
-                    set_widget_states(False, hlength_group)
-                    set_widget_states(False, hactivity_group)
-                    set_widget_states(True, hibernate_group)
-            if key == "Chaos":
-                hibernateTypeDescription.configure(text="Every time hibernate activates, a random type (other than chaos) is selected.\n\n")
-                if vars.hibernate_mode.get():
-                    set_widget_states(True, hlength_group)
-                    set_widget_states(True, hactivity_group)
-                    set_widget_states(True, hibernate_group)
-            if not vars.hibernate_mode.get():
-                set_widget_states(False, hlength_group)
-                set_widget_states(False, hactivity_group)
-                set_widget_states(False, hibernate_group)
-
-        hibernateHelper(vars.hibernate_type.get())
-
-        hibernateMinButton = Button(
-            hibernateMinFrame,
-            text="Manual min...",
-            command=lambda: assign(vars.hibernate_delay_min, simpledialog.askinteger("Manual Minimum Sleep (sec)", prompt="[1-7200]: ")),
-        )
-        hibernateMinScale = Scale(hibernateMinFrame, label="Min Sleep (sec)", variable=vars.hibernate_delay_min, orient="horizontal", from_=1, to=7200)
-        hibernateMaxButton = Button(
-            hibernateMaxFrame,
-            text="Manual max...",
-            command=lambda: assign(vars.hibernate_delay_max, simpledialog.askinteger("Manual Maximum Sleep (sec)", prompt="[2-14400]: ")),
-        )
-        hibernateMaxScale = Scale(hibernateMaxFrame, label="Max Sleep (sec)", variable=vars.hibernate_delay_max, orient="horizontal", from_=2, to=14400)
-        h_activityScale = Scale(hibernateActivityFrame, label="Awaken Activity", orient="horizontal", from_=1, to=50, variable=vars.hibernate_activity)
-        h_activityButton = Button(
-            hibernateActivityFrame,
-            text="Manual act...",
-            command=lambda: assign(vars.hibernate_activity, simpledialog.askinteger("Manual Wakeup Activity", prompt="[1-50]: ")),
-        )
-        hibernateLengthScale = Scale(
-            hibernateLengthFrame, label="Max Length (sec)", variable=vars.hibernate_activity_length, orient="horizontal", from_=5, to=300
-        )
-        hibernateLengthButton = Button(
-            hibernateLengthFrame,
-            text="Manual length...",
-            command=lambda: assign(vars.hibernate_activity_length, simpledialog.askinteger("Manual Hibernate Length", prompt="[5-300]: ")),
-        )
-
-        CreateToolTip(
-            toggleHibernateButton,
-            "Runs EdgeWare silently without any popups.\n\n"
-            "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
-            'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
-            'Check the "About" tab for more detailed information on each hibernate type.',
-        )
-        CreateToolTip(
-            fixWallpaperButton,
-            '"fixes" your wallpaper after hibernate is finished by changing it to'
-            " your panic wallpaper. If left off, it will keep the pack's wallpaper on until you panic"
-            " or change it back yourself.",
-        )
-
-        hibernate_group.append(hibernateMinButton)
-        hibernate_group.append(hibernateMinScale)
-        hibernate_group.append(hibernateMaxButton)
-        hibernate_group.append(hibernateMaxScale)
-
-        hlength_group.append(hibernateLengthButton)
-        hlength_group.append(hibernateLengthScale)
-
-        hactivity_group.append(h_activityScale)
-        hactivity_group.append(h_activityButton)
-
-        Label(tabHibernate, text="Hibernate Mode", font=title_font, relief=GROOVE).pack(pady=2)
-        hibernateHostFrame.pack(fill="x")
-        hibernateFrame.pack(fill="y", side="left")
-        hibernateTypeFrame.pack(fill="x", side="left")
-        toggleHibernateButton.pack(fill="x", side="top")
-        fixWallpaperButton.pack(fill="x", side="top")
-        hibernateTypeDropdown.pack(fill="x", side="top")
-        hibernateTypeDescriptionFrame.pack(fill="both", side="left", expand=1, padx=2, pady=2)
-        hibernateTypeDescription.pack(fill="y", pady=2)
-        hibernateMinScale.pack(fill="y")
-        hibernateMinButton.pack(fill="y")
-        hibernateMinFrame.pack(fill="x", side="left")
-        hibernateMaxScale.pack(fill="y")
-        hibernateMaxButton.pack(fill="y")
-        hibernateMaxFrame.pack(fill="x", side="left")
-        h_activityScale.pack(fill="y")
-        h_activityButton.pack(fill="y")
-        hibernateActivityFrame.pack(fill="x", side="left")
-        hibernateLengthScale.pack(fill="y")
-        hibernateLengthButton.pack(fill="y")
-        hibernateLengthFrame.pack(fill="x", side="left")
 
         # ===================={CORRUPTION}==============================#
         modes_notebook.add(tabCorruption, text="Corruption")
@@ -730,7 +578,6 @@ class Config(Tk):
         # ==========={TOGGLE ASSOCIATE SETTINGS}===========#
         # all toggleAssociateSettings goes here, because it is rendered after the appropriate theme change
 
-        hibernateHelper(vars.hibernate_type.get())
         fade_helper(vars.corruption_fade.get())
         trigger_helper(vars.corruption_trigger.get(), False)
         set_widget_states(os.path.isfile(pack.paths.corruption), corruptionEnabled_group)
