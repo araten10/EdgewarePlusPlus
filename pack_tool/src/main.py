@@ -68,18 +68,19 @@ def make_media(source: Source, build: Build, compimg: bool, compvid: bool, renam
 
             location = None
             copy = shutil.copyfile
-            if filetype.is_image(file_path):
-                location = build.image
-                # animated gifs compress down to a single frame, so they are skipped until we find a sane solution
-                if compimg and not filename.endswith(".gif"):
-                    copy = compress_image
-            elif filetype.is_video(file_path):
-                location = build.video
-                # Can remove video type check once we support more filetypes for compression
-                if compvid and filetype.video_match(file_path).mime == "video/mp4":
-                    copy = compress_video
-            elif filetype.is_audio(file_path):
-                location = build.audio
+            if file_path.is_file():
+                if filetype.is_image(file_path):
+                    location = build.image
+                    # animated gifs compress down to a single frame, so they are skipped until we find a sane solution
+                    if compimg and not filetype.image_match(file_path).mime == "image/gif":
+                        copy = compress_image
+                elif filetype.is_video(file_path):
+                    location = build.video
+                    # Can remove video type check once we support more filetypes for compression
+                    if compvid and filetype.video_match(file_path).mime == "video/mp4":
+                        copy = compress_video
+                elif filetype.is_audio(file_path):
+                    location = build.audio
 
             if location:
                 location.mkdir(parents=True, exist_ok=True)
@@ -95,10 +96,9 @@ def make_media(source: Source, build: Build, compimg: bool, compvid: bool, renam
 
 
 def compress_video(source: Path, destination: Path) -> None:
-    ffm_instance = FFmpeg()
     try:
         # if h265 causes issues, change (or add setting) back down to h264
-        subprocess.run(f'"{ffm_instance._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
+        subprocess.run(f'"{FFmpeg()._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
     except Exception as e:
         logging.warning(f"Error compressing video: {e}")
 
