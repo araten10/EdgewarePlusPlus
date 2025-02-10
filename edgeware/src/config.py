@@ -9,13 +9,11 @@ from tkinter import (
     Button,
     Canvas,
     Checkbutton,
-    Entry,
     Frame,
     Label,
     Message,
     OptionMenu,
     Scale,
-    StringVar,
     Text,
     Tk,
     font,
@@ -35,6 +33,9 @@ from config_window.general.default_file import DefaultFileTab
 from config_window.general.file import FileTab
 from config_window.general.info import InfoTab
 from config_window.general.start import StartTab
+from config_window.modes.basic import BasicModesTab
+from config_window.modes.dangerous_modes import DangerousModesTab
+from config_window.troubleshooting import TroubleshootingTab
 from config_window.utils import (
     all_children,
     assign,
@@ -65,9 +66,6 @@ pack = Pack(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_P
 
 pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
-
-# description text for each tab
-LOWKEY_TEXT = 'Lowkey mode makes it so all window-based popups will spawn in a corner of your screen rather than random locations. This is meant for more passive use as it generally makes popups interrupt other actions less often.\n\nBest used with the "Popup Timeout" feature along with a relatively high delay, as popups will stack on top of eachother.'
 
 # text for the about tab
 ANNOYANCE_TEXT = 'The "Annoyance" section consists of the 5 main configurable settings of Edgeware:\nDelay\nPopup Frequency\nWebsite Frequency\nAudio Frequency\nPromptFrequency\n\nEach is fairly self explanatory, but will still be expounded upon in this section. Delay is the forced time delay between each tick of the "clock" for Edgeware. The longer it is, the slower things will happen. Popup frequency is the percent chance that a randomly selected popup will appear on any given tick of the clock, and similarly for the rest, website being the probability of opening a website or video from /resource/vid/, audio for playing a file from /resource/aud/, and prompt for a typing prompt to pop up.\n\nThese values can be set by adjusting the bars, or by clicking the button beneath each respective slider, which will allow you to type in an explicit number instead of searching for it on the scrollbar.\n\nIn order to disable any feature, lower its probability to 0, to ensure that you\'ll be getting as much of any feature as possible, turn it up to 100.\nThe popup setting "Mitosis mode" changes how popups are displayed. Instead of popping up based on the timer, the program create a single popup when it starts. When the submit button on ANY popup is clicked to close it, a number of popups will open up in its place, as given by the "Mitosis Strength" setting.\n\nPopup timeout will result in popups timing out and closing after a certain number of seconds.'
@@ -120,9 +118,6 @@ class Config(Tk):
         hibernate_group = []
         hlength_group = []
         hactivity_group = []
-        mitosis_group = []
-        mitosis_cGroup = []
-        timer_group = []
         lowkey_group = []
         ctime_group = []
         cpopup_group = []
@@ -149,22 +144,22 @@ class Config(Tk):
         annoyance_tab = ttk.Frame(notebook)
         notebook.add(annoyance_tab, text="Annoyance/Runtime")
         annoyance_notebook = ttk.Notebook(annoyance_tab)
-        annoyance_notebook.add(PopupTab(vars, title_font, message_group, mitosis_group), text="Popups")  # tab for popup settings
+        annoyance_notebook.add(PopupTab(vars, title_font, message_group), text="Popups")  # tab for popup settings
         annoyance_notebook.add(AudioVideoTab(vars, title_font, message_group), text="Audio/Video")  # tab for managing audio and video settings
         annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
         annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
 
-        mode_tab = ttk.Frame(notebook)
-        notebook.add(mode_tab, text="Modes")
-        notebookModes = ttk.Notebook(mode_tab)
-        tabBasicModes = ttk.Frame(None)  # tab for basic popup modes
-        tabDangerModes = ttk.Frame(None)  # tab for timer mode
+        modes_tab = ttk.Frame(notebook)
+        notebook.add(modes_tab, text="Modes")
+        modes_notebook = ttk.Notebook(modes_tab)
+        modes_notebook.add(BasicModesTab(vars, title_font), text="Basic Modes")  # tab for basic popup modes
+        modes_notebook.add(DangerousModesTab(vars, title_font, message_group), text="Dangerous Modes")  # tab for timer mode
         tabHibernate = ttk.Frame(None)  # tab for hibernate mode
         tabCorruption = ttk.Frame(None)  # tab for corruption mode
 
-        troubleshooting_tab = ttk.Frame(None)  # tab for miscellaneous settings with niche use cases
+        notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
         tabInfo = ttk.Frame(None)  # info, github, version, about, etc.
 
         style = ttk.Style(self)  # style setting for left aligned tabs
@@ -225,118 +220,8 @@ class Config(Tk):
         # ========================================================= #
         # --------------------------------------------------------- #
 
-        # ==========={EDGEWARE++ "BASIC MODES" TAB STARTS HERE}===========#
-        notebookModes.add(tabBasicModes, text="Basic Modes")
-        # Unsure if not calling this lowkey/moving in the tab will confuse people, consider renaming if people find it annoying
-
-        Label(tabBasicModes, text="Lowkey Mode", font=title_font, relief=GROOVE).pack(pady=2)
-        lowkeyFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
-
-        posList = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
-        lkItemVar = StringVar(self, posList[vars.lowkey_corner.get()])
-
-        lowkeyDropdown = OptionMenu(lowkeyFrame, lkItemVar, *posList, command=lambda x: (vars.lowkey_corner.set(posList.index(x))))
-        lowkeyToggle = Checkbutton(
-            lowkeyFrame,
-            text="Lowkey Mode",
-            variable=vars.lowkey_mode,
-            command=lambda: set_widget_states(vars.lowkey_mode.get(), lowkey_group),
-            cursor="question_arrow",
-        )
-
-        CreateToolTip(
-            lowkeyToggle,
-            "Makes popups appear in a corner of the screen instead of the middle.\n\nBest used with Popup Timeout or high delay as popups will stack.",
-        )
-
-        lowkey_group.append(lowkeyDropdown)
-
-        lowkeyFrame.pack(fill="x")
-        lowkeyToggle.pack(fill="both", expand=1)
-        lowkeyDropdown.pack(fill="x", padx=2, pady=5)
-
-        Label(tabBasicModes, text="Movement Mode", font=title_font, relief=GROOVE).pack(pady=2)
-        movementFrame = Frame(tabBasicModes, borderwidth=5, relief=RAISED)
-
-        moveChanceFrame = Frame(movementFrame)
-        movingSlider = Scale(moveChanceFrame, label="Moving Chance", orient="horizontal", variable=vars.moving_chance, cursor="question_arrow")
-        movingRandToggle = Checkbutton(moveChanceFrame, text="Random Direction", variable=vars.moving_random, cursor="question_arrow")
-
-        CreateToolTip(
-            movingSlider,
-            'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
-            "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
-        )
-        CreateToolTip(movingRandToggle, "Makes moving popups move in a random direction rather than the static diagonal one.")
-
-        speedFrame = Frame(movementFrame)
-        movingSpeedSlider = Scale(speedFrame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed)
-        manualSpeed = Button(
-            speedFrame, text="Manual speed...", command=lambda: assign(vars.moving_speed, simpledialog.askinteger("Manual Speed", prompt="[1-15]: "))
-        )
-
-        movementFrame.pack(fill="x")
-        moveChanceFrame.pack(fill="x", side="left")
-        movingSlider.pack(fill="x")
-        movingRandToggle.pack(fill="x")
-        speedFrame.pack(fill="x", side="left")
-        movingSpeedSlider.pack(fill="x")
-        manualSpeed.pack(fill="x")
-
-        # ==========={EDGEWARE++ "DANGEROUS MODES" TAB STARTS HERE}===========#
-        notebookModes.add(tabDangerModes, text="Dangerous Modes")
-        # timer settings
-        Label(tabDangerModes, text="Timer Settings", font=title_font, relief=GROOVE).pack(pady=2)
-        timerFrame = Frame(tabDangerModes, borderwidth=5, relief=RAISED)
-
-        timerToggle = Checkbutton(timerFrame, text="Timer Mode", variable=vars.timer_mode, command=lambda: timerHelper(), cursor="question_arrow")
-        timerSlider = Scale(timerFrame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=vars.timer_time)
-        safewordFrame = Frame(timerFrame)
-
-        def timerHelper():
-            set_widget_states(vars.timer_mode.get(), timer_group)
-
-        CreateToolTip(
-            timerToggle,
-            'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
-            '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
-            "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
-            "instability when running EdgeWare multiple times without changing config settings.",
-        )
-
-        Label(safewordFrame, text="Emergency Safeword").pack()
-        timerSafeword = Entry(safewordFrame, show="*", textvariable=vars.timer_password)
-        timerSafeword.pack(expand=1, fill="both")
-
-        timer_group.append(timerSafeword)
-        timer_group.append(timerSlider)
-
-        timerToggle.pack(side="left", fill="x", padx=5)
-        timerSlider.pack(side="left", fill="x", expand=1, padx=10)
-        safewordFrame.pack(side="right", fill="x", padx=5)
-
-        timerFrame.pack(fill="x")
-
-        Label(tabDangerModes, text="Mitosis Mode", font=title_font, relief=GROOVE).pack(pady=2)
-        mitosisFrame = Frame(tabDangerModes, borderwidth=5, relief=RAISED)
-
-        def toggleMitosis():
-            set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
-            set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
-
-        mitosisToggle = Checkbutton(mitosisFrame, text="Mitosis Mode", variable=vars.mitosis_mode, command=toggleMitosis, cursor="question_arrow")
-        mitosisStren = Scale(mitosisFrame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=vars.mitosis_strength)
-
-        CreateToolTip(mitosisToggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
-
-        mitosis_cGroup.append(mitosisStren)
-
-        mitosisFrame.pack(fill="x")
-        mitosisToggle.pack(side="left", fill="x", padx=5)
-        mitosisStren.pack(side="left", fill="x", expand=1, padx=10)
-
         # ==========={EDGEWARE++ "HIBERNATE" TAB STARTS HERE}===========#
-        notebookModes.add(tabHibernate, text="Hibernate")
+        modes_notebook.add(tabHibernate, text="Hibernate")
         # init
         hibernate_types = ["Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos"]
 
@@ -485,7 +370,7 @@ class Config(Tk):
         hibernateLengthFrame.pack(fill="x", side="left")
 
         # ===================={CORRUPTION}==============================#
-        notebookModes.add(tabCorruption, text="Corruption")
+        modes_notebook.add(tabCorruption, text="Corruption")
 
         corruptionFrame = Frame(tabCorruption)
 
@@ -811,49 +696,6 @@ class Config(Tk):
 
         corruptionTabMaster.bind("<<NotebookTabChanged>>", corruptionTutorialHelper)
 
-        # ==========={IN HERE IS ADVANCED TAB ITEM INITS}===========#
-        notebook.add(troubleshooting_tab, text="Troubleshooting")
-
-        Label(troubleshooting_tab, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)
-        troubleshootingHostFrame = Frame(troubleshooting_tab, borderwidth=5, relief=RAISED)
-        troubleshootingFrame1 = Frame(troubleshootingHostFrame)
-        troubleshootingFrame2 = Frame(troubleshootingHostFrame)
-
-        toggleInternetSetting = Checkbutton(troubleshootingFrame2, text="Disable Connection to Github", variable=vars.toggle_internet, cursor="question_arrow")
-        toggleHibernateSkip = Checkbutton(
-            troubleshootingFrame1, text="Toggle Tray Hibernate Skip", variable=vars.toggle_hibernate_skip, cursor="question_arrow"
-        )
-        toggleMoodSettings = Checkbutton(troubleshootingFrame2, text="Turn Off Mood Settings", variable=vars.toggle_mood_set, cursor="question_arrow")
-
-        troubleshootingHostFrame.pack(fill="x")
-        troubleshootingFrame1.pack(fill="both", side="left", expand=1)
-        troubleshootingFrame2.pack(fill="both", side="left", expand=1)
-        toggleInternetSetting.pack(fill="x", side="top")
-        toggleHibernateSkip.pack(fill="x", side="top")
-        toggleMoodSettings.pack(fill="x", side="top")
-
-        CreateToolTip(
-            toggleInternetSetting,
-            "In some cases, having a slow internet connection can cause the config window to delay opening for a long time.\n\n"
-            "EdgeWare connects to Github just to check if there's a new update, but sometimes even this can take a while.\n\n"
-            "If you have noticed this, try enabling this setting- it will disable all connections to Github on future launches.",
-        )
-        CreateToolTip(
-            toggleHibernateSkip,
-            "Want to test out how hibernate mode works with your current settings, and hate waiting for the minimum time? Me too!\n\n"
-            "This adds a feature in the tray that allows you to skip to the start of hibernate.",
-        )
-        CreateToolTip(
-            toggleMoodSettings,
-            "If your pack does not have a 'info.json' file with a valid pack name, it will generate a mood setting file based on a unique identifier.\n\n"
-            "This unique identifier is created by taking a bunch of values from your pack and putting them all together, including the amount of images,"
-            " audio, videos, and whether or not the pack has certain features.\n\n"
-            "Because of this, if you are rapidly editing your pack and entering the config window, you could potentially create a bunch of mood settings"
-            " files in //moods//unnamed, all pointing to what is essentially the same pack. This will reset your mood settings every time, too.\n\n"
-            "In situations like this, I recommend creating a info file with a pack name, but if you're unsure how to do that or just don't want to"
-            " deal with all this mood business, you can disable the mood saving feature here.",
-        )
-
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
         notebook.add(tabInfo, text="About")
         tabInfoExpound.add(tab_annoyance, text="Annoyance")
@@ -888,10 +730,6 @@ class Config(Tk):
         # ==========={TOGGLE ASSOCIATE SETTINGS}===========#
         # all toggleAssociateSettings goes here, because it is rendered after the appropriate theme change
 
-        set_widget_states(vars.mitosis_mode.get(), mitosis_cGroup)
-        set_widget_states(not vars.mitosis_mode.get(), mitosis_group)
-        set_widget_states(vars.timer_mode.get(), timer_group)
-        set_widget_states(vars.lowkey_mode.get(), lowkey_group)
         hibernateHelper(vars.hibernate_type.get())
         fade_helper(vars.corruption_fade.get())
         trigger_helper(vars.corruption_trigger.get(), False)
@@ -903,7 +741,7 @@ class Config(Tk):
         notebook.pack(expand=1, fill="both")
         general_notebook.pack(expand=1, fill="both")
         annoyance_notebook.pack(expand=1, fill="both")
-        notebookModes.pack(expand=1, fill="both")
+        modes_notebook.pack(expand=1, fill="both")
         tabInfoExpound.pack(expand=1, fill="both")
         resourceFrame.pack(fill="x")
         importResourcesButton.pack(fill="x", side="left", expand=1)

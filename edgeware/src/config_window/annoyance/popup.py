@@ -8,7 +8,6 @@ from tkinter import (
     Label,
     Message,
     Scale,
-    Widget,
     simpledialog,
     ttk,
 )
@@ -27,7 +26,7 @@ OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them
 
 
 class PopupTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], mitosis_group: list[Widget]):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]):
         super().__init__()
 
         intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)
@@ -54,9 +53,6 @@ class PopupTab(ScrollFrame):
             command=lambda: assign(vars.image_chance, simpledialog.askinteger("Manual Popup Chance", prompt="[0-100]: ")),
         )
         image_chance_manual.pack(fill="x")
-
-        mitosis_group.append(image_chance_scale)
-        mitosis_group.append(image_chance_manual)
 
         popup_frame_2 = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         popup_frame_2.pack(fill="x")
