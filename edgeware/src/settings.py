@@ -1,5 +1,6 @@
 import ast
 import json
+import logging
 import shutil
 import subprocess
 import sys
@@ -51,6 +52,7 @@ class Settings:
     def __init__(self):
         self.config = load_config()
         self.load_settings()
+        logging.info(f"Config loaded: {self.config}")
 
     def load_settings(self) -> None:
         # Impacts other settings
@@ -106,6 +108,7 @@ class Settings:
         try:
             vlc.libvlc_hex_version()  # Check if VLC is installed
         except NameError:
+            logging.info("VLC not found.")
             self.vlc_mode = False
 
         # Captions

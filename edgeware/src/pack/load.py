@@ -20,7 +20,9 @@ T = TypeVar("T")
 def try_load(path: Path, load: Callable[[str], T]) -> T | None:
     try:
         with open(path) as f:
-            return load(f.read())
+            data = load(f.read())
+            logging.info(f"{path.name} loaded successfully.")
+            return data
     except FileNotFoundError:
         logging.info(f"{path.name} not found.")
     except JSONDecodeError as e:
@@ -209,6 +211,8 @@ def list_media(dir: Path, is_valid: Callable[[str], bool]) -> list[Path]:
 
 
 def load_index_fallback(paths: PackPaths) -> Index:
+    logging.info("Using fallback files for index.")
+
     index = Index(media_moods=load_media(paths))
 
     captions = load_captions(paths)

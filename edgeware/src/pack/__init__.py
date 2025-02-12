@@ -1,8 +1,9 @@
+import logging
 import random
 from pathlib import Path
 
 import filetype
-from paths import Assets, CustomAssets, PackPaths
+from paths import PATH, Assets, CustomAssets, PackPaths
 
 from pack.data import MoodBase, MoodSet
 from pack.load import list_media, load_active_moods, load_corruption, load_discord, load_index, load_info
@@ -10,6 +11,8 @@ from pack.load import list_media, load_active_moods, load_corruption, load_disco
 
 class Pack:
     def __init__(self, root: Path):
+        logging.info(f"Loading pack at {root.relative_to(PATH)}.")
+
         self.paths = PackPaths(root)
 
         # Pack files
@@ -32,6 +35,8 @@ class Pack:
         self.icon = self.paths.icon if self.paths.icon.is_file() else CustomAssets.icon()
         self.wallpaper = self.paths.wallpaper if self.paths.wallpaper.is_file() else Assets.DEFAULT_WALLPAPER
         self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
+
+        logging.info(f"Active moods: {self.active_moods()}")
 
     def block_corruption_moods(self) -> None:
         for level in self.corruption_levels:
