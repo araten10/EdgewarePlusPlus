@@ -25,121 +25,90 @@ discord:
   # Discord status message when running the pack.
   status: "Discord status"
 
-captions:
-  # Generate captions.json, true or false.
+index:
+  # Generate index.json, true or false.
   generate: true
 
-  # Text for the close button of a popup window.
-  close-text: "Close"
+  # Default mood and generic runtime configuration for packs. All of the
+  # settings are optional, you may delete any of them to not use them.
+  default:
+    # Text for the close button of a popup window.
+    popup-close: "Close"
 
-  # List of captions used in denial overlays. (Optional, leave the list empty
-  # to not use)
-  denial:
-    - "Denied"
+    # The maximum number of clicks needed to close a popup with this mood.
+    max-clicks: 1
 
-  # List of generic captions without a prefix.
-  default-captions:
-    - "Caption 1"
-    - "Caption 2"
+    # List of captions.
+    captions:
+      - "Caption 1"
+      - "Caption 2"
 
-  # List of captions used in subliminal message popups. (Optional, leave the
-  # list empty to not use)
-  subliminal-messages:
-    - "Subliminal message"
+    # List of captions used in denial overlays.
+    denial:
+      - "Denied"
 
-  # List of captions used in system notifications. (Optional, leave the list
-  # empty to not use)
-  notifications:
-    - "Notification"
+    # List of captions used in subliminal message popups.
+    subliminal-messages:
+      - "Subliminal message"
 
-  # List of caption prefixes, or "moods," to display particular captions on
-  # particular images. For example, the captions under a prefix with the name
-  # "foo" will only display on files the name of which start with "foo", such
-  # as "foo_abc.png". (Optional, leave the list empty to not use)
-  #
-  # Prefixes contain the following fields:
-  #   name       - Name of the prefix, as described previously.
-  #   chance     - The probability as a percentage that the prefix will be
-  #                shown on a popup instead of a default caption. Float value
-  #                between 0 and 100. (Optional, omit to not use)
-  #   max-clicks - The maximum number of clicks needed to close a popup with a
-  #                caption from the prefix. (Optional, omit to not use)
-  #   captions   - List of captions for the prefix.
-  prefixes:
-    - name: "foo"
-      chance: 50
-      max-clicks: 1
-      captions:
-        - "Foo caption 1"
-        - "Foo caption 2"
-    - name: "bar"
-      captions:
-        - "Bar caption"
+    # List of captions used in system notifications.
+    notifications:
+      - "Notification"
 
-prompt:
-  # Generate prompt.json, true or false.
-  generate: true
+    # Text for the command at the top of prompt windows.
+    prompt-command: "Type below"
 
-  # Text for the command at the top of prompt windows. (Optional, leave empty
-  # to not use)
-  command: "Type below"
+    # Text for the submit button of a prompt window.
+    prompt-submit: "Submit"
 
-  # Text for the submit button of a prompt window.
-  submit-text: "Submit"
+    # The minimum and maximum number of prompt strings in a single prompt
+    # window.
+    prompt-min-length: 1
+    prompt-max-length: 1
 
-  # The minimum and maximum number of prompt strings in a single prompt window.
-  minimum-length: 1
-  maximum-length: 1
-
-  # Default prompts not associated with a mood.
-  default-prompts:
-    # The frequency of default prompts as a weight relative to the weight of
-    # moods.
-    weight: 100
-
-    # List of prompts. (Optional, leave the list empty to not use)
+    # List of prompts.
     prompts:
       - "Prompt 1"
       - "Prompt 2"
 
-  # List of prompt moods. (Optional, leave the list empty to not use)
+    # List of websites that can be opened by Edgeware.
+    #
+    # URLs contain the following fields:
+    #   url  - The URL. (Required)
+    #   args - List of arguments that can be appended to the URL.
+    web:
+      - url: "https://duckduckgo.com/?q="
+        args:
+          - "edgeware packs"
+          - "rule 34"
+      - url: "https://github.com/"
+
+  # List of moods.
   #
   # Moods contain the following fields:
-  # name    - Name of the mood.
-  # weight  - The frequency of the mood's prompts as a weight relative to other
-  #           moods' weights.
-  # prompts - List of prompts for the mood.
+  #   mood                - Name of the mood. (Required)
+  #   max-clicks          - The maximum number of clicks needed to close a
+  #                         popup with this mood.
+  #   captions            - List of captions.
+  #   denial              - List of captions used in denial overlays.
+  #   subliminal-messages - List of captions used in subliminal message popups.
+  #   notifications       - List of captions used in system notifications.
+  #   prompts             - List of prompts.
+  #   web                 - List of websites that can be opened by Edgeware.
   moods:
-    - name: "vanilla"
-      weight: 50
+    - mood: "vanilla"
+      captions:
+        - "Vanilla caption"
       prompts:
-        - "Vanilla propmt 1"
+        - "Vanilla prompt 1"
         - "Vanilla prompt 2"
-    - name: "kinky"
-      weight: 75
-      prompts:
-        - "Kinky propmt 1"
-        - "Kinky prompt 2"
+      web:
+        - url: "https://bsky.app/"
 
-web:
-  # Generate web.json, true or false.
-  generate: true
-
-  # List of websites that can be opened by Edgeware.
-  #
-  # URLs contain the following fields:
-  #   url  - The URL.
-  #   mood - A mood name for the URL.
-  #   args - List of arguments that can be appended to the URL. (Optional, omit
-  #          to not use)
-  urls:
-    - url: "https://duckduckgo.com/?q="
-      mood: "duckduckgo"
-      args:
-        - "edgeware packs"
-        - "rule 34"
-    - url: "https://github.com/"
-      mood: "github"
+    - mood: "kinky"
+      max-clicks: 2
+      captions:
+        - "Kinky caption"
 
 corruption:
   # Generate corruption.json, true or false.
@@ -148,13 +117,10 @@ corruption:
   # List of corruption levels.
   #
   # Corruption levels contain the following fields:
-  #   add-moods    - List of moods to add at the level. (Optional, omit to not
-  #                  use)
-  #   remove-moods - List of moods to remove at the level. (Optional, omit to
-  #                  not use)
+  #   add-moods    - List of moods to add at the level.
+  #   remove-moods - List of moods to remove at the level.
   #   wallpaper    - The filename of the wallpaper to change to at this level.
-  #                  (Optional, omit to not use)
-  #   config       - Config to use at this level. (Optional, omit to not use)
+  #   config       - Config to use at this level.
   levels:
     # Level 1
     - add-moods:

@@ -13,99 +13,66 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from dataclasses import dataclass
+from voluptuous import ALLOW_EXTRA, All, Optional, Range, Required, Schema, Url
 
-from voluptuous import ALLOW_EXTRA, All, Optional, Range, Schema, Union, Url
+INFO = Schema(
+    {
+        "generate": bool,
+        "name": str,
+        "id": str,
+        "creator": str,
+        "version": str,
+        "description": str,
+    },
+    required=True,
+    extra=ALLOW_EXTRA,
+)
 
+DISCORD = Schema({"generate": bool, "status": str}, required=True, extra=ALLOW_EXTRA)
 
-@dataclass
-class Schemas:
-    INFO = Schema(
-        {
-            "generate": bool,
-            "name": str,
-            "id": str,
-            "creator": str,
-            "version": str,
-            "description": str,
-        },
-        required=True,
-        extra=ALLOW_EXTRA,
-    )
+MOOD_BASE = Schema(
+    {
+        "max-clicks": All(int, Range(min=1)),
+        "captions": [str],
+        "denial": [str],
+        "subliminal-messages": [str],
+        "notifications": [str],
+        "prompts": [str],
+        "web": [{"url": Url(), Optional("args"): [str]}],
+    },
+    extra=ALLOW_EXTRA,
+)
 
-    DISCORD = Schema({"generate": bool, "status": str}, required=True, extra=ALLOW_EXTRA)
-
-    CAPTION = Schema(
-        {
-            "generate": bool,
-            "close-text": str,
-            Optional("denial"): Union([str], None),
-            "default-captions": [str],
-            Optional("subliminal-messages"): Union([str], None),
-            Optional("notifications"): Union([str], None),
-            "prefixes": Union(
-                [
-                    {
-                        "name": str,
-                        Optional("chance"): All(Union(int, float), Range(min=0, max=100)),
-                        Optional("max-clicks"): All(int, Range(min=1)),
-                        "captions": [str],
-                    }
-                ],
-                None,
-            ),
-        },
-        required=True,
-        extra=ALLOW_EXTRA,
-    )
-
-    PROMPT = Schema(
-        {
-            "generate": bool,
-            Optional("command"): Union(str, None),
-            "submit-text": str,
-            "minimum-length": All(int, Range(min=1)),
-            "maximum-length": All(int, Range(min=1)),
-            "default-prompts": {
-                "weight": All(int, Range(min=0)),
-                "prompts": Union([str], None),
+INDEX = Schema(
+    {
+        Required("generate"): bool,
+        Required("default"): MOOD_BASE.extend(
+            {
+                "popup-close": str,
+                "prompt-command": str,
+                "prompt-submit": str,
+                "prompt-min-length": All(int, Range(min=1)),
+                "prompt-max-length": All(int, Range(min=1)),
             },
-            "moods": Union(
-                [
-                    {
-                        "name": str,
-                        "weight": All(int, Range(min=0)),
-                        "prompts": [str],
-                    }
-                ],
-                None,
-            ),
-        },
-        required=True,
-        extra=ALLOW_EXTRA,
-    )
+            extra=ALLOW_EXTRA,
+        ),
+        Required("moods"): [MOOD_BASE.extend({Required("mood"): str}, extra=ALLOW_EXTRA)],
+    },
+    extra=ALLOW_EXTRA,
+)
 
-    WEB = Schema(
-        {
-            "generate": bool,
-            "urls": [{"url": Url(), "mood": str, Optional("args"): [str]}],
-        },
-        required=True,
-        extra=ALLOW_EXTRA,
-    )
-
-    CORRUPTION = Schema(
-        {
-            "generate": bool,
-            "levels": [
-                {
-                    Optional("add-moods"): [str],
-                    Optional("remove-moods"): [str],
-                    Optional("wallpaper"): str,
-                    Optional("config"): dict,
-                }
-            ],
-        },
-        required=True,
-        extra=ALLOW_EXTRA,
-    )
+CORRUPTION = Schema(
+    {
+        "generate": bool,
+        "levels": [
+            {
+                Optional("add-moods"): [str],
+                Optional("remove-moods"): [str],
+                Optional("wallpaper"): str,
+                Optional("config"): dict,
+            }
+        ],
+    },
+    required=True,
+    extra=ALLOW_EXTRA,
+)
