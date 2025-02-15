@@ -70,19 +70,29 @@ def write_index(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> set[s
         "moods": [],
     }
 
-    def set_if_defined(src: yaml.Node, src_key: str, dest: dict, dest_key: str) -> bool:
-        if src_key in src:
-            dest[dest_key] = src[src_key]
-            return True
-        return False
+    base_mapping = [
+        ("max-clicks", "maxClicks"),
+        ("captions", "captions"),
+        ("denial", "denial"),
+        ("subliminal-messages", "subliminals"),
+        ("notifications", "notifications"),
+        ("prompts", "prompts")
+    ]
+
+    default_mapping = [
+        ("popup-close", "popupClose"),
+        ("prompt-command", "promptCommand"),
+        ("prompt-submit", "promptSubmit"),
+        ("prompt-min-length", "promptMinLength"),
+        ("prompt-max-length", "promptMaxLength")
+    ]
 
     def load_base(yaml_base: yaml.Node, json_base: dict) -> None:
-        set_if_defined(yaml_base, "max-clicks", json_base, "maxClicks")
-        set_if_defined(yaml_base, "captions", json_base, "captions")
-        set_if_defined(yaml_base, "denial", json_base, "denial")
-        set_if_defined(yaml_base, "subliminal-messages", json_base, "subliminals")
-        set_if_defined(yaml_base, "notifications", json_base, "notifications")
-        set_if_defined(yaml_base, "prompts", json_base, "prompts")
+        for yaml_key, json_key in base_mapping:
+            value = yaml_base.get(yaml_key)
+            if value is not None:
+                json_base[json_key] = value
+
         if "web" in yaml_base:
             json_base["web"] = []
             json_base["webArgs"] = []
@@ -90,29 +100,122 @@ def write_index(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> set[s
                 json_base["web"].append(web["url"])
                 json_base["webArgs"].append(web.get("args", []))
 
-    yaml_default = pack["index"]["default"]
-    json_default = index["default"]
-    load_base(yaml_default, json_default)
-    set_if_defined(yaml_default, "popup-close", json_default, "popupClose")
-    set_if_defined(yaml_default, "prompt-command", json_default, "promptCommand")
-    set_if_defined(yaml_default, "prompt-submit", json_default, "promptSubmit")
-    set_if_defined(yaml_default, "prompt-min-length", json_default, "promptMinLength")
-    set_if_defined(yaml_default, "prompt-max-length", json_default, "promptMaxLength")
+    load_base(pack["index"]["default"], index["default"])
+    for yaml_key, json_key in default_mapping:
+        value = pack["index"]["default"].get(yaml_key)
+        if value is not None:
+            index["default"][json_key] = value
 
     media = media.copy()  # We don't want to modify the original media dict
     for yaml_mood in pack["index"]["moods"]:
-        mood = yaml_mood["mood"]
-        json_mood = {"mood": mood}
+        mood_name = yaml_mood["mood"]
+        json_mood = {"mood": mood_name}
         load_base(yaml_mood, json_mood)
-        if set_if_defined(media, mood, json_mood, "media"):
-            del media[mood]
+
+        media_list = media.get(mood_name)
+        if media_list is not None:
+            json_mood["media"] = media_list
+            del media[mood_name]
+
         index["moods"].append(json_mood)
 
-    for mood in media:
-        index["moods"].append({"mood": mood, "media": media[mood]})
+    for mood_name in media:
+        index["moods"].append({"mood": mood_name, "media": media[mood_name]})
 
     write_json(index, build.index)
     return set(map(lambda mood: mood["mood"], index["moods"]))
+
+
+def write_legacy(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> None:
+    if not pack["index"]["generate"]:
+        logging.info("Skipping legacy JSON files")
+        return set()
+
+    schemas.INDEX(pack["index"])
+
+    pack["index"]["default"]
+
+    captions = {
+        "default": [],
+        "prefix": [],
+        "prefix_settings": {},
+    }
+
+    prompt = {
+        "minLen": 1,
+        "maxLen": 1,
+        "moods": [],
+        "freqList": [],
+    }
+
+    web = {"urls": [], "moods": [], "args": []}
+
+    special_mapping = [
+        ("denial", "denial"),
+        ("subliminal-messages", "subliminals"),
+        ("notifications", "notifications")
+    ]
+
+    default_mapping = [
+        ("popup-close", "subtext", captions),
+        ("prompt-command", "commandtext", prompt),
+        ("prompt-submit", "subtext", prompt),
+        ("prompt-min-length", "minLen", prompt),
+        ("prompt-max-length", "maxLen", prompt)
+    ]
+
+    def load_base(base: yaml.Node, mood_name: str = "default") -> None:
+        if "max-clicks" in base:
+            if mood_name != "default" and mood_name not in captions["prefix"]:
+                captions["prefix"].append(mood_name)
+            captions["prefix_settings"][mood_name] = {"max": base["max-clicks"]}
+
+        if "captions" in base:
+            if mood_name != "default" and mood_name not in captions["prefix"]:
+                captions["prefix"].append(mood_name)
+            captions[mood_name] = base["captions"]
+
+        for yaml_key, json_key in special_mapping:
+            value = base.get(yaml_key)
+            if value is not None:
+                if json_key not in captions:
+                    captions[json_key] = []
+                captions[json_key].extend(value)
+
+        if "prompts" in base:
+            prompt["moods"].append(mood_name)
+            prompt[mood_name] = base["prompts"]
+            prompt["freqList"].append(1)
+
+        if "web" in base:
+            for yaml_web in base["web"]:
+                web["urls"].append(yaml_web["url"])
+                web["moods"].append(mood_name)
+
+                args_string = ""
+                for arg in yaml_web.get("args", []):
+                    if "," in arg:
+                        logging.error(f"Legacy web args must not contain commas, invalid arg: {arg}")
+                    else:
+                        if args_string != "":
+                            args_string += ","
+                        args_string += f"{arg}"
+
+                web["args"].append(args_string)
+
+    load_base(pack["index"]["default"])
+    for yaml_key, json_key, json_dict in default_mapping:
+        value = pack["index"]["default"].get(yaml_key)
+        if value is not None:
+            json_dict[json_key] = value
+
+    for mood in pack["index"]["moods"]:
+        load_base(mood, mood["mood"])
+
+    write_json(media, build.media)
+    write_json(captions, build.captions)
+    write_json(prompt, build.prompt)
+    write_json(web, build.web)
 
 
 def write_corruption(pack: yaml.Node, build: Build, moods: set[str]) -> None:

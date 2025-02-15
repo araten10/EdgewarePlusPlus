@@ -21,7 +21,7 @@ from copy import copy_icon, copy_loading_splash, copy_media, copy_subliminals, c
 
 import yaml
 from paths import DEFAULT_PACK, Build, Source
-from write import write_corruption, write_discord, write_index, write_info
+from write import write_corruption, write_discord, write_index, write_info, write_legacy
 
 
 def new_pack(source: Source) -> None:
@@ -51,6 +51,8 @@ def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
         write_info(pack, build)
         write_discord(pack, build)
         moods = write_index(pack, build, media)
+        if not args.skip_legacy:
+            write_legacy(pack, build, media)
         write_corruption(pack, build, moods)
 
 
@@ -59,8 +61,9 @@ if __name__ == "__main__":
     parser.add_argument("source", help="pack source directory")
     parser.add_argument("-o", "--output", default="build", help="output directory name")
     parser.add_argument("-n", "--new", action="store_true", help="create a new pack template and exit")
-    parser.add_argument("-v", "--compvid", action="store_true", help="compresses video files using ffmpeg")
-    parser.add_argument("-i", "--compimg", action="store_true", help="compresses image files using pillow")
+    parser.add_argument("-s", "--skip-legacy", action="store_true", help="don't generate fallback legacy JSON files")
+    parser.add_argument("-v", "--compvid", action="store_true", help="compresses video files using FFmpeg")
+    parser.add_argument("-i", "--compimg", action="store_true", help="compresses image files using Pillow")
     parser.add_argument("-r", "--rename", action="store_true", help="appends mood name to files")
     args = parser.parse_args()
 
