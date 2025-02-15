@@ -76,7 +76,7 @@ def write_index(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> set[s
         ("denial", "denial"),
         ("subliminal-messages", "subliminals"),
         ("notifications", "notifications"),
-        ("prompts", "prompts")
+        ("prompts", "prompts"),
     ]
 
     default_mapping = [
@@ -84,7 +84,7 @@ def write_index(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> set[s
         ("prompt-command", "promptCommand"),
         ("prompt-submit", "promptSubmit"),
         ("prompt-min-length", "promptMinLength"),
-        ("prompt-max-length", "promptMaxLength")
+        ("prompt-max-length", "promptMaxLength"),
     ]
 
     def load_base(yaml_base: yaml.Node, json_base: dict) -> None:
@@ -150,18 +150,14 @@ def write_legacy(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> None
 
     web = {"urls": [], "moods": [], "args": []}
 
-    special_mapping = [
-        ("denial", "denial"),
-        ("subliminal-messages", "subliminals"),
-        ("notifications", "notifications")
-    ]
+    special_mapping = [("denial", "denial"), ("subliminal-messages", "subliminals"), ("notifications", "notifications")]
 
     default_mapping = [
         ("popup-close", "subtext", captions),
         ("prompt-command", "commandtext", prompt),
         ("prompt-submit", "subtext", prompt),
         ("prompt-min-length", "minLen", prompt),
-        ("prompt-max-length", "maxLen", prompt)
+        ("prompt-max-length", "maxLen", prompt),
     ]
 
     def load_base(base: yaml.Node, mood_name: str = "default") -> None:
