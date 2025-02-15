@@ -63,16 +63,15 @@ INDEX = Schema(
 
 CORRUPTION = Schema(
     {
-        "generate": bool,
-        "levels": [
+        Required("generate"): bool,
+        Required("levels"): [
             {
-                Optional("add-moods"): [str],
-                Optional("remove-moods"): [str],
-                Optional("wallpaper"): str,
-                Optional("config"): dict,
+                "add-moods": [str],
+                "remove-moods": [str],
+                "wallpaper": str,
+                "config": dict,
             }
         ],
     },
-    required=True,
     extra=ALLOW_EXTRA,
 )

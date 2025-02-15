@@ -30,12 +30,12 @@ def copy_media(source: Source, build: Build, compimg: bool, compvid: bool, renam
 
     if not source.media.is_dir():
         logging.error(f"{source.media} does not exist or is not a directory, unable to read media")
-        return set()
+        return media
 
     moods = os.listdir(source.media)
     if len(moods) == 0:
         logging.error("Media directory exists, but it is empty")
-        return set()
+        return media
 
     for mood in moods:
         mood_path = source.media / mood
@@ -82,19 +82,13 @@ def copy_media(source: Source, build: Build, compimg: bool, compvid: bool, renam
 
 
 def compress_video(source: Path, destination: Path) -> None:
-    try:
-        # if h265 causes issues, change (or add setting) back down to h264
-        subprocess.run(f'"{FFmpeg()._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
-    except Exception as e:
-        logging.warning(f"Error compressing video: {e}")
+    # If H265 causes issues, change (or add setting) back down to H264
+    subprocess.run(f'"{FFmpeg()._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
 
 
 def compress_image(source: Path, destination: Path) -> None:
-    try:
-        image = Image.open(source)
-        image.save(destination, optimize=True, quality=85)
-    except Exception as e:
-        logging.warning(f"Error compressing image: {e}")
+    image = Image.open(source)
+    image.save(destination, optimize=True, quality=85)
 
 
 def copy_subliminals(source: Source, build: Build) -> None:

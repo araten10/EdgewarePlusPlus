@@ -13,27 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import json
 import logging
-from pathlib import Path
 
 import schemas
 import yaml
 from paths import Build
-
-
-def write_json(data: dict, path: Path) -> None:
-    logging.info(f"Writing {path.name}")
-    with open(path, "w") as f:
-        json.dump(data, f, indent=2)
+from utils import validate, write_json
 
 
 def write_info(pack: yaml.Node, build: Build) -> None:
-    if not pack["info"]["generate"]:
+    if not validate(pack, "info", schemas.INFO):
         logging.info("Skipping info.json")
         return
-
-    schemas.INFO(pack["info"])
 
     info = {
         "name": pack["info"]["name"],
@@ -47,11 +38,9 @@ def write_info(pack: yaml.Node, build: Build) -> None:
 
 
 def write_discord(pack: yaml.Node, build: Build) -> None:
-    if not pack["discord"]["generate"]:
+    if not validate(pack, "discord", schemas.DISCORD):
         logging.info("Skipping discord.dat")
         return
-
-    schemas.DISCORD(pack["discord"])
 
     with open(build.discord, "w") as f:
         logging.info("Writing discord.dat")
@@ -59,11 +48,9 @@ def write_discord(pack: yaml.Node, build: Build) -> None:
 
 
 def write_index(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> set[str]:
-    if not pack["index"]["generate"]:
+    if not validate(pack, "index", schemas.INDEX):
         logging.info("Skipping index.json")
         return set()
-
-    schemas.INDEX(pack["index"])
 
     index = {
         "default": {},
@@ -127,13 +114,9 @@ def write_index(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> set[s
 
 
 def write_legacy(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> None:
-    if not pack["index"]["generate"]:
+    if not validate(pack, "index", schemas.INDEX):
         logging.info("Skipping legacy JSON files")
-        return set()
-
-    schemas.INDEX(pack["index"])
-
-    pack["index"]["default"]
+        return
 
     captions = {
         "default": [],
@@ -215,11 +198,9 @@ def write_legacy(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> None
 
 
 def write_corruption(pack: yaml.Node, build: Build, moods: set[str]) -> None:
-    if not pack["corruption"]["generate"]:
+    if not validate(pack, "corruption", schemas.CORRUPTION):
         logging.info("Skipping corruption.json")
         return
-
-    schemas.CORRUPTION(pack["corruption"])
 
     corruption = {"moods": {}, "wallpapers": {}, "config": {}}
 

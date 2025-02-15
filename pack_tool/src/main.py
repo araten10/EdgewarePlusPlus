@@ -20,6 +20,7 @@ import sys
 from copy import copy_icon, copy_loading_splash, copy_media, copy_subliminals, copy_wallpapers
 
 import yaml
+from legacy.write import write_captions, write_media, write_prompt, write_web
 from paths import DEFAULT_PACK, Build, Source
 from write import write_corruption, write_discord, write_index, write_info, write_legacy
 
@@ -50,9 +51,18 @@ def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
 
         write_info(pack, build)
         write_discord(pack, build)
-        moods = write_index(pack, build, media)
-        if not args.skip_legacy:
-            write_legacy(pack, build, media)
+
+        if "index" in pack:
+            moods = write_index(pack, build, media)
+            if not args.skip_legacy:
+                write_legacy(pack, build, media)
+        else:
+            logging.info("Index not found in pack.yml, attempting to read legacy formats")
+            moods = write_media(build, media)
+            moods = moods.union(write_captions(pack, build))
+            moods = moods.union(write_prompt(pack, build))
+            moods = moods.union(write_web(pack, build))
+
         write_corruption(pack, build, moods)
 
 

@@ -30,12 +30,6 @@ specified with `-o`):
 $ ./pack_tool.sh my_pack
 ```
 
-Compile the pack in `my_pack` to `build` and compress the media files:
-
-```
-$ ./pack_tool.sh -c my_pack
-```
-
 ## Pack Structure
 
 The pack structure used by Edgeware is well known, but it has several problems
