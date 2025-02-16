@@ -145,7 +145,7 @@ def launch(settings: Settings, pack: Pack, state: State) -> None:
 
 
 def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
-    if not settings.corruption_mode:
+    if not (settings.corruption_mode and pack.corruption_levels):
         return
 
     if settings.corruption_purity:
