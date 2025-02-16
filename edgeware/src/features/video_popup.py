@@ -19,7 +19,6 @@ class VideoPopup(Popup):
         properties = get_video_properties(video)
 
         self.compute_geometry(properties["width"], properties["height"])
-        self.wait_visibility()
         label = Label(self, width=self.width, height=self.height)
         label.pack()
         label.wait_visibility()

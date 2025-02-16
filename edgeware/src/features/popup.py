@@ -31,9 +31,6 @@ class Popup(Toplevel):
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
         self.attributes("-topmost", True)
         utils.set_borderless(self)
-        # TODO: May be needed for opacity on some Linux setups
-        # self.update_idletasks()
-        # self.wait_visibility()
 
         self.opacity = self.settings.opacity
         self.attributes("-alpha", self.opacity)
