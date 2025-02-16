@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 from tkinter import Toplevel
 
-import vlc
 from paths import CustomAssets, Process
 from settings import load_default_config
 from utils.linux_utils import get_desktop_environment, get_wallpaper_commands, get_wallpaper_function
@@ -37,10 +36,6 @@ def set_wallpaper(wallpaper: Path) -> None:
             logging.warning(f"Failed to set wallpaper. Reason: {e}")
     else:
         logging.info(f"Can't set wallpaper for desktop environment {desktop}")
-
-
-def set_vlc_window(player: vlc.MediaPlayer, window_id: int) -> None:
-    player.set_xwindow(window_id)
 
 
 def open_directory(url: str) -> None:

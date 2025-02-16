@@ -1,6 +1,4 @@
-import webbrowser
 from tkinter import (
-    CENTER,
     GROOVE,
     RAISED,
     Button,
@@ -19,9 +17,6 @@ from config_window.utils import (
 )
 from config_window.vars import Vars
 from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
-
-PLAYBACK_TEXT = 'It is highly recommended to set up VLC and enable this setting. While it is an external download and could have it\'s own share of troubleshooting, it will massively increase performance and also fix a potential issue of videos having no audio. More details on this are listed in the hover tooltip for the "Use VLC to play videos" setting.'
 
 
 class AudioVideoTab(ScrollFrame):
@@ -92,34 +87,3 @@ class AudioVideoTab(ScrollFrame):
 
         max_video_group = [max_video_scale, max_video_manual]
         set_widget_states(vars.max_video_enabled.get(), max_video_group)
-
-        # Playback options
-        Label(self.viewPort, text="Playback Options", font=title_font, relief=GROOVE).pack(pady=2)
-
-        playback_message = Message(self.viewPort, text=PLAYBACK_TEXT, justify=CENTER, width=675)
-        playback_message.pack(fill="both")
-        message_group.append(playback_message)
-
-        playback_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        playback_frame.pack(fill="x")
-
-        toggle_vlc = Checkbutton(playback_frame, text="Use VLC to play videos", variable=vars.vlc_mode, cursor="question_arrow")
-        toggle_vlc.pack(fill="both", side="top", expand=1, padx=2)
-        CreateToolTip(
-            toggle_vlc,
-            "Going to get a bit technical here:\n\nBy default, EdgeWare loads videos by taking the source file, turning every frame into an image, and then playing the images in "
-            "sequence at the specified framerate. The upside to this is it requires no additional dependencies, but it has multiple downsides. Firstly, it's very slow: you may have "
-            "noticed that videos take a while to load and also cause excessive memory usage. Secondly, there is a bug that can cause certain users to not have audio while playing videos."
-            "\n\nSo here's an alternative: by installing VLC to your computer and using this option, you can make videos play much faster and use less memory by using libvlc. "
-            "If videos were silent for you this will hopefully fix that as well.\n\nPlease note that this feature has the potential to break in the future as VLC is a program independent "
-            "from EdgeWare. For posterity's sake, the current version of VLC as of writing this tooltip is 3.0.20.",
-        )
-
-        Label(
-            playback_frame,
-            text="NOTE: Installing VLC is required for this option!\nMake sure you download the version your OS supports!\nIf you have a 64 bit OS, download x64!",
-            width=10,
-        ).pack(fill="both", side="top", expand=1, padx=2)
-        Button(playback_frame, text="Go to VLC's website", command=lambda: webbrowser.open("https://www.videolan.org/vlc/")).pack(
-            fill="both", side="top", padx=2
-        )

@@ -17,7 +17,6 @@ class CorruptionConfig:
         "toggleHibSkip",
         "toggleMoodSet",
         "corruptionMode",  # if you're turning off corruption mode with corruption just make it the final level lmao
-        "vlcMode",  # we might get rid of this anyways if we force vlc, but also people shouldn't be able to disable/enable this forcibly
         "presetsDanger",  # see safeMode
         "corruptionDevMode",
         "corruptionFullPerm",

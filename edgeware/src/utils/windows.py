@@ -8,14 +8,6 @@ from tkinter import Toplevel
 
 from paths import PATH, CustomAssets, Process
 
-try:
-    import vlc
-except FileNotFoundError:
-    # Defined for type hints
-    class vlc:  # noqa: N801
-        MediaPlayer = None
-
-
 PYW = {
     Process.CONFIG: PATH / "config.pyw",
     Process.MAIN: PATH / "edgeware.pyw",
@@ -29,10 +21,6 @@ def set_borderless(window: Toplevel) -> None:
 
 def set_wallpaper(wallpaper: Path) -> None:
     ctypes.windll.user32.SystemParametersInfoW(20, 0, str(wallpaper), 0)
-
-
-def set_vlc_window(player: vlc.MediaPlayer, window_id: int) -> None:
-    player.set_hwnd(window_id)
 
 
 def open_directory(url: str) -> None:

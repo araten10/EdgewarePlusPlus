@@ -7,11 +7,6 @@ import sys
 
 from paths import DEFAULT_PACK_PATH, Assets, Data, Process
 
-try:
-    import vlc
-except FileNotFoundError:
-    pass
-
 
 def first_launch_configure() -> None:
     if not Data.CONFIG.is_file():
@@ -103,12 +98,6 @@ class Settings:
         self.video_chance = int(self.config["vidMod"])  # 0 to 100
         self.video_volume = int(self.config["videoVolume"])  # 0 to 100
         self.max_video = int(self.config["maxVideos"]) if bool(self.config["maxVideoBool"]) else float("inf")
-        self.vlc_mode = bool(self.config["vlcMode"])
-        try:
-            vlc.libvlc_hex_version()  # Check if VLC is installed
-        except NameError:
-            logging.info("VLC not found.")
-            self.vlc_mode = False
 
         # Captions
         self.captions_in_popups = bool(self.config["showCaptions"])
