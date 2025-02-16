@@ -4,7 +4,7 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
-from features.misc import open_web
+from features.misc import mitosis_popup, open_web
 from features.theme import get_theme
 from pack import Pack
 from panic import panic
@@ -162,25 +162,17 @@ class Popup(Toplevel):
             open_web(self.pack)
 
     def try_mitosis(self) -> None:
-        if self.settings.mitosis_mode:
-            # Imports done here to avoid circular imports
-            from features.image_popup import ImagePopup
-            from features.video_popup import VideoPopup
-
+        if self.settings.mitosis_mode and not self.settings.lowkey_mode:
             for n in range(self.settings.mitosis_strength):
-                try:
-                    popup = random.choices([ImagePopup, VideoPopup], [self.settings.image_chance, self.settings.video_chance], k=1)[0]
-                except ValueError:
-                    popup = ImagePopup  # Exception thrown when both chances are 0
-                popup(self.root, self.settings, self.pack, self.state)
+                mitosis_popup(self.root, self.settings, self.pack, self.state)
 
     def click(self) -> None:
         self.clicks_to_close -= 1
         if self.clicks_to_close <= 0:
             self.close()
+            self.try_mitosis()
 
     def close(self) -> None:
         self.state.popup_number -= 1
         self.try_web_open()
-        self.try_mitosis()
         self.destroy()

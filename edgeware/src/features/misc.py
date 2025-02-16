@@ -138,9 +138,25 @@ def handle_timer_mode(root: Tk, settings: Settings, state: State) -> None:
         root.after(settings.timer_time, timer_over)
 
 
+def mitosis_popup(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
+    # Imports done here to avoid circular imports
+    from features.image_popup import ImagePopup
+    from features.video_popup import VideoPopup
+
+    try:
+        popup = random.choices([ImagePopup, VideoPopup], [settings.image_chance, settings.video_chance], k=1)[0]
+    except ValueError:
+        popup = ImagePopup  # Exception thrown when both chances are 0
+    popup(root, settings, pack, state)
+
+
 def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     if settings.mitosis_mode:
         # Import done here to avoid circular imports
-        from features.image_popup import ImagePopup
 
-        ImagePopup(root, settings, pack, state)
+        def observer() -> None:
+            if state.popup_number == 0:
+                mitosis_popup(root, settings, pack, state)
+
+        state._popup_number.attach(observer)
+        mitosis_popup(root, settings, pack, state)
