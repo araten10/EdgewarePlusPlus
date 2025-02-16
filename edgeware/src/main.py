@@ -47,6 +47,8 @@ if __name__ == "__main__":
     pack = Pack(settings.pack_path)
     state = State()
 
+    settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
+
     # if sound is laggy or strange try changing buffer size (doc: https://www.pygame.org/docs/ref/mixer.html)
     # TODO: check if pygame.mixer.quit() is preferable to use in panic? seems fine without it
     mixer.init()

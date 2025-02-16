@@ -21,7 +21,7 @@ class VideoPopup(Popup):
         self.compute_geometry(properties["width"], properties["height"])
         label = Label(self, width=self.width, height=self.height)
         label.pack()
-        label.wait_visibility()
+        label.wait_visibility()  # Need to wait for VLC
         self.player = VideoPlayer(label, video, (self.width, self.height), self.settings.video_volume, self.settings.vlc_mode)
 
         self.init_finish()
