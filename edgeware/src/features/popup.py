@@ -43,7 +43,6 @@ class Popup(Toplevel):
         self.try_multi_click()
         self.try_timeout()
         self.try_pump_scare()
-        self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
         self.monitor = random.choice(get_monitors())
@@ -67,6 +66,7 @@ class Popup(Toplevel):
         else:
             self.x = random.randint(self.monitor.x, self.monitor.x + self.monitor.width - self.width)
             self.y = random.randint(self.monitor.y, self.monitor.y + self.monitor.height - self.height)
+        self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
 
     def try_caption(self) -> None:
         caption = self.pack.random_caption(self.media)

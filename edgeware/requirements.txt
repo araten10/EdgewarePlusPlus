@@ -2,14 +2,12 @@ desktop-notifier
 filetype
 gallery-dl
 get-video-properties
-# git+https://github.com/Zulko/moviepy.git # The current version v1.0.3 has a bug with to_soundarray
 imageio
-moviepy
+mpv
 pillow
 pygame
 pypresence
 pystray
-python-vlc
 requests
 screeninfo
 sounddevice

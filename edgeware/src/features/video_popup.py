@@ -21,8 +21,8 @@ class VideoPopup(Popup):
         self.compute_geometry(properties["width"], properties["height"])
         label = Label(self, width=self.width, height=self.height)
         label.pack()
-        label.wait_visibility()  # Need to wait for VLC
-        self.player = VideoPlayer(label, video, (self.width, self.height), self.settings.video_volume, self.settings.vlc_mode)
+        label.wait_visibility()  # Needs to be visible for mpv to draw on it
+        self.player = VideoPlayer(label, video, self.settings.video_volume)
 
         self.init_finish()
 
@@ -33,6 +33,5 @@ class VideoPopup(Popup):
         return False
 
     def close(self) -> None:
-        self.player.on_close()
         super().close()
         self.state.video_number -= 1
