@@ -5,11 +5,11 @@ from tkinter import Label, Tk
 import filetype
 from features.popup import Popup
 from pack import Pack
-from PIL import Image, ImageFilter
+from PIL import Image, ImageTk
 from roll import roll
 from settings import Settings
 from state import State
-from widgets.image_label import GifLike, ImageLabel
+from widgets.video_player import VideoPlayer
 
 
 class ImagePopup(Popup):
@@ -20,20 +20,43 @@ class ImagePopup(Popup):
             return
         super().__init__(root, settings, pack, state)
 
-        self.denial = roll(self.settings.denial_chance)
-
         # TODO: Better way to use downloaded images
         if settings.download_path.is_dir() and self.settings.booru_download and roll(50):
             dir = settings.download_path
             choices = [dir / file for file in os.listdir(dir) if filetype.is_image(dir / file)]
             if len(choices) > 0:
                 self.media = random.choice(choices)
+
         image = Image.open(self.media)
-
         self.compute_geometry(image.width, image.height)
-        ImageLabel(self, self.try_subliminal(image), (self.width, self.height), self.try_denial_filter()).pack()
 
-        self.try_denial_text()
+        # Static               -> image
+        # Static,   subliminal -> image overlay, mpv
+        # Animated             -> mpv
+        # Animated, subliminal -> mpv, ?
+
+        if getattr(image, "n_frames", 0) > 1:
+            player = VideoPlayer(self, self.width, self.height)
+            player.vf = self.try_denial_filter(True)
+            player.play(str(self.media))
+        else:
+            resized = image.resize((self.width, self.height), Image.LANCZOS).convert("RGBA")
+            filter = self.try_denial_filter(False)
+            final = resized.filter(filter) if filter else resized
+
+            if self.subliminal:
+                player = VideoPlayer(self, self.width, self.height)
+                player.video_scale_x = max(self.width / self.height, 1)
+                player.video_scale_y = max(self.height / self.width, 1)
+                final.putalpha(int((1 - self.settings.subliminal_opacity) * 255))
+                player.create_image_overlay().update(final)
+                player.play(str(self.pack.random_subliminal_overlay()))
+            else:
+                label = Label(self, width=self.width, height=self.height)
+                label.pack()
+                self.photo_image = ImageTk.PhotoImage(final)
+                label.config(image=self.photo_image)
+
         self.init_finish()
 
     def should_init(self, settings: Settings, state: State) -> bool:
@@ -47,45 +70,6 @@ class ImagePopup(Popup):
             state.subliminal_number += 1
             return True
         return False
-
-    def try_subliminal(self, image: Image.Image) -> Image.Image | GifLike:
-        single_frame = not hasattr(image, "n_frames") or image.n_frames == 1
-        if self.subliminal and single_frame:
-            blend_image = image.convert("RGBA")
-            subliminal = Image.open(self.pack.random_subliminal_overlay())
-
-            if hasattr(subliminal, "n_frames") and subliminal.n_frames > 1:
-                frames = []
-                for i in range(subliminal.n_frames):
-                    subliminal.seek(i)
-                    blend_frame = subliminal.resize(image.size).convert("RGBA")
-                    frame = Image.blend(blend_image, blend_frame, self.settings.subliminal_opacity)
-                    frames.append((frame, subliminal.info["duration"]))
-
-                return GifLike(frames)
-            else:
-                blend_subliminal = subliminal.resize(image.size).convert("RGBA")
-                return Image.blend(blend_image, blend_subliminal, self.settings.subliminal_opacity)
-        else:
-            return image
-
-    def try_denial_filter(self) -> ImageFilter.Filter:
-        if self.denial:
-            return random.choice([
-                ImageFilter.GaussianBlur(5),
-                ImageFilter.GaussianBlur(10),
-                ImageFilter.GaussianBlur(20),
-                ImageFilter.BoxBlur(5),
-                ImageFilter.BoxBlur(10),
-                ImageFilter.BoxBlur(20),
-            ])  # fmt: skip
-        else:
-            return None
-
-    def try_denial_text(self) -> None:
-        if self.denial:
-            label = Label(self, text=self.pack.random_denial(), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg)
-            label.place(relx=0.5, rely=0.5, anchor="c")
 
     def close(self) -> None:
         super().close()

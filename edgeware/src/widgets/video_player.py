@@ -1,12 +1,13 @@
-from pathlib import Path
-from tkinter import Toplevel
+from tkinter import Label, Misc
 
 import mpv
 
 
-class VideoPlayer:
-    def __init__(self, master: Toplevel, video: Path, volume: int):
-        self.player = mpv.MPV(wid=master.winfo_id())
-        self.player.loop = True
-        self.player.volume = volume
-        self.player.play(str(video))
+class VideoPlayer(mpv.MPV):
+    def __init__(self, master: Misc, width: int, height: int):
+        label = Label(master, width=width, height=height)
+        label.pack()
+        label.wait_visibility()  # Needs to be visible for mpv to draw on it
+
+        super().__init__(wid=label.winfo_id())
+        self.loop = True

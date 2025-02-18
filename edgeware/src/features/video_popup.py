@@ -1,4 +1,4 @@
-from tkinter import Label, Tk
+from tkinter import Tk
 
 from features.popup import Popup
 from pack import Pack
@@ -15,14 +15,13 @@ class VideoPopup(Popup):
             return
         super().__init__(root, settings, pack, state)
 
-        video = self.media
-        properties = get_video_properties(video)
-
+        properties = get_video_properties(self.media)
         self.compute_geometry(properties["width"], properties["height"])
-        label = Label(self, width=self.width, height=self.height)
-        label.pack()
-        label.wait_visibility()  # Needs to be visible for mpv to draw on it
-        self.player = VideoPlayer(label, video, self.settings.video_volume)
+
+        player = VideoPlayer(self, self.width, self.height)
+        player.volume = self.settings.video_volume
+        player.vf = self.try_denial_filter(True)
+        player.play(str(self.media))
 
         self.init_finish()
 

@@ -1,11 +1,11 @@
 from collections.abc import Callable
-from tkinter import Toplevel
+from tkinter import Label, Toplevel
 
 from pack import Pack
-from PIL import Image
+from PIL import Image, ImageTk
 from screeninfo import get_monitors
 from utils import utils
-from widgets.image_label import ImageLabel
+from widgets.video_player import VideoPlayer
 
 
 class StartupSplash(Toplevel):
@@ -30,7 +30,17 @@ class StartupSplash(Toplevel):
         y = monitor.y + (monitor.height - height) // 2
 
         self.geometry(f"{width}x{height}+{x}+{y}")
-        ImageLabel(self, image, (width, height)).pack()
+
+        if getattr(image, "n_frames", 0) > 1:
+            VideoPlayer(self, width, height).play(str(pack.startup_splash))
+        else:
+            label = Label(self, width=width, height=height)
+            label.pack()
+
+            resized = image.resize((width, height), Image.LANCZOS).convert("RGBA")
+            self.photo_image = ImageTk.PhotoImage(resized)
+            label.config(image=self.photo_image)
+
         self.fade_in()
 
     def fade_in(self) -> None:

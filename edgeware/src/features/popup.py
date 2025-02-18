@@ -8,6 +8,7 @@ from features.misc import mitosis_popup, open_web
 from features.theme import get_theme
 from pack import Pack
 from panic import panic
+from PIL import ImageFilter
 from roll import roll
 from screeninfo import get_monitors
 from settings import Settings
@@ -28,6 +29,8 @@ class Popup(Toplevel):
         self.state = state
         self.theme = get_theme(settings)
 
+        self.denial = roll(self.settings.denial_chance)
+
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
         self.attributes("-topmost", True)
         utils.set_borderless(self)
@@ -36,6 +39,7 @@ class Popup(Toplevel):
         self.attributes("-alpha", self.opacity)
 
     def init_finish(self) -> None:
+        self.try_denial_text()
         self.try_caption()
         self.try_corruption_dev()
         self.try_button()
@@ -67,6 +71,16 @@ class Popup(Toplevel):
             self.x = random.randint(self.monitor.x, self.monitor.x + self.monitor.width - self.width)
             self.y = random.randint(self.monitor.y, self.monitor.y + self.monitor.height - self.height)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
+
+    def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
+        mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
+        image_filters = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20)]
+        return random.choice(mpv_filters if mpv else image_filters) if self.denial else ""
+
+    def try_denial_text(self) -> None:
+        if self.denial:
+            label = Label(self, text=self.pack.random_denial(), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg)
+            label.place(relx=0.5, rely=0.5, anchor="c")
 
     def try_caption(self) -> None:
         caption = self.pack.random_caption(self.media)
