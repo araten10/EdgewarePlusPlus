@@ -1,6 +1,7 @@
 import ast
 import json
 import logging
+import traceback
 from pathlib import Path
 from tkinter import (
     Button,
@@ -408,5 +409,5 @@ if __name__ == "__main__":
     try:
         Config()
     except Exception as e:
-        logging.fatal(f"Config encountered fatal error:\n{e}")
+        logging.fatal(f"Config encountered fatal error: {e}\n\n{traceback.format_exc()}")
         messagebox.showerror("Could not start", f"Could not start config.\n[{e}]")

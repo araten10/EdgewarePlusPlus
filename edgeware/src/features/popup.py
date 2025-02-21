@@ -4,6 +4,8 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
+from desktop_notifier.common import Icon
+from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
 from features.theme import get_theme
 from pack import Pack
@@ -13,8 +15,6 @@ from screeninfo import get_monitors
 from settings import Settings
 from state import State
 from utils import utils
-from desktop_notifier.common import Attachment, Icon
-from desktop_notifier.sync import DesktopNotifierSync
 
 
 class Popup(Toplevel):
@@ -29,13 +29,17 @@ class Popup(Toplevel):
         self.pack = pack
         self.state = state
         self.theme = get_theme(settings)
-        self.altState = False
+        self.alt_state = False
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
-        self.bind("<Alt_L>", lambda event: AltOn())
-        self.bind("<KeyRelease-Alt_L>", lambda event: AltOff())
-        def AltOn(): self.altState=True
-        def AltOff(): self.altState=False
+        self.bind("<Alt_L>", lambda event: alt_on())
+        self.bind("<KeyRelease-Alt_L>", lambda event: alt_off())
+
+        def alt_on():
+            self.alt_state = True
+
+        def alt_off():
+            self.alt_state = False
 
         self.attributes("-topmost", True)
         utils.set_borderless(self)
@@ -182,15 +186,12 @@ class Popup(Toplevel):
 
     def blacklist_media(self) -> None:
         notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
-        notifier.send(
-            title=self.pack.info.name,
-            message="Alt Click Successful"
-        )
+        notifier.send(title=self.pack.info.name, message="Alt Click Successful")
         print("Alt Click Successful")
 
     def close(self) -> None:
         self.state.popup_number -= 1
-        if self.altState:
+        if self.alt_state:
             self.blacklist_media()
         self.try_web_open()
         self.destroy()
