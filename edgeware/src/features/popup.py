@@ -4,6 +4,7 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
+import utils
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
@@ -14,7 +15,6 @@ from roll import roll
 from screeninfo import get_monitors
 from settings import Settings
 from state import State
-from utils import utils
 
 
 class Popup(Toplevel):

@@ -9,11 +9,11 @@ import zipfile
 from pathlib import Path
 from tkinter import BooleanVar, Button, Frame, IntVar, Label, Listbox, StringVar, Tk, Toplevel, Widget, filedialog, messagebox, simpledialog
 
+import utils
 from config_window.vars import Vars
 from pack import Pack
 from paths import DEFAULT_PACK_PATH, Data, Process
 from settings import load_config
-from utils import utils
 
 BUTTON_FACE = "SystemButtonFace" if utils.is_windows() else "gray90"
 

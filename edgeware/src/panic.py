@@ -3,10 +3,10 @@ from multiprocessing.connection import Client, Listener
 from threading import Thread
 from tkinter import Tk, simpledialog
 
+import utils
 from paths import CustomAssets
 from settings import Settings
 from state import State
-from utils import utils
 
 ADDRESS = ("localhost", 6000)
 AUTHKEY = b"Edgeware++"

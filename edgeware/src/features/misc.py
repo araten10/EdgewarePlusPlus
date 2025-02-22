@@ -9,6 +9,7 @@ from threading import Thread
 from tkinter import Tk
 
 import pystray
+import utils
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from pack import Pack
@@ -20,7 +21,6 @@ from pypresence import Presence
 from roll import roll
 from settings import Settings
 from state import State
-from utils import utils
 
 
 def play_audio(pack: Pack) -> None:

@@ -1,10 +1,10 @@
 from collections.abc import Callable
 from tkinter import Toplevel
 
+import utils
 from pack import Pack
 from PIL import Image
 from screeninfo import get_monitors
-from utils import utils
 from widgets.image_label import ImageLabel
 
 

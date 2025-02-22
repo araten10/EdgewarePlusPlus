@@ -5,8 +5,8 @@ from threading import Thread
 from tkinter import Label, TclError, Toplevel
 
 import imageio
+import utils
 from PIL import Image, ImageTk
-from utils import utils
 from videoprops import get_video_properties
 
 try:

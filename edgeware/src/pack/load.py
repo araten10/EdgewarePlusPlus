@@ -7,8 +7,8 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import TypeVar
 
+import utils
 from paths import Data, PackPaths
-from utils import utils
 from voluptuous import ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Equal, In, Length, Number, Optional, Range, Required, Schema, Url
 from voluptuous.error import Invalid
 

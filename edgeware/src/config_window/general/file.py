@@ -23,6 +23,7 @@ from tkinter import (
 )
 from tkinter.font import Font
 
+import utils
 from config_window.utils import (
     export_resource,
     import_resource,
@@ -35,7 +36,6 @@ from config_window.utils import (
 from config_window.vars import Vars
 from pack import Pack
 from paths import Data
-from utils import utils
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

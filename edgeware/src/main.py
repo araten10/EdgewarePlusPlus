@@ -1,6 +1,7 @@
 from threading import Thread
 from tkinter import Tk
 
+import utils
 from features.corruption import corruption_danger_check, handle_corruption
 from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
@@ -27,7 +28,6 @@ from pygame import mixer
 from roll import RollTarget, roll_targets
 from settings import Settings, first_launch_configure
 from state import State
-from utils import utils
 
 
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
