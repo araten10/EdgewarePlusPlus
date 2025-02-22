@@ -24,7 +24,7 @@ from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from pack import Pack
 from panic import start_panic_listener
-from pygame import mixer
+import pygame
 from roll import RollTarget, roll_targets
 from settings import Settings, first_launch_configure
 from state import State
@@ -46,13 +46,14 @@ if __name__ == "__main__":
     settings = Settings()
     pack = Pack(settings.pack_path)
     state = State()
+    pygame.init()
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
 
     # if sound is laggy or strange try changing buffer size (doc: https://www.pygame.org/docs/ref/mixer.html)
     # TODO: check if pygame.mixer.quit() is preferable to use in panic? seems fine without it
-    mixer.init()
-    mixer.set_num_channels(settings.max_audio)
+    pygame.mixer.init()
+    pygame.mixer.set_num_channels(settings.max_audio)
 
     corruption_danger_check(settings, pack)
 

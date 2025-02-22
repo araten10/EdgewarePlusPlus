@@ -16,6 +16,8 @@ from screeninfo import get_monitors
 from settings import Settings
 from state import State
 
+import pygame
+import pygame.locals
 
 class Popup(Toplevel):
     media: Path  # Defined by subclasses
@@ -32,14 +34,7 @@ class Popup(Toplevel):
         self.alt_state = False
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
-        self.bind("<Alt_L>", lambda event: alt_on())
-        self.bind("<KeyRelease-Alt_L>", lambda event: alt_off())
 
-        def alt_on():
-            self.alt_state = True
-
-        def alt_off():
-            self.alt_state = False
 
         self.attributes("-topmost", True)
         utils.set_borderless(self)
@@ -191,7 +186,7 @@ class Popup(Toplevel):
 
     def close(self) -> None:
         self.state.popup_number -= 1
-        if self.alt_state:
+        if pygame.key.get_mods() and pygame.KMOD_ALT:
             self.blacklist_media()
         self.try_web_open()
         self.destroy()
