@@ -176,6 +176,8 @@ class Popup(Toplevel):
     def click(self) -> None:
         self.clicks_to_close -= 1
         if self.clicks_to_close <= 0:
+            if pygame.key.get_mods() and pygame.KMOD_ALT:
+                self.blacklist_media()
             self.close()
             self.try_mitosis()
 
@@ -186,7 +188,5 @@ class Popup(Toplevel):
 
     def close(self) -> None:
         self.state.popup_number -= 1
-        if pygame.key.get_mods() and pygame.KMOD_ALT:
-            self.blacklist_media()
         self.try_web_open()
         self.destroy()
