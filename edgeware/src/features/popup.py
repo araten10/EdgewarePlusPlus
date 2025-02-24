@@ -4,6 +4,8 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
+import pygame
+import pygame.locals
 import utils
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
@@ -16,8 +18,6 @@ from screeninfo import get_monitors
 from settings import Settings
 from state import State
 
-import pygame
-import pygame.locals
 
 class Popup(Toplevel):
     media: Path  # Defined by subclasses
@@ -34,7 +34,6 @@ class Popup(Toplevel):
         self.alt_state = False
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
-
 
         self.attributes("-topmost", True)
         utils.set_borderless(self)

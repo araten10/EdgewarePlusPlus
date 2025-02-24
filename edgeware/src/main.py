@@ -1,6 +1,7 @@
 from threading import Thread
 from tkinter import Tk
 
+import pygame
 import utils
 from features.corruption import corruption_danger_check, handle_corruption
 from features.drive import fill_drive, replace_images
@@ -24,7 +25,6 @@ from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from pack import Pack
 from panic import start_panic_listener
-import pygame
 from roll import RollTarget, roll_targets
 from settings import Settings, first_launch_configure
 from state import State

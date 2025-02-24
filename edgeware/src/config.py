@@ -19,22 +19,22 @@ from tkinter import (
     ttk,
 )
 
-from config_window.annoyance.audio_video import AudioVideoTab
-from config_window.annoyance.captions import CaptionsTab
-from config_window.annoyance.dangerous_settings import DangerousSettingsTab
-from config_window.annoyance.moods import MoodsTab
-from config_window.annoyance.popup import PopupTab
-from config_window.annoyance.wallpaper import WallpaperTab
-from config_window.general.booru import BooruTab
-from config_window.general.default_file import DefaultFileTab
-from config_window.general.file import FileTab
-from config_window.general.info import InfoTab
-from config_window.general.start import StartTab
-from config_window.modes.basic import BasicModesTab
-from config_window.modes.corruption import CorruptionModeTab
-from config_window.modes.dangerous_modes import DangerousModesTab
-from config_window.modes.hibernate import HibernateModeTab
-from config_window.troubleshooting import TroubleshootingTab
+from config_window.tabs.annoyance.audio_video import AudioVideoTab
+from config_window.tabs.annoyance.captions import CaptionsTab
+from config_window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
+from config_window.tabs.annoyance.moods import MoodsTab
+from config_window.tabs.annoyance.popup import PopupTab
+from config_window.tabs.annoyance.wallpaper import WallpaperTab
+from config_window.tabs.general.booru import BooruTab
+from config_window.tabs.general.default_file import DefaultFileTab
+from config_window.tabs.general.file import FileTab
+from config_window.tabs.general.info import InfoTab
+from config_window.tabs.general.start import StartTab
+from config_window.tabs.modes.basic import BasicModesTab
+from config_window.tabs.modes.corruption import CorruptionModeTab
+from config_window.tabs.modes.dangerous_modes import DangerousModesTab
+from config_window.tabs.modes.hibernate import HibernateModeTab
+from config_window.tabs.troubleshooting import TroubleshootingTab
 from config_window.utils import (
     all_children,
     config,
