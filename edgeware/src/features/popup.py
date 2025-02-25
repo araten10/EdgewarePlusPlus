@@ -31,7 +31,7 @@ class Popup(Toplevel):
         self.pack = pack
         self.state = state
         self.theme = get_theme(settings)
-        self.alt_state = False
+        # self.alt_state = False
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
 
@@ -175,15 +175,15 @@ class Popup(Toplevel):
     def click(self) -> None:
         self.clicks_to_close -= 1
         if self.clicks_to_close <= 0:
-            if pygame.key.get_mods() and pygame.KMOD_ALT:
-                self.blacklist_media()
+            # if pygame.key.get_mods() and pygame.KMOD_ALT:
+            #     self.blacklist_media()
             self.close()
             self.try_mitosis()
 
-    def blacklist_media(self) -> None:
-        notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
-        notifier.send(title=self.pack.info.name, message="Alt Click Successful")
-        print("Alt Click Successful")
+    # def blacklist_media(self) -> None:
+    #     notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
+    #     notifier.send(title=self.pack.info.name, message="Alt Click Successful")
+    #     print("Alt Click Successful")
 
     def close(self) -> None:
         self.state.popup_number -= 1
