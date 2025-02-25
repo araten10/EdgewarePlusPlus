@@ -9,6 +9,25 @@
 
 **Since last version...**
 
+**Version 15**
+
+•*The bulk of the config window refactor is finished! This is mostly backend, but now all tabs have scrollbar support.*
+>This means that once the about tab is finished being scrapped, the buttons at the bottom of the window will stop disappearing on smaller monitors!
+
+•*Additional info logs have been added*
+
+•*Corruption path view has been fixed and now properly displays corruption levels again*
+>We plan to overhaul this at some point, but at the very least it should be viewable now!
+
+•*Fixed a crash when the user would load a non-corruption pack while corruption was still enabled*
+
+•*Mitosis no longer triggers on popup timeout and now properly spawns a new popup if timed out*
+
+•*Pack Tool can now generate `index.json` with an updated helper `pack.yml` file*
+>If you prefer the old style of pack creation edgeware will still support those! For more information, view the patch notes for version 14.7. We hope to have a fun new horny pack featuring this new format soon, if you want a proper example!
+
+•*Pack Tool bug giving uninformative error messages when subdirectories are inside media mood directories is fixed*
+
 **Version 14.7**
 
 Lots of small changes, as well as things that will lead in to huge overhauls! Corruption is finally finished as was originally planned!
