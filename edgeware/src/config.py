@@ -19,6 +19,7 @@ from tkinter import (
     ttk,
 )
 
+from config_window.import_export import export_pack, import_pack
 from config_window.tabs.annoyance.audio_video import AudioVideoTab
 from config_window.tabs.annoyance.captions import CaptionsTab
 from config_window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
@@ -38,9 +39,7 @@ from config_window.tabs.troubleshooting import TroubleshootingTab
 from config_window.utils import (
     all_children,
     config,
-    export_resource,
     get_live_version,
-    import_resource,
     write_save,
 )
 from config_window.vars import Vars
@@ -177,10 +176,10 @@ class Config(Tk):
         )
         style.configure("lefttab.TNotebook", tabposition="wn")
 
-        resource_frame = Frame(self)
-        resource_frame.pack(fill="x")
-        Button(resource_frame, text="Import Resource Pack", command=lambda: import_resource(self)).pack(fill="x", side="left", expand=1)
-        Button(resource_frame, text="Export Resource Pack", command=export_resource).pack(fill="x", side="left", expand=1)
+        pack_frame = Frame(self)
+        pack_frame.pack(fill="x")
+        Button(pack_frame, text="Import Resource Pack", command=lambda: import_pack(True)).pack(fill="x", side="left", expand=1)
+        Button(pack_frame, text="Export Resource Pack", command=export_pack).pack(fill="x", side="left", expand=1)
         Button(self, text="Save & Exit", command=lambda: write_save(vars, True)).pack(fill="x")
 
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
