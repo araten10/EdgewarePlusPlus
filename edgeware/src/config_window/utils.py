@@ -1,18 +1,15 @@
 import json
 import logging
 import os
-import shutil
 import subprocess
 import sys
 import urllib
-import zipfile
-from pathlib import Path
-from tkinter import BooleanVar, Button, Frame, IntVar, Label, Listbox, StringVar, Tk, Toplevel, Widget, filedialog, messagebox, simpledialog
+from tkinter import BooleanVar, Frame, IntVar, Label, Listbox, StringVar, Widget, messagebox, simpledialog
 
 import utils
 from config_window.vars import Vars
 from pack import Pack
-from paths import DEFAULT_PACK_PATH, Data, Process
+from paths import Data, Process
 from settings import load_config
 
 BUTTON_FACE = "SystemButtonFace" if utils.is_windows() else "gray90"
@@ -138,59 +135,6 @@ def safe_check(vars: Vars) -> bool:
     return True
 
 
-def export_resource() -> bool:
-    try:
-        logging.info("starting zip export...")
-        save_location = filedialog.asksaveasfile("w", defaultextension=".zip")
-        with zipfile.ZipFile(save_location.name, "w", compression=zipfile.ZIP_DEFLATED) as zip:
-            beyond_root = False
-            for root, dirs, files in os.walk(DEFAULT_PACK_PATH):
-                for file in files:
-                    logging.info(f"write {file}")
-                    if beyond_root:
-                        zip.write(os.path.join(root, file), os.path.join(Path(root).name, file))
-                    else:
-                        zip.write(os.path.join(root, file), file)
-                for dir in dirs:
-                    logging.info(f"make dir {dir}")
-                    zip.write(os.path.join(root, dir), dir)
-                beyond_root = True
-        return True
-    except Exception as e:
-        logging.fatal(f"failed to export zip\n\tReason: {e}")
-        messagebox.showerror("Write Error", "Failed to export resource to zip file.")
-        return False
-
-
-def import_resource(parent: Tk) -> bool:
-    try:
-        open_location = filedialog.askopenfile("r", defaultextension=".zip")
-        if open_location is None:
-            return False
-        if os.path.exists(DEFAULT_PACK_PATH):
-            resp = confirm_box(
-                parent,
-                "Confirm",
-                "Current resource folder will be deleted and overwritten. Corruption launches will be reset. Is this okay?"
-                "\nNOTE: This might take a while when importing larger packs, please be patient!",
-            )
-            if not resp:
-                logging.info("exited import resource overwrite")
-                return False
-            shutil.rmtree(DEFAULT_PACK_PATH)
-            logging.info("removed old resource folder")
-        with zipfile.ZipFile(open_location.name, "r") as zip:
-            zip.extractall(DEFAULT_PACK_PATH)
-            logging.info("extracted all from zip")
-        messagebox.showinfo("Done", "Resource importing completed.")
-        clear_launches(False)
-        refresh()
-        return True
-    except Exception as e:
-        messagebox.showerror("Read Error", f"Failed to import resources from file.\n[{e}]")
-        return False
-
-
 # applyPreset already exists, but there's a reason i'm not using it. I want the per-pack preset to not include every setting unless specified to do so, and
 # I also want the settings to not automatically be saved in case the user does not like what the pack sets.
 def pack_preset(pack: Pack, vars: Vars, preset_type: str, danger: bool):
@@ -231,31 +175,6 @@ def pack_preset(pack: Pack, vars: Vars, preset_type: str, danger: bool):
         except Exception as e:
             logging.warning(f"could not load pack suggested settings. Reason: {e}")
             messagebox.showwarning("Error Loading File", f"There was an issue loading the pack config file. {e}")
-
-
-def confirm_box(parent: Tk, btitle: str, message: str) -> bool:
-    allow = False
-    root = Toplevel(parent)
-
-    def complete(state: bool) -> bool:
-        nonlocal allow
-        allow = state
-        root.quit()
-
-    root.geometry("300x150")
-    root.resizable(False, False)
-    root.focus_force()
-    root.title(btitle)
-    Label(root, text=message, wraplength=292).pack(fill="x")
-    # Label(root).pack()
-    Button(root, text="Continue", command=lambda: complete(True)).pack()
-    Button(root, text="Cancel", command=lambda: complete(False)).pack()
-    root.mainloop()
-    try:
-        root.destroy()
-    except Exception:
-        False
-    return allow
 
 
 def clear_launches(confirmation: bool):

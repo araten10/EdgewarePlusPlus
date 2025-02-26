@@ -3,8 +3,6 @@ import logging
 import os
 import shutil
 import textwrap
-import zipfile
-from pathlib import Path
 from tkinter import (
     CENTER,
     GROOVE,
@@ -16,7 +14,6 @@ from tkinter import (
     Message,
     OptionMenu,
     StringVar,
-    filedialog,
     messagebox,
     simpledialog,
     ttk,
@@ -24,9 +21,8 @@ from tkinter import (
 from tkinter.font import Font
 
 import utils
+from config_window.import_export import export_pack, import_pack
 from config_window.utils import (
-    export_resource,
-    import_resource,
     log_file,
     pack_preset,
     refresh,
@@ -47,24 +43,6 @@ PRESET_TEXT = "Please be careful before importing unknown config presets! Double
 def save_and_refresh(vars: Vars) -> None:
     write_save(vars)
     refresh()
-
-
-def import_new_pack() -> None:
-    try:
-        pack_zip = filedialog.askopenfile("r", defaultextension=".zip")
-        if not pack_zip:
-            return
-
-        with zipfile.ZipFile(pack_zip.name, "r") as zip:
-            pack_name = Path(pack_zip.name).with_suffix("").name
-            import_location = Data.PACKS / pack_name
-            import_location.mkdir(parents=True, exist_ok=True)
-            zip.extractall(import_location)
-
-        messagebox.showinfo("Done", "New pack imported")
-        refresh()
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to import new pack.\n[{e}]")
 
 
 def get_presets() -> list[str]:
@@ -181,13 +159,11 @@ class FileTab(ScrollFrame):
         pack_dropdown = OptionMenu(pack_selection_frame, vars.pack_path, *pack_list)
         pack_dropdown["menu"].insert_separator(1)
         pack_dropdown.pack(padx=2, fill="x", side="left")
-        Button(pack_selection_frame, text="Import New Pack", command=import_new_pack).pack(padx=2, fill="x", side="left", expand=1)
+        Button(pack_selection_frame, text="Import New Pack", command=lambda: import_pack(False)).pack(padx=2, fill="x", side="left", expand=1)
 
         ttk.Separator(import_export_frame, orient="horizontal").pack(fill="x", pady=2)
-        Button(import_export_frame, text="Import Default Pack", command=lambda: import_resource(self.viewPort)).pack(
-            padx=2, pady=2, fill="x", side="left", expand=1
-        )
-        Button(import_export_frame, text="Export Default Pack", command=export_resource).pack(padx=2, pady=2, fill="x", side="left", expand=1)
+        Button(import_export_frame, text="Import Default Pack", command=lambda: import_pack(True)).pack(padx=2, pady=2, fill="x", side="left", expand=1)
+        Button(import_export_frame, text="Export Default Pack", command=export_pack).pack(padx=2, pady=2, fill="x", side="left", expand=1)
 
         # Presets
         Label(self.viewPort, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)
