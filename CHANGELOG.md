@@ -14,6 +14,9 @@
 •*The bulk of the config window refactor is finished! This is mostly backend, but now all tabs have scrollbar support.*
 >This means that once the about tab is finished being scrapped, the buttons at the bottom of the window will stop disappearing on smaller monitors!
 
+•*About 60% of the "about" tab has been removed, due to either redundant or out of date info*
+>If you are looking for assistance with certain features, leave on the config help text option! I've gone through and checked that what I was removing was covered there.
+
 •*Additional info logs have been added*
 
 •*Corruption path view has been fixed and now properly displays corruption levels again*
@@ -27,6 +30,8 @@
 >If you prefer the old style of pack creation edgeware will still support those! For more information, view the patch notes for version 14.7. We hope to have a fun new horny pack featuring this new format soon, if you want a proper example!
 
 •*Pack Tool bug giving uninformative error messages when subdirectories are inside media mood directories is fixed*
+
+•*Added a check and recovery for incorrect pack imports, fixing folder structures and moving them one folder up*
 
 **Version 14.7**
 
