@@ -47,6 +47,7 @@ from pack import Pack
 from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from settings import load_default_config
+from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
 PATH = Path(__file__).parent
@@ -61,26 +62,26 @@ pil_logger.setLevel(logging.INFO)
 
 # "stashed" relevant information from each about tab, for when a "tutorial" section gets added:
 
-#ANNOYANCE_TEXT: pretty much everything has been covered. in new tutorial emphasise this is the most important tab (because it is)
+# ANNOYANCE_TEXT: pretty much everything has been covered. in new tutorial emphasise this is the most important tab (because it is)
 
-#DRIVE_TEXT: leaving this for last as it's the most "actually important" thing here. but I think I did a half decent job on explaining it in the relevant tab as well. note about the threads: at one point the about tab comments on how you can set the number of threads as an option, but this is not true. The number of fill threads was always hard coded at 8, whether that makes any sense is up in the air
+# DRIVE_TEXT: leaving this for last as it's the most "actually important" thing here. but I think I did a half decent job on explaining it in the relevant tab as well. note about the threads: at one point the about tab comments on how you can set the number of threads as an option, but this is not true. The number of fill threads was always hard coded at 8, whether that makes any sense is up in the air
 
-#WALLPAPER_TEXT: we might be changing the wallpaper tab up to begin with, but generally I find it a bit confusing. Panic wallpaper should be moved to a more important place, then the wallpaper tab could be named "rotate wallpaper" or something. this tab offers not much to clear it up, but setting a reminder to change "rotate variation" to a better name (gives range of time +/- the timer)
+# WALLPAPER_TEXT: we might be changing the wallpaper tab up to begin with, but generally I find it a bit confusing. Panic wallpaper should be moved to a more important place, then the wallpaper tab could be named "rotate wallpaper" or something. this tab offers not much to clear it up, but setting a reminder to change "rotate variation" to a better name (gives range of time +/- the timer)
 # text for the about tab
 
-#STARTUP_TEXT: almost all of this text is useful details, but not sure where to put it instead of here as it's all tech support related stuff. "Launch on PC Startup" currently has no hover tooltip, but also it's fairly self explanatory, not sure how many people would hover it. Here's what's missing from current explanation: "Please note that the method used does NOT edit registry or schedule any tasks. The "lazy startup" method was used for both convenience of implementation and convenience of cleaning.\n\nIf you forget to turn off the "start on logon" setting before uninstalling, you will need to manually go to your Startup folder and remove "edgeware.bat"."
+# STARTUP_TEXT: almost all of this text is useful details, but not sure where to put it instead of here as it's all tech support related stuff. "Launch on PC Startup" currently has no hover tooltip, but also it's fairly self explanatory, not sure how many people would hover it. Here's what's missing from current explanation: "Please note that the method used does NOT edit registry or schedule any tasks. The "lazy startup" method was used for both convenience of implementation and convenience of cleaning.\n\nIf you forget to turn off the "start on logon" setting before uninstalling, you will need to manually go to your Startup folder and remove "edgeware.bat"."
 
-#HIBERNATE_TEXT: mostly redundant/already covered, but I do like the way it's more long form and expanded compared to the shorter form messages. note to self in the tutorial: maybe try making it a bit more conversational/suggestion based, to give ideas on how to use edgeware
+# HIBERNATE_TEXT: mostly redundant/already covered, but I do like the way it's more long form and expanded compared to the shorter form messages. note to self in the tutorial: maybe try making it a bit more conversational/suggestion based, to give ideas on how to use edgeware
 
-#HIBERNATE_TYPE_TEXT: these are all useful imo, but are also explained in brief on the hibernate window itself. could maybe make the hibernate window a bit bigger to explain them, or put a part in the tutorial section later. keeping these up for now as well
+# HIBERNATE_TYPE_TEXT: these are all useful imo, but are also explained in brief on the hibernate window itself. could maybe make the hibernate window a bit bigger to explain them, or put a part in the tutorial section later. keeping these up for now as well
 
-#THANK_AND_ABOUT_TEXT: I don't really want to erase petit's work, especially considering they have a donation link (and I am potentially thinking about accepting donations as well? maybe?), I would feel kind of like a dick. but also the program is so much different than how it used to be that I feel like we took it in our own direction. In any case, leaving this up for now as it's fairly benign and can be easily removed whenever
+# THANK_AND_ABOUT_TEXT: I don't really want to erase petit's work, especially considering they have a donation link (and I am potentially thinking about accepting donations as well? maybe?), I would feel kind of like a dick. but also the program is so much different than how it used to be that I feel like we took it in our own direction. In any case, leaving this up for now as it's fairly benign and can be easily removed whenever
 
-#PLUSPLUS_TEXT: outdated, stopped updating it when marigold joined the team as she kind of helped inspire me to legitimize actual patchnotes rather than just doing whatever crap I want like this. leaving it up for now but can be easily removed. I do want to write a credits page at some point, even if its short and tucked away
+# PLUSPLUS_TEXT: outdated, stopped updating it when marigold joined the team as she kind of helped inspire me to legitimize actual patchnotes rather than just doing whatever crap I want like this. leaving it up for now but can be easily removed. I do want to write a credits page at some point, even if its short and tucked away
 
-#PACKINFO_TEXT: redundant and out of date. however, there is some useful information relating to discord statuses: "Also included in this section is the discord status info, which gives what your discord status will be set to if that setting is turned on, along with the image. As of time of writing (or if I forget to update this later), the image cannot be previewed as it is "hard coded" into EdgeWare\'s discord application and accessed through the API. As I am not the original creator of EdgeWare, and am not sure how to contact them, the best I could do is low-res screenshots or the name of each image. I chose the latter. Because of this hard-coding, the only person i\'ve run into so far who use these images is PetitTournesol themselves, but it should be noted that anyone can use them as long as they know what to add to the discord.dat file. This is partially the reason I left this information in."
+# PACKINFO_TEXT: redundant and out of date. however, there is some useful information relating to discord statuses: "Also included in this section is the discord status info, which gives what your discord status will be set to if that setting is turned on, along with the image. As of time of writing (or if I forget to update this later), the image cannot be previewed as it is "hard coded" into EdgeWare\'s discord application and accessed through the API. As I am not the original creator of EdgeWare, and am not sure how to contact them, the best I could do is low-res screenshots or the name of each image. I chose the latter. Because of this hard-coding, the only person i\'ve run into so far who use these images is PetitTournesol themselves, but it should be noted that anyone can use them as long as they know what to add to the discord.dat file. This is partially the reason I left this information in."
 
-#FILE_TEXT: there is some useful stuff in here, but it's also information i'm not sure people really need to know. also, i've been thinking about splitting up the file tab and moving things around, as it has a lot of important stuff in it mixed in with things barely anyone will ever use.
+# FILE_TEXT: there is some useful stuff in here, but it's also information i'm not sure people really need to know. also, i've been thinking about splitting up the file tab and moving things around, as it has a lot of important stuff in it mixed in with things barely anyone will ever use.
 
 DRIVE_TEXT = 'The "Drive" portion of Edgeware has three features: fill drive, replace images, and Booru downloader.\n\n"Fill Drive" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a "." or have their names listed in the folder name blacklist.\nIt will also ONLY place images into the User folder and its subfolders.\nFill drive has one modifier, which is its own forced delay. Because it runs with between 1 and 8 threads at any given time, when unchecked it can fill your drive VERY quickly. To ensure that you get that nice slow fill, you can adjust the delay between each folder sweep it performs and the max number of threads.\n\n"Replace Images" is more complicated. Its searching is the exact same as fill drive, but instead of throwing images everywhere, it will seek out folders with large numbers of images (more than the threshold value) and when it finds one, it will replace ALL of the images with porn from /resource/img/. REMEMBER THAT IF YOU CARE ABOUT YOUR PHOTOS, AND THEY\'RE IN A FOLDER WITH MORE IMAGES THAN YOUR CHOSEN THRESHOLD VALUE, EITHER BACK THEM UP IN A ZIP OR SOMETHING OR DO. NOT. USE. THIS SETTING. I AM NOT RESPONSIBLE FOR YOUR OWN DECISION TO RUIN YOUR PHOTOS. Edgeware will attempt to backup any replaced images under /data/backups, but DO NOT RELY ON THIS FEATURE IN ANY CIRCUMSTANCE. ALWAYS BACKUP YOUR FILES YOURSELF.\n\nBooru downloader allows you to download new items from a Booru of your choice. For the booru name, ONLY the literal name is used, like "censored" or "blacked" instead of the full url. This is not case sensitive. Use the "Validate" button to ensure that downloading will be successful before running. For tagging, if you want to have multiple tags, they can be combined using "tag1+tag2+tag3" or if you want to add blacklist tags, type your tag and append a "+-blacklist_tag" after the desired tag.'
 HIBERNATE_TYPE_TEXT = "Original: The original hibernate type that came with base EdgeWare. Spawns a barrage of popups instantly, the max possible amount is based on your awaken activity.\n\nSpaced: Essentially runs EdgeWare normally, but over a brief period of time before ceasing generation of new popups. Because of this awaken activity isn't used, instead popup delay is looked at for frequency of popups.\n\nGlitch: Creates popups at random-ish intervals over a period of time. The total amount of popups spawned is based on the awaken activity. Perfect for those who want a 'virus-like' experience, or just something different every time.\n\nRamp: Similar to spaced, only the popup frequency gets faster and faster over the hibernate length. After reaching the max duration, it will spawn a number of popups equal to the awaken activity at a speed slightly faster than your popup delay. Best used with long hibernate length values and fairly short popup delay. (keep in mind that if the popup delay is too short though, popups can potentially not appear or lag behind)\n\nPump-Scare: Do you like haunted houses or scary movies? Don't you wish that instead of screamers and jumpscares, they had porn pop out at you instead? This is kind of like that. When hibernate is triggered a popup with audio will appear for around a second or two, then immediately disappear. This works best on packs with short, immediate audio files: old EdgeWare packs that contain half-hour long hypno files will likely not reach meaningful audio in time. Large audio files can also hamper effectiveness of the audio and lead to desync with the popup.\n\nChaos: Every time hibernate activates, it randomly selects any of the other hibernate modes."
@@ -198,25 +199,25 @@ class Config(Tk):
 
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
         tab_info = ttk.Frame(None)  # info, github, version, about, etc.
+        notebook.add(tab_info, text="About")
         tab_info_expound = ttk.Notebook(tab_info, style="lefttab.TNotebook")  # additional subtabs for info on features
         tab_info_expound.pack(expand=1, fill="both")
-        tab_drive = ttk.Frame(None)
-        tab_hibernate = ttk.Frame(None)
-        tab_hibernate_type = ttk.Frame(None)
-        tab_corruption = ttk.Frame(None)
-        tab_advanced = ttk.Frame(None)
-        tab_thanks_and_about = ttk.Frame(None)
-        tab_pack_info = ttk.Frame(None)
-        tab_file = ttk.Frame(None)
-        notebook.add(tab_info, text="About")
+
+        tab_drive = ScrollFrame()
         tab_info_expound.add(tab_drive, text="Hard Drive")
-        Label(tab_drive, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
+        Label(tab_drive.viewPort, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
+
+        tab_hibernate_type = ScrollFrame()
         tab_info_expound.add(tab_hibernate_type, text="Hibernate Types")
-        Label(tab_hibernate_type, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
+        Label(tab_hibernate_type.viewPort, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
+
+        tab_thanks_and_about = ScrollFrame()
         tab_info_expound.add(tab_thanks_and_about, text="Thanks & About")
-        Label(tab_thanks_and_about, text=THANK_AND_ABOUT_TEXT, anchor="nw", wraplength=460).pack()
+        Label(tab_thanks_and_about.viewPort, text=THANK_AND_ABOUT_TEXT, anchor="nw", wraplength=460).pack()
+
+        tab_file = ScrollFrame()
         tab_info_expound.add(tab_file, text="File")
-        Label(tab_file, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
+        Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
         # ==========={HERE ENDS  ABOUT TAB ITEM INITS}===========#
 
         theme_change(config["themeType"].strip(), self, style, window_font, title_font)
