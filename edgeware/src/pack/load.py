@@ -196,6 +196,15 @@ def load_info(paths: PackPaths) -> Info:
     return try_load(paths.info, load) or default
 
 
+def load_config(paths: PackPaths) -> dict:
+    def load(content: str) -> dict:
+        config = json.loads(content)
+        filter = ["version", "versionplusplus", "packPath"]
+        return {key: value for key, value in config.items() if key not in filter}
+
+    return try_load(paths.config, load) or {}
+
+
 def load_active_moods(mood_file: Path) -> Callable[[], set[str]]:
     def load(content: str) -> Callable[[], set[str]]:
         moods = json.loads(content)

@@ -1,14 +1,15 @@
 import json
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import urllib
+from pathlib import Path
 from tkinter import BooleanVar, Frame, IntVar, Label, Listbox, StringVar, Widget, messagebox, simpledialog
 
 import utils
 from config_window.vars import Vars
-from pack import Pack
 from paths import Data, Process
 from settings import load_config
 
@@ -22,6 +23,20 @@ log_file = utils.init_logging("config")
 # TODO: Review these functions
 def all_children(widget: Widget) -> list[Widget]:
     return [widget] + [subchild for child in widget.winfo_children() for subchild in all_children(child)]
+
+
+def confirm_overwrite(path: Path) -> bool:
+    if not path.exists():
+        return True
+
+    type = "directory" if path.is_dir() else "file"
+    delete = shutil.rmtree if path.is_dir() else os.remove
+
+    confirm = messagebox.askyesno("Confirm", f'Path "{path}" already exists. This {type} will be deleted and overwritten. Is this okay?')
+    if confirm:
+        delete(path)
+
+    return confirm
 
 
 def get_live_version() -> str:
@@ -133,48 +148,6 @@ def safe_check(vars: Vars) -> bool:
             logging.info("user cancelled save.")
             return False
     return True
-
-
-# applyPreset already exists, but there's a reason i'm not using it. I want the per-pack preset to not include every setting unless specified to do so, and
-# I also want the settings to not automatically be saved in case the user does not like what the pack sets.
-def pack_preset(pack: Pack, vars: Vars, preset_type: str, danger: bool):
-    with open(pack.paths.config) as f:
-        try:
-            pack_config = json.loads(f.read())
-            print(pack_config)
-            if "version" in pack_config:
-                del pack_config["version"]
-            if "versionplusplus" in pack_config:
-                del pack_config["versionplusplus"]
-            if "packPath" in pack_config:
-                del pack_config["packPath"]
-            filter = []
-            num = 0
-            if preset_type == "full":
-                filter = vars.entries.keys()
-            if preset_type == "corruption":
-                filter = ["corruptionMode", "corruptionTime", "corruptionFadeType"]
-            for c in pack_config:
-                if c in filter:
-                    num += 1
-                    print(f"{c} matches. Looking for list number...")
-                    var = vars.entries[c]
-                    if isinstance(var, IntVar):
-                        var.set(int(pack_config[c]))
-                    if isinstance(var, BooleanVar):
-                        var.set(pack_config[c] == 1)
-                    if isinstance(var, StringVar):
-                        var.set(pack_config[c].strip())
-            messagebox.showinfo(
-                "Load Completed",
-                f"Pack config settings have been loaded successfully. There were {num} settings loaded."
-                "\n\nChanges have not been automatically saved. You may choose to look over the new settings before either saving or exiting the program.",
-            )
-            if danger:
-                vars.safe_mode.set(True)
-        except Exception as e:
-            logging.warning(f"could not load pack suggested settings. Reason: {e}")
-            messagebox.showwarning("Error Loading File", f"There was an issue loading the pack config file. {e}")
 
 
 def clear_launches(confirmation: bool):

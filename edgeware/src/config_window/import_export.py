@@ -4,8 +4,8 @@ import zipfile
 from pathlib import Path
 from tkinter import filedialog, messagebox
 
-from config_window.utils import refresh
-from paths import DEFAULT_PACK_PATH, PATH, Data, PackPaths
+from config_window.utils import confirm_overwrite, refresh
+from paths import DEFAULT_PACK_PATH, Data, PackPaths
 
 
 def import_pack(default: bool) -> None:
@@ -19,22 +19,10 @@ def import_pack(default: bool) -> None:
 
     pack_name = Path(pack_zip.name).with_suffix("").name
     import_location = DEFAULT_PACK_PATH if default else Data.PACKS / pack_name
-    relative = import_location.relative_to(PATH)
 
-    if import_location.exists():
-        type = "directory" if import_location.is_dir() else "file"
-        delete = shutil.rmtree if import_location.is_dir() else os.remove
-
-        confirm = messagebox.askyesno(
-            "Confirm",
-            f'Pack import location "{relative}" already exists. '
-            f"This {type} will be deleted and overwritten. Is this okay?"
-            "\n\nNOTE: Importing large packs might take a while, please be patient!",
-        )
-        if not confirm:
-            messagebox.showinfo("Cancelled", "Pack import cancelled.")
-            return
-        delete(import_location)
+    if not confirm_overwrite(import_location):
+        messagebox.showinfo("Cancelled", "Pack import cancelled.")
+        return
 
     with zipfile.ZipFile(pack_zip.name, "r") as zip:
         import_location.mkdir(parents=True, exist_ok=True)
@@ -72,7 +60,7 @@ def import_pack(default: bool) -> None:
         failure()
         return
 
-    messagebox.showinfo("Done", f'Pack imported to "{relative}". Refreshing config window.')
+    messagebox.showinfo("Done", f'Pack imported to "{import_location}". Refreshing config window.')
     refresh()
 
 

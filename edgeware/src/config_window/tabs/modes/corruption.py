@@ -13,11 +13,11 @@ from tkinter import (
 )
 from tkinter.font import Font
 
+from config_window.preset import apply_preset
 from config_window.utils import (
     assign,
     clear_launches,
     config,
-    pack_preset,
     set_widget_states,
     set_widget_states_with_colors,
 )
@@ -67,7 +67,7 @@ class CorruptionModeTab(ScrollFrame):
             text="Recommended Settings",
             cursor="question_arrow",
             height=2,
-            command=lambda: pack_preset(pack, vars, "corruption", vars.preset_danger.get()),
+            command=lambda: apply_preset(pack.config, vars, ["corruptionMode", "corruptionTime", "corruptionFadeType"]),
         )
         recommended_settings_button.pack(fill="x", padx=2, pady=2)
         CreateToolTip(
