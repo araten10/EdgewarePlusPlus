@@ -17,6 +17,7 @@ from panic import panic
 from paths import CustomAssets, Data, Process
 from PIL import Image
 from pygame import mixer
+from pynput import keyboard
 from pypresence import Presence
 from roll import roll
 from settings import Settings
@@ -160,3 +161,11 @@ def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) 
 
         state._popup_number.attach(observer)
         mitosis_popup(root, settings, pack, state)
+
+
+def handle_keyboard(state: State) -> None:
+    def handle_alt(key: keyboard.Key, held: bool) -> None:
+        if key == keyboard.Key.alt:
+            state.alt_held = held
+
+    keyboard.Listener(on_press=lambda key: handle_alt(key, True), on_release=lambda key: handle_alt(key, False)).start()

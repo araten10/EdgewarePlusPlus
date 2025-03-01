@@ -2,7 +2,6 @@ import ast
 import json
 import logging
 import traceback
-from pathlib import Path
 from tkinter import (
     Button,
     Canvas,
@@ -49,8 +48,6 @@ from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from settings import load_default_config
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
-
-PATH = Path(__file__).parent
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()

@@ -4,12 +4,9 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
-# import pygame
-# import pygame.locals
 import utils
-
-# from desktop_notifier.common import Icon
-# from desktop_notifier.sync import DesktopNotifierSync
+from desktop_notifier.common import Icon
+from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
 from features.theme import get_theme
 from pack import Pack
@@ -32,7 +29,6 @@ class Popup(Toplevel):
         self.pack = pack
         self.state = state
         self.theme = get_theme(settings)
-        # self.alt_state = False
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
 
@@ -176,15 +172,15 @@ class Popup(Toplevel):
     def click(self) -> None:
         self.clicks_to_close -= 1
         if self.clicks_to_close <= 0:
-            # if pygame.key.get_mods() and pygame.KMOD_ALT:
-            #     self.blacklist_media()
+            if self.state.alt_held:
+                self.blacklist_media()
             self.close()
             self.try_mitosis()
 
-    # def blacklist_media(self) -> None:
-    #     notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
-    #     notifier.send(title=self.pack.info.name, message="Alt Click Successful")
-    #     print("Alt Click Successful")
+    def blacklist_media(self) -> None:
+        notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
+        notifier.send(title=self.pack.info.name, message="Alt Click Successful")
+        print("Alt Click Successful")
 
     def close(self) -> None:
         self.state.popup_number -= 1
