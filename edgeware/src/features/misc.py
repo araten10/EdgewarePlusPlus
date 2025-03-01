@@ -165,7 +165,7 @@ def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) 
 
 def handle_keyboard(state: State) -> None:
     def handle_alt(key: keyboard.Key, held: bool) -> None:
-        if key == keyboard.Key.alt:
+        if key in [keyboard.Key.alt, keyboard.Key.alt_gr, keyboard.Key.alt_l, keyboard.Key.alt_r]:
             state.alt_held = held
 
     keyboard.Listener(on_press=lambda key: handle_alt(key, True), on_release=lambda key: handle_alt(key, False)).start()
