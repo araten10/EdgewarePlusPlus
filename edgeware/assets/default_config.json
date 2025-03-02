@@ -91,5 +91,6 @@
   "messageOff": 0,
   "notificationChance": 0,
   "notificationImageChance": 50,
-  "packPath": null
+  "packPath": null,
+  "globalPanicButton": "Key.esc"
 }

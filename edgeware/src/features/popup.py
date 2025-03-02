@@ -30,7 +30,7 @@ class Popup(Toplevel):
         self.state = state
         self.theme = get_theme(settings)
 
-        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
+        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, legacy_key=event.keysym))
 
         self.attributes("-topmost", True)
         utils.set_borderless(self)

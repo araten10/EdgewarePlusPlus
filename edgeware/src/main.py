@@ -78,7 +78,7 @@ if __name__ == "__main__":
         handle_discord(root, settings, pack)
         handle_timer_mode(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
-        handle_keyboard(state)
+        handle_keyboard(root, settings, state)
         start_panic_listener(root, settings, state)
 
         if settings.hibernate_mode:
