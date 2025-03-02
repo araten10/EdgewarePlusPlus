@@ -9,10 +9,13 @@
 
 **Since last version...**
 
+•*Added a blacklist feature! Alt+Click close any popup you don't like, and it'll be moved to a blacklist folder!*
+>Current blacklist folder is data/blacklist/[Pack Name]. Keep in mind that if you reimport a pack, the blacklisted images will come back- this basically is designed for the multi-import feature or people who only use one pack.
+
 **Version 15**
 
 •*The bulk of the config window refactor is finished! This is mostly backend, but now all tabs have scrollbar support.*
->This means that the buttons at the bottom of the window will stop disappearing on some platforms!
+>This means that once the about tab is finished being scrapped, the buttons at the bottom of the window will stop disappearing on smaller monitors!
 
 •*About 60% of the "about" tab has been removed, due to either redundant or out of date info*
 >If you are looking for assistance with certain features, leave on the config help text option! I've gone through and checked that what I was removing was covered there.
