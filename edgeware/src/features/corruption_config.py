@@ -10,6 +10,7 @@ class CorruptionConfig:
         "version",  # version, etc, things that make no sense to change
         "versionplusplus",
         "panicButton",  # while disabling panic could be used for danger-chasing fetishists, changing the hotkey serves little purpose
+        "globalPanicButton",
         "safeword",  # imo, the safeword is a safeword for a reason (timer mode)
         "drivePath",  # We can't know what paths exist and they look different on Linux and Windows
         "safeMode",  # optional warning in config to warn of dangerous settings. being able to disable remotely doesn't affect anything horny, just allows you to be a dick

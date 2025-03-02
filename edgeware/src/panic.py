@@ -13,8 +13,11 @@ AUTHKEY = b"Edgeware++"
 PANIC_MESSAGE = "panic"
 
 
-def panic(root: Tk, settings: Settings, state: State, key: str | None = None) -> None:
-    if key and (settings.panic_disabled or key != settings.panic_key):
+def panic(root: Tk, settings: Settings, state: State, legacy_key: str | None = None, global_key: str | None = None) -> None:
+    if legacy_key and (settings.panic_disabled or legacy_key != settings.panic_key):
+        return
+
+    if global_key and (settings.panic_disabled or global_key != settings.global_panic_key):
         return
 
     if settings.timer_mode and state.timer_active:

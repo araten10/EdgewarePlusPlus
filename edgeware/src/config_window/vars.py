@@ -33,6 +33,7 @@ class Vars:
         self.startup_splash = self.make(BooleanVar, "showLoadingFlair")
         self.captions_in_popups = self.make(BooleanVar, "showCaptions")
         self.panic_key = self.make(StringVar, "panicButton")
+        self.global_panic_key = self.make(StringVar, "globalPanicButton")
         self.panic_disabled = self.make(BooleanVar, "panicDisabled")
 
         self.prompt_max_mistakes = self.make(IntVar, "promptMistakes")

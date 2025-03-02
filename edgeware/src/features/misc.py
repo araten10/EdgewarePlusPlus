@@ -163,9 +163,16 @@ def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) 
         mitosis_popup(root, settings, pack, state)
 
 
-def handle_keyboard(state: State) -> None:
-    def handle_alt(key: keyboard.Key, held: bool) -> None:
-        if key in [keyboard.Key.alt, keyboard.Key.alt_gr, keyboard.Key.alt_l, keyboard.Key.alt_r]:
-            state.alt_held = held
+def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
+    alt = [keyboard.Key.alt, keyboard.Key.alt_gr, keyboard.Key.alt_l, keyboard.Key.alt_r]
 
-    keyboard.Listener(on_press=lambda key: handle_alt(key, True), on_release=lambda key: handle_alt(key, False)).start()
+    def on_press(key: keyboard.Key) -> None:
+        if key in alt:
+            state.alt_held = True
+
+    def on_release(key: keyboard.Key) -> None:
+        if key in alt:
+            state.alt_held = False
+        panic(root, settings, state, global_key=str(key))
+
+    keyboard.Listener(on_press=on_press, on_release=on_release).start()
