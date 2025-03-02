@@ -1,5 +1,7 @@
 import random
 import time
+import os
+import shutil
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
@@ -15,6 +17,7 @@ from roll import roll
 from screeninfo import get_monitors
 from settings import Settings
 from state import State
+from paths import Data
 
 
 class Popup(Toplevel):
@@ -178,9 +181,17 @@ class Popup(Toplevel):
             self.try_mitosis()
 
     def blacklist_media(self) -> None:
-        notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
-        notifier.send(title=self.pack.info.name, message="Alt Click Successful")
-        print("Alt Click Successful")
+        filename = os.path.basename(self.media).split('/')[-1]
+        try:
+            path_blacklist = Data.BLACKLIST / "".join(self.pack.info.name.split())
+            #print(path_blacklist)
+            if not os.path.exists(path_blacklist):
+                os.makedirs(path_blacklist)
+            shutil.move(self.media, path_blacklist)
+            notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
+            notifier.send(title=self.pack.info.name, message=f"{filename} has been successfully sent to blacklist")
+        except Exception as e:
+            print(f"Could not move to blacklist. {e}")
 
     def close(self) -> None:
         self.state.popup_number -= 1
