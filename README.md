@@ -136,7 +136,7 @@ As mentioned a few questions above, there is an unofficial discord. Me and Marig
 
 >Q: Can you give me more info on upcoming features?
 
-A: I personally like to reveal things once they're at the point where i'm not going to turn back or change my mind on them, as I think sometimes revealing things too early kills motivation and adds a lot of stress. I also get easily distracted and absentminded (don't we all...) so I can't guarantee that anything I announce early will actually happen anytime soon. Because of this I don't like to give out information on upcoming features to people, but I do post general updates/ideas on my [twitter account](https://twitter.com/ara10ten), which also serves as a point of contact/a place for me to ramble about horny things! You can also view planned features on the issues page!
+A: I personally like to reveal things once they're at the point where i'm not going to turn back or change my mind on them, as I think sometimes revealing things too early kills motivation and adds a lot of stress. I also get easily distracted and absentminded (don't we all...) so I can't guarantee that anything I announce early will actually happen anytime soon. Because of this I don't like to give out information on upcoming features to people, but I do post general updates/ideas on my [bsky account](https://bsky.app/profile/araten.bsky.social) and [twitter account](https://twitter.com/ara10ten), which also serves as a point of contact/a place for me to ramble about horny things! You can also view planned features on the issues page!
 
 >Q: Why are my videos silent/why do videos not work?
 
