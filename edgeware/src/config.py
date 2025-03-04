@@ -35,6 +35,7 @@ from config_window.tabs.modes.corruption import CorruptionModeTab
 from config_window.tabs.modes.dangerous_modes import DangerousModesTab
 from config_window.tabs.modes.hibernate import HibernateModeTab
 from config_window.tabs.troubleshooting import TroubleshootingTab
+from config_window.tabs.tutorial import TutorialTab
 from config_window.utils import (
     all_children,
     config,
@@ -155,6 +156,8 @@ class Config(Tk):
 
         notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
+        notebook.add(TutorialTab(vars, title_font), text="Tutorial") # tab for tutorial, etc
+
         style = ttk.Style(self)  # style setting for left aligned tabs
 
         # going to vent here for a second: I have no idea why ttk doesn't use the default theme by default
@@ -193,31 +196,6 @@ class Config(Tk):
         Button(pack_frame, text="Import Resource Pack", command=lambda: import_pack(True)).pack(fill="x", side="left", expand=1)
         Button(pack_frame, text="Export Resource Pack", command=export_pack).pack(fill="x", side="left", expand=1)
         Button(self, text="Save & Exit", command=lambda: write_save(vars, True)).pack(fill="x")
-
-        # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
-        tab_info = ttk.Frame(None)  # info, github, version, about, etc.
-        notebook.add(tab_info, text="About")
-        tab_info_expound = ttk.Notebook(tab_info, style="lefttab.TNotebook")  # additional subtabs for info on features
-        tab_info_expound.pack(expand=1, fill="both")
-
-        notebook.add(tab_info, text="About")
-
-        tab_about = ScrollFrame()
-        tab_info_expound.add(tab_about, text="About")
-        Label(tab_about.viewPort, text=ABOUT_TEXT, anchor="nw", wraplength=460).pack()
-
-        tab_drive = ScrollFrame()
-        tab_info_expound.add(tab_drive, text="Hard Drive")
-        Label(tab_drive.viewPort, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
-
-        tab_hibernate_type = ScrollFrame()
-        tab_info_expound.add(tab_hibernate_type, text="Hibernate Types")
-        Label(tab_hibernate_type.viewPort, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
-
-        tab_file = ScrollFrame()
-        tab_info_expound.add(tab_file, text="File")
-        Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
-        # ==========={HERE ENDS  ABOUT TAB ITEM INITS}===========#
 
         theme_change(config["themeType"].strip(), self, style, window_font, title_font)
 
