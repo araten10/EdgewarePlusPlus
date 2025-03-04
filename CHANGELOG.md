@@ -13,7 +13,9 @@
 >Current blacklist folder is data/blacklist/[Pack Name]. Keep in mind that if you reimport a pack, the blacklisted images will come back- this basically is designed for the multi-import feature or people who only use one pack.
 
 •*Added a universal panic hotkey option that will start panic regardless if a popup is focused, edgeware is busy, etc*
->The legacy panic hotkey has been kept in in case the new setting doesn't work on certain setups, or if people have muscle memory for their preset hotkeys. 
+>The legacy panic hotkey has been kept in in case the new setting doesn't work on certain setups, or if people have muscle memory for their preset hotkeys.
+
+•*Updated the readme in some areas*
 
 **Version 15**
 
