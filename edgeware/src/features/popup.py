@@ -182,16 +182,12 @@ class Popup(Toplevel):
 
     def blacklist_media(self) -> None:
         filename = os.path.basename(self.media).split('/')[-1]
-        try:
-            path_blacklist = Data.BLACKLIST / "".join(self.pack.info.name.split())
-            #print(path_blacklist)
-            if not os.path.exists(path_blacklist):
-                os.makedirs(path_blacklist)
-            shutil.move(self.media, path_blacklist)
-            notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
-            notifier.send(title=self.pack.info.name, message=f"{filename} has been successfully sent to blacklist")
-        except Exception as e:
-            print(f"Could not move to blacklist. {e}")
+        path_blacklist = Data.BLACKLIST / "".join(self.pack.info.name.split())
+        if not os.path.exists(path_blacklist):
+            os.makedirs(path_blacklist)
+        shutil.move(self.media, path_blacklist)
+        notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
+        notifier.send(title=self.pack.info.name, message=f"{filename} has been successfully sent to blacklist")
 
     def close(self) -> None:
         self.state.popup_number -= 1
