@@ -52,7 +52,8 @@ class TutorialTab(ScrollFrame):
         # == tried setting this left tab style up in several different ways but each way was giving a really weird error crashing at runtime halfway through loading the config window, I give up and will try other things first==
         style2.configure("lefttab.TNotebook", tabposition="wn")
 
-        tab_info = ttk.Frame(None)  # info, github, version, about, etc.
+        tab_info = ttk.Frame(self.viewPort)  # info, github, version, about, etc.
+        tab_info.pack(expand=1, fill="both")
         tab_info_expound = ttk.Notebook(tab_info, style="lefttab.TNotebook")  # additional subtabs for info on features
         tab_info_expound.pack(expand=1, fill="both")
 
@@ -72,5 +73,5 @@ class TutorialTab(ScrollFrame):
         tab_info_expound.add(tab_file, text="File")
         Label(tab_file.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
 
-        tutorial_body_frame = ScrollFrame(self.viewPort).pack(fill="both", side="top")
-        tutorial_navi_frame = Frame(self.viewPort).pack(fill="x", side="top")
+        # tutorial_body_frame = ScrollFrame(tab_info).pack(fill="both", side="top")
+        # tutorial_navi_frame = Frame(tab_info).pack(fill="x", side="top")
