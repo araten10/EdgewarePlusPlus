@@ -22,25 +22,55 @@ class TutorialTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font):
         super().__init__()
 
-    # == tried setting this left tab style up in several different ways but each way was giving a really weird error crashing at runtime halfway through loading the config window, I give up and will try other things first==
-    # style.configure("lefttab.TNotebook", tabposition="wn")
-    #
-    # tab_info = ttk.Frame(None)  # info, github, version, about, etc.
-    # tab_info_expound = ttk.Notebook(tab_info, style="lefttab.TNotebook")  # additional subtabs for info on features
-    # tab_info_expound.pack(expand=1, fill="both")
-    #
-    # tab_about = ScrollFrame()
-    # tab_info_expound.add(tab_about, text="About")
-    # Label(tab_about.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
-    #
-    # tab_drive = ScrollFrame()
-    # tab_info_expound.add(tab_drive, text="Hard Drive")
-    # Label(tab_drive.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
-    #
-    # tab_hibernate_type = ScrollFrame()
-    # tab_info_expound.add(tab_hibernate_type, text="Hibernate Types")
-    # Label(tab_hibernate_type.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
-    #
-    # tab_file = ScrollFrame()
-    # tab_info_expound.add(tab_file, text="File")
-    # Label(tab_file.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
+        style2 = ttk.Style(self)
+
+        style2.layout(
+            "Tab",
+            [
+                (
+                    "Notebook.tab",
+                    {
+                        "sticky": "nswe",
+                        "children": [
+                            (
+                                "Notebook.padding",
+                                {
+                                    "side": "top",
+                                    "sticky": "nswe",
+                                    "children":
+                                    # [('Notebook.focus', {'side': 'top', 'sticky': 'nswe', 'children': (Removes ugly selection dots from tabs)
+                                    [("Notebook.label", {"side": "top", "sticky": ""})],
+                                    # })],
+                                },
+                            )
+                        ],
+                    },
+                )
+            ],
+        )
+
+        # == tried setting this left tab style up in several different ways but each way was giving a really weird error crashing at runtime halfway through loading the config window, I give up and will try other things first==
+        style2.configure("lefttab.TNotebook", tabposition="wn")
+
+        tab_info = ttk.Frame(None)  # info, github, version, about, etc.
+        tab_info_expound = ttk.Notebook(tab_info, style="lefttab.TNotebook")  # additional subtabs for info on features
+        tab_info_expound.pack(expand=1, fill="both")
+
+        tab_about = ScrollFrame()
+        tab_info_expound.add(tab_about, text="About")
+        Label(tab_about.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
+
+        tab_drive = ScrollFrame()
+        tab_info_expound.add(tab_drive, text="Hard Drive")
+        Label(tab_drive.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
+
+        tab_hibernate_type = ScrollFrame()
+        tab_info_expound.add(tab_hibernate_type, text="Hibernate Types")
+        Label(tab_hibernate_type.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
+
+        tab_file = ScrollFrame()
+        tab_info_expound.add(tab_file, text="File")
+        Label(tab_file.viewPort, text=TUTORIAL_TEST, anchor="nw", wraplength=460).pack()
+
+        tutorial_body_frame = ScrollFrame(self.viewPort).pack(fill="both", side="top")
+        tutorial_navi_frame = Frame(self.viewPort).pack(fill="x", side="top")
