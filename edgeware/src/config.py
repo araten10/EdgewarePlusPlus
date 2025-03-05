@@ -165,6 +165,33 @@ class Config(Tk):
         # apparently borderwidth, highlightthickness, and anything else just decides to not work...
         style.theme_use("default")
 
+        style.layout(
+            "Tab",
+            [
+                (
+                    "Notebook.tab",
+                    {
+                        "sticky": "nswe",
+                        "children": [
+                            (
+                                "Notebook.padding",
+                                {
+                                    "side": "top",
+                                    "sticky": "nswe",
+                                    "children":
+                                    # [('Notebook.focus', {'side': 'top', 'sticky': 'nswe', 'children': (Removes ugly selection dots from tabs)
+                                    [("Notebook.label", {"side": "top", "sticky": ""})],
+                                    # })],
+                                },
+                            )
+                        ],
+                    },
+                )
+            ],
+        )
+
+        style.configure("lefttab.TNotebook", tabposition="wn")
+
         pack_frame = Frame(self)
         pack_frame.pack(fill="x")
         Button(pack_frame, text="Import Resource Pack", command=lambda: import_pack(True)).pack(fill="x", side="left", expand=1)
