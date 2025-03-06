@@ -1,3 +1,4 @@
+from threading import Thread
 from tkinter import Tk
 
 from features.popup import Popup
@@ -18,10 +19,10 @@ class VideoPopup(Popup):
         properties = get_video_properties(self.media)
         self.compute_geometry(properties["width"], properties["height"])
 
-        player = VideoPlayer(self, self.width, self.height)
-        player.volume = self.settings.video_volume
-        player.vf = self.try_denial_filter(True)
-        player.play(str(self.media))
+        self.player = VideoPlayer(self, self.width, self.height)
+        self.player.volume = self.settings.video_volume
+        self.player.vf = self.try_denial_filter(True)
+        self.player.play(str(self.media))
 
         self.init_finish()
 
@@ -32,5 +33,9 @@ class VideoPopup(Popup):
         return False
 
     def close(self) -> None:
+        # Run in a thread as a workaround for X error
+        # https://github.com/jaseg/python-mpv/issues/114
+        Thread(target=self.player.terminate).start()
+
         super().close()
         self.state.video_number -= 1
