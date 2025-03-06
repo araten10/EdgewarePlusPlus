@@ -8,6 +8,7 @@ from tkinter import Toplevel
 
 from paths import CustomAssets, Process
 from settings import load_default_config
+
 from utils.linux_utils import get_desktop_environment, get_wallpaper_commands, get_wallpaper_function
 
 

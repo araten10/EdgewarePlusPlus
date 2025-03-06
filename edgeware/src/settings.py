@@ -57,6 +57,7 @@ class Settings:
         self.theme = self.config["themeType"]
         self.startup_splash = bool(self.config["showLoadingFlair"])
         self.desktop_icons = bool(self.config["desktopIcons"])
+        self.global_panic_key = self.config["globalPanicButton"]
         self.panic_key = self.config["panicButton"]
         self.pack_path = Data.PACKS / self.config["packPath"] if self.config["packPath"] else DEFAULT_PACK_PATH
 

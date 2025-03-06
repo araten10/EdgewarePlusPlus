@@ -1,10 +1,6 @@
-import json
 import logging
 import os
-import shutil
 import textwrap
-import zipfile
-from pathlib import Path
 from tkinter import (
     CENTER,
     GROOVE,
@@ -16,18 +12,16 @@ from tkinter import (
     Message,
     OptionMenu,
     StringVar,
-    filedialog,
     messagebox,
-    simpledialog,
     ttk,
 )
 from tkinter.font import Font
 
+import utils
+from config_window.import_export import export_pack, import_pack
+from config_window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
 from config_window.utils import (
-    export_resource,
-    import_resource,
     log_file,
-    pack_preset,
     refresh,
     set_widget_states,
     write_save,
@@ -35,7 +29,6 @@ from config_window.utils import (
 from config_window.vars import Vars
 from pack import Pack
 from paths import Data
-from utils import utils
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
@@ -47,80 +40,6 @@ PRESET_TEXT = "Please be careful before importing unknown config presets! Double
 def save_and_refresh(vars: Vars) -> None:
     write_save(vars)
     refresh()
-
-
-def import_new_pack() -> None:
-    try:
-        pack_zip = filedialog.askopenfile("r", defaultextension=".zip")
-        if not pack_zip:
-            return
-
-        with zipfile.ZipFile(pack_zip.name, "r") as zip:
-            pack_name = Path(pack_zip.name).with_suffix("").name
-            import_location = Data.PACKS / pack_name
-            import_location.mkdir(parents=True, exist_ok=True)
-            zip.extractall(import_location)
-
-        messagebox.showinfo("Done", "New pack imported")
-        refresh()
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to import new pack.\n[{e}]")
-
-
-def get_presets() -> list[str]:
-    Data.PRESETS.mkdir(parents=True, exist_ok=True)
-    return os.listdir(Data.PRESETS)
-
-
-def get_preset_description(name: str) -> str:
-    try:
-        with open(Data.PRESETS / f"{name.lower()}.txt", "r") as file:
-            text = ""
-            for line in file.readlines():
-                text += line
-            return text
-    except Exception:
-        return "This preset has no description file."
-
-
-def apply_preset(name: str):
-    try:
-        shutil.copyfile(Data.PRESETS / f"{name.lower()}.cfg", Data.CONFIG)
-        refresh()
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to load preset.\n\n{e}")
-
-
-def save_preset(name: str) -> bool:
-    try:
-        if name is not None and name != "":
-            shutil.copyfile(Data.CONFIG, Data.PRESETS / f"{name.lower()}.cfg")
-            with open(Data.PRESETS / f"{name.lower()}.cfg", "rw") as file:
-                file_json = json.loads(file.readline())
-                file_json["drivePath"] = "C:/Users/"
-                file.write(json.dumps(file_json))
-            return True
-        return False
-    except Exception:
-        return True
-
-
-def get_pack_config_number(pack: Pack) -> int:
-    if not pack.paths.config.exists():
-        return 0
-
-    try:
-        with open(pack.paths.config) as f:
-            config = json.loads(f.read())
-            number = len(config)
-            if "version" in config:
-                number -= 1
-            if "versionplusplus" in config:
-                number -= 1
-            return number
-    except Exception as e:
-        logging.warning(f"Could not load pack suggested settings. Reason: {e}")
-        return 0
 
 
 def get_log_number() -> int:
@@ -145,14 +64,6 @@ def delete_logs(log_number_label: Label):
         log_number_label.configure(text=f"Total Logs: {get_log_number()}")
     except Exception as e:
         logging.warning(f"could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}")
-
-
-def open_directory(url):
-    try:
-        utils.open_directory(url)
-    except Exception as e:
-        logging.warning(f"failed to open explorer view\n\tReason: {e}")
-        messagebox.showerror("Explorer Error", "Failed to open explorer view.")
 
 
 class FileTab(ScrollFrame):
@@ -181,80 +92,49 @@ class FileTab(ScrollFrame):
         pack_dropdown = OptionMenu(pack_selection_frame, vars.pack_path, *pack_list)
         pack_dropdown["menu"].insert_separator(1)
         pack_dropdown.pack(padx=2, fill="x", side="left")
-        Button(pack_selection_frame, text="Import New Pack", command=import_new_pack).pack(padx=2, fill="x", side="left", expand=1)
+        Button(pack_selection_frame, text="Import New Pack", command=lambda: import_pack(False)).pack(padx=2, fill="x", side="left", expand=1)
 
         ttk.Separator(import_export_frame, orient="horizontal").pack(fill="x", pady=2)
-        Button(import_export_frame, text="Import Default Pack", command=lambda: import_resource(self.viewPort)).pack(
-            padx=2, pady=2, fill="x", side="left", expand=1
-        )
-        Button(import_export_frame, text="Export Default Pack", command=export_resource).pack(padx=2, pady=2, fill="x", side="left", expand=1)
+        Button(import_export_frame, text="Import Default Pack", command=lambda: import_pack(True)).pack(padx=2, pady=2, fill="x", side="left", expand=1)
+        Button(import_export_frame, text="Export Default Pack", command=export_pack).pack(padx=2, pady=2, fill="x", side="left", expand=1)
 
         # Presets
         Label(self.viewPort, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)
 
-        # TODO: Move these functions
-        def change_description_text(key: str):
-            preset_name_label.configure(text=f"{key} Description")
-            preset_description_label.configure(text=preset_description_wrap.fill(text=get_preset_description(key)))
-
-        def update_helper_func(key: str):
-            preset_var.set(key)
-            change_description_text(key)
-
-        def do_save() -> bool:
-            name_ = simpledialog.askstring("Save Preset", "Preset name")
-            existed = os.path.exists(Data.PRESETS / f"{name_.lower()}.cfg")
-            if name_ is not None and name_ != "":
-                write_save(vars)
-                if existed:
-                    if messagebox.askquestion("Overwrite", "A preset with this name already exists. Overwrite it?") == "no":
-                        return False
-            if save_preset(name_) and not existed:
-                preset_list.insert(0, "Default")
-                preset_list.append(name_.capitalize())
-                preset_var.set("Default")
-                preset_dropdown["menu"].delete(0, "end")
-                for item in preset_list:
-                    preset_dropdown["menu"].add_command(label=item, command=lambda x=item: update_helper_func(x))
-                preset_var.set(preset_list[0])
-            return True
-
         preset_message = Message(self.viewPort, text=PRESET_TEXT, justify=CENTER, width=675)
         preset_message.pack(fill="both")
-        # TODO: Is this commented out on purpose?
-        # message_group.append(preset_message)
+        message_group.append(preset_message)
 
         preset_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         preset_frame.pack(fill="both", pady=2)
 
-        preset_list = [_.split(".")[0].capitalize() for _ in get_presets() if _.endswith(".cfg")]
-        preset_var = StringVar(self.viewPort, preset_list.pop(0))
+        preset_list = list_presets()
+        self.preset_var = StringVar(self.viewPort, preset_list.pop(0))  # Without pop the first item appears twice in the list
 
         preset_selection_frame = Frame(preset_frame)
         preset_selection_frame.pack(side="left", fill="x", padx=6)
-        preset_dropdown = OptionMenu(preset_selection_frame, preset_var, preset_var.get(), *preset_list, command=lambda key: change_description_text(key))
-        preset_dropdown.pack(fill="x", expand=1)
-        Button(preset_selection_frame, text="Load Preset", command=lambda: apply_preset(preset_var.get())).pack(fill="both", expand=1)
+        self.preset_dropdown = OptionMenu(preset_selection_frame, self.preset_var, self.preset_var.get(), *preset_list, command=self.set_preset_description)
+        self.preset_dropdown.pack(fill="x", expand=1)
+        Button(preset_selection_frame, text="Load Preset", command=lambda: apply_preset(load_preset(self.preset_var.get()), vars)).pack(fill="both", expand=1)
         Label(preset_selection_frame).pack(fill="both", expand=1)
         Label(preset_selection_frame).pack(fill="both", expand=1)
-        Button(preset_selection_frame, text="Save Preset", command=do_save).pack(fill="both", expand=1)
+        Button(preset_selection_frame, text="Save Preset", command=self.save_preset_and_update).pack(fill="both", expand=1)
 
         preset_description_frame = Frame(preset_frame, borderwidth=2, relief=GROOVE)
         preset_description_frame.pack(side="right", fill="both", expand=1)
-        preset_name_label = Label(preset_description_frame, text="Default Description", font="Default 15")
-        preset_name_label.pack(fill="y", pady=4)
-        preset_description_wrap = textwrap.TextWrapper(width=100, max_lines=5)
-        preset_description_label = Label(preset_description_frame, text=preset_description_wrap.fill(text="Default Text Here"), relief=GROOVE)
-        preset_description_label.pack(fill="both", expand=1)
-        change_description_text("Default")
+        self.preset_name_label = Label(preset_description_frame, text="Default Description", font="Default 15")
+        self.preset_name_label.pack(fill="y", pady=4)
+        self.preset_description_wrap = textwrap.TextWrapper(width=100, max_lines=5)
+        self.preset_description_label = Label(preset_description_frame, text=self.preset_description_wrap.fill(text="Default Text Here"), relief=GROOVE)
+        self.preset_description_label.pack(fill="both", expand=1)
+        self.set_preset_description(self.preset_var.get())
 
         pack_preset_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         pack_preset_frame.pack(fill="x", pady=2)
 
         pack_preset_col_1 = Frame(pack_preset_frame)
         pack_preset_col_1.pack(fill="both", side="left", expand=1)
-        pack_config_number = get_pack_config_number(pack)
-        Label(pack_preset_col_1, text=f"Number of suggested config settings: {pack_config_number}").pack(fill="both", side="top")
+        Label(pack_preset_col_1, text=f"Number of suggested config settings: {len(pack.config)}").pack(fill="both", side="top")
         pack_preset_danger_toggle = Checkbutton(pack_preset_col_1, text="Toggle on warning failsafes", variable=vars.preset_danger, cursor="question_arrow")
         pack_preset_danger_toggle.pack(fill="both", side="top")
         CreateToolTip(
@@ -272,7 +152,7 @@ class FileTab(ScrollFrame):
             pack_preset_col_2,
             text="Load Pack Configuration",
             cursor="question_arrow",
-            command=lambda: pack_preset(pack, vars, "full", vars.preset_danger.get()),
+            command=lambda: apply_preset(pack.config, vars),
         )
         load_pack_preset_button.pack(fill="both", expand=1)
         CreateToolTip(
@@ -284,7 +164,7 @@ class FileTab(ScrollFrame):
         )
 
         pack_preset_group = [load_pack_preset_button]
-        if pack_config_number == 0:
+        if len(pack.config) == 0:
             set_widget_states(False, pack_preset_group)
 
         # Directories
@@ -300,7 +180,7 @@ class FileTab(ScrollFrame):
 
         logs_col_2 = Frame(logs_frame)
         logs_col_2.pack(fill="both", side="left", expand=1)
-        Button(logs_col_2, text="Open Logs Folder", command=lambda: open_directory(Data.LOGS)).pack(fill="x", expand=1)
+        Button(logs_col_2, text="Open Logs Folder", command=lambda: utils.open_directory(Data.LOGS)).pack(fill="x", expand=1)
         delete_logs_button = Button(logs_col_2, text="Delete All Logs", command=lambda: delete_logs(log_number_label), cursor="question_arrow")
         delete_logs_button.pack(fill="x", expand=1)
         CreateToolTip(delete_logs_button, "This will delete every log (except the log currently being written).")
@@ -317,7 +197,7 @@ class FileTab(ScrollFrame):
 
         moods_col_2 = Frame(moods_frame)
         moods_col_2.pack(fill="both", side="left", expand=1)
-        open_moods_button = Button(moods_col_2, height=2, text="Open Moods Folder", command=lambda: open_directory(Data.MOODS), cursor="question_arrow")
+        open_moods_button = Button(moods_col_2, height=2, text="Open Moods Folder", command=lambda: utils.open_directory(Data.MOODS), cursor="question_arrow")
         open_moods_button.pack(fill="x", expand=1)
         CreateToolTip(
             open_moods_button,
@@ -326,4 +206,29 @@ class FileTab(ScrollFrame):
             'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
         )
 
-        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: open_directory(pack.paths.root)).pack(fill="x", pady=2)
+        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)
+
+    def set_preset_description(self, name: str) -> None:
+        self.preset_name_label.configure(text=f"{name} Description")
+        self.preset_description_label.configure(text=self.preset_description_wrap.fill(text=load_preset_description(name)))
+
+    def save_preset_and_update(self) -> None:
+        name = save_preset()
+        if not name:
+            return
+
+        # Clear menu
+        menu = self.preset_dropdown["menu"]
+        menu.delete(0, "end")
+
+        # Repopulate menu with preset names, this has to be done individually
+        for preset in list_presets():
+            # Name must be a default argument to the command function, otherwise the dropdown breaks
+            def select_preset(selection: str = preset) -> None:
+                self.preset_var.set(selection)
+                self.set_preset_description(selection)
+
+            menu.add_command(label=preset, command=select_preset)
+
+        self.preset_var.set(name)
+        self.set_preset_description(name)

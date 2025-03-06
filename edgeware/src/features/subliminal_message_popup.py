@@ -1,11 +1,11 @@
 import random
 from tkinter import Label, Toplevel
 
+import utils
 from features.theme import get_theme
 from pack import Pack
 from screeninfo import get_monitors
 from settings import Settings
-from utils import utils
 
 
 class SubliminalMessagePopup(Toplevel):

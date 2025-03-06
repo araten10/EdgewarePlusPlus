@@ -4,6 +4,7 @@ from collections.abc import Callable
 from threading import Thread
 from tkinter import Tk
 
+import utils
 from features.drive import fill_drive
 from features.misc import handle_wallpaper
 from pack import Pack
@@ -11,7 +12,6 @@ from paths import CustomAssets
 from roll import RollTarget, roll_targets
 from settings import Settings
 from state import State
-from utils import utils
 
 
 def reset_wallpaper(settings: Settings, state: State) -> None:

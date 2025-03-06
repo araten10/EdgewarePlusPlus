@@ -3,13 +3,13 @@ import sys
 import time
 from tkinter import Tk, messagebox
 
+import utils
 from features.corruption_config import CorruptionConfig
 from pack import Pack
 from paths import Data
 from roll import roll
 from settings import Settings
 from state import State
-from utils import utils
 
 
 def corruption_danger_check(settings: Settings, pack: Pack) -> None:

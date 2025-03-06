@@ -6,7 +6,7 @@ import filetype
 from paths import PATH, Assets, CustomAssets, PackPaths
 
 from pack.data import MoodBase, MoodSet
-from pack.load import list_media, load_active_moods, load_corruption, load_discord, load_index, load_info
+from pack.load import list_media, load_active_moods, load_config, load_corruption, load_discord, load_index, load_info
 
 
 class Pack:
@@ -20,6 +20,7 @@ class Pack:
         self.discord = load_discord(self.paths)
         self.index = load_index(self.paths)
         self.info = load_info(self.paths)
+        self.config = load_config(self.paths)
 
         # Data files
         self.active_moods = load_active_moods(self.info.mood_file)

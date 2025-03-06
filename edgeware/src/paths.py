@@ -47,6 +47,7 @@ class Data:
     MOODS = ROOT / "moods"
     PACKS = ROOT / "packs"
     PRESETS = ROOT / "presets"
+    BLACKLIST = ROOT / "blacklist"
 
     # Files
     CONFIG = ROOT / "config.json"

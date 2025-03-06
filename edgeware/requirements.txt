@@ -6,6 +6,7 @@ imageio
 mpv
 pillow
 pygame
+pynput
 pypresence
 pystray
 requests

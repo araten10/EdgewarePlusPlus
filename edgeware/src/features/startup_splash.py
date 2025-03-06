@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from tkinter import Label, Toplevel
 
+import utils
 from pack import Pack
 from PIL import Image, ImageTk
 from screeninfo import get_monitors

@@ -22,6 +22,7 @@ from config_window.vars import Vars
 from panic import send_panic
 from paths import CustomAssets
 from PIL import ImageTk
+from pynput import keyboard
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
@@ -29,21 +30,43 @@ INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this wi
 PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
 
 
-def request_panic_key(button: Button, var: StringVar) -> None:
-    window = Toplevel()
+class KeyListenerWindow(Toplevel):
+    def __init__(self):
+        super().__init__()
+        self.resizable(False, False)
+        self.title("Key Listener")
+        self.wm_attributes("-topmost", 1)
+        self.geometry("250x250")
+        self.focus_force()
+        Label(self, text="Press any key or exit").pack(expand=1, fill="both")
+
+
+def request_legacy_panic_key(button: Button, var: StringVar) -> None:
+    window = KeyListenerWindow()
 
     def assign_panic_key(event: Event) -> None:
-        button.configure(text=f"Set Panic\nButton\n<{event.keysym}>")
+        button.configure(text=f"Set Legacy\nPanic Key\n<{event.keysym}>")
         var.set(str(event.keysym))
         window.destroy()
 
-    window.resizable(False, False)
-    window.title("Key Listener")
-    window.wm_attributes("-topmost", 1)
-    window.geometry("250x250")
-    window.focus_force()
     window.bind("<KeyPress>", assign_panic_key)
-    Label(window, text="Press any key or exit").pack(expand=1, fill="both")
+
+
+def request_global_panic_key(button: Button, var: StringVar) -> None:
+    window = KeyListenerWindow()
+
+    def close() -> None:
+        window.destroy()
+        listener.stop()
+
+    def assign_panic_key(key: keyboard.Key) -> None:
+        button.configure(text=f"Set Global\nPanic Key\n<{str(key)}>")
+        var.set(str(key))
+        close()
+
+    listener = keyboard.Listener(on_release=assign_panic_key)
+    listener.start()
+    window.protocol("WM_DELETE_WINDOW", close)
 
 
 class StartTab(ScrollFrame):
@@ -351,12 +374,23 @@ class StartTab(ScrollFrame):
         panic_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         panic_frame.pack(fill="x")
 
-        set_panic_key_button = Button(
+        set_global_panic_button = Button(
             panic_frame,
-            text=f"Set Panic\nButton\n<{vars.panic_key.get()}>",
-            command=lambda: request_panic_key(set_panic_key_button, vars.panic_key),
+            text=f"Set Global\nPanic Key\n<{vars.global_panic_key.get()}>",
+            command=lambda: request_global_panic_key(set_global_panic_button, vars.global_panic_key),
             cursor="question_arrow",
         )
-        set_panic_key_button.pack(fill="x", side="left", expand=1)
-        CreateToolTip(set_panic_key_button, 'NOTE: To use this hotkey you must be "focused" on a EdgeWare popup. Click on a popup before using.')
+        set_global_panic_button.pack(fill="x", side="left", expand=1)
+        CreateToolTip(set_global_panic_button, "This is a global key that does not require focus to activate. Press the key at any time to perform panic.")
+        set_legacy_panic_button = Button(
+            panic_frame,
+            text=f"Set Legacy\nPanic Key\n<{vars.panic_key.get()}>",
+            command=lambda: request_legacy_panic_key(set_legacy_panic_button, vars.panic_key),
+            cursor="question_arrow",
+        )
+        set_legacy_panic_button.pack(fill="x", side="left", expand=1)
+        CreateToolTip(
+            set_legacy_panic_button,
+            'This is the old panic key. To use this hotkey you must be "focused" on an Edgeware image or video popup. Click on a popup before using.',
+        )
         Button(panic_frame, text="Perform Panic", command=send_panic).pack(fill="both", side="left", expand=1)

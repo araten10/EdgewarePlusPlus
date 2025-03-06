@@ -6,12 +6,6 @@
   "prefix_settings": {
     // The name of the prefix, if the prefix already exists in the prefix section this will supplement it.
     "prefix1": {
-      // OPTIONAL: Caption section to use for this prefix, if omitted will default to the prefix name
-      "caption": "prefix1",
-      // OPTIONAL: The string a resource file must start with to qualify for this prefix (if the setting is on). if omitted will default to the prefix name
-      "images": "pre",
-      // OPTIONAL: The odds of this prefix being displayed, post-roll, as a %chance out of 100. Value is a float, so sub 1% chances are allowed. If omitted with default to 100%
-      "chance": 50,
       // OPTIONAL: The maximum number of clicks needed to dismiss the popup. If enabled a random number will be selected in the range of 2-max. If omitted will default to 1
       "max": 5
     }

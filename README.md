@@ -112,7 +112,9 @@ Meant to demo corruption and the corruption "fade" feature, this pack is for peo
 
 A: Unfortunately, packs are kind of scattered about... Since there is no specific place to congregate EdgeWare packs (to my knowledge), people usually end up posting them to their personal twitters or discord servers. Additionally, some people charge money for their own packs and/or bundle a complete copy of EdgeWare with their pack, making it even harder to give a definite answer to this question.
 
-There are a few places you can start, however. PetitTournesol's original github page has multiple packs, although they don't support new ++ features. /r/edgingware on reddit is mostly focused to tech support, but there are multiple packs there, including a helpful reference pack. I believe hgoon.booru also has a thread for EdgeWare packs on the forum, but since it's a bit of an obscure booru and requires an account to post, i'm sure many still fall through the cracks.
+There are a few places you can start, however. PetitTournesol's original github page has multiple packs, although they don't support new ++ features. ~~/r/edgingware on reddit is mostly focused to tech support, but there are multiple packs there, including a helpful reference pack.~~ [EDIT: subreddit died from automod because reddit sucks] ~~I believe hgoon.booru also has a thread for EdgeWare packs on the forum, but since it's a bit of an obscure booru and requires an account to post, i'm sure many still fall through the cracks.~~ [EDIT: doesnt get updated much when I checked recently]
+
+There is an [unofficial discord](https://discord.com/invite/9rxab3BSB8) that hosts a lot of packs, just know that I don't really visit it much since I tend to use discord sparingly. 
 
 >Q: I found a bug!
 
@@ -130,9 +132,11 @@ If you know that the pack creator set specific config settings for their EdgeWar
 
 A: No, I don't have any plans for this. On top of not particularly liking discord both as a program and a company, I also sadly don't have the energy to manage and moderate a discord. Even if I made one just for development updates with limited public posting, it would essentially be what my twitter is but on a platform I use less often.
 
+As mentioned a few questions above, there is an unofficial discord. Me and Marigold don't really have much to do with it, but a ton of people have joined it and there's loads of packs up there. Feel free to join but please don't message me about goings on in there- i'm not a mod or anything!
+
 >Q: Can you give me more info on upcoming features?
 
-A: I personally like to reveal things once they're at the point where i'm not going to turn back or change my mind on them, as I think sometimes revealing things too early kills motivation and adds a lot of stress. I also get easily distracted and absentminded (don't we all...) so I can't guarantee that anything I announce early will actually happen anytime soon. Because of this I don't like to give out information on upcoming features to people, but I do post general updates/ideas on my [twitter account](https://twitter.com/ara10ten), which also serves as a point of contact/a place for me to ramble about horny things! You can also view planned features on the issues page!
+A: I personally like to reveal things once they're at the point where i'm not going to turn back or change my mind on them, as I think sometimes revealing things too early kills motivation and adds a lot of stress. I also get easily distracted and absentminded (don't we all...) so I can't guarantee that anything I announce early will actually happen anytime soon. Because of this I don't like to give out information on upcoming features to people, but I do post general updates/ideas on my [bsky account](https://bsky.app/profile/araten.bsky.social) and [twitter account](https://twitter.com/ara10ten), which also serves as a point of contact/a place for me to ramble about horny things! You can also view planned features on the issues page!
 
 >Q: Why are my videos silent/why do videos not work?
 

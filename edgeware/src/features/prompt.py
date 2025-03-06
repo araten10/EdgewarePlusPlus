@@ -1,11 +1,11 @@
 from tkinter import Button, Label, Text, Toplevel
 
+import utils
 from features.theme import get_theme
 from pack import Pack
 from screeninfo import get_monitors
 from settings import Settings
 from state import State
-from utils import utils
 
 
 class Prompt(Toplevel):

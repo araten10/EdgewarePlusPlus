@@ -1,6 +1,8 @@
 from threading import Thread
 from tkinter import Tk
 
+import pygame
+import utils
 from features.corruption import corruption_danger_check, handle_corruption
 from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
@@ -9,6 +11,7 @@ from features.misc import (
     display_notification,
     handle_booru_download,
     handle_discord,
+    handle_keyboard,
     handle_mitosis_mode,
     handle_timer_mode,
     handle_wallpaper,
@@ -23,11 +26,9 @@ from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from pack import Pack
 from panic import start_panic_listener
-from pygame import mixer
 from roll import RollTarget, roll_targets
 from settings import Settings, first_launch_configure
 from state import State
-from utils import utils
 
 
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
@@ -46,13 +47,14 @@ if __name__ == "__main__":
     settings = Settings()
     pack = Pack(settings.pack_path)
     state = State()
+    pygame.init()
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
 
     # if sound is laggy or strange try changing buffer size (doc: https://www.pygame.org/docs/ref/mixer.html)
     # TODO: check if pygame.mixer.quit() is preferable to use in panic? seems fine without it
-    mixer.init()
-    mixer.set_num_channels(settings.max_audio)
+    pygame.mixer.init()
+    pygame.mixer.set_num_channels(settings.max_audio)
 
     corruption_danger_check(settings, pack)
 
@@ -76,6 +78,7 @@ if __name__ == "__main__":
         handle_discord(root, settings, pack)
         handle_timer_mode(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
+        handle_keyboard(root, settings, state)
         start_panic_listener(root, settings, state)
 
         if settings.hibernate_mode:

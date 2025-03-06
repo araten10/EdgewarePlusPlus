@@ -38,6 +38,8 @@ class State:
 
     gallery_dl_process = None
 
+    alt_held = False
+
     @property
     def popup_number(self) -> int:
         return self._popup_number.value

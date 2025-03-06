@@ -1,7 +1,7 @@
 import ast
 import json
 import logging
-from pathlib import Path
+import traceback
 from tkinter import (
     Button,
     Canvas,
@@ -18,28 +18,27 @@ from tkinter import (
     ttk,
 )
 
-from config_window.annoyance.audio_video import AudioVideoTab
-from config_window.annoyance.captions import CaptionsTab
-from config_window.annoyance.dangerous_settings import DangerousSettingsTab
-from config_window.annoyance.moods import MoodsTab
-from config_window.annoyance.popup import PopupTab
-from config_window.annoyance.wallpaper import WallpaperTab
-from config_window.general.booru import BooruTab
-from config_window.general.default_file import DefaultFileTab
-from config_window.general.file import FileTab
-from config_window.general.info import InfoTab
-from config_window.general.start import StartTab
-from config_window.modes.basic import BasicModesTab
-from config_window.modes.corruption import CorruptionModeTab
-from config_window.modes.dangerous_modes import DangerousModesTab
-from config_window.modes.hibernate import HibernateModeTab
-from config_window.troubleshooting import TroubleshootingTab
+from config_window.import_export import export_pack, import_pack
+from config_window.tabs.annoyance.audio_video import AudioVideoTab
+from config_window.tabs.annoyance.captions import CaptionsTab
+from config_window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
+from config_window.tabs.annoyance.moods import MoodsTab
+from config_window.tabs.annoyance.popup import PopupTab
+from config_window.tabs.annoyance.wallpaper import WallpaperTab
+from config_window.tabs.general.booru import BooruTab
+from config_window.tabs.general.default_file import DefaultFileTab
+from config_window.tabs.general.file import FileTab
+from config_window.tabs.general.info import InfoTab
+from config_window.tabs.general.start import StartTab
+from config_window.tabs.modes.basic import BasicModesTab
+from config_window.tabs.modes.corruption import CorruptionModeTab
+from config_window.tabs.modes.dangerous_modes import DangerousModesTab
+from config_window.tabs.modes.hibernate import HibernateModeTab
+from config_window.tabs.troubleshooting import TroubleshootingTab
 from config_window.utils import (
     all_children,
     config,
-    export_resource,
     get_live_version,
-    import_resource,
     write_save,
 )
 from config_window.vars import Vars
@@ -47,9 +46,8 @@ from pack import Pack
 from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from settings import load_default_config
+from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
-
-PATH = Path(__file__).parent
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()
@@ -59,20 +57,34 @@ pack = Pack(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_P
 pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
-# text for the about tab
-ANNOYANCE_TEXT = 'The "Annoyance" section consists of the 5 main configurable settings of Edgeware:\nDelay\nPopup Frequency\nWebsite Frequency\nAudio Frequency\nPromptFrequency\n\nEach is fairly self explanatory, but will still be expounded upon in this section. Delay is the forced time delay between each tick of the "clock" for Edgeware. The longer it is, the slower things will happen. Popup frequency is the percent chance that a randomly selected popup will appear on any given tick of the clock, and similarly for the rest, website being the probability of opening a website or video from /resource/vid/, audio for playing a file from /resource/aud/, and prompt for a typing prompt to pop up.\n\nThese values can be set by adjusting the bars, or by clicking the button beneath each respective slider, which will allow you to type in an explicit number instead of searching for it on the scrollbar.\n\nIn order to disable any feature, lower its probability to 0, to ensure that you\'ll be getting as much of any feature as possible, turn it up to 100.\nThe popup setting "Mitosis mode" changes how popups are displayed. Instead of popping up based on the timer, the program create a single popup when it starts. When the submit button on ANY popup is clicked to close it, a number of popups will open up in its place, as given by the "Mitosis Strength" setting.\n\nPopup timeout will result in popups timing out and closing after a certain number of seconds.'
-DRIVE_TEXT = 'The "Drive" portion of Edgeware has three features: fill drive, replace images, and Booru downloader.\n\n"Fill Drive" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a "." or have their names listed in the folder name blacklist.\nIt will also ONLY place images into the User folder and its subfolders.\nFill drive has one modifier, which is its own forced delay. Because it runs with between 1 and 8 threads at any given time, when unchecked it can fill your drive VERY quickly. To ensure that you get that nice slow fill, you can adjust the delay between each folder sweep it performs and the max number of threads.\n\n"Replace Images" is more complicated. Its searching is the exact same as fill drive, but instead of throwing images everywhere, it will seek out folders with large numbers of images (more than the threshold value) and when it finds one, it will replace ALL of the images with porn from /resource/img/. REMEMBER THAT IF YOU CARE ABOUT YOUR PHOTOS, AND THEY\'RE IN A FOLDER WITH MORE IMAGES THAN YOUR CHOSEN THRESHOLD VALUE, EITHER BACK THEM UP IN A ZIP OR SOMETHING OR DO. NOT. USE. THIS SETTING. I AM NOT RESPONSIBLE FOR YOUR OWN DECISION TO RUIN YOUR PHOTOS. Edgeware will attempt to backup any replaced images under /data/backups, but DO NOT RELY ON THIS FEATURE IN ANY CIRCUMSTANCE. ALWAYS BACKUP YOUR FILES YOURSELF.\n\nBooru downloader allows you to download new items from a Booru of your choice. For the booru name, ONLY the literal name is used, like "censored" or "blacked" instead of the full url. This is not case sensitive. Use the "Validate" button to ensure that downloading will be successful before running. For tagging, if you want to have multiple tags, they can be combined using "tag1+tag2+tag3" or if you want to add blacklist tags, type your tag and append a "+-blacklist_tag" after the desired tag.'
-STARTUP_TEXT = 'Start on launch does exactly what it says it does and nothing more: it allows Edgeware to start itself whenever you start up and log into your PC.\n\nPlease note that the method used does NOT edit registry or schedule any tasks. The "lazy startup" method was used for both convenience of implementation and convenience of cleaning.\n\nIf you forget to turn off the "start on logon" setting before uninstalling, you will need to manually go to your Startup folder and remove "edgeware.bat".'
-WALLPAPER_TEXT = "The Wallpaper section allows you to set up rotating wallpapers of your choice from any location, or auto import all images from the /resource/ folder (NOT /resource/img/ folder) to use as wallpapers.\n\nThe rotate timer is the amount of time the program will wait before rotating to another randomly selected wallpaper, and the rotate variation is the amount above or below that set value that can randomly be selected as the actual wait time."
-HIBERNATE_TEXT = 'The Hibernate feature is an entirely different mode for Edgeware to operate in.\nInstead of constantly shoving popups, lewd websites, audio, and prompts in your face, hibernate starts quiet and waits for a random amount of time between its provided min and max before exploding with a rapid assortment of your chosen payloads. Once it finishes its barrage, it settles back down again for another random amount of time, ready to strike again when the time is right.\n\n\nThis feature is intend to be a much "calmer" way to use Edgeware; instead of explicitly using it to edge yourself or get off, it\'s supposed to lie in wait for you and perform bursts of self-sabotage to keep drawing you back to porn.\n\n In EdgeWare++, the hibernate function has been expanded with two key features: fix wallpaper and hibernate types. Fix wallpaper is fairly straightforward, it changes your wallpaper back to your panic wallpaper after hibernate is finished. Hibernate types are a bit more complicated, as each one changes the the way hibernate handles payloads. There is a short-form description next to the dropdown menu for quick reference, but you can check the about tab labelled "Hibernate Types" for a more detailed description of each type. Also, if you wish to trial out any of these types and don\'t want to wait, you can enable the "Toggle Tray Hibernate Skip" option in the troubleshooting tab to immediately skip to hibernate starting, on command.'
-HIBERNATE_TYPE_TEXT = "Check the \"Hibernate\" about tab for more information on what this is and how it works.\n\nOriginal: The original hibernate type that came with base EdgeWare. Spawns a barrage of popups instantly, the max possible amount is based on your awaken activity.\n\nSpaced: Essentially runs EdgeWare normally, but over a brief period of time before ceasing generation of new popups. Because of this awaken activity isn't used, instead popup delay is looked at for frequency of popups.\n\nGlitch: Creates popups at random-ish intervals over a period of time. The total amount of popups spawned is based on the awaken activity. Perfect for those who want a 'virus-like' experience, or just something different every time.\n\nRamp: Similar to spaced, only the popup frequency gets faster and faster over the hibernate length. After reaching the max duration, it will spawn a number of popups equal to the awaken activity at a speed slightly faster than your popup delay. Best used with long hibernate length values and fairly short popup delay. (keep in mind that if the popup delay is too short though, popups can potentially not appear or lag behind)\n\nPump-Scare: Do you like haunted houses or scary movies? Don't you wish that instead of screamers and jumpscares, they had porn pop out at you instead? This is kind of like that. When hibernate is triggered a popup with audio will appear for around a second or two, then immediately disappear. This works best on packs with short, immediate audio files: old EdgeWare packs that contain half-hour long hypno files will likely not reach meaningful audio in time. Large audio files can also hamper effectiveness of the audio and lead to desync with the popup.\n\nChaos: Every time hibernate activates, it randomly selects any of the other hibernate modes."
-CORRUPTION_TEXT = "This is a feature not currently implemented in the release version of EdgeWare. But it will be soon! Feel free to slide the sliders around and press some buttons. It currently won't do anything but sometimes just feels good to do."
-ADVANCED_TEXT = 'The "Debug Config Edit" section is also something previously only accessible by directly editing the config.cfg file. It offers full and complete customization of all setting values without any limitations outside of variable typing.\n\n\nPlease use this feature with discretion, as any erroneous values will result in a complete deletion and regeneration of the config file from the default, and certain value ranges are likely to result in crashes or unexpected glitches in the program.\n\nOtherwise, the Troubleshooting tab is fairly self explanatory. All features here will hopefully help issues you might have while running EdgeWare. If you didn\'t already know, you can hover over any option that gives your cursor a "question mark sign" to get a more detailed description of what it does.'
-THANK_AND_ABOUT_TEXT = "[NOTE: this is the thanks page from the original EdgeWare. I didn't want to replace/remove it and erase credit to the original creator! Sorry if this caused confusion!]\n\nThank you so much to all the fantastic artists who create and freely distribute the art that allows programs like this to exist, to all the people who helped me work through the various installation problems as we set the software up (especially early on), and honestly thank you to ALL of the people who are happily using Edgeware. \n\nIt truly makes me happy to know that my work is actually being put to good use by people who enjoy it. After all, at the end of the day that's really all I've ever really wanted, but figured was beyond reach of a stupid degreeless neet.\nI love you all <3\n\n\n\nIf you like my work, please feel free to help support my neet lifestyle by donating to $PetitTournesol on Cashapp; by no means are you obligated or expected to, but any and all donations are greatly appreciated!"
+# "stashed" relevant information from each about tab, for when a "tutorial" section gets added:
 
-PLUSPLUS_TEXT = 'Thanks for taking the time to check out this extension on EdgeWare! However you found it, I appreciate that it interested you enough to give it a download.\n\nI am not an expert programmer by any means, so apologies if there are any bugs or errors in this version. My goal is to not do anything crazy ambitious like rewrite the entire program or fix up the backend, but rather just add on functionality that I thought could improve the base version. Because of this, i\'m hoping that compatability between those who use normal EdgeWare and those who use this version stays relatively stable. If you were given this version directly without a download link and are curious about development updates, you can find updates and links to the github @ twitter @ara10ten.\n\n Current changes:\n\n•Added a option under "misc" to enable/disable desktop icon generation.\n•Added options to cap the number of audio popups and video popups.\n•Added a chance slider for subliminals, and a max subliminals slider.\n•Added feature to change Startup Graphic and Icon per pack. (name the file(s) "loading_splash" and/or "icon.ico" in the resource folder)\n•Added feature to enable warnings for "Dangerous Settings".\n•Added hover tooltips on some things to make the program easier to understand.\n•Added troubleshooting tab under "advanced" with some settings to fix things for certain users.\n•Added feature to click anywhere on popup to close.\n•Made the EdgewareSetup.bat more clear with easier to read text. Hopefully if you\'re seeing this it all worked out!\n•Moved the import/export resources button to be visible on every page, because honestly they\'re pretty important\n•Added the "Pack Info" tab with lots of fun goodies and stats so you know what you\'re getting into with each pack.\n•Added a simplified error console in the "advanced" tab.\n•Overhauled Hibernate with a bunch of new modes and features\n•Added file tab with multiple file management settings\n•Added feature to enable or disable moods (feature in regular edgeware that went unused afaik)\n•Added corruption. What is it? Dont worry about it.\n•Added advanced caption settings to captions.json.\n•Added theme support with multiple themes to switch between.\n•Pack creators can now create a config preset for their pack.\n•Two new popup types, Subliminal Messages and Moving Popups, with help from /u/basicmo!\n•Experimental Linux support!'
-PACKINFO_TEXT = 'The pack info section contains an overview for whatever pack is currently loaded.\n\nThe "Stats" tab allows you to see what features are included in the current pack (or if a pack is even loaded at all), but keep in mind all of these features have default fallbacks if they aren\'t included. It also lets you see a lot of fun stats relating to the pack, including almost everything you\'ll encounter while using EdgeWare. Keep in mind that certain things having "0" as a stat doesn\'t mean you can\'t use it, for example, having 0 subliminals uses the default spiral and having 0 images displays a very un-sexy circle.\n\nThe "Information" tab gets info on the pack from //resource//info.json, which is a new addition to EdgeWare++. This feature was added to allow pack creators to give the pack a formal name and description without having to worry about details being lost if transferred from person to person. Think of it like a readme. Also included in this section is the discord status info, which gives what your discord status will be set to if that setting is turned on, along with the image. As of time of writing (or if I forget to update this later), the image cannot be previewed as it is "hard coded" into EdgeWare\'s discord application and accessed through the API. As I am not the original creator of EdgeWare, and am not sure how to contact them, the best I could do is low-res screenshots or the name of each image. I chose the latter. Because of this hard-coding, the only person i\'ve run into so far who use these images is PetitTournesol themselves, but it should be noted that anyone can use them as long as they know what to add to the discord.dat file. This is partially the reason I left this information in.\n\nThe "Moods" tab is where you can access mood settings and previews for the current pack. The left table shows information for media (linking moods to images, videos, etc), captions, and prompts, while the "Corruption Path" area shows how these moods correlate to corruption levels.'
-FILE_TEXT = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the "total logs in folder" stat will always display as "1".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a "moods json file", which is tapped into when selecting what moods you want to see in the "Pack Info" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want EdgeWare++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.\n\n When manually editing mood config jsons, you don\'t need to worry about how the unique ID is generated- the file tab will tell you what to look for. If you are curious though, here is the exact formula:\n\nnum_images + num_audio + num_video + wallpaper(y/n) + loading_splash(y/n) + discord_status(y/n) + icon(y/n) + corruption(y/n)\n\nFor example:\nA pack with 268 images, 7 audio, 6 videos, has a wallpaper, doesn\'t have a custom loading splash, has a discord status, doesn\'t have a custom icon, and doesn\'t have a corruption file, would generate "26876wxdxx.json" in //moods//unnamed (mood files go in unnamed when using unique IDs)'
+# ANNOYANCE_TEXT: pretty much everything has been covered. in new tutorial emphasise this is the most important tab (because it is)
+
+# DRIVE_TEXT: leaving this for last as it's the most "actually important" thing here. but I think I did a half decent job on explaining it in the relevant tab as well. note about the threads: at one point the about tab comments on how you can set the number of threads as an option, but this is not true. The number of fill threads was always hard coded at 8, whether that makes any sense is up in the air
+
+# WALLPAPER_TEXT: we might be changing the wallpaper tab up to begin with, but generally I find it a bit confusing. Panic wallpaper should be moved to a more important place, then the wallpaper tab could be named "rotate wallpaper" or something. this tab offers not much to clear it up, but setting a reminder to change "rotate variation" to a better name (gives range of time +/- the timer)
+# text for the about tab
+
+# STARTUP_TEXT: almost all of this text is useful details, but not sure where to put it instead of here as it's all tech support related stuff. "Launch on PC Startup" currently has no hover tooltip, but also it's fairly self explanatory, not sure how many people would hover it. Here's what's missing from current explanation: "Please note that the method used does NOT edit registry or schedule any tasks. The "lazy startup" method was used for both convenience of implementation and convenience of cleaning.\n\nIf you forget to turn off the "start on logon" setting before uninstalling, you will need to manually go to your Startup folder and remove "edgeware.bat"."
+
+# HIBERNATE_TEXT: mostly redundant/already covered, but I do like the way it's more long form and expanded compared to the shorter form messages. note to self in the tutorial: maybe try making it a bit more conversational/suggestion based, to give ideas on how to use edgeware
+
+# HIBERNATE_TYPE_TEXT: these are all useful imo, but are also explained in brief on the hibernate window itself. could maybe make the hibernate window a bit bigger to explain them, or put a part in the tutorial section later. keeping these up for now as well
+
+# THANK_AND_ABOUT_TEXT: I don't really want to erase petit's work, especially considering they have a donation link (and I am potentially thinking about accepting donations as well? maybe?), I would feel kind of like a dick. but also the program is so much different than how it used to be that I feel like we took it in our own direction. In any case, leaving this up for now as it's fairly benign and can be easily removed whenever
+
+# PLUSPLUS_TEXT: outdated, stopped updating it when marigold joined the team as she kind of helped inspire me to legitimize actual patchnotes rather than just doing whatever crap I want like this. leaving it up for now but can be easily removed. I do want to write a credits page at some point, even if its short and tucked away
+
+# PACKINFO_TEXT: redundant and out of date. however, there is some useful information relating to discord statuses: "Also included in this section is the discord status info, which gives what your discord status will be set to if that setting is turned on, along with the image. As of time of writing (or if I forget to update this later), the image cannot be previewed as it is "hard coded" into EdgeWare\'s discord application and accessed through the API. As I am not the original creator of EdgeWare, and am not sure how to contact them, the best I could do is low-res screenshots or the name of each image. I chose the latter. Because of this hard-coding, the only person i\'ve run into so far who use these images is PetitTournesol themselves, but it should be noted that anyone can use them as long as they know what to add to the discord.dat file. This is partially the reason I left this information in."
+
+# FILE_TEXT: there is some useful stuff in here, but it's also information i'm not sure people really need to know. also, i've been thinking about splitting up the file tab and moving things around, as it has a lot of important stuff in it mixed in with things barely anyone will ever use.
+ABOUT_TEXT = "This is the \"About\" tab, where you can find additional information about a few harder to explain topics! It's a bit barren right now, but that's because we're in the process of changing to a new tutorial window which should be a lot more helpful to new users.\n\nMost of the information that used to be here was either outdated or redundant, as we've moved a lot of help to their respective tabs. The things currently left here are mostly deep dives into specific tabs or features, new users should check out each tab from left to right for the time being and try hovering over settings that confuse them!"
+
+DRIVE_TEXT = 'The "Drive" portion of Edgeware has three features: fill drive, replace images, and Booru downloader.\n\n"Fill Drive" does exactly what it says: it attempts to fill your hard drive with as much porn from /resource/img/ as possible. It does, however, have some restrictions. It will (should) not place ANY images into folders that start with a "." or have their names listed in the folder name blacklist.\nIt will also ONLY place images into the User folder and its subfolders.\nFill drive has one modifier, which is its own forced delay. Because it runs with between 1 and 8 threads at any given time, when unchecked it can fill your drive VERY quickly. To ensure that you get that nice slow fill, you can adjust the delay between each folder sweep it performs and the max number of threads.\n\n"Replace Images" is more complicated. Its searching is the exact same as fill drive, but instead of throwing images everywhere, it will seek out folders with large numbers of images (more than the threshold value) and when it finds one, it will replace ALL of the images with porn from /resource/img/. REMEMBER THAT IF YOU CARE ABOUT YOUR PHOTOS, AND THEY\'RE IN A FOLDER WITH MORE IMAGES THAN YOUR CHOSEN THRESHOLD VALUE, EITHER BACK THEM UP IN A ZIP OR SOMETHING OR DO. NOT. USE. THIS SETTING. I AM NOT RESPONSIBLE FOR YOUR OWN DECISION TO RUIN YOUR PHOTOS. Edgeware will attempt to backup any replaced images under /data/backups, but DO NOT RELY ON THIS FEATURE IN ANY CIRCUMSTANCE. ALWAYS BACKUP YOUR FILES YOURSELF.\n\nBooru downloader allows you to download new items from a Booru of your choice. For the booru name, ONLY the literal name is used, like "censored" or "blacked" instead of the full url. This is not case sensitive. Use the "Validate" button to ensure that downloading will be successful before running. For tagging, if you want to have multiple tags, they can be combined using "tag1+tag2+tag3" or if you want to add blacklist tags, type your tag and append a "+-blacklist_tag" after the desired tag.'
+HIBERNATE_TYPE_TEXT = "Original: The original hibernate type that came with base EdgeWare. Spawns a barrage of popups instantly, the max possible amount is based on your awaken activity.\n\nSpaced: Essentially runs EdgeWare normally, but over a brief period of time before ceasing generation of new popups. Because of this awaken activity isn't used, instead popup delay is looked at for frequency of popups.\n\nGlitch: Creates popups at random-ish intervals over a period of time. The total amount of popups spawned is based on the awaken activity. Perfect for those who want a 'virus-like' experience, or just something different every time.\n\nRamp: Similar to spaced, only the popup frequency gets faster and faster over the hibernate length. After reaching the max duration, it will spawn a number of popups equal to the awaken activity at a speed slightly faster than your popup delay. Best used with long hibernate length values and fairly short popup delay. (keep in mind that if the popup delay is too short though, popups can potentially not appear or lag behind)\n\nPump-Scare: Do you like haunted houses or scary movies? Don't you wish that instead of screamers and jumpscares, they had porn pop out at you instead? This is kind of like that. When hibernate is triggered a popup with audio will appear for around a second or two, then immediately disappear. This works best on packs with short, immediate audio files: old EdgeWare packs that contain half-hour long hypno files will likely not reach meaningful audio in time. Large audio files can also hamper effectiveness of the audio and lead to desync with the popup.\n\nChaos: Every time hibernate activates, it randomly selects any of the other hibernate modes."
+
+FILE_TEXT = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the "total logs in folder" stat will always display as "1".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a "moods json file", which is tapped into when selecting what moods you want to see in the "Pack Info" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want EdgeWare++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.'
 
 # Generate mood file if it doesn't exist or is invalid
 if not pack.info.mood_file.is_file() or isinstance(pack.active_moods, UniversalSet):
@@ -176,53 +188,35 @@ class Config(Tk):
         )
         style.configure("lefttab.TNotebook", tabposition="wn")
 
-        resource_frame = Frame(self)
-        resource_frame.pack(fill="x")
-        Button(resource_frame, text="Import Resource Pack", command=lambda: import_resource(self)).pack(fill="x", side="left", expand=1)
-        Button(resource_frame, text="Export Resource Pack", command=export_resource).pack(fill="x", side="left", expand=1)
+        pack_frame = Frame(self)
+        pack_frame.pack(fill="x")
+        Button(pack_frame, text="Import Resource Pack", command=lambda: import_pack(True)).pack(fill="x", side="left", expand=1)
+        Button(pack_frame, text="Export Resource Pack", command=export_pack).pack(fill="x", side="left", expand=1)
         Button(self, text="Save & Exit", command=lambda: write_save(vars, True)).pack(fill="x")
 
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
         tab_info = ttk.Frame(None)  # info, github, version, about, etc.
+        notebook.add(tab_info, text="About")
         tab_info_expound = ttk.Notebook(tab_info, style="lefttab.TNotebook")  # additional subtabs for info on features
         tab_info_expound.pack(expand=1, fill="both")
-        tab_annoyance = ttk.Frame(None)
-        tab_drive = ttk.Frame(None)
-        tab_wallpaper = ttk.Frame(None)
-        tab_launch = ttk.Frame(None)
-        tab_hibernate = ttk.Frame(None)
-        tab_hibernate_type = ttk.Frame(None)
-        tab_corruption = ttk.Frame(None)
-        tab_advanced = ttk.Frame(None)
-        tab_thanks_and_about = ttk.Frame(None)
-        tab_plus_plus = ttk.Frame(None)
-        tab_pack_info = ttk.Frame(None)
-        tab_file = ttk.Frame(None)
+
         notebook.add(tab_info, text="About")
-        tab_info_expound.add(tab_annoyance, text="Annoyance")
-        Label(tab_annoyance, text=ANNOYANCE_TEXT, anchor="nw", wraplength=460).pack()
+
+        tab_about = ScrollFrame()
+        tab_info_expound.add(tab_about, text="About")
+        Label(tab_about.viewPort, text=ABOUT_TEXT, anchor="nw", wraplength=460).pack()
+
+        tab_drive = ScrollFrame()
         tab_info_expound.add(tab_drive, text="Hard Drive")
-        Label(tab_drive, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_wallpaper, text="Wallpaper")
-        Label(tab_wallpaper, text=WALLPAPER_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_launch, text="Startup")
-        Label(tab_launch, text=STARTUP_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_hibernate, text="Hibernate")
-        Label(tab_hibernate, text=HIBERNATE_TEXT, anchor="nw", wraplength=460).pack()
+        Label(tab_drive.viewPort, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
+
+        tab_hibernate_type = ScrollFrame()
         tab_info_expound.add(tab_hibernate_type, text="Hibernate Types")
-        Label(tab_hibernate_type, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_advanced, text="Troubleshooting")
-        Label(tab_advanced, text=ADVANCED_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_thanks_and_about, text="Thanks & About")
-        Label(tab_thanks_and_about, text=THANK_AND_ABOUT_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_plus_plus, text="EdgeWare++")
-        Label(tab_plus_plus, text=PLUSPLUS_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_pack_info, text="Pack Info")
-        Label(tab_pack_info, text=PACKINFO_TEXT, anchor="nw", wraplength=460).pack()
+        Label(tab_hibernate_type.viewPort, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
+
+        tab_file = ScrollFrame()
         tab_info_expound.add(tab_file, text="File")
-        Label(tab_file, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
-        tab_info_expound.add(tab_corruption, text="Corruption")
-        Label(tab_corruption, text=CORRUPTION_TEXT, anchor="nw", wraplength=460).pack()
+        Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
         # ==========={HERE ENDS  ABOUT TAB ITEM INITS}===========#
 
         theme_change(config["themeType"].strip(), self, style, window_font, title_font)
@@ -408,5 +402,5 @@ if __name__ == "__main__":
     try:
         Config()
     except Exception as e:
-        logging.fatal(f"Config encountered fatal error:\n{e}")
+        logging.fatal(f"Config encountered fatal error: {e}\n\n{traceback.format_exc()}")
         messagebox.showerror("Could not start", f"Could not start config.\n[{e}]")

@@ -17,7 +17,6 @@ from tkinter import (
 
 from config_window.utils import (
     config,
-    confirm_box,
     set_widget_states,
 )
 from config_window.vars import Vars
@@ -127,9 +126,7 @@ class WallpaperTab(ScrollFrame):
             messagebox.showwarning("Remove Default", "You cannot remove the default wallpaper.")
 
     def auto_import(self) -> None:
-        allow_ = confirm_box(
-            self.wallpaper_list, "Confirm", "Current list will be cleared before new list is imported from the /resource folder. Is that okay?"
-        )
+        allow_ = messagebox.askyesno("Confirm", "Current list will be cleared before new list is imported from the /resource folder. Is that okay?")
         if allow_:
             # clear list
             while True:

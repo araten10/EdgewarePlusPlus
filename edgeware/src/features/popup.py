@@ -1,9 +1,14 @@
 import random
 import time
+import os
+import shutil
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
+import utils
+from desktop_notifier.common import Icon
+from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
 from features.theme import get_theme
 from pack import Pack
@@ -13,7 +18,7 @@ from roll import roll
 from screeninfo import get_monitors
 from settings import Settings
 from state import State
-from utils import utils
+from paths import Data
 
 
 class Popup(Toplevel):
@@ -31,7 +36,7 @@ class Popup(Toplevel):
 
         self.denial = roll(self.settings.denial_chance)
 
-        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, event.keysym))
+        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, legacy_key=event.keysym))
         self.attributes("-topmost", True)
         utils.set_borderless(self)
 
@@ -183,8 +188,19 @@ class Popup(Toplevel):
     def click(self) -> None:
         self.clicks_to_close -= 1
         if self.clicks_to_close <= 0:
+            if self.state.alt_held:
+                self.blacklist_media()
             self.close()
             self.try_mitosis()
+
+    def blacklist_media(self) -> None:
+        filename = os.path.basename(self.media).split('/')[-1]
+        path_blacklist = Data.BLACKLIST / "".join(self.pack.info.name.split())
+        if not os.path.exists(path_blacklist):
+            os.makedirs(path_blacklist)
+        shutil.move(self.media, path_blacklist)
+        notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
+        notifier.send(title=self.pack.info.name, message=f"{filename} has been successfully sent to blacklist")
 
     def close(self) -> None:
         self.state.popup_number -= 1

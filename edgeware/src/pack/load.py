@@ -7,8 +7,8 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import TypeVar
 
+import utils
 from paths import Data, PackPaths
-from utils import utils
 from voluptuous import ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Equal, In, Length, Number, Optional, Range, Required, Schema, Url
 from voluptuous.error import Invalid
 
@@ -194,6 +194,15 @@ def load_info(paths: PackPaths) -> Info:
         return Info(info["name"], Data.MOODS / f"{info['id']}.{mood_id}.json", info["creator"], info["version"], info["description"])
 
     return try_load(paths.info, load) or default
+
+
+def load_config(paths: PackPaths) -> dict:
+    def load(content: str) -> dict:
+        config = json.loads(content)
+        filter = ["version", "versionplusplus", "packPath"]
+        return {key: value for key, value in config.items() if key not in filter}
+
+    return try_load(paths.config, load) or {}
 
 
 def load_active_moods(mood_file: Path) -> Callable[[], set[str]]:
