@@ -36,21 +36,21 @@ class ImagePopup(Popup):
         # Animated, subliminal -> mpv, ?
 
         if getattr(image, "n_frames", 0) > 1:
-            player = VideoPlayer(self, self.width, self.height)
-            player.vf = self.try_denial_filter(True)
-            player.play(str(self.media))
+            self.player = VideoPlayer(self, self.width, self.height)
+            self.player.vf = self.try_denial_filter(True)
+            self.player.play(str(self.media))
         else:
             resized = image.resize((self.width, self.height), Image.LANCZOS).convert("RGBA")
             filter = self.try_denial_filter(False)
             final = resized.filter(filter) if filter else resized
 
             if self.subliminal:
-                player = VideoPlayer(self, self.width, self.height)
-                player.video_scale_x = max(self.width / self.height, 1)
-                player.video_scale_y = max(self.height / self.width, 1)
+                self.player = VideoPlayer(self, self.width, self.height)
+                self.player.video_scale_x = max(self.width / self.height, 1)
+                self.player.video_scale_y = max(self.height / self.width, 1)
                 final.putalpha(int((1 - self.settings.subliminal_opacity) * 255))
-                player.create_image_overlay().update(final)
-                player.play(str(self.pack.random_subliminal_overlay()))
+                self.player.create_image_overlay().update(final)
+                self.player.play(str(self.pack.random_subliminal_overlay()))
             else:
                 label = Label(self, width=self.width, height=self.height)
                 label.pack()
@@ -72,6 +72,8 @@ class ImagePopup(Popup):
         return False
 
     def close(self) -> None:
+        if hasattr(self, "player"):
+            self.player.terminate()
         super().close()
         if self.subliminal:
             self.state.subliminal_number -= 1

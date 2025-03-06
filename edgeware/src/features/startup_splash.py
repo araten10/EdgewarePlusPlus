@@ -32,7 +32,8 @@ class StartupSplash(Toplevel):
         self.geometry(f"{width}x{height}+{x}+{y}")
 
         if getattr(image, "n_frames", 0) > 1:
-            VideoPlayer(self, width, height).play(str(pack.startup_splash))
+            self.player = VideoPlayer(self, width, height)
+            self.player.play(str(pack.startup_splash))
         else:
             label = Label(self, width=width, height=height)
             label.pack()
@@ -57,5 +58,7 @@ class StartupSplash(Toplevel):
             self.attributes("-alpha", self.opacity)
             self.after(10 // 4, self.fade_out)
         else:
+            if hasattr(self, "player"):
+                self.player.terminate()
             self.destroy()
             self.callback()
