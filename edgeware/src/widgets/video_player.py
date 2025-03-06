@@ -10,4 +10,5 @@ class VideoPlayer(mpv.MPV):
         label.wait_visibility()  # Needs to be visible for mpv to draw on it
 
         super().__init__(wid=label.winfo_id())
+        self["hwdec"] = "auto"  # Enable hardware acceleration
         self.loop = True
