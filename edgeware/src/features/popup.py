@@ -1,7 +1,7 @@
-import random
-import time
 import os
+import random
 import shutil
+import time
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
@@ -13,12 +13,12 @@ from features.misc import mitosis_popup, open_web
 from features.theme import get_theme
 from pack import Pack
 from panic import panic
+from paths import Data
 from PIL import ImageFilter
 from roll import roll
 from screeninfo import get_monitors
 from settings import Settings
 from state import State
-from paths import Data
 
 
 class Popup(Toplevel):
@@ -194,7 +194,7 @@ class Popup(Toplevel):
             self.try_mitosis()
 
     def blacklist_media(self) -> None:
-        filename = os.path.basename(self.media).split('/')[-1]
+        filename = os.path.basename(self.media).split("/")[-1]
         path_blacklist = Data.BLACKLIST / "".join(self.pack.info.name.split())
         if not os.path.exists(path_blacklist):
             os.makedirs(path_blacklist)

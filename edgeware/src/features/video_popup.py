@@ -1,4 +1,3 @@
-from threading import Thread
 from tkinter import Tk
 
 from features.popup import Popup
@@ -33,9 +32,6 @@ class VideoPopup(Popup):
         return False
 
     def close(self) -> None:
-        # Run in a thread as a workaround for X error
-        # https://github.com/jaseg/python-mpv/issues/114
-        Thread(target=self.player.terminate).start()
-
+        self.player.terminate()
         super().close()
         self.state.video_number -= 1
