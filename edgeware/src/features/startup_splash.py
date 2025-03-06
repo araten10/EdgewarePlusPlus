@@ -5,7 +5,6 @@ import utils
 from pack import Pack
 from PIL import Image, ImageTk
 from screeninfo import get_monitors
-from utils import utils
 from widgets.video_player import VideoPlayer
 
 
