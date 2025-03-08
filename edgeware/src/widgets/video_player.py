@@ -18,4 +18,5 @@ class VideoPlayer(mpv.MPV):
     def terminate(self) -> None:
         # Run in a thread as a workaround for X error
         # https://github.com/jaseg/python-mpv/issues/114
-        Thread(target=super().terminate).start()
+        # Thread(target=super().terminate).start()
+        self.quit(0)
