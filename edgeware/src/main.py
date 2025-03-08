@@ -88,7 +88,7 @@ if __name__ == "__main__":
             main(root, settings, pack, targets)
 
     if settings.startup_splash:
-        StartupSplash(pack, start_main)
+        StartupSplash(settings, pack, start_main)
     else:
         start_main()
 

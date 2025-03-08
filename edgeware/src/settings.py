@@ -99,6 +99,7 @@ class Settings:
         self.video_chance = int(self.config["vidMod"])  # 0 to 100
         self.video_volume = int(self.config["videoVolume"])  # 0 to 100
         self.max_video = int(self.config["maxVideos"]) if bool(self.config["maxVideoBool"]) else float("inf")
+        self.video_hardware_acceleration = bool(self.config["videoHardwareAcceleration"])
 
         # Captions
         self.captions_in_popups = bool(self.config["showCaptions"])

@@ -18,7 +18,7 @@ class VideoPopup(Popup):
         properties = get_video_properties(self.media)
         self.compute_geometry(properties["width"], properties["height"])
 
-        self.player = VideoPlayer(self, self.width, self.height)
+        self.player = VideoPlayer(self, self.settings, self.width, self.height)
         self.player.volume = self.settings.video_volume
         self.player.vf = self.try_denial_filter(True)
         self.player.play(str(self.media))

@@ -17,6 +17,7 @@ from config_window.utils import (
 )
 from config_window.vars import Vars
 from widgets.scroll_frame import ScrollFrame
+from widgets.tooltip import CreateToolTip
 
 
 class AudioVideoTab(ScrollFrame):
@@ -87,3 +88,14 @@ class AudioVideoTab(ScrollFrame):
 
         max_video_group = [max_video_scale, max_video_manual]
         set_widget_states(vars.max_video_enabled.get(), max_video_group)
+
+        hardware_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        hardware_frame.pack(fill="x")
+
+        hardware_acceleration_toggle = Checkbutton(
+            hardware_frame, text="Enable hardware acceleration", variable=vars.video_hardware_acceleration, cursor="question_arrow"
+        )
+        hardware_acceleration_toggle.pack(fill="both", side="top", expand=1, padx=2)
+        CreateToolTip(
+            hardware_acceleration_toggle, "Disabling hardware acceleration may increase CPU usage, but it can provide a more consistent and stable experience."
+        )

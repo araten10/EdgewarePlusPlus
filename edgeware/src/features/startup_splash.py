@@ -5,11 +5,12 @@ import utils
 from pack import Pack
 from PIL import Image, ImageTk
 from screeninfo import get_monitors
+from settings import Settings
 from widgets.video_player import VideoPlayer
 
 
 class StartupSplash(Toplevel):
-    def __init__(self, pack: Pack, callback: Callable[[], None]):
+    def __init__(self, settings: Settings, pack: Pack, callback: Callable[[], None]):
         super().__init__(bg="black")
 
         self.callback = callback
@@ -32,7 +33,7 @@ class StartupSplash(Toplevel):
         self.geometry(f"{width}x{height}+{x}+{y}")
 
         if getattr(image, "n_frames", 0) > 1:
-            self.player = VideoPlayer(self, width, height)
+            self.player = VideoPlayer(self, settings, width, height)
             self.player.play(str(pack.startup_splash))
         else:
             label = Label(self, width=width, height=height)

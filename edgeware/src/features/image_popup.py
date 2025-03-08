@@ -36,7 +36,7 @@ class ImagePopup(Popup):
         # Animated, subliminal -> mpv, ?
 
         if getattr(image, "n_frames", 0) > 1:
-            self.player = VideoPlayer(self, self.width, self.height)
+            self.player = VideoPlayer(self, self.settings, self.width, self.height)
             self.player.vf = self.try_denial_filter(True)
             self.player.play(str(self.media))
         else:
@@ -45,7 +45,7 @@ class ImagePopup(Popup):
             final = resized.filter(filter) if filter else resized
 
             if self.subliminal:
-                self.player = VideoPlayer(self, self.width, self.height)
+                self.player = VideoPlayer(self, self.settings, self.width, self.height)
                 self.player.video_scale_x = max(self.width / self.height, 1)
                 self.player.video_scale_y = max(self.height / self.width, 1)
                 final.putalpha(int((1 - self.settings.subliminal_opacity) * 255))
