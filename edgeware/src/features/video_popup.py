@@ -32,6 +32,6 @@ class VideoPopup(Popup):
         return False
 
     def close(self) -> None:
-        self.player.terminate()
+        self.player.close()
         super().close()
         self.state.video_number -= 1

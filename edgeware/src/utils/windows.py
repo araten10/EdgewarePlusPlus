@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 from tkinter import Toplevel
 
+import mpv
 from paths import PATH, CustomAssets, Process
 
 PYW = {
@@ -13,6 +14,10 @@ PYW = {
     Process.MAIN: PATH / "edgeware.pyw",
     Process.PANIC: PATH / "panic.pyw",
 }
+
+
+def close_mpv(player: mpv.MPV) -> None:
+    player.terminate()
 
 
 def set_borderless(window: Toplevel) -> None:

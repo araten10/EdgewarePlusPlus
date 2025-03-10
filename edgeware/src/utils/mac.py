@@ -1,6 +1,12 @@
 from pathlib import Path
 from tkinter import Toplevel
 
+import mpv
+
+
+def close_mpv(player: mpv.MPV) -> None:
+    pass
+
 
 def set_borderless(window: Toplevel) -> None:
     pass

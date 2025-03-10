@@ -1,6 +1,7 @@
 from tkinter import Label, Misc
 
 import mpv
+import utils
 from settings import Settings
 
 
@@ -14,7 +15,5 @@ class VideoPlayer(mpv.MPV):
         self["hwdec"] = "auto" if settings.video_hardware_acceleration else "no"
         self.loop = True
 
-    def terminate(self) -> None:
-        # Run in a thread as a workaround for X error
-        # https://github.com/jaseg/python-mpv/issues/114
-        super().terminate()
+    def close(self) -> None:
+        utils.close_mpv(self)

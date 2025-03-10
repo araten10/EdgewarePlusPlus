@@ -60,6 +60,6 @@ class StartupSplash(Toplevel):
             self.after(10 // 4, self.fade_out)
         else:
             if hasattr(self, "player"):
-                self.player.terminate()
+                self.player.close()
             self.destroy()
             self.callback()

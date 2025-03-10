@@ -73,7 +73,7 @@ class ImagePopup(Popup):
 
     def close(self) -> None:
         if hasattr(self, "player"):
-            self.player.terminate()
+            self.player.close()
         super().close()
         if self.subliminal:
             self.state.subliminal_number -= 1

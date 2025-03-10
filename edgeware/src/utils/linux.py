@@ -6,10 +6,15 @@ import sys
 from pathlib import Path
 from tkinter import Toplevel
 
+import mpv
 from paths import CustomAssets, Process
 from settings import load_default_config
 
 from utils.linux_utils import get_desktop_environment, get_wallpaper_commands, get_wallpaper_function
+
+
+def close_mpv(player: mpv.MPV) -> None:
+    player.quit(0)
 
 
 def set_borderless(window: Toplevel) -> None:
