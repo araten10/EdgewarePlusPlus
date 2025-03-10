@@ -45,6 +45,7 @@ goto mpv
 echo Installing libmpv...
 if not exist data mkdir data
 curl https://7-zip.org/a/7zr.exe -o data\7z.exe
+reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
 if %OS%==32BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-i686-20250304-git-2542a78.7z -o data\mpv.7z
 if %OS%==64BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-x86_64-20250304-git-2542a78.7z -o data\mpv.7z
 data\7z.exe e data\mpv.7z -odata libmpv-2.dll
