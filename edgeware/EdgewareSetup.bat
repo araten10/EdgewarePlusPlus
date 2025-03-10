@@ -40,6 +40,14 @@ goto requirements
 echo Installing requirements...
 py -m pip install -r requirements.txt
 if NOT %errorlevel%==0 goto quitRequirements
+goto mpv
+:mpv
+echo Installing libmpv...
+if not exist data mkdir data
+curl https://7-zip.org/a/7zr.exe -o data\7z.exe
+if %OS%==32BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-i686-20250304-git-2542a78.7z -o data\mpv.7z
+if %OS%==64BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-x86_64-20250304-git-2542a78.7z -o data\mpv.7z
+data\7z.exe e data\mpv.7z -odata libmpv-2.dll
 goto shortcuts
 :shortcuts
 call :makePyw "CONFIG" "config"
