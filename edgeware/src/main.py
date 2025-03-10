@@ -2,7 +2,8 @@ import os
 
 from paths import Data
 
-os.environ["PATH"] += os.pathsep + str(Data.ROOT / "libmpv-2.dll")
+# Required on Windows
+os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
 from threading import Thread
 from tkinter import Tk
