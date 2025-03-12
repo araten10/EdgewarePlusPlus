@@ -1,5 +1,7 @@
 @echo off
 
+reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
+
 echo +==============[ Welcome to Edgeware++ Setup~ ]==============+
 echo Python version:
 py --version
@@ -13,7 +15,6 @@ if not %errorlevel%==0 (
   echo Could not find Python.
   echo Now downloading installer from python.org, please wait...
 
-  reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
   if %OS%==32BIT curl https://www.python.org/ftp/python/3.12.6/python-3.12.6.exe -o pyinstaller.exe
   if %OS%==64BIT curl https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe -o pyinstaller.exe
 
@@ -37,7 +38,7 @@ if not %errorlevel%==0 (
   echo Installing pip with ensurepip...
   py -m ensurepip --upgrade
   py -m pip --version
-  if NOT %errorlevel%==0 (
+  if not %errorlevel%==0 (
     echo pip still could not be found.
     pause
     exit
@@ -57,7 +58,6 @@ if not exist data\libmpv-2.dll (
   if not exist data mkdir data
   if not exist data\7z.exe curl https://7-zip.org/a/7zr.exe -o data\7z.exe
   if not exist data\mpv.7z (
-    reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
     if %OS%==32BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-i686-20250304-git-2542a78.7z -o data\mpv.7z
     if %OS%==64BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-x86_64-20250304-git-2542a78.7z -o data\mpv.7z
   )
