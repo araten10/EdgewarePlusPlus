@@ -28,7 +28,7 @@ We have also added a Pack Editor included with each copy of EdgeWare++. It's a b
 
 •*Toggle that switches from antialiasing to lanczos, if Edgeware wasn't displaying popups for you this will fix that! (probably)*
 
-•*Toggle that allows you to play videos with VLC, which not only loads faster but also should fix audio issues*
+•*Videos and GIFs are played with mpv, which not only loads faster but also should fix audio issues*
 
 •*Toggle to enable/disable desktop icon generation*
 
@@ -137,14 +137,6 @@ As mentioned a few questions above, there is an unofficial discord. Me and Marig
 >Q: Can you give me more info on upcoming features?
 
 A: I personally like to reveal things once they're at the point where i'm not going to turn back or change my mind on them, as I think sometimes revealing things too early kills motivation and adds a lot of stress. I also get easily distracted and absentminded (don't we all...) so I can't guarantee that anything I announce early will actually happen anytime soon. Because of this I don't like to give out information on upcoming features to people, but I do post general updates/ideas on my [bsky account](https://bsky.app/profile/araten.bsky.social) and [twitter account](https://twitter.com/ara10ten), which also serves as a point of contact/a place for me to ramble about horny things! You can also view planned features on the issues page!
-
->Q: Why are my videos silent/why do videos not work?
-
-A: You might be one of the many people affected by the **python video player bubonic plague**! Jokes aside, the default video player that EdgeWare used is really janky and mostly left in for ease of use and compatibility. In EdgeWare++ I have added support for libvlc, which has it's own plethora of problems i'm sure, but is generally more stable and fixes these issues. Head on over to [vlc's website](https://www.videolan.org/vlc/) and download **the correct VLC for your hardware** (extra emphasis on this, check if you're 64-bit!). Then go to the troubleshooting tab and enable VLC playback once you've installed it.
-
->Q: I opened up the debug script after using VLC, and oh my god, there's a horrifying amount of errors being spit out into console!
-
-A: I guarantee this won't be a frequently asked question, but when else am I going to talk about it? I found a fix for this [here](https://stackoverflow.com/questions/68246840/how-to-avoid-main-libvlc-error-when-using-the-python-vlc-package), assuming it's the "stale plugins cache" error.
 
 >Q: Can we be friends/talk more/can I dom you?
 
