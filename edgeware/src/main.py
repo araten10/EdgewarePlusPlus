@@ -1,9 +1,10 @@
-import os
+if __name__ == "__main__":
+    import os
 
-from paths import Data
+    from paths import Data
 
-# Required on Windows
-os.environ["PATH"] += os.pathsep + str(Data.ROOT)
+    # Required on Windows
+    os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
 from threading import Thread
 from tkinter import Tk

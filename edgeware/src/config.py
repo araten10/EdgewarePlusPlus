@@ -1,3 +1,11 @@
+if __name__ == "__main__":
+    import os
+
+    from paths import Data
+
+    # Required on Windows
+    os.environ["PATH"] += os.pathsep + str(Data.ROOT)
+
 import ast
 import json
 import logging
