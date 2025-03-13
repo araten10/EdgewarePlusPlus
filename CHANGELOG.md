@@ -1,4 +1,4 @@
-## EdgeWare++ Patch Notes
+## Edgeware++ Patch Notes
 **If you see that there's a new update and are somebody (like me) who is lazy and doesn't like installing every single update if unnecessary, here is how I do versioning:**
 
 •+1.0 to version number: multiple new features, or a single large feature

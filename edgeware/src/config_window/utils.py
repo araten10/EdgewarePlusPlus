@@ -106,7 +106,7 @@ def safe_check(vars: Vars) -> bool:
         logging.info("major dangers found.")
         dangers.append("\n\nMajor:")
         if vars.run_at_startup.get():
-            dangers.append("\n•Launch on Startup is enabled! This will run EdgeWare when you start your computer! (Note: Timer mode enables this setting!)")
+            dangers.append("\n•Launch on Startup is enabled! This will run Edgeware when you start your computer! (Note: Timer mode enables this setting!)")
         if vars.fill_drive.get():
             dangers.append(
                 "\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
@@ -131,9 +131,9 @@ def safe_check(vars: Vars) -> bool:
         logging.info("minor dangers found.")
         dangers.append("\n\nMinor:")
         if vars.panic_disabled.get():
-            dangers.append("\n•Panic Hotkey is disabled! If you want to easily close EdgeWare, read the tooltip in the Annoyance tab for other ways to panic!")
+            dangers.append("\n•Panic Hotkey is disabled! If you want to easily close Edgeware, read the tooltip in the Annoyance tab for other ways to panic!")
         if vars.run_on_save_quit.get():
-            dangers.append("\n•EdgeWare will run on Save & Exit (AKA: when you hit Yes!)")
+            dangers.append("\n•Edgeware will run on Save & Exit (AKA: when you hit Yes!)")
     dangers = " ".join(dangers)
     if len(dangers):
         logging.info("safe mode intercepted save! asking user...")
@@ -157,7 +157,7 @@ def clear_launches(confirmation: bool):
             if confirmation:
                 messagebox.showinfo(
                     "Cleaning Completed",
-                    "The file that manages corruption launches has been deleted, and will be remade next time you start EdgeWare with corruption on!",
+                    "The file that manages corruption launches has been deleted, and will be remade next time you start Edgeware with corruption on!",
                 )
         else:
             if confirmation:
@@ -165,7 +165,7 @@ def clear_launches(confirmation: bool):
                     "No launches file!",
                     "There is no launches file to delete!\n\nThe launches file is used"
                     " for the launch transition mode, and is automatically deleted when you load a new pack. To generate a new"
-                    " one, simply start EdgeWare with the corruption setting on!",
+                    " one, simply start Edgeware with the corruption setting on!",
                 )
     except Exception as e:
         print(f"failed to clear launches. {e}")

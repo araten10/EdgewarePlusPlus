@@ -42,7 +42,7 @@ class TroubleshootingTab(ScrollFrame):
         CreateToolTip(
             github_connection_toggle,
             "In some cases, having a slow internet connection can cause the config window to delay opening for a long time.\n\n"
-            "EdgeWare connects to Github just to check if there's a new update, but sometimes even this can take a while.\n\n"
+            "Edgeware connects to Github just to check if there's a new update, but sometimes even this can take a while.\n\n"
             "If you have noticed this, try enabling this setting- it will disable all connections to Github on future launches.",
         )
         mood_settings_toggle = Checkbutton(troubleshooting_col_2, text="Turn Off Mood Settings", variable=vars.toggle_mood_set, cursor="question_arrow")

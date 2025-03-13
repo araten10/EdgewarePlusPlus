@@ -123,7 +123,7 @@ class PopupTab(ScrollFrame):
         single_mode_toggle.pack(fill="x", side="left", expand=1)
         CreateToolTip(
             single_mode_toggle,
-            'The randomization in EdgeWare does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
+            'The randomization in Edgeware does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
             "For example, if you have audio, videos, and prompts all turned on, there's a very real chance you will get all of them popping up at the same "
             "time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It "
             "delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: In this mode, the chance of a popup appearing "

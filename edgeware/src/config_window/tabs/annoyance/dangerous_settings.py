@@ -70,9 +70,9 @@ class DangerousSettingsTab(ScrollFrame):
         Button(
             blacklist_frame,
             text="Remove Name",
-            command=lambda: remove_list(blacklist_listbox, "avoidList", "Remove EdgeWare", "You cannot remove the EdgeWare folder exception."),
+            command=lambda: remove_list(blacklist_listbox, "avoidList", "Remove Edgeware", "You cannot remove the Edgeware folder exception."),
         ).pack(fill="x")
-        Button(blacklist_frame, text="Reset", command=lambda: reset_list(blacklist_listbox, "avoidList", "EdgeWare>AppData")).pack(fill="x")
+        Button(blacklist_frame, text="Reset", command=lambda: reset_list(blacklist_listbox, "avoidList", "Edgeware>AppData")).pack(fill="x")
 
         fill_replace_frame = Frame(drive_frame)
         fill_replace_frame.pack(fill="y", side="left")

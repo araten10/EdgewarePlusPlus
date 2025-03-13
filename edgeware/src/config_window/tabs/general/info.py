@@ -70,7 +70,7 @@ class InfoTab(ScrollFrame):
             status_frame,
             "Custom Startup",
             pack.paths.splash,
-            "If you are looking to add this to packs made before EdgeWare++,"
+            "If you are looking to add this to packs made before Edgeware++,"
             ' put the desired file in /resource/ and name it "loading_splash.png"'
             " (also supports .gif, .bmp and .jpg/jpeg).",
         )
@@ -79,7 +79,7 @@ class InfoTab(ScrollFrame):
             status_frame,
             "Custom Icon",
             pack.paths.icon.is_file(),
-            "If you are looking to add this to packs made before EdgeWare++,"
+            "If you are looking to add this to packs made before Edgeware++,"
             ' put the desired file in /resource/ and name it "icon.ico". (the file must be'
             " a .ico file! make sure you convert properly!)",
         )
@@ -87,7 +87,7 @@ class InfoTab(ScrollFrame):
             status_frame,
             "Corruption",
             pack.paths.corruption.is_file(),
-            "An EdgeWare++ feature that is kind of hard to describe in a single tooltip.\n\n"
+            "An Edgeware++ feature that is kind of hard to describe in a single tooltip.\n\n"
             'For more information, check the "About" tab for a detailed writeup.',
         )
 
@@ -189,7 +189,7 @@ class InfoTab(ScrollFrame):
             discord_image_label,
             "As much as I would like to show you this image, it's fetched from the discord "
             "application API- which I cannot access without permissions, as far as i'm aware.\n\n"
-            "Because of this, only packs created by the original EdgeWare creator, PetitTournesol, have custom status images.\n\n"
+            "Because of this, only packs created by the original Edgeware creator, PetitTournesol, have custom status images.\n\n"
             "Nevertheless, I have decided to put this here not only for those packs, but also for other "
             "packs that tap in to the same image IDs.",
         )

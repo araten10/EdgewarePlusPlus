@@ -157,7 +157,7 @@ class FileTab(ScrollFrame):
         load_pack_preset_button.pack(fill="both", expand=1)
         CreateToolTip(
             load_pack_preset_button,
-            "In EdgeWare++, the functionality was added for pack creators to add a config file to their pack, "
+            "In Edgeware++, the functionality was added for pack creators to add a config file to their pack, "
             "allowing for quick loading of setting presets tailored to their intended pack experience. It is highly recommended you save your "
             "personal preset beforehand, as this will overwrite all your current settings.\n\nIt should also be noted that this can potentially "
             "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
@@ -202,7 +202,7 @@ class FileTab(ScrollFrame):
         CreateToolTip(
             open_moods_button,
             'If your currently loaded pack has a "info.json" file, it can be found under the pack name in this folder.\n\n'
-            "If it does not have this file however, EdgeWare++ will generate a Unique ID for it, so you can still save your mood settings "
+            "If it does not have this file however, Edgeware++ will generate a Unique ID for it, so you can still save your mood settings "
             'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
         )
 

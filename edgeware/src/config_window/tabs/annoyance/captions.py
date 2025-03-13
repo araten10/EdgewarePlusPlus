@@ -53,7 +53,7 @@ class CaptionsTab(ScrollFrame):
             "When enabled, captions will try and match the filename of the image they attach to.\n\n"
             'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
             'of images named things like "goon300242", "goon-love", "goon_ytur8843", etc.\n\n'
-            "This is how EdgeWare processed captions before moods were implemented fully in EdgeWare++. The reason you'd turn this off, however, "
+            "This is how Edgeware processed captions before moods were implemented fully in Edgeware++. The reason you'd turn this off, however, "
             "is that if the mood doesn't match the filename, it won't display at all.\n\n For example, if you had a mood named \"succubus\", but "
             'no filtered files started with "succubus", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
             "the pack supports it.",

@@ -38,7 +38,7 @@ class DangerousModesTab(ScrollFrame):
             'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
             '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
             "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
-            "instability when running EdgeWare multiple times without changing config settings.",
+            "instability when running Edgeware multiple times without changing config settings.",
         )
         timer_slider = Scale(timer_frame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=vars.timer_time)
         timer_slider.pack(side="left", fill="x", expand=1, padx=10)

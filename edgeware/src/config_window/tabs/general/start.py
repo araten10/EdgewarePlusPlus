@@ -92,8 +92,8 @@ class StartTab(ScrollFrame):
 
         version_frame = Frame(information_frame)
         version_frame.pack(fill="both", side="left", expand=1)
-        Label(version_frame, text=f"EdgeWare++ Local Version:\n{local_version}").pack(fill="x")
-        Label(version_frame, text=f"EdgeWare++ Github Version:\n{live_version}", bg=(BUTTON_FACE if (local_version == live_version) else "red")).pack(fill="x")
+        Label(version_frame, text=f"Edgeware++ Local Version:\n{local_version}").pack(fill="x")
+        Label(version_frame, text=f"Edgeware++ Github Version:\n{live_version}", bg=(BUTTON_FACE if (local_version == live_version) else "red")).pack(fill="x")
 
         # Theme
         Label(self.viewPort, text="Theme", font=title_font, relief=GROOVE).pack(pady=2)
@@ -340,7 +340,7 @@ class StartTab(ScrollFrame):
         other_col_1.pack(fill="both", side="left", expand=1)
         toggle_flair_button = Checkbutton(other_col_1, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
         toggle_flair_button.pack(fill="x")
-        CreateToolTip(toggle_flair_button, 'Displays a brief "loading" image before EdgeWare startup, which can be set per-pack by the pack creator.')
+        CreateToolTip(toggle_flair_button, 'Displays a brief "loading" image before Edgeware startup, which can be set per-pack by the pack creator.')
         Checkbutton(other_col_1, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit).pack(fill="x")
 
         other_col_2 = Frame(other_frame)
@@ -356,7 +356,7 @@ class StartTab(ScrollFrame):
             "Replace Images\n\n"
             "Major (very dangerous, can affect your computer):\n"
             "Launch on Startup, Fill Drive\n\n"
-            "Medium (can lead to embarassment or reduced control over EdgeWare):\n"
+            "Medium (can lead to embarassment or reduced control over Edgeware):\n"
             "Timer Mode, Mitosis Mode, Show on Discord, short hibernate cooldown\n\n"
             "Minor (low risk but could lead to unwanted interactions):\n"
             "Disable Panic Hotkey, Run on Save & Exit",

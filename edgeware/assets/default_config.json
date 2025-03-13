@@ -31,7 +31,7 @@
   "timeoutPopups": 0,
   "popupTimeout": 1,
   "mitosisStrength": 2,
-  "avoidList": "EdgeWare>AppData",
+  "avoidList": "edgeware>AppData",
   "booruName": "",
   "booruMinScore": -5,
   "desktopIcons": 1,
