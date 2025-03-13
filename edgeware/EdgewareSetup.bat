@@ -37,6 +37,7 @@ if not %errorlevel%==0 (
   echo Could not find pip.
   echo Installing pip with ensurepip...
   py -m ensurepip --upgrade
+
   py -m pip --version
   if not %errorlevel%==0 (
     echo pip still could not be found.
@@ -62,6 +63,12 @@ if not exist data\libmpv-2.dll (
     if %OS%==64BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-x86_64-20250304-git-2542a78.7z -o data\mpv.7z
   )
   data\7z.exe e data\mpv.7z -odata libmpv-2.dll
+
+  if not exist data\libmpv-2.dll (
+    echo Failed to install libmpv.
+    pause
+    exit
+  )
 )
 
 call :makePyw "CONFIG" "config"
