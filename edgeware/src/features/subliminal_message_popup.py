@@ -1,5 +1,6 @@
 from tkinter import Label, Toplevel
 
+import os_utils
 import utils
 from features.theme import get_theme
 from pack import Pack
@@ -16,9 +17,9 @@ class SubliminalMessagePopup(Toplevel):
         self.theme = get_theme(settings)
 
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
         self.attributes("-alpha", settings.subliminal_message_popup_opacity)
-        if utils.is_windows():
+        if os_utils.is_windows():
             self.wm_attributes("-transparentcolor", self.theme.transparent_bg)
 
         monitor = utils.random_monitor(settings)
@@ -30,7 +31,7 @@ class SubliminalMessagePopup(Toplevel):
             font=font,
             wraplength=monitor.width / 1.5,
             fg=self.theme.fg,
-            bg=(self.theme.transparent_bg if utils.is_windows() else self.theme.bg),
+            bg=(self.theme.transparent_bg if os_utils.is_windows() else self.theme.bg),
         )
         label.pack()
 

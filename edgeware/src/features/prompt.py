@@ -1,5 +1,6 @@
 from tkinter import Button, Label, Text, Toplevel
 
+import os_utils
 import utils
 from features.theme import get_theme
 from pack import Pack
@@ -18,7 +19,7 @@ class Prompt(Toplevel):
         self.theme = get_theme(settings)
 
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
         self.configure(background=self.theme.bg)
 
         monitor = utils.primary_monitor()

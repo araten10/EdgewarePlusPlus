@@ -1,7 +1,6 @@
 import getpass
 import logging
 import os
-import platform
 import random
 import sys
 import time
@@ -47,25 +46,3 @@ def primary_monitor() -> Monitor:
 def random_monitor(settings: Settings) -> Monitor:
     enabled_monitors = [m for m in get_monitors() if m.name not in settings.disabled_monitors]
     return random.choice(enabled_monitors or primary_monitor())
-
-
-def is_linux():
-    return platform.system() == "Linux"
-
-
-def is_windows():
-    return platform.system() == "Windows"
-
-
-def is_mac():
-    return platform.system() == "Darwin"
-
-
-if is_linux():
-    from utils.linux import *  # noqa: F403
-elif is_windows():
-    from utils.windows import *  # noqa: F403
-elif is_mac():
-    from utils.mac import *  # noqa: F403
-else:
-    raise RuntimeError(f"Unsupported operating system: {platform.system()}")

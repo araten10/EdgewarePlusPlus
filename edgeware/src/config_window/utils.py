@@ -8,12 +8,13 @@ import urllib
 from pathlib import Path
 from tkinter import BooleanVar, Frame, IntVar, Label, Listbox, StringVar, Widget, messagebox, simpledialog
 
+import os_utils
 import utils
 from config_window.vars import Vars
 from paths import Data, Process
 from settings import load_config
 
-BUTTON_FACE = "SystemButtonFace" if utils.is_windows() else "gray90"
+BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"
 
 # TODO: Don't load these here
 config = load_config()
@@ -63,7 +64,7 @@ def write_save(vars: Vars, exit_at_end: bool = False) -> None:
     temp = config.copy()
     temp["wallpaperDat"] = str(config["wallpaperDat"])
 
-    utils.toggle_run_at_startup(vars.run_at_startup.get())
+    os_utils.toggle_run_at_startup(vars.run_at_startup.get())
 
     for key, var in vars.entries.items():
         value = var.get()

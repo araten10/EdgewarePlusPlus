@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from tkinter import Label, Toplevel
 
+import os_utils
 import utils
 from pack import Pack
 from PIL import Image, ImageTk
@@ -16,7 +17,7 @@ class StartupSplash(Toplevel):
         self.opacity = 0
 
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
 
         monitor = utils.primary_monitor()
 

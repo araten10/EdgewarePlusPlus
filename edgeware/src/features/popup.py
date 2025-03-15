@@ -6,6 +6,7 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
+import os_utils
 import utils
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
@@ -37,7 +38,7 @@ class Popup(Toplevel):
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, legacy_key=event.keysym))
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
 
         self.opacity = self.settings.opacity
         self.attributes("-alpha", self.opacity)
