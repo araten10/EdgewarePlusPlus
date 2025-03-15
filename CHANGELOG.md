@@ -9,6 +9,10 @@
 
 **Since last version...**
 
+**Version 15.5**
+
+This is actually a huge update, possibly one of the biggest heavy hitters in a while. The only reason i'm not giving this the version 16 title is because the tutorial tab is almost on its way, and Marigold is working on settings for restricting Edgeware++ to certain monitors! So there will be two big updates back to back. This way everyone can update more important stuff faster, without waiting for everything to come out in one big update. I'm also like 95% done on a second demo pack, which should hopefully be coming out soon.
+
 •*Added a blacklist feature! Alt+Click close any popup you don't like, and it'll be moved to a blacklist folder!*
 >Current blacklist folder is data/blacklist/[Pack Name]. Keep in mind that if you reimport a pack, the blacklisted images will come back- this basically is designed for the multi-import feature or people who only use one pack.
 
@@ -16,6 +20,14 @@
 >The legacy panic hotkey has been kept in in case the new setting doesn't work on certain setups, or if people have muscle memory for their preset hotkeys.
 
 •*Updated the readme in some areas*
+
+•*Denial overlays are now supported for videos*
+
+•*VLC has now been completely replaced with mpv! Make sure you run EdgewareSetup.bat to get it!*
+>This should speed up load times for videos and fix some weird issues people were having, but most importantly, it allows us to use Edgewaresetup.bat to install the video player without asking people to go out and get it themselves. Let us know if you encounter any issues with this new method!
+
+•*GIF files and subliminal overlays also now use mpv*
+>Should drastically reduce performance issues with these types of files, in theory
 
 **Version 15**
 
