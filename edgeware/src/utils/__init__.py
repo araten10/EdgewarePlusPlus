@@ -2,11 +2,14 @@ import getpass
 import logging
 import os
 import platform
+import random
 import sys
 import time
 from hashlib import md5
 
 from paths import Data, PackPaths
+from screeninfo import Monitor, get_monitors
+from settings import Settings
 
 
 class RedactUsernameFormatter(logging.Formatter):
@@ -35,6 +38,15 @@ def compute_mood_id(paths: PackPaths) -> str:
         data.append(sorted(files))
 
     return md5(str(sorted(data)).encode()).hexdigest()
+
+
+def primary_monitor() -> Monitor:
+    return next(m for m in get_monitors() if m.is_primary)
+
+
+def random_monitor(settings: Settings) -> Monitor:
+    enabled_monitors = [m for m in get_monitors() if m.name not in settings.disabled_monitors]
+    return random.choice(enabled_monitors or primary_monitor())
 
 
 def is_linux():

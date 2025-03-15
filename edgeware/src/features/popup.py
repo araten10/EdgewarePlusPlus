@@ -16,7 +16,6 @@ from panic import panic
 from paths import Data
 from PIL import ImageFilter
 from roll import roll
-from screeninfo import get_monitors
 from settings import Settings
 from state import State
 
@@ -54,7 +53,7 @@ class Popup(Toplevel):
         self.try_pump_scare()
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
-        self.monitor = random.choice(get_monitors())
+        self.monitor = utils.random_monitor(self.settings)
 
         source_size = max(source_width, source_height) / min(self.monitor.width, self.monitor.height)
         target_size = (random.randint(30, 70) if not self.settings.lowkey_mode else random.randint(20, 50)) / 100

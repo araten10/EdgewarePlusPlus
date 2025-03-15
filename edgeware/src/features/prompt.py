@@ -3,7 +3,6 @@ from tkinter import Button, Label, Text, Toplevel
 import utils
 from features.theme import get_theme
 from pack import Pack
-from screeninfo import get_monitors
 from settings import Settings
 from state import State
 
@@ -22,7 +21,7 @@ class Prompt(Toplevel):
         utils.set_borderless(self)
         self.configure(background=self.theme.bg)
 
-        monitor = next(m for m in get_monitors() if m.is_primary)
+        monitor = utils.primary_monitor()
         width = monitor.width // 4
         height = monitor.height // 2
         x = monitor.x + (monitor.width - width) // 2

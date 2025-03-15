@@ -93,5 +93,6 @@
   "notificationImageChance": 50,
   "packPath": null,
   "globalPanicButton": "Key.esc",
-  "videoHardwareAcceleration": 1
+  "videoHardwareAcceleration": 1,
+  "disabledMonitors": []
 }

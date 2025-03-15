@@ -1,10 +1,8 @@
-import random
 from tkinter import Label, Toplevel
 
 import utils
 from features.theme import get_theme
 from pack import Pack
-from screeninfo import get_monitors
 from settings import Settings
 
 
@@ -23,7 +21,7 @@ class SubliminalMessagePopup(Toplevel):
         if utils.is_windows():
             self.wm_attributes("-transparentcolor", self.theme.transparent_bg)
 
-        monitor = random.choice(get_monitors())
+        monitor = utils.random_monitor(settings)
 
         font = (self.theme.font, min(monitor.width, monitor.height) // 10)
         label = Label(

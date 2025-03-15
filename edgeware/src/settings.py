@@ -83,6 +83,9 @@ class Settings:
         self.max_subliminals = int(self.config["maxSubliminals"])
         self.subliminal_opacity = int(self.config["subliminalsAlpha"]) / 100  # Float between 0 and 1
 
+        # Monitors
+        self.disabled_monitors = self.config["disabledMonitors"]
+
         # Web
         self.web_chance = int(self.config["webMod"])  # 0 to 100
         self.web_on_popup_close = bool(self.config["webPopup"]) and not lowkey_mode

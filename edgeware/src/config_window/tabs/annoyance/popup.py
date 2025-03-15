@@ -1,28 +1,31 @@
-from tkinter import (
-    CENTER,
-    GROOVE,
-    RAISED,
-    Button,
-    Checkbutton,
-    Frame,
-    Label,
-    Message,
-    Scale,
-    simpledialog,
-    ttk,
-)
+from tkinter import CENTER, GROOVE, RAISED, BooleanVar, Button, Checkbutton, Frame, Label, Message, Misc, Scale, simpledialog, ttk
 from tkinter.font import Font
 
 from config_window.utils import (
     assign,
+    config,
     set_widget_states,
 )
 from config_window.vars import Vars
+from screeninfo import Monitor, get_monitors
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
 INTRO_TEXT = 'Here is where you can change the most important settings of Edgeware: the frequency and behaviour of popups. The "Popup Timer Delay" is how long a popup takes to spawn, and the overall "Popup Chance" then rolls to see if the popup spawns. Keeping the chance at 100% allows for a consistent experience, while lowering it makes for a more random one.\n\nOnce ready to spawn, a popup can be many things: A regular image, a website link (opens in your default browser), a prompt you need to fill out, autoplaying audio or videos, or a subliminal message. All of these are rolled for corresponding to their respective frequency settings, which can be found in the "Audio/Video" tab, "Captions" tab, and this tab as well. There are also plenty of other settings there to configure popups to your liking~! '
 OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
+
+
+class MonitorCheckbutton(Checkbutton):
+    def __init__(self, master: Misc, monitor: Monitor):
+        self.monitor = monitor
+        self.var = BooleanVar(master, self.monitor.name not in config["disabledMonitors"])
+        super().__init__(master, text=f"{self.monitor.name} ({self.monitor.width}x{self.monitor.height})", variable=self.var, command=self.update_monitors)
+
+    def update_monitors(self) -> None:
+        if self.var.get():
+            config["disabledMonitors"].remove(self.monitor.name)
+        else:
+            config["disabledMonitors"].append(self.monitor.name)
 
 
 class PopupTab(ScrollFrame):
@@ -210,3 +213,11 @@ class PopupTab(ScrollFrame):
 
         denial_group = [denial_chance_slider, denial_chance_manual]
         set_widget_states(vars.denial_mode.get(), denial_group)
+
+        # Monitors
+        Label(self.viewPort, text="Enabled Monitors", font=title_font, relief=GROOVE).pack(pady=2)
+
+        monitor_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        monitor_frame.pack(fill="x")
+        for monitor in get_monitors():
+            MonitorCheckbutton(monitor_frame, monitor).pack(fill="x", expand=1)
