@@ -1,12 +1,14 @@
 import getpass
 import logging
 import os
-import platform
+import random
 import sys
 import time
 from hashlib import md5
 
 from paths import Data, PackPaths
+from screeninfo import Monitor, get_monitors
+from settings import Settings
 
 
 class RedactUsernameFormatter(logging.Formatter):
@@ -37,23 +39,10 @@ def compute_mood_id(paths: PackPaths) -> str:
     return md5(str(sorted(data)).encode()).hexdigest()
 
 
-def is_linux():
-    return platform.system() == "Linux"
+def primary_monitor() -> Monitor:
+    return next(m for m in get_monitors() if m.is_primary)
 
 
-def is_windows():
-    return platform.system() == "Windows"
-
-
-def is_mac():
-    return platform.system() == "Darwin"
-
-
-if is_linux():
-    from utils.linux import *  # noqa: F403
-elif is_windows():
-    from utils.windows import *  # noqa: F403
-elif is_mac():
-    from utils.mac import *  # noqa: F403
-else:
-    raise RuntimeError(f"Unsupported operating system: {platform.system()}")
+def random_monitor(settings: Settings) -> Monitor:
+    enabled_monitors = [m for m in get_monitors() if m.name not in settings.disabled_monitors]
+    return random.choice(enabled_monitors or primary_monitor())

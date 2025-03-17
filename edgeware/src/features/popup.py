@@ -1,11 +1,12 @@
-import random
-import time
 import os
+import random
 import shutil
+import time
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
+import os_utils
 import utils
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
@@ -13,11 +14,11 @@ from features.misc import mitosis_popup, open_web
 from features.theme import get_theme
 from pack import Pack
 from panic import panic
+from paths import Data
+from PIL import ImageFilter
 from roll import roll
-from screeninfo import get_monitors
 from settings import Settings
 from state import State
-from paths import Data
 
 
 class Popup(Toplevel):
@@ -33,15 +34,17 @@ class Popup(Toplevel):
         self.state = state
         self.theme = get_theme(settings)
 
-        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, legacy_key=event.keysym))
+        self.denial = roll(self.settings.denial_chance)
 
+        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, legacy_key=event.keysym))
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
 
         self.opacity = self.settings.opacity
         self.attributes("-alpha", self.opacity)
 
     def init_finish(self) -> None:
+        self.try_denial_text()
         self.try_caption()
         self.try_corruption_dev()
         self.try_button()
@@ -51,7 +54,7 @@ class Popup(Toplevel):
         self.try_pump_scare()
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
-        self.monitor = random.choice(get_monitors())
+        self.monitor = utils.random_monitor(self.settings)
 
         source_size = max(source_width, source_height) / min(self.monitor.width, self.monitor.height)
         target_size = (random.randint(30, 70) if not self.settings.lowkey_mode else random.randint(20, 50)) / 100
@@ -73,6 +76,16 @@ class Popup(Toplevel):
             self.x = random.randint(self.monitor.x, self.monitor.x + self.monitor.width - self.width)
             self.y = random.randint(self.monitor.y, self.monitor.y + self.monitor.height - self.height)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
+
+    def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
+        mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
+        image_filters = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20)]
+        return random.choice(mpv_filters if mpv else image_filters) if self.denial else ""
+
+    def try_denial_text(self) -> None:
+        if self.denial:
+            label = Label(self, text=self.pack.random_denial(), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg)
+            label.place(relx=0.5, rely=0.5, anchor="c")
 
     def try_caption(self) -> None:
         caption = self.pack.random_caption(self.media)
@@ -181,17 +194,13 @@ class Popup(Toplevel):
             self.try_mitosis()
 
     def blacklist_media(self) -> None:
-        filename = os.path.basename(self.media).split('/')[-1]
-        try:
-            path_blacklist = Data.BLACKLIST / "".join(self.pack.info.name.split())
-            #print(path_blacklist)
-            if not os.path.exists(path_blacklist):
-                os.makedirs(path_blacklist)
-            shutil.move(self.media, path_blacklist)
-            notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
-            notifier.send(title=self.pack.info.name, message=f"{filename} has been successfully sent to blacklist")
-        except Exception as e:
-            print(f"Could not move to blacklist. {e}")
+        filename = os.path.basename(self.media).split("/")[-1]
+        path_blacklist = Data.BLACKLIST / "".join(self.pack.info.name.split())
+        if not os.path.exists(path_blacklist):
+            os.makedirs(path_blacklist)
+        shutil.move(self.media, path_blacklist)
+        notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(self.pack.icon))
+        notifier.send(title=self.pack.info.name, message=f"{filename} has been successfully sent to blacklist")
 
     def close(self) -> None:
         self.state.popup_number -= 1

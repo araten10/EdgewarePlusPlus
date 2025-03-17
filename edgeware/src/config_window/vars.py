@@ -74,6 +74,7 @@ class Vars:
         self.max_audio = self.make(IntVar, "maxAudio")
         self.max_video_enabled = self.make(BooleanVar, "maxVideoBool")
         self.max_video = self.make(IntVar, "maxVideos")
+        self.video_hardware_acceleration = self.make(BooleanVar, "videoHardwareAcceleration")
 
         self.subliminal_chance = self.make(IntVar, "subliminalsChance")
         self.max_subliminals = self.make(IntVar, "maxSubliminals")
@@ -100,7 +101,6 @@ class Vars:
         self.corruption_themes = self.make(BooleanVar, "corruptionThemeCycle")
         self.corruption_purity = self.make(BooleanVar, "corruptionPurityMode")
 
-        self.vlc_mode = self.make(BooleanVar, "vlcMode")
         self.multi_click_popups = self.make(BooleanVar, "multiClick")
 
         self.theme = self.make(StringVar, "themeType")

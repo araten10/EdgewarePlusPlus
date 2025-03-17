@@ -16,7 +16,7 @@ from paths import CustomAssets, Data
 from PIL import Image, ImageTk
 from widgets.scroll_frame import ScrollFrame
 
-INTRO_TEXT = 'Changing these will change the default file EdgeWare++ falls back on when a replacement isn\'t provided by a pack. The files you choose will be stored under "data."'
+INTRO_TEXT = 'Changing these will change the default file Edgeware++ falls back on when a replacement isn\'t provided by a pack. The files you choose will be stored under "data."'
 
 
 class DefaultImageFrame(Frame):

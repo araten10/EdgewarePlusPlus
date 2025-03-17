@@ -1,3 +1,11 @@
+if __name__ == "__main__":
+    import os
+
+    from paths import Data
+
+    # Required on Windows
+    os.environ["PATH"] += os.pathsep + str(Data.ROOT)
+
 from threading import Thread
 from tkinter import Tk
 
@@ -88,7 +96,7 @@ if __name__ == "__main__":
             main(root, settings, pack, targets)
 
     if settings.startup_splash:
-        StartupSplash(pack, start_main)
+        StartupSplash(settings, pack, start_main)
     else:
         start_main()
 

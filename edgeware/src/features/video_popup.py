@@ -1,4 +1,4 @@
-from tkinter import Label, Tk
+from tkinter import Tk
 
 from features.popup import Popup
 from pack import Pack
@@ -15,14 +15,13 @@ class VideoPopup(Popup):
             return
         super().__init__(root, settings, pack, state)
 
-        video = self.media
-        properties = get_video_properties(video)
-
+        properties = get_video_properties(self.media)
         self.compute_geometry(properties["width"], properties["height"])
-        label = Label(self, width=self.width, height=self.height)
-        label.pack()
-        label.wait_visibility()  # Need to wait for VLC
-        self.player = VideoPlayer(label, video, (self.width, self.height), self.settings.video_volume, self.settings.vlc_mode)
+
+        self.player = VideoPlayer(self, self.settings, self.width, self.height)
+        self.player.volume = self.settings.video_volume
+        self.player.vf = self.try_denial_filter(True)
+        self.player.play(str(self.media))
 
         self.init_finish()
 
@@ -33,6 +32,6 @@ class VideoPopup(Popup):
         return False
 
     def close(self) -> None:
-        self.player.on_close()
+        self.player.close()
         super().close()
         self.state.video_number -= 1

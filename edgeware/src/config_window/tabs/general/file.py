@@ -17,6 +17,7 @@ from tkinter import (
 )
 from tkinter.font import Font
 
+import os_utils
 import utils
 from config_window.import_export import export_pack, import_pack
 from config_window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
@@ -157,7 +158,7 @@ class FileTab(ScrollFrame):
         load_pack_preset_button.pack(fill="both", expand=1)
         CreateToolTip(
             load_pack_preset_button,
-            "In EdgeWare++, the functionality was added for pack creators to add a config file to their pack, "
+            "In Edgeware++, the functionality was added for pack creators to add a config file to their pack, "
             "allowing for quick loading of setting presets tailored to their intended pack experience. It is highly recommended you save your "
             "personal preset beforehand, as this will overwrite all your current settings.\n\nIt should also be noted that this can potentially "
             "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
@@ -180,7 +181,7 @@ class FileTab(ScrollFrame):
 
         logs_col_2 = Frame(logs_frame)
         logs_col_2.pack(fill="both", side="left", expand=1)
-        Button(logs_col_2, text="Open Logs Folder", command=lambda: utils.open_directory(Data.LOGS)).pack(fill="x", expand=1)
+        Button(logs_col_2, text="Open Logs Folder", command=lambda: os_utils.open_directory(Data.LOGS)).pack(fill="x", expand=1)
         delete_logs_button = Button(logs_col_2, text="Delete All Logs", command=lambda: delete_logs(log_number_label), cursor="question_arrow")
         delete_logs_button.pack(fill="x", expand=1)
         CreateToolTip(delete_logs_button, "This will delete every log (except the log currently being written).")
@@ -197,16 +198,18 @@ class FileTab(ScrollFrame):
 
         moods_col_2 = Frame(moods_frame)
         moods_col_2.pack(fill="both", side="left", expand=1)
-        open_moods_button = Button(moods_col_2, height=2, text="Open Moods Folder", command=lambda: utils.open_directory(Data.MOODS), cursor="question_arrow")
+        open_moods_button = Button(
+            moods_col_2, height=2, text="Open Moods Folder", command=lambda: os_utils.open_directory(Data.MOODS), cursor="question_arrow"
+        )
         open_moods_button.pack(fill="x", expand=1)
         CreateToolTip(
             open_moods_button,
             'If your currently loaded pack has a "info.json" file, it can be found under the pack name in this folder.\n\n'
-            "If it does not have this file however, EdgeWare++ will generate a Unique ID for it, so you can still save your mood settings "
+            "If it does not have this file however, Edgeware++ will generate a Unique ID for it, so you can still save your mood settings "
             'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
         )
 
-        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)
+        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: os_utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)
 
     def set_preset_description(self, name: str) -> None:
         self.preset_name_label.configure(text=f"{name} Description")

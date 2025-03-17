@@ -6,15 +6,8 @@ import tempfile
 from pathlib import Path
 from tkinter import Toplevel
 
+import mpv
 from paths import PATH, CustomAssets, Process
-
-try:
-    import vlc
-except FileNotFoundError:
-    # Defined for type hints
-    class vlc:  # noqa: N801
-        MediaPlayer = None
-
 
 PYW = {
     Process.CONFIG: PATH / "config.pyw",
@@ -23,16 +16,16 @@ PYW = {
 }
 
 
+def close_mpv(player: mpv.MPV) -> None:
+    player.terminate()
+
+
 def set_borderless(window: Toplevel) -> None:
     window.overrideredirect(True)
 
 
 def set_wallpaper(wallpaper: Path) -> None:
     ctypes.windll.user32.SystemParametersInfoW(20, 0, str(wallpaper), 0)
-
-
-def set_vlc_window(player: vlc.MediaPlayer, window_id: int) -> None:
-    player.set_hwnd(window_id)
 
 
 def open_directory(url: str) -> None:

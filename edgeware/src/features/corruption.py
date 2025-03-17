@@ -3,7 +3,7 @@ import sys
 import time
 from tkinter import Tk, messagebox
 
-import utils
+import os_utils
 from features.corruption_config import CorruptionConfig
 from pack import Pack
 from paths import Data
@@ -53,7 +53,7 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
     level = pack.corruption_levels[state.corruption_level - 1]
 
     if settings.corruption_wallpaper:
-        utils.set_wallpaper(pack.paths.root / (level.wallpaper or pack.wallpaper))
+        os_utils.set_wallpaper(pack.paths.root / (level.wallpaper or pack.wallpaper))
 
     if settings.corruption_full:
         for key, value in level.config.items():

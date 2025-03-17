@@ -1,24 +1,25 @@
 from collections.abc import Callable
-from tkinter import Toplevel
+from tkinter import Label, Toplevel
 
+import os_utils
 import utils
 from pack import Pack
-from PIL import Image
-from screeninfo import get_monitors
-from widgets.image_label import ImageLabel
+from PIL import Image, ImageTk
+from settings import Settings
+from widgets.video_player import VideoPlayer
 
 
 class StartupSplash(Toplevel):
-    def __init__(self, pack: Pack, callback: Callable[[], None]):
+    def __init__(self, settings: Settings, pack: Pack, callback: Callable[[], None]):
         super().__init__(bg="black")
 
         self.callback = callback
         self.opacity = 0
 
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
 
-        monitor = next(m for m in get_monitors() if m.is_primary)
+        monitor = utils.primary_monitor()
 
         image = Image.open(pack.startup_splash)
 
@@ -30,7 +31,18 @@ class StartupSplash(Toplevel):
         y = monitor.y + (monitor.height - height) // 2
 
         self.geometry(f"{width}x{height}+{x}+{y}")
-        ImageLabel(self, image, (width, height)).pack()
+
+        if getattr(image, "n_frames", 0) > 1:
+            self.player = VideoPlayer(self, settings, width, height)
+            self.player.play(str(pack.startup_splash))
+        else:
+            label = Label(self, width=width, height=height)
+            label.pack()
+
+            resized = image.resize((width, height), Image.LANCZOS).convert("RGBA")
+            self.photo_image = ImageTk.PhotoImage(resized)
+            label.config(image=self.photo_image)
+
         self.fade_in()
 
     def fade_in(self) -> None:
@@ -47,5 +59,7 @@ class StartupSplash(Toplevel):
             self.attributes("-alpha", self.opacity)
             self.after(10 // 4, self.fade_out)
         else:
+            if hasattr(self, "player"):
+                self.player.close()
             self.destroy()
             self.callback()

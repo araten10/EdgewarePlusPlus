@@ -8,8 +8,8 @@ from collections.abc import Callable
 from threading import Thread
 from tkinter import Tk
 
+import os_utils
 import pystray
-import utils
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from pack import Pack
@@ -56,7 +56,7 @@ def display_notification(settings: Settings, pack: Pack) -> None:
 
 
 def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hibernate_activity: Callable[[], None]) -> None:
-    menu = [pystray.MenuItem("Panic", lambda: panic(root, settings, state))]
+    menu = [] if settings.panic_disabled else [pystray.MenuItem("Panic", lambda: panic(root, settings, state))]
     if settings.hibernate_mode:
 
         def skip_hibernate() -> None:
@@ -74,9 +74,9 @@ def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hiber
 
 def make_desktop_icons(settings: Settings) -> None:
     if settings.desktop_icons:
-        utils.make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon())
-        utils.make_shortcut("Edgeware++ Config", Process.CONFIG, CustomAssets.config_icon())
-        utils.make_shortcut("Edgeware++ Panic", Process.PANIC, CustomAssets.panic_icon())
+        os_utils.make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon())
+        os_utils.make_shortcut("Edgeware++ Config", Process.CONFIG, CustomAssets.config_icon())
+        os_utils.make_shortcut("Edgeware++ Panic", Process.PANIC, CustomAssets.panic_icon())
 
 
 def handle_booru_download(settings: Settings, state: State) -> None:
@@ -103,7 +103,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
             wallpapers.remove(previous)
 
         wallpaper = random.choice(wallpapers)
-        utils.set_wallpaper(pack.paths.root / wallpaper)
+        os_utils.set_wallpaper(pack.paths.root / wallpaper)
 
         t = settings.wallpaper_timer
         v = settings.wallpaper_variance
@@ -115,7 +115,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
     if settings.rotate_wallpaper and len(settings.wallpapers) > 1:
         rotate()
     else:
-        utils.set_wallpaper(pack.wallpaper)
+        os_utils.set_wallpaper(pack.wallpaper)
 
 
 def handle_discord(root: Tk, settings: Settings, pack: Pack) -> None:

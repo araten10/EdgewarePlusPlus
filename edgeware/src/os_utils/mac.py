@@ -1,7 +1,11 @@
 from pathlib import Path
 from tkinter import Toplevel
 
-import vlc
+import mpv
+
+
+def close_mpv(player: mpv.MPV) -> None:
+    pass
 
 
 def set_borderless(window: Toplevel) -> None:
@@ -10,10 +14,6 @@ def set_borderless(window: Toplevel) -> None:
 
 def set_wallpaper(wallpaper: Path) -> None:
     pass
-
-
-def set_vlc_window(player: vlc.MediaPlayer, window_id: int) -> None:
-    player.set_nsobject(window_id)
 
 
 def open_directory(url: str) -> None:

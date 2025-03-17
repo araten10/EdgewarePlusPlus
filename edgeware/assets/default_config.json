@@ -1,6 +1,6 @@
 {
   "version": "2.4.2_A",
-  "versionplusplus": "15",
+  "versionplusplus": "15.5",
   "delay": 5000,
   "fill": 0,
   "replace": 0,
@@ -31,7 +31,7 @@
   "timeoutPopups": 0,
   "popupTimeout": 1,
   "mitosisStrength": 2,
-  "avoidList": "EdgeWare>AppData",
+  "avoidList": "edgeware>AppData",
   "booruName": "",
   "booruMinScore": -5,
   "desktopIcons": 1,
@@ -92,5 +92,7 @@
   "notificationChance": 0,
   "notificationImageChance": 50,
   "packPath": null,
-  "globalPanicButton": "Key.esc"
+  "globalPanicButton": "Key.esc",
+  "videoHardwareAcceleration": 1,
+  "disabledMonitors": []
 }

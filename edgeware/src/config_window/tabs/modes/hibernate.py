@@ -41,8 +41,8 @@ class HibernateModeTab(ScrollFrame):
         hibernate_toggle.pack(fill="x", side="top")
         CreateToolTip(
             hibernate_toggle,
-            "Runs EdgeWare silently without any popups.\n\n"
-            "After a random time in the specified range, EdgeWare activates and barrages the user with popups "
+            "Runs Edgeware silently without any popups.\n\n"
+            "After a random time in the specified range, Edgeware activates and barrages the user with popups "
             'based on the "Awaken Activity" value (depending on the hibernate type), then goes back to "sleep".\n\n'
             'Check the "About" tab for more detailed information on each hibernate type.',
         )

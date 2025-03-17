@@ -28,7 +28,7 @@ from PIL import ImageTk
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
-INTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and help like this elsewhere, but I realize that this is probably the most complex and in-depth feature to be added to EdgeWare. Don't worry, we'll work through it together!\n\nEach tab will go over a feature of corruption, while also highlighting where the settings are for reference. Any additional details not covered here can be found in the \"About\" tab!"
+INTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and help like this elsewhere, but I realize that this is probably the most complex and in-depth feature to be added to Edgeware. Don't worry, we'll work through it together!\n\nEach tab will go over a feature of corruption, while also highlighting where the settings are for reference. Any additional details not covered here can be found in the \"About\" tab!"
 START_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
 TRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
 
@@ -57,7 +57,7 @@ class CorruptionModeTab(ScrollFrame):
             " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
             "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
             ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
-            ' EdgeWare.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
+            ' Edgeware.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
         )
         full_permission_toggle = Checkbutton(start_frame, text="Full Permissions Mode", variable=vars.corruption_full, cursor="question_arrow")
         full_permission_toggle.pack(fill="x", expand=1)
@@ -309,7 +309,7 @@ class CorruptionModeTab(ScrollFrame):
                     set_widget_states(True, level_popup_group)
                     set_widget_states(False, level_launch_group)
             if key == "Launch":
-                trigger_description.configure(text="Transitions based on number of EdgeWare launches.")
+                trigger_description.configure(text="Transitions based on number of Edgeware launches.")
                 if tutorial_mode:
                     set_widget_states_with_colors(False, level_time_group, "lime green", "forest green")
                     set_widget_states_with_colors(False, level_popup_group, "lime green", "forest green")

@@ -4,7 +4,7 @@ from collections.abc import Callable
 from threading import Thread
 from tkinter import Tk
 
-import utils
+import os_utils
 from features.drive import fill_drive
 from features.misc import handle_wallpaper
 from pack import Pack
@@ -18,7 +18,7 @@ def reset_wallpaper(settings: Settings, state: State) -> None:
     if not (settings.hibernate_fix_wallpaper and state.popup_number == 0 and not state.hibernate_active):
         return
 
-    utils.set_wallpaper(CustomAssets.panic_wallpaper())
+    os_utils.set_wallpaper(CustomAssets.panic_wallpaper())
 
 
 def spaced(root: Tk, settings: Settings, targets: list[RollTarget], run: Callable[[], bool]) -> None:
