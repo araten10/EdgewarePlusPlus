@@ -1,10 +1,10 @@
 from collections.abc import Callable
 from tkinter import Label, Toplevel
 
+import os_utils
 import utils
 from pack import Pack
 from PIL import Image, ImageTk
-from screeninfo import get_monitors
 from settings import Settings
 from widgets.video_player import VideoPlayer
 
@@ -17,9 +17,9 @@ class StartupSplash(Toplevel):
         self.opacity = 0
 
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
 
-        monitor = next(m for m in get_monitors() if m.is_primary)
+        monitor = utils.primary_monitor()
 
         image = Image.open(pack.startup_splash)
 

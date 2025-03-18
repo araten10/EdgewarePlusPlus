@@ -6,6 +6,7 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
+import os_utils
 import utils
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
@@ -16,7 +17,6 @@ from panic import panic
 from paths import Data
 from PIL import ImageFilter
 from roll import roll
-from screeninfo import get_monitors
 from settings import Settings
 from state import State
 
@@ -38,7 +38,7 @@ class Popup(Toplevel):
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, legacy_key=event.keysym))
         self.attributes("-topmost", True)
-        utils.set_borderless(self)
+        os_utils.set_borderless(self)
 
         self.opacity = self.settings.opacity
         self.attributes("-alpha", self.opacity)
@@ -54,7 +54,7 @@ class Popup(Toplevel):
         self.try_pump_scare()
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
-        self.monitor = random.choice(get_monitors())
+        self.monitor = utils.random_monitor(self.settings)
 
         source_size = max(source_width, source_height) / min(self.monitor.width, self.monitor.height)
         target_size = (random.randint(30, 70) if not self.settings.lowkey_mode else random.randint(20, 50)) / 100

@@ -1,7 +1,7 @@
 from tkinter import Label, Misc
 
 import mpv
-import utils
+import os_utils
 from settings import Settings
 
 
@@ -16,4 +16,4 @@ class VideoPlayer(mpv.MPV):
         self.loop = True
 
     def close(self) -> None:
-        utils.close_mpv(self)
+        os_utils.close_mpv(self)

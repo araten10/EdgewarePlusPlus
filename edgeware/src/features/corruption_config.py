@@ -24,6 +24,7 @@ class CorruptionConfig:
         "messageOff",
         "runOnSaveQuit",
         "themeNoConfig",
+        "disabledMonitors",
         # Changing these settings would most likely not do anything with their current implementation
         "desktopIcons",
         "showLoadingFlair",
