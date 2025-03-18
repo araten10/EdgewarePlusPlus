@@ -199,7 +199,7 @@ class Config(Tk):
         pack_frame = Frame(self)
         pack_frame.pack(fill="x")
         Button(pack_frame, text="Import Resource Pack", command=lambda: import_pack(True)).pack(fill="x", side="left", expand=1)
-        Button(pack_frame, text="Export Resource Pack", command=export_pack).pack(fill="x", side="left", expand=1)
+        #Button(pack_frame, text="Export Resource Pack", command=export_pack).pack(fill="x", side="left", expand=1)
         Button(self, text="Save & Exit", command=lambda: write_save(vars, True)).pack(fill="x")
 
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#

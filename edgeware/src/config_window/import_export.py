@@ -62,18 +62,3 @@ def import_pack(default: bool) -> None:
 
     messagebox.showinfo("Done", f'Pack imported to "{import_location}". Refreshing config window.')
     refresh()
-
-
-def export_pack() -> None:
-    export_location = filedialog.asksaveasfile("w", defaultextension=".zip")
-    with zipfile.ZipFile(export_location.name, "w", compression=zipfile.ZIP_DEFLATED) as zip:
-        for root, dirs, files in os.walk(DEFAULT_PACK_PATH):
-            root_path = Path(root)
-
-            for file in files:
-                zip.write(root_path / file, file if root_path == DEFAULT_PACK_PATH else os.path.join(root_path.name, file))
-
-            for dir in dirs:
-                zip.write(root_path / dir, dir)
-
-    messagebox.showinfo("Done", f'Pack exported to "{export_location.name}".')
