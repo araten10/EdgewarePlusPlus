@@ -26,7 +26,7 @@ from tkinter import (
     ttk,
 )
 
-from config_window.import_export import import_pack
+from config_window.import_pack import import_pack
 from config_window.tabs.annoyance.audio_video import AudioVideoTab
 from config_window.tabs.annoyance.captions import CaptionsTab
 from config_window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
@@ -48,6 +48,7 @@ from config_window.utils import (
     config,
     get_live_version,
     write_save,
+    refresh,
 )
 from config_window.vars import Vars
 from pack import Pack
@@ -198,7 +199,13 @@ class Config(Tk):
 
         pack_frame = Frame(self)
         pack_frame.pack(fill="x")
-        Button(pack_frame, text="Import New Pack", command=lambda: import_pack(True)).pack(fill="x", side="left", expand=1)
+        Button(pack_frame, text="Import New Pack", command=lambda: import_pack(True)).pack(fill="both", side="left", padx=[0,2], pady=[0,2], expand=1)
+        Button(pack_frame, text="Switch Pack", command=lambda: switch_pack(vars)).pack(fill="x", side="left", pady=[0,2], expand=1)
+        Data.PACKS.mkdir(parents=True, exist_ok=True)
+        pack_list = ["default"] + os.listdir(Data.PACKS)
+        pack_dropdown = OptionMenu(pack_frame, vars.pack_path, *pack_list)
+        pack_dropdown["menu"].insert_separator(1)
+        pack_dropdown.pack(padx=[2,0], pady=[0,1], fill="x", side="left", expand=1)
         #Button(pack_frame, text="Load Pack", command=export_pack).pack(fill="x", side="left", expand=1)
         Button(self, text="Save & Exit", command=lambda: write_save(vars, True)).pack(fill="x")
 
@@ -404,6 +411,11 @@ def toggle_help(state: bool, messages: list):
                 widget.destroy()
         except Exception as e:
             logging.warning(f"could not properly turn help off. {e}")
+
+# TODO: Review this function, it was directly copied from the file tab as "save_and_refresh", mainly used for loading the selected pack here
+def switch_pack(vars: Vars) -> None:
+    write_save(vars)
+    refresh()
 
 
 if __name__ == "__main__":

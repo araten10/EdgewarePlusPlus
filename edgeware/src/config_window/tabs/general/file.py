@@ -19,7 +19,7 @@ from tkinter.font import Font
 
 import os_utils
 import utils
-from config_window.import_export import import_pack
+from config_window.import_pack import import_pack
 from config_window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
 from config_window.utils import (
     log_file,
@@ -83,10 +83,10 @@ class FileTab(ScrollFrame):
         Button(self.viewPort, text="Save Settings", command=lambda: write_save(vars)).pack(fill="x", pady=2)
         Button(self.viewPort, text="Save & Refresh", command=lambda: save_and_refresh(vars)).pack(fill="x", pady=2)
 
-        import_export_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        import_export_frame.pack(fill="x", pady=2)
+        import_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        import_frame.pack(fill="x", pady=2)
 
-        pack_selection_frame = Frame(import_export_frame)
+        pack_selection_frame = Frame(import_frame)
         pack_selection_frame.pack(fill="both", pady=2, expand=1)
         Data.PACKS.mkdir(parents=True, exist_ok=True)
         pack_list = ["default"] + os.listdir(Data.PACKS)
@@ -95,9 +95,9 @@ class FileTab(ScrollFrame):
         pack_dropdown.pack(padx=2, fill="x", side="left")
         Button(pack_selection_frame, text="Import New Pack", command=lambda: import_pack(False)).pack(padx=2, fill="x", side="left", expand=1)
 
-        ttk.Separator(import_export_frame, orient="horizontal").pack(fill="x", pady=2)
-        Button(import_export_frame, text="Import Default Pack", command=lambda: import_pack(True)).pack(padx=2, pady=2, fill="x", side="left", expand=1)
-        #Button(import_export_frame, text="Export Default Pack", command=export_pack).pack(padx=2, pady=2, fill="x", side="left", expand=1)
+        ttk.Separator(import_frame, orient="horizontal").pack(fill="x", pady=2)
+        Button(import_frame, text="Import Default Pack", command=lambda: import_pack(True)).pack(padx=2, pady=2, fill="x", side="left", expand=1)
+        #Button(import_frame, text="Export Default Pack", command=export_pack).pack(padx=2, pady=2, fill="x", side="left", expand=1)
 
         # Presets
         Label(self.viewPort, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)

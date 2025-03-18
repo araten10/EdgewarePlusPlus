@@ -29,6 +29,9 @@ This is actually a huge update, possibly one of the biggest heavy hitters in a w
 •*GIF files and subliminal overlays also now use mpv*
 >Should drastically reduce performance issues with these types of files, in theory
 
+•*Removed "Export Pack" from file tab and bottom of the config window, replaced it with a fast pack switcher viewable from any tab*
+>Setting was becoming very obsolete, and the pack creator is now bundled with edgeware
+
 **Version 15**
 
 •*The bulk of the config window refactor is finished! This is mostly backend, but now all tabs have scrollbar support.*
