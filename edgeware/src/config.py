@@ -24,6 +24,7 @@ from tkinter import (
     font,
     messagebox,
     ttk,
+    Toplevel,
 )
 
 from config_window.import_pack import import_pack
@@ -199,7 +200,7 @@ class Config(Tk):
 
         pack_frame = Frame(self)
         pack_frame.pack(fill="x")
-        Button(pack_frame, text="Import New Pack", command=lambda: import_pack(True)).pack(fill="both", side="left", padx=[0,2], pady=[0,2], expand=1)
+        Button(pack_frame, text="Import New Pack", command=lambda: import_window(self)).pack(fill="both", side="left", padx=[0,2], pady=[0,2], expand=1)
         Button(pack_frame, text="Switch Pack", command=lambda: switch_pack(vars)).pack(fill="x", side="left", pady=[0,2], expand=1)
         Data.PACKS.mkdir(parents=True, exist_ok=True)
         pack_list = ["default"] + os.listdir(Data.PACKS)
@@ -417,6 +418,25 @@ def switch_pack(vars: Vars) -> None:
     write_save(vars)
     refresh()
 
+def import_window(parent: Tk) -> None:
+    allow = False
+    root = Toplevel(parent)
+    root.geometry('350x225')
+    root.resizable(False, False)
+    root.wm_attributes('-toolwindow', 1)
+    root.focus_force()
+    root.title("Import New Pack")
+    message = "Would you like to import a new pack, or change the default pack instead?\n\nImporting a new pack saves it to /data/packs, and allows fast switching between all packs saved this way.\n\nChanging the default pack saves it to /resource, overwriting any pack previously saved there.\n"
+    Label(root, text=message, wraplength=325).pack(fill='x')
+    Button(root, text='Import New', command=lambda: import_pack(False)).pack()
+    Button(root, text='Change Default', command=lambda: import_pack(True)).pack()
+    Button(root, text='Cancel', command=lambda: root.destroy()).pack()
+    root.mainloop()
+    try:
+        root.destroy()
+    except:
+        False
+    return allow
 
 if __name__ == "__main__":
     try:
