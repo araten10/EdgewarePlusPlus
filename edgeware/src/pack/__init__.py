@@ -73,16 +73,19 @@ class Pack:
         return (self.find_media_mood(media).captions or self.index.default.captions) if media else self.find_list("captions")
 
     def random_caption(self, media: Path | None = None) -> str | None:
-        return random.choice(self.find_captions(media) or [None])
+        captions = self.find_captions(media)
+        return random.choice(captions) if captions else None
 
     def random_clicks_to_close(self, media: Path) -> int:
         return random.randint(1, self.find_media_mood(media).max_clicks)
 
-    def random_subliminal_message(self) -> str:
-        return random.choice(self.find_list("subliminals") or self.find_captions())
+    def random_subliminal_message(self) -> str | None:
+        subliminals = self.find_list("subliminals")
+        return random.choice(subliminals) if subliminals else self.random_caption()
 
-    def random_notification(self) -> str:
-        return random.choice(self.find_list("notifications") or self.find_captions())
+    def random_notification(self) -> str | None:
+        notifications = self.find_list("notifications")
+        return random.choice(notifications) if notifications else self.random_caption()
 
     def random_denial(self) -> str:
         return random.choice(self.find_list("denial") or ["Not for you~"])
