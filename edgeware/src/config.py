@@ -422,7 +422,6 @@ def import_window(parent: Tk) -> None:
     root = Toplevel(parent)
     root.geometry('350x225')
     root.resizable(False, False)
-    root.wm_attributes('-toolwindow', 1)
     root.focus_force()
     root.title("Import New Pack")
     message = "Would you like to import a new pack, or change the default pack instead?\n\nImporting a new pack saves it to /data/packs, and allows fast switching between all packs saved this way.\n\nChanging the default pack saves it to /resource, overwriting any pack previously saved there.\n"
