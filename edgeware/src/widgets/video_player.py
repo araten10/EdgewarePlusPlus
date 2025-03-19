@@ -1,7 +1,7 @@
 from tkinter import Label, Misc
 
 import mpv
-import os_utils
+from os_utils import close_mpv, is_linux
 from settings import Settings
 
 
@@ -13,7 +13,9 @@ class VideoPlayer(mpv.MPV):
 
         super().__init__(wid=label.winfo_id())
         self["hwdec"] = "auto" if settings.video_hardware_acceleration else "no"
+        if is_linux():
+            self["gpu-context"] = "x11"
         self.loop = True
 
     def close(self) -> None:
-        os_utils.close_mpv(self)
+        close_mpv(self)
