@@ -419,7 +419,6 @@ def switch_pack(vars: Vars) -> None:
     refresh()
 
 def import_window(parent: Tk) -> None:
-    allow = False
     root = Toplevel(parent)
     root.geometry('350x225')
     root.resizable(False, False)
