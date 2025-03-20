@@ -16,6 +16,7 @@ from tkinter import (
     Checkbutton,
     Frame,
     Label,
+    Listbox,
     Message,
     OptionMenu,
     Scale,
@@ -25,8 +26,6 @@ from tkinter import (
     font,
     messagebox,
     ttk,
-    Toplevel,
-    Listbox,
 )
 
 from config_window.import_pack import import_pack
@@ -409,8 +408,9 @@ def toggle_help(state: bool, messages: list):
         except Exception as e:
             logging.warning(f"could not properly turn help off. {e}")
 
+
 def switch_pack(vars: Vars, pack: str) -> None:
-    vars.pack_path = pack
+    vars.pack_path.set(pack)
     write_save(vars)
     refresh()
 
@@ -418,7 +418,7 @@ def switch_pack(vars: Vars, pack: str) -> None:
 def import_window(parent: Tk) -> None:
     root = Toplevel(parent)
     root.geometry("350x225")
-    root.resizable(False, False)
+    root.resizable(False, True)
     root.focus_force()
     root.title("Import New Pack")
 
@@ -433,9 +433,8 @@ def import_window(parent: Tk) -> None:
 
 def switch_window(parent: Tk, vars: Vars) -> None:
     root = Toplevel(parent)
-    root.geometry('275x290')
-    root.resizable(False, False)
-    #root.wm_attributes('-toolwindow', 1)
+    root.geometry("275x290")
+    root.resizable(False, True)
     root.focus_force()
     root.title("Switch Pack")
 
@@ -459,9 +458,10 @@ def switch_window(parent: Tk, vars: Vars) -> None:
     switch_list_scrollbar.pack(side="left", fill="y")
     switch_buttons_frame = Frame(root)
     switch_buttons_frame.pack()
-    Button(switch_buttons_frame, text='Switch', command=lambda: switch_pack(vars, get_list_entry(switch_list))).pack(side="left")
-    Button(switch_buttons_frame, text='Default', command=lambda: switch_pack(vars, "default")).pack(side="left", padx=5)
-    Button(switch_buttons_frame, text='Cancel', command=lambda: root.destroy()).pack(side="left")
+    Button(switch_buttons_frame, text="Switch", command=lambda: switch_pack(vars, get_list_entry(switch_list))).pack(side="left")
+    Button(switch_buttons_frame, text="Default", command=lambda: switch_pack(vars, "default")).pack(side="left", padx=5)
+    Button(switch_buttons_frame, text="Cancel", command=lambda: root.destroy()).pack(side="left")
+
 
 if __name__ == "__main__":
     try:
