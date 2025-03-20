@@ -25,6 +25,7 @@ from tkinter import (
     messagebox,
     ttk,
     Toplevel,
+    Listbox,
 )
 
 from config_window.import_pack import import_pack
@@ -200,14 +201,8 @@ class Config(Tk):
 
         pack_frame = Frame(self)
         pack_frame.pack(fill="x")
-        Button(pack_frame, text="Import New Pack", command=lambda: import_window(self)).pack(fill="both", side="left", padx=[0,2], pady=[0,2], expand=1)
-        Button(pack_frame, text="Switch Pack", command=lambda: switch_pack(vars)).pack(fill="x", side="left", pady=[0,2], expand=1)
-        Data.PACKS.mkdir(parents=True, exist_ok=True)
-        pack_list = ["default"] + os.listdir(Data.PACKS)
-        pack_dropdown = OptionMenu(pack_frame, vars.pack_path, *pack_list)
-        pack_dropdown["menu"].insert_separator(1)
-        pack_dropdown.pack(padx=[2,0], pady=[0,1], fill="x", side="left", expand=1)
-        #Button(pack_frame, text="Load Pack", command=export_pack).pack(fill="x", side="left", expand=1)
+        Button(pack_frame, text="Import New Pack", command=lambda: import_window(self)).pack(fill="both", side="left", expand=1)
+        Button(pack_frame, text="Switch Pack", command=lambda: switch_window(self, vars)).pack(fill="x", side="left", expand=1)
         Button(self, text="Save & Exit", command=lambda: write_save(vars, True)).pack(fill="x")
 
         # ==========={IN HERE IS ABOUT TAB ITEM INITS}===========#
@@ -413,8 +408,8 @@ def toggle_help(state: bool, messages: list):
         except Exception as e:
             logging.warning(f"could not properly turn help off. {e}")
 
-# TODO: Review this function, it was directly copied from the file tab as "save_and_refresh", mainly used for loading the selected pack here
-def switch_pack(vars: Vars) -> None:
+def switch_pack(vars: Vars, pack: str) -> None:
+    vars.pack_path = pack
     write_save(vars)
     refresh()
 
@@ -425,6 +420,7 @@ def import_window(parent: Tk) -> None:
     root.wm_attributes('-toolwindow', 1)
     root.focus_force()
     root.title("Import New Pack")
+
     message = "Would you like to import a new pack, or change the default pack instead?\n\nImporting a new pack saves it to /data/packs, and allows fast switching between all packs saved this way.\n\nChanging the default pack saves it to /resource, overwriting any pack previously saved there.\n"
     Label(root, text=message, wraplength=325).pack(fill='x')
     Button(root, text='Import New', command=lambda: import_pack(False)).pack()
@@ -436,6 +432,38 @@ def import_window(parent: Tk) -> None:
     except:
         False
     return allow
+
+def switch_window(parent: Tk, vars: Vars) -> None:
+    root = Toplevel(parent)
+    root.geometry('275x290')
+    root.resizable(False, False)
+    #root.wm_attributes('-toolwindow', 1)
+    root.focus_force()
+    root.title("Switch Pack")
+
+    switch_list_frame = Frame(root)
+    switch_list_frame.pack()
+    switch_list = Listbox(switch_list_frame, width=40, height=15)
+    Data.PACKS.mkdir(parents=True, exist_ok=True)
+    pack_list = os.listdir(Data.PACKS)
+    i = 0
+    for i, pack in enumerate(pack_list):
+        switch_list.insert(i, pack)
+
+    def get_list_entry(listbox: Listbox) -> str:
+        selection = listbox.curselection()
+        selected_pack = listbox.get(selection[0])
+        print(selected_pack)
+        return selected_pack
+
+    switch_list.pack(side="left")
+    switch_list_scrollbar = ttk.Scrollbar(switch_list_frame, orient="vertical", command=switch_list.yview)
+    switch_list_scrollbar.pack(side="left", fill="y")
+    switch_buttons_frame = Frame(root)
+    switch_buttons_frame.pack()
+    Button(switch_buttons_frame, text='Switch', command=lambda: switch_pack(vars, get_list_entry(switch_list))).pack(side="left")
+    Button(switch_buttons_frame, text='Default', command=lambda: switch_pack(vars, "default")).pack(side="left", padx=5)
+    Button(switch_buttons_frame, text='Cancel', command=lambda: root.destroy()).pack(side="left")
 
 if __name__ == "__main__":
     try:
