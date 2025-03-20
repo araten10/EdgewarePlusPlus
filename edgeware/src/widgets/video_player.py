@@ -1,7 +1,7 @@
 from tkinter import Label, Misc
 
 import mpv
-import os_utils
+from os_utils import close_mpv, init_mpv
 from settings import Settings
 
 
@@ -12,8 +12,9 @@ class VideoPlayer(mpv.MPV):
         label.wait_visibility()  # Needs to be visible for mpv to draw on it
 
         super().__init__(wid=label.winfo_id())
+        init_mpv(self)
         self["hwdec"] = "auto" if settings.video_hardware_acceleration else "no"
         self.loop = True
 
     def close(self) -> None:
-        os_utils.close_mpv(self)
+        close_mpv(self)

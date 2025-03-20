@@ -1,3 +1,4 @@
+import gc
 import logging
 import os
 import shlex
@@ -9,12 +10,45 @@ from tkinter import Toplevel
 import mpv
 from paths import CustomAssets, Process
 from settings import load_default_config
+from Xlib.display import Display
+from Xlib.error import BadWindow
 
 from os_utils.linux_utils import get_desktop_environment, get_wallpaper_commands, get_wallpaper_function
 
+# Stores references to all mpv players so that they don't get terminated by the
+# garbage collector prematurely before the X window created by Tkinter has been
+# destroyed, otherwise Tkinter may produce an X error and crash the program
+mpv_players = []
+x_display = Display()
+
+
+def mpv_player_gc(phase: str, info: dict) -> None:
+    global mpv_players
+    if phase != "stop":
+        return
+
+    alive = []
+    for player, x_window in mpv_players:
+        try:
+            x_window.get_attributes()
+            alive.append((player, x_window))
+        except BadWindow:
+            # Only terminate the player once the X window is destroyed
+            player.terminate()
+
+    mpv_players = alive
+
+
+gc.callbacks.append(mpv_player_gc)
+
+
+def init_mpv(player: mpv.MPV) -> None:
+    player["gpu-context"] = "x11"  # Required on Wayland for embedding the player
+    mpv_players.append((player, x_display.create_resource_object("window", player.wid)))
+
 
 def close_mpv(player: mpv.MPV) -> None:
-    player.quit(0)
+    player.stop()
 
 
 def set_borderless(window: Toplevel) -> None:

@@ -9,6 +9,7 @@ pygame
 pynput
 pypresence
 pystray
+python-xlib; sys_platform == 'linux'
 requests
 screeninfo
 sounddevice

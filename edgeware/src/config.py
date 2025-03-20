@@ -21,6 +21,7 @@ from tkinter import (
     Scale,
     Text,
     Tk,
+    Toplevel,
     font,
     messagebox,
     ttk,
@@ -49,8 +50,8 @@ from config_window.utils import (
     all_children,
     config,
     get_live_version,
-    write_save,
     refresh,
+    write_save,
 )
 from config_window.vars import Vars
 from pack import Pack
@@ -413,25 +414,22 @@ def switch_pack(vars: Vars, pack: str) -> None:
     write_save(vars)
     refresh()
 
+
 def import_window(parent: Tk) -> None:
     root = Toplevel(parent)
-    root.geometry('350x225')
+    root.geometry("350x225")
     root.resizable(False, False)
-    root.wm_attributes('-toolwindow', 1)
     root.focus_force()
     root.title("Import New Pack")
 
     message = "Would you like to import a new pack, or change the default pack instead?\n\nImporting a new pack saves it to /data/packs, and allows fast switching between all packs saved this way.\n\nChanging the default pack saves it to /resource, overwriting any pack previously saved there.\n"
-    Label(root, text=message, wraplength=325).pack(fill='x')
-    Button(root, text='Import New', command=lambda: import_pack(False)).pack()
-    Button(root, text='Change Default', command=lambda: import_pack(True)).pack()
-    Button(root, text='Cancel', command=lambda: root.destroy()).pack()
+    Label(root, text=message, wraplength=325).pack(fill="x")
+    Button(root, text="Import New", command=lambda: import_pack(False)).pack()
+    Button(root, text="Change Default", command=lambda: import_pack(True)).pack()
+    Button(root, text="Cancel", command=lambda: root.destroy()).pack()
     root.mainloop()
-    try:
-        root.destroy()
-    except:
-        False
-    return allow
+    root.destroy()
+
 
 def switch_window(parent: Tk, vars: Vars) -> None:
     root = Toplevel(parent)

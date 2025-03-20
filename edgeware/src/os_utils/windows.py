@@ -16,6 +16,10 @@ PYW = {
 }
 
 
+def init_mpv(player: mpv.MPV) -> None:
+    pass  # Nothing special needs to be done on Windows
+
+
 def close_mpv(player: mpv.MPV) -> None:
     player.terminate()
 
