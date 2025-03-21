@@ -9,6 +9,11 @@
 
 **Since last version...**
 
+•*Removed "Export Pack" from the bottom of the config window, replacing it with the pack switcher and improved pack import buttons*
+>We've moved on to a system that has multiple pack support, allowing you to quickly swap between things... on top of that, exporting packs was becoming increasingly obsolete. The pack creator tool now comes bundled with Edgeware++, and if people still prefer to do it the old fashioned way they can still zip up the resource folder! If you liked having everything in just one folder and didn't make use of the pack switching feature, don't worry- you can choose to import packs as "default" when you click the new "import pack" button.
+
+•*Potentially fixed a crash on linux involving mpv and tkinter conflicts*
+
 **Version 15.5**
 
 This is actually a huge update, possibly one of the biggest heavy hitters in a while. The only reason i'm not giving this the version 16 title is because the tutorial tab is almost on its way, and Marigold is working on settings for restricting Edgeware++ to certain monitors! So there will be two big updates back to back. This way everyone can update more important stuff faster, without waiting for everything to come out in one big update. I'm also like 95% done on a second demo pack, which should hopefully be coming out soon.

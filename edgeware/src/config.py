@@ -433,10 +433,12 @@ def import_window(parent: Tk) -> None:
 
 def switch_window(parent: Tk, vars: Vars) -> None:
     root = Toplevel(parent)
-    root.geometry("275x290")
+    root.geometry("275x340")
     root.resizable(False, True)
     root.focus_force()
     root.title("Switch Pack")
+
+    Label(root, text=f"Currently loaded pack:\n{vars.pack_path.get()}", wraplength=250).pack(fill="x")
 
     switch_list_frame = Frame(root)
     switch_list_frame.pack()
