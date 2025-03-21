@@ -14,6 +14,11 @@
 
 •*Potentially fixed a crash on linux involving mpv and tkinter conflicts*
 
+•*Removed a bunch of duplicate items in the file tab*
+>Originally put stuff like pack loading and exporting at the top of the file tab to help with anyone who had issues on smaller monitors, but now with the scrollbars on each tab there should be much less issue with that.
+
+•*Fixed some small errors/inaccuracies with help text throughout the config window*
+
 **Version 15.5**
 
 This is actually a huge update, possibly one of the biggest heavy hitters in a while. The only reason i'm not giving this the version 16 title is because the tutorial tab is almost on its way, and Marigold is working on settings for restricting Edgeware++ to certain monitors! So there will be two big updates back to back. This way everyone can update more important stuff faster, without waiting for everything to come out in one big update. I'm also like 95% done on a second demo pack, which should hopefully be coming out soon.

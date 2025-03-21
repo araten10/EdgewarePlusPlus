@@ -17,7 +17,7 @@ from pack import Pack
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
-MULTI_PACK_TEXT = 'NOTE: If you have multiple packs loaded (via the file tab), make sure to apply the pack you want using the "Save & Refresh" button there! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
+MULTI_PACK_TEXT = 'NOTE: If you have multiple packs loaded, make sure to apply the pack you want using the "Switch Pack" button at the bottom of the window! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
 
 
 def list_length(pack: Pack, attr: str) -> list:
