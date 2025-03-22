@@ -12,12 +12,20 @@
 •*Removed "Export Pack" from the bottom of the config window, replacing it with the pack switcher and improved pack import buttons*
 >We've moved on to a system that has multiple pack support, allowing you to quickly swap between things... on top of that, exporting packs was becoming increasingly obsolete. The pack creator tool now comes bundled with Edgeware++, and if people still prefer to do it the old fashioned way they can still zip up the resource folder! If you liked having everything in just one folder and didn't make use of the pack switching feature, don't worry- you can choose to import packs as "default" when you click the new "import pack" button.
 
-•*Potentially fixed a crash on linux involving mpv and tkinter conflicts*
-
 •*Removed a bunch of duplicate items in the file tab*
 >Originally put stuff like pack loading and exporting at the top of the file tab to help with anyone who had issues on smaller monitors, but now with the scrollbars on each tab there should be much less issue with that.
 
+•*Added a "monitor whitelist" feature under Popups, which forces Edgeware to be restricted to certain monitors if enabled*
+
+•*Potentially fixed a crash on linux involving mpv and tkinter conflicts*
+
 •*Fixed some small errors/inaccuracies with help text throughout the config window*
+
+•*Fixed an oversight with tray panic not being disabled by the "disable panic" option*
+
+•*Fixed a crash with notifications and subliminal messages when there are no captions in the pack*
+
+•*Fixed a bug on Wayland (Linux) where mpv players don't get embedded inside popups*
 
 **Version 15.5**
 
