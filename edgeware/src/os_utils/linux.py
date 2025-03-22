@@ -44,6 +44,7 @@ gc.callbacks.append(mpv_player_gc)
 
 def init_mpv(player: mpv.MPV) -> None:
     player["gpu-context"] = "x11"  # Required on Wayland for embedding the player
+    player["input-cursor-passthrough"] = "yes"  # Required for buttonless closing
     mpv_players.append((player, x_display.create_resource_object("window", player.wid)))
 
 
