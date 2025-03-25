@@ -29,7 +29,7 @@ def write_media(build: Build, media: dict[str, [str]]) -> set[str]:
 def write_captions(pack: yaml.Node, build: Build) -> set[str]:
     if not validate(pack, "captions", schemas.CAPTION):
         logging.info("Skipping captions.json")
-        return
+        return set()
 
     captions = {
         "subtext": pack["captions"]["close-text"],
@@ -74,7 +74,7 @@ def write_captions(pack: yaml.Node, build: Build) -> set[str]:
 def write_prompt(pack: yaml.Node, build: Build) -> set[str]:
     if not validate(pack, "prompt", schemas.PROMPT):
         logging.info("Skipping prompt.json")
-        return
+        return set()
 
     prompt = {
         "subtext": pack["prompt"]["submit-text"],
@@ -110,7 +110,7 @@ def write_prompt(pack: yaml.Node, build: Build) -> set[str]:
 def write_web(pack: yaml.Node, build: Build) -> set[str]:
     if not validate(pack, "web", schemas.WEB):
         logging.info("Skipping web.json")
-        return
+        return set()
 
     web = {"urls": [], "moods": [], "args": []}
 
