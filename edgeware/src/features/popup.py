@@ -98,7 +98,7 @@ class Popup(Toplevel):
                     for w, h, x, y in geometries:
                         intersection = max(0, min(sx + sw, x + w) - max(sx, x)) * max(0, min(sy + sh, y + h) - max(sy, y))
                         nonoverlap = 1 - intersection / (sw * sh)
-                        distance_squared = abs(sx + sw / 2 - (x + w / 2)) ** 2 + abs(sy + sh / 2 - (y + h / 2)) ** 2
+                        distance_squared = (sx + sw / 2 - (x + w / 2)) ** 2 + (sy + sh / 2 - (y + h / 2)) ** 2
                         weight = min(2 ** (32 * nonoverlap) + distance_squared, weight)
 
                     positions.append((sx, sy))
