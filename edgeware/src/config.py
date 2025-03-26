@@ -58,7 +58,6 @@ from pack import Pack
 from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from settings import load_default_config
-from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
@@ -138,7 +137,7 @@ class Config(Tk):
 
         notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
-        notebook.add(TutorialTab(vars, title_font), text="Tutorial") # tab for tutorial, etc
+        notebook.add(TutorialTab(vars, title_font), text="Tutorial")  # tab for tutorial, etc
 
         style = ttk.Style(self)  # style setting for left aligned tabs
 

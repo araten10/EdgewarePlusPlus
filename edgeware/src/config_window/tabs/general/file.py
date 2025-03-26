@@ -13,13 +13,11 @@ from tkinter import (
     OptionMenu,
     StringVar,
     messagebox,
-    ttk,
 )
 from tkinter.font import Font
 
 import os_utils
 import utils
-from config_window.import_pack import import_pack
 from config_window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
 from config_window.utils import (
     log_file,
