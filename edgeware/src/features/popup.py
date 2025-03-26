@@ -32,6 +32,7 @@ class Popup(Toplevel):
         self.settings = settings
         self.pack = pack
         self.state = state
+        self.popup_id = state.get_popup_id()
         self.theme = get_theme(settings)
 
         self.denial = roll(self.settings.denial_chance)
@@ -73,8 +74,49 @@ class Popup(Toplevel):
             self.x = self.monitor.x + (self.monitor.width - self.width if right else 0)
             self.y = self.monitor.y + (self.monitor.height - self.height if bottom else 0)
         else:
-            self.x = random.randint(self.monitor.x, self.monitor.x + self.monitor.width - self.width)
-            self.y = random.randint(self.monitor.y, self.monitor.y + self.monitor.height - self.height)
+            positions = []
+            weights = []
+
+            # Divide the area of possible coordinates with respect to the
+            # monitor and popup sizes into a grid of side * side squares.
+            # Considering each pixel individually is unnecessary and too slow.
+            side = 50
+            area_width = self.monitor.width - self.width
+            area_height = self.monitor.height - self.height
+            for x_index in range(area_width // side):
+                for y_index in range(area_height // side):
+                    # Possible coordinates for this popup
+                    sx = x_index * side + self.monitor.x
+                    sy = y_index * side + self.monitor.y
+                    sw = self.width
+                    sh = self.height
+
+                    # Compute the weight for this position, preferring positions
+                    # that reduce popup overlap and clustering
+                    geometries = self.state.popup_geometries.values()
+                    weight = float("inf") if geometries else 1
+                    for w, h, x, y in geometries:
+                        intersection = max(0, min(sx + sw, x + w) - max(sx, x)) * max(0, min(sy + sh, y + h) - max(sy, y))
+                        nonoverlap = 1 - intersection / (sw * sh)
+                        distance_squared = abs(sx + sw / 2 - (x + w / 2)) ** 2 + abs(sy + sh / 2 - (y + h / 2)) ** 2
+                        weight = min(2 ** (32 * nonoverlap) + distance_squared, weight)
+
+                    positions.append((sx, sy))
+                    weights.append(weight)
+
+            # Select a position inside the chosen square randomly
+            min_x, min_y = random.choices(positions, weights)[0]
+
+            # In case the area can't be neatly divided into squares
+            max_x = min_x + side
+            max_x += (area_width % side if area_width - max_x < side else 0) - 1
+            max_y = min_y + side
+            max_y += (area_height % side if area_height - max_y < side else 0) - 1
+
+            self.x = random.randint(min_x, max_x)
+            self.y = random.randint(min_y, max_y)
+
+        self.state.popup_geometries[self.popup_id] = (self.width, self.height, self.x, self.y)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
@@ -204,5 +246,6 @@ class Popup(Toplevel):
 
     def close(self) -> None:
         self.state.popup_number -= 1
+        self.state.popup_geometries.pop(self.popup_id)
         self.try_web_open()
         self.destroy()
