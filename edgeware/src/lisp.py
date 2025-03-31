@@ -244,7 +244,7 @@ def eval(exp: Expression, env: Environment) -> Expression | None:
                     p_env = procedure.env(args)
                     for p_exp in procedure.body[0:-1]:
                         eval(p_exp, p_env)
-                    exp, env = procedure.body[-1], p_exp
+                    exp, env = procedure.body[-1], p_env
                 else:
                     return procedure(*args)
 
