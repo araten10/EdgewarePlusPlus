@@ -80,9 +80,63 @@ class Environment:
         self.find(symbol).frame[symbol] = value
 
 
+class Macro:
+    def __init__(self, function: Callable[[list[Expression]], Expression]):
+        self.function = function
+
+    def expand(self, cdr: list[Expression]) -> Expression:
+        return self.function(cdr)
+
+
+def and_function(cdr: list[Expression]) -> Expression:
+    if len(cdr) > 0:
+        test = cdr.pop(0)
+        return [Symbol("if"), test, [Symbol("and"), *cdr], False]
+    else:
+        return True
+
+
+def or_function(cdr: list[Expression]) -> Expression:
+    if len(cdr) > 0:
+        test = cdr.pop(0)
+        return [Symbol("let"), [[Symbol("test"), test]], [Symbol("if"), Symbol("test"), Symbol("test"), [Symbol("or"), *cdr]]]
+    else:
+        return False
+
+
+def let_function(cdr: list[Expression]) -> Expression:
+    assert len(cdr) >= 1 and (isinstance(cdr[0], Symbol) or isinstance(cdr[0], list))
+    if isinstance(cdr[0], Symbol):
+        # Named let
+        name, bindings, *body = cdr
+        assert isinstance(bindings, list) and all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
+        vars = [var for var, init in bindings]
+        return [Symbol("let"), [*bindings, [name, [Symbol("lambda"), vars, *body]]], [name, *vars]]
+    else:
+        # letrec*
+        bindings, *body = cdr
+        assert all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
+        if len(bindings) > 0:
+            var, init = bindings.pop(0)
+            return [[Symbol("lambda"), [], [Symbol("define"), var, init], [Symbol("let"), bindings, *body]]]
+        else:
+            return [[Symbol("lambda"), [], *body]]
+
+
+def begin_function(cdr: list[Expression]) -> Expression:
+    if len(cdr) > 1:
+        return [Symbol("if"), cdr.pop(0), [Symbol("begin"), *cdr], [Symbol("begin"), *cdr]]
+    else:
+        return cdr[0]
+
+
 modules = {
     "standard": {
         "1.0": {
+            "and": Macro(and_function),
+            "or": Macro(or_function),
+            "let": Macro(let_function),
+            "begin": Macro(begin_function),
             "print": print,
             "after": lambda delay, callback: root.after(delay, callback),
             "+": lambda *args: operator.add(*args) if len(args) > 1 else operator.pos(*args),
@@ -223,54 +277,20 @@ def eval(exp: Expression, env: Environment) -> Expression | None:
                         env.define(var, value)
                 return
 
-            case [Symbol("and"), *cdr]:
-                if len(cdr) > 0:
-                    test = cdr.pop(0)
-                    exp = [Symbol("if"), test, [Symbol("and"), *cdr], False]
-                else:
-                    exp = True
+            case [car, *cdr]:
+                value = eval(car, env)
+                match value:
+                    case Macro():
+                        exp = value.expand(cdr)
 
-            case [Symbol("or"), *cdr]:
-                if len(cdr) > 0:
-                    test = cdr.pop(0)
-                    exp = [Symbol("let"), [[Symbol("test"), test]], [Symbol("if"), Symbol("test"), Symbol("test"), [Symbol("or"), *cdr]]]
-                else:
-                    exp = False
+                    case Procedure():
+                        p_env = value.env([eval(arg, env) for arg in cdr])
+                        for p_exp in value.body[0:-1]:
+                            eval(p_exp, p_env)
+                        exp, env = value.body[-1], p_env
 
-            case [Symbol("let"), *cdr]:
-                assert len(cdr) >= 1 and (isinstance(cdr[0], Symbol) or isinstance(cdr[0], list))
-                if isinstance(cdr[0], Symbol):
-                    # Named let
-                    name, bindings, *body = cdr
-                    assert isinstance(bindings, list) and all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
-                    vars = [var for var, init in bindings]
-                    exp = [Symbol("let"), [*bindings, [name, [Symbol("lambda"), vars, *body]]], [name, *vars]]
-                else:
-                    # letrec*
-                    bindings, *body = cdr
-                    assert all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
-                    if len(bindings) > 0:
-                        var, init = bindings.pop(0)
-                        exp = [[Symbol("lambda"), [], [Symbol("define"), var, init], [Symbol("let"), bindings, *body]]]
-                    else:
-                        exp = [[Symbol("lambda"), [], *body]]
-
-            case [Symbol("begin"), *cdr]:
-                if len(cdr) > 1:
-                    exp = [Symbol("if"), cdr.pop(0), [Symbol("begin"), *cdr], [Symbol("begin"), *cdr]]
-                else:
-                    exp = cdr[0]
-
-            case [operator, *cdr]:
-                procedure = eval(operator, env)
-                args = [eval(arg, env) for arg in cdr]
-                if isinstance(procedure, Procedure):
-                    p_env = procedure.env(args)
-                    for p_exp in procedure.body[0:-1]:
-                        eval(p_exp, p_env)
-                    exp, env = procedure.body[-1], p_env
-                else:
-                    return procedure(*args)
+                    case _:
+                        return value(*[eval(arg, env) for arg in cdr])
 
             case _:
                 raise Exception(f"Syntax error in expression {exp}")
