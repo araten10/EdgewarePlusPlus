@@ -45,7 +45,7 @@ from config_window.tabs.modes.corruption import CorruptionModeTab
 from config_window.tabs.modes.dangerous_modes import DangerousModesTab
 from config_window.tabs.modes.hibernate import HibernateModeTab
 from config_window.tabs.troubleshooting import TroubleshootingTab
-from config_window.tabs.tutorial import TutorialTab
+from config_window.tabs.tutorial import TutorialTab, openTutorial
 from config_window.utils import (
     all_children,
     config,
@@ -138,7 +138,8 @@ class Config(Tk):
 
         notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
-        notebook.add(TutorialTab(vars, title_font), text="Tutorial") # tab for tutorial, etc
+        notebook.add(Frame(), text="Tutorial") # tab for tutorial, etc
+        notebook.bind("<<NotebookTabChanged>>", lambda event: openTutorial(event, self))
 
         style = ttk.Style(self)  # style setting for left aligned tabs
 
@@ -196,6 +197,7 @@ class Config(Tk):
                 'Main local version and web version are not the same.\nPlease visit the Github and download the newer files,\nor use the direct download link on the "Start" tab.',
             )
         self.mainloop()
+
 
 
 # helper funcs for lambdas =======================================================
@@ -348,7 +350,6 @@ def theme_change(theme: str, root, style, mfont, tfont):
             mfont.configure(family="Constantia")
             tfont.configure(family="Constantia")
 
-
 def toggle_help(state: bool, messages: list):
     if state is True:
         try:
@@ -412,7 +413,6 @@ def switch_window(parent: Tk, vars: Vars) -> None:
     Button(switch_buttons_frame, text="Switch", command=lambda: switch_pack(vars, get_list_entry(switch_list))).pack(side="left")
     Button(switch_buttons_frame, text="Default", command=lambda: switch_pack(vars, "default")).pack(side="left", padx=5)
     Button(switch_buttons_frame, text="Cancel", command=lambda: root.destroy()).pack(side="left")
-
 
 if __name__ == "__main__":
     try:

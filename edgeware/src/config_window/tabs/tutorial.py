@@ -8,6 +8,9 @@ from tkinter import (
     Message,
     Misc,
     ttk,
+    Tk,
+    Toplevel,
+    font,
 )
 from tkinter.font import Font
 
@@ -24,11 +27,23 @@ HIBERNATE_TYPE_TEXT = "Original: The original hibernate type that came with base
 
 FILE_TEXT = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the "total logs in folder" stat will always display as "1".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a "moods json file", which is tapped into when selecting what moods you want to see in the "Pack Info" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want Edgeware++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.'
 
+def openTutorial(event, parent: Tk) -> None:
+    if event.widget.select() == ".!frame4":
+        root = Toplevel(parent)
+        root.geometry("740x900")
+        root.focus_force()
+        root.title("Edgeware++ Tutorial")
+
+        title_font = font.Font(font="Default")
+        title_font.configure(size=13)
+        tutorial_frame = TutorialTab(root, vars, title_font)
+        tutorial_frame.pack()
+
 class TutorialTab(Frame):
-    def __init__(self, vars: Vars, title_font: Font):
+    def __init__(self, root: Tk, vars: Vars, title_font: Font):
         super().__init__()
 
-        tutorial_frame = Frame(self)
+        tutorial_frame = Frame(root)
         tutorial_frame.pack(expand=1, fill="both")
         tutorial_notebook = ttk.Notebook(tutorial_frame, style="lefttab.TNotebook")
         tutorial_notebook.pack(expand=1, fill="both")
