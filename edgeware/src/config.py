@@ -138,7 +138,16 @@ class Config(Tk):
         notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
         notebook.add(Frame(), text="Tutorial")  # tab for tutorial, etc
-        notebook.bind("<<NotebookTabChanged>>", lambda event: open_tutorial(event, self))
+        last_tab = notebook.index(notebook.select()) #get initial tab to prevent switching to tutorial
+        notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self, last_tab))
+
+        def tutorial_container(event, self, last_tab: int) -> None:
+            if event.widget.select() == ".!frame4":
+                open_tutorial(event, self)
+                notebook.select(last_tab)
+            else:
+                last_tab = notebook.index(notebook.select())
+
 
         style = ttk.Style(self)  # style setting for left aligned tabs
 

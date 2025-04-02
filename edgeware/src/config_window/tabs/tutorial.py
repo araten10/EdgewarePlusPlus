@@ -20,34 +20,33 @@ FILE_TEXT = 'The file tab is for all your file management needs, whether it be s
 
 
 def open_tutorial(event, parent: Tk) -> None:
-    if event.widget.select() == ".!frame4":
-        root = Toplevel(parent)
-        root.geometry("740x900")
-        root.focus_force()
-        root.title("Edgeware++ Tutorial")
+    root = Toplevel(parent)
+    root.geometry("740x900")
+    root.focus_force()
+    root.title("Edgeware++ Tutorial")
 
-        title_font = font.Font(font="Default")
-        title_font.configure(size=13)
+    title_font = font.Font(font="Default")
+    title_font.configure(size=13)
 
-        tutorial_frame = Frame(root)
-        tutorial_frame.pack(expand=1, fill="both")
-        tutorial_notebook = ttk.Notebook(tutorial_frame, style="lefttab.TNotebook")
-        tutorial_notebook.pack(expand=1, fill="both")
+    tutorial_frame = Frame(root)
+    tutorial_frame.pack(expand=1, fill="both")
+    tutorial_notebook = ttk.Notebook(tutorial_frame, style="lefttab.TNotebook")
+    tutorial_notebook.pack(expand=1, fill="both")
 
-        tab_about = ScrollFrame(tutorial_frame)
-        tutorial_notebook.add(tab_about, text="Intro/About")
-        Label(tab_about.viewPort, text=ABOUT_INTRO_TEXT, anchor="nw", wraplength=460).pack()
-        Label(tab_about.viewPort, text="About", font=title_font, relief=GROOVE).pack(pady=2)
-        Label(tab_about.viewPort, text=ABOUT_TEXT, anchor="nw", wraplength=460).pack()
+    tab_about = ScrollFrame(tutorial_frame)
+    tutorial_notebook.add(tab_about, text="Intro/About")
+    Label(tab_about.viewPort, text=ABOUT_INTRO_TEXT, anchor="nw", wraplength=460).pack()
+    Label(tab_about.viewPort, text="About", font=title_font, relief=GROOVE).pack(pady=2)
+    Label(tab_about.viewPort, text=ABOUT_TEXT, anchor="nw", wraplength=460).pack()
 
-        tab_drive = ScrollFrame(tutorial_frame)
-        tutorial_notebook.add(tab_drive, text="Hard Drive")
-        Label(tab_drive.viewPort, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
+    tab_drive = ScrollFrame(tutorial_frame)
+    tutorial_notebook.add(tab_drive, text="Hard Drive")
+    Label(tab_drive.viewPort, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
 
-        tab_hibernate_type = ScrollFrame(tutorial_frame)
-        tutorial_notebook.add(tab_hibernate_type, text="Hibernate Types")
-        Label(tab_hibernate_type.viewPort, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
+    tab_hibernate_type = ScrollFrame(tutorial_frame)
+    tutorial_notebook.add(tab_hibernate_type, text="Hibernate Types")
+    Label(tab_hibernate_type.viewPort, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
 
-        tab_file = ScrollFrame(tutorial_frame)
-        tutorial_notebook.add(tab_file, text="File")
-        Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
+    tab_file = ScrollFrame(tutorial_frame)
+    tutorial_notebook.add(tab_file, text="File")
+    Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
