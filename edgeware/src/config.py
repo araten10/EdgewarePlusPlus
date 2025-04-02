@@ -58,7 +58,6 @@ from pack import Pack
 from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from settings import load_default_config
-from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])

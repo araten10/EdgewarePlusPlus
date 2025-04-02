@@ -18,12 +18,15 @@ class Subject:
 
 @dataclass
 class State:
-    audio_number = 0
     fill_number = 0
     _popup_number = Subject(0)
     prompt_active = False
     subliminal_number = 0
     video_number = 0
+
+    # popup_id -> (width, height, x, y)
+    popup_geometries: dict[int, (int, int, int, int)] = field(default_factory=dict)
+    _next_popup_id = 0
 
     timer_active = False
 
@@ -57,3 +60,8 @@ class State:
     def hibernate_active(self, value: bool) -> None:
         self._hibernate_active.value = value
         self._hibernate_active.notify()
+
+    def get_popup_id(self) -> int:
+        id = self._next_popup_id
+        self._next_popup_id += 1
+        return id
