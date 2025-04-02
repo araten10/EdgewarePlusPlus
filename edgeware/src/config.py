@@ -139,9 +139,10 @@ class Config(Tk):
 
         notebook.add(Frame(), text="Tutorial")  # tab for tutorial, etc
         last_tab = notebook.index(notebook.select()) #get initial tab to prevent switching to tutorial
-        notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self, last_tab))
+        notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self))
 
-        def tutorial_container(event, self, last_tab: int) -> None:
+        def tutorial_container(event, self) -> None:
+            global last_tab
             if event.widget.select() == ".!frame4":
                 open_tutorial(event, self)
                 notebook.select(last_tab)
