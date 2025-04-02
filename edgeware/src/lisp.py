@@ -1,3 +1,4 @@
+import operator
 import sys
 from tkinter import Tk
 from typing import Callable
@@ -25,7 +26,8 @@ mixer.init()
 mixer.set_num_channels(settings.max_audio)
 
 script = """
-(import (standard))
+(import (standard "1.0")
+        (edgeware "1.0"))
 (print "Hello world!")
 """
 
@@ -80,16 +82,33 @@ class Environment:
 
 modules = {
     "standard": {
-        "print": lambda *args: print(*args),
-        "after": lambda delay, callback: root.after(delay, callback),
+        "1.0": {
+            "print": print,
+            "after": lambda delay, callback: root.after(delay, callback),
+            "+": lambda *args: operator.add(*args) if len(args) > 1 else operator.pos(*args),
+            "-": lambda *args: operator.sub(*args) if len(args) > 1 else operator.neg(*args),
+            "*": operator.mul,
+            "/": operator.truediv,
+            "abs": operator.abs,
+            "modulo": operator.mod,
+            "expt": operator.pow,
+            "=": operator.eq,
+            "<": operator.lt,
+            "<=": operator.le,
+            ">": operator.gt,
+            ">=": operator.ge,
+            "not": operator.not_,
+        },
     },
     "edgeware": {
-        "image": lambda: ImagePopup(root, settings, pack, state),
-        "video": lambda: VideoPopup(root, settings, pack, state),
-        "subliminal": lambda: SubliminalMessagePopup(settings, pack),
-        "notification": lambda: display_notification(settings, pack),
-        "web": lambda: open_web(pack),
-        "audio": lambda: play_audio(pack),
+        "1.0": {
+            "image": lambda: ImagePopup(root, settings, pack, state),
+            "video": lambda: VideoPopup(root, settings, pack, state),
+            "subliminal": lambda: SubliminalMessagePopup(settings, pack),
+            "notification": lambda: display_notification(settings, pack),
+            "web": lambda: open_web(pack),
+            "audio": lambda: play_audio(pack),
+        },
     },
 }
 
@@ -164,7 +183,7 @@ def eval(exp: Expression, env: Environment) -> Expression | None:
 
             case [Symbol("quote"), *cdr]:
                 assert len(cdr) == 1
-                return cdr
+                return cdr[0]
 
             case [Symbol("lambda"), *cdr]:
                 assert len(cdr) >= 1
@@ -197,10 +216,10 @@ def eval(exp: Expression, env: Environment) -> Expression | None:
                 return
 
             case [Symbol("import"), *cdr]:
-                assert all([isinstance(spec, list) and len(spec) == 1 and isinstance(spec[0], Symbol) for spec in cdr])
+                assert all([isinstance(spec, list) and len(spec) == 2 and isinstance(spec[0], Symbol) and isinstance(spec[1], String) for spec in cdr])
                 for spec in cdr:
-                    module = spec[0]
-                    for var, value in modules[module].items():
+                    module, version = spec
+                    for var, value in modules[module][version].items():
                         env.define(var, value)
                 return
 
@@ -214,28 +233,33 @@ def eval(exp: Expression, env: Environment) -> Expression | None:
             case [Symbol("or"), *cdr]:
                 if len(cdr) > 0:
                     test = cdr.pop(0)
-                    exp = [Symbol("if"), test, True, [Symbol("or"), *cdr]]
+                    exp = [Symbol("let"), [[Symbol("test"), test]], [Symbol("if"), Symbol("test"), Symbol("test"), [Symbol("or"), *cdr]]]
                 else:
                     exp = False
 
             case [Symbol("let"), *cdr]:
-                assert len(cdr) >= 1
-                bindings, *body = cdr
-                assert isinstance(bindings, list) and all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
-                exp = [[Symbol("lambda"), [*[var for var, init in bindings]], *body], *[init for var, init in bindings]]
-
-            case [Symbol("let*"), *cdr]:
-                assert len(cdr) >= 1
-                bindings, *body = cdr
-                assert isinstance(bindings, list) and all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
-                if len(bindings) > 0:
-                    var, init = bindings.pop(0)
-                    exp = [[Symbol("lambda"), [var], [Symbol("let*"), bindings, *body]], init]
+                assert len(cdr) >= 1 and (isinstance(cdr[0], Symbol) or isinstance(cdr[0], list))
+                if isinstance(cdr[0], Symbol):
+                    # Named let
+                    name, bindings, *body = cdr
+                    assert isinstance(bindings, list) and all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
+                    vars = [var for var, init in bindings]
+                    exp = [Symbol("let"), [*bindings, [name, [Symbol("lambda"), vars, *body]]], [name, *vars]]
                 else:
-                    exp = [[Symbol("lambda"), [], *body]]
+                    # letrec*
+                    bindings, *body = cdr
+                    assert all([len(binding) == 2 and isinstance(binding[0], Symbol) for binding in bindings])
+                    if len(bindings) > 0:
+                        var, init = bindings.pop(0)
+                        exp = [[Symbol("lambda"), [], [Symbol("define"), var, init], [Symbol("let"), bindings, *body]]]
+                    else:
+                        exp = [[Symbol("lambda"), [], *body]]
 
             case [Symbol("begin"), *cdr]:
-                exp = [[Symbol("lambda"), [], *cdr]]
+                if len(cdr) > 1:
+                    exp = [Symbol("if"), cdr.pop(0), [Symbol("begin"), *cdr], [Symbol("begin"), *cdr]]
+                else:
+                    exp = cdr[0]
 
             case [operator, *cdr]:
                 procedure = eval(operator, env)
