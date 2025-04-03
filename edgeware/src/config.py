@@ -144,7 +144,7 @@ class Config(Tk):
         def tutorial_container(event, self) -> None:
             global last_tab
             if event.widget.select() == ".!frame4":
-                open_tutorial(event, self)
+                open_tutorial(event, self, style, window_font, title_font)
                 notebook.select(last_tab)
             else:
                 last_tab = notebook.index(notebook.select())

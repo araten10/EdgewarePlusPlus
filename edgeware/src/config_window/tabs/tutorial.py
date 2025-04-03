@@ -1,3 +1,4 @@
+from tkinter.font import Font
 from tkinter import (
     GROOVE,
     Frame,
@@ -6,9 +7,16 @@ from tkinter import (
     Toplevel,
     font,
     ttk,
+    Message,
+    Canvas,
+    Text,
 )
 
 from widgets.scroll_frame import ScrollFrame
+from config_window.utils import (
+    all_children,
+    config,
+)
 
 ABOUT_INTRO_TEXT = 'Hello, and welcome to Edgeware++! Whether you\'ve found this from word of mouth, downloaded a pack from a creator you like, or are a long-time "original Edgeware" user, thank you so much for using our program. This is the "Tutorial" tab, where you can read detailed help from the basics to more advanced features. If you want to start the tutorial proper, feel free to click on one of the tabs on the left! (I recommend "Getting Started"!)'
 ABOUT_TEXT = "The original Edgeware was created by PetitTournesol in 2021. By the time I had discovered it in 2023, they had already stopped updating it- something totally understandable, but there were a few things I wanted to fix. I originally got assistance from a “furry gooning discord server” since there was a dedicated development channel full of nice, helpful people. I eventually accomplished my goal of adding a toggle to desktop icon popups, but then I got new ideas… and even more new ideas after those…\n\nA year or so later, I was still working on the program, and had made a few social media accounts to post updates on it. The support I received was much greater than I ever could have hoped- considering I had started this project with quite literally zero python experience, I was happy people were enjoying it. From here I made a new close friend named Marigold, who has been invaluable to the project since! She has not only helped with Linux development (a highly sought after feature), but has helped endlessly with new features, organization, bugfixing, and github usage.\n\nAs I write this, we are still continuing strong on Edgeware++ updates and hope to keep doing so in the future. At this point, we have added so many new features that it’s hard to count… as well as almost completely rewriting the backend. To be honest, I never thought we would still be working on it this far ahead in time, but with everyone’s continued support and interest our passion remains strong. I don’t want to speak prematurely, but maybe after we’re done with Edgeware++, we’ll work together on more fun projects in the future…?\n\nSo once again, thank you for your love and support. As somebody who struggles with mental health issues among various other things, I never thought i’d be able to create something that so many people use and enjoy- and make new friends while doing it. We hope you enjoy the program, and feel similarly inspired to go out there and create some cool, horny things!\n\n-Araten"
@@ -19,7 +27,7 @@ HIBERNATE_TYPE_TEXT = "Original: The original hibernate type that came with base
 FILE_TEXT = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the "total logs in folder" stat will always display as "1".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a "moods json file", which is tapped into when selecting what moods you want to see in the "Pack Info" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want Edgeware++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.'
 
 
-def open_tutorial(event, parent: Tk) -> None:
+def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_font: Font) -> None:
     root = Toplevel(parent)
     root.geometry("740x900")
     root.focus_force()
@@ -50,3 +58,94 @@ def open_tutorial(event, parent: Tk) -> None:
     tab_file = ScrollFrame(tutorial_frame)
     tutorial_notebook.add(tab_file, text="File")
     Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
+
+    def theme_change(theme: str, root, style, mfont, tfont):
+        if theme == "Original" or config["themeNoConfig"] is True:
+            for widget in all_children(root):
+                if isinstance(widget, Message):
+                    widget.configure(font=(mfont, 8))
+            style.configure("TFrame", background="#f0f0f0")
+            style.configure("TNotebook", background="#f0f0f0")
+            style.map("TNotebook.Tab", background=[("selected", "#f0f0f0")])
+            style.configure("TNotebook.Tab", background="#d9d9d9")
+        else:
+            if theme == "Dark":
+                for widget in all_children(root):
+                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                        widget.configure(bg="#282c34")
+                    if isinstance(widget, Label):
+                        widget.configure(bg="#282c34", fg="ghost white")
+                    if isinstance(widget, Text):
+                        widget.configure(bg="#1b1d23", fg="ghost white")
+                    if isinstance(widget, Message):
+                        widget.configure(bg="#282c34", fg="ghost white", font=(mfont, 8))
+                style.configure("TFrame", background="#282c34")
+                style.configure("TNotebook", background="#282c34")
+                style.map("TNotebook.Tab", background=[("selected", "#282c34")])
+                style.configure("TNotebook.Tab", background="#1b1d23", foreground="#f9faff")
+            if theme == "The One":
+                for widget in all_children(root):
+                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                        widget.configure(bg="#282c34")
+                    if isinstance(widget, Label):
+                        widget.configure(bg="#282c34", fg="#00ff41")
+                    if isinstance(widget, Text):
+                        widget.configure(bg="#1b1d23", fg="#00ff41")
+                    if isinstance(widget, Message):
+                        widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8))
+                style.configure("TFrame", background="#282c34")
+                style.configure("TNotebook", background="#282c34")
+                style.map("TNotebook.Tab", background=[("selected", "#282c34")])
+                style.configure("TNotebook.Tab", background="#1b1d23", foreground="#00ff41")
+                mfont.configure(family="Consolas", size=8)
+                tfont.configure(family="Consolas")
+            if theme == "Ransom":
+                for widget in all_children(root):
+                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                        widget.configure(bg="#841212")
+                    if isinstance(widget, Label):
+                        widget.configure(bg="#841212", fg="white")
+                    if isinstance(widget, Text):
+                        widget.configure(bg="white", fg="black")
+                    if isinstance(widget, Message):
+                        widget.configure(bg="#841212", fg="white", font=("Arial", 8))
+                style.configure("TFrame", background="#841212")
+                style.configure("TNotebook", background="#841212")
+                style.map("TNotebook.Tab", background=[("selected", "#841212")])
+                style.configure("TNotebook.Tab", background="#5c0d0d", foreground="#ffffff")
+                mfont.configure(family="Arial")
+                tfont.configure(family="Arial Bold")
+            if theme == "Goth":
+                for widget in all_children(root):
+                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                        widget.configure(bg="#282c34")
+                    if isinstance(widget, Label):
+                        widget.configure(bg="#282c34", fg="MediumPurple1")
+                    if isinstance(widget, Text):
+                        widget.configure(bg="MediumOrchid2", fg="purple4")
+                    if isinstance(widget, Message):
+                        widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 8))
+                style.configure("TFrame", background="#282c34")
+                style.configure("TNotebook", background="#282c34")
+                style.map("TNotebook.Tab", background=[("selected", "#282c34")])
+                style.configure("TNotebook.Tab", background="#1b1d23", foreground="MediumPurple1")
+                mfont.configure(family="Constantia")
+                tfont.configure(family="Constantia")
+            if theme == "Bimbo":
+                for widget in all_children(root):
+                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                        widget.configure(bg="pink")
+                    if isinstance(widget, Label):
+                        widget.configure(bg="pink", fg="deep pink")
+                    if isinstance(widget, Text):
+                        widget.configure(bg="light pink", fg="magenta2")
+                    if isinstance(widget, Message):
+                        widget.configure(bg="pink", fg="deep pink", font=("Constantia", 8))
+                style.configure("TFrame", background="pink")
+                style.configure("TNotebook", background="pink")
+                style.map("TNotebook.Tab", background=[("selected", "pink")])
+                style.configure("TNotebook.Tab", background="lightpink", foreground="deep pink")
+                mfont.configure(family="Constantia")
+                tfont.configure(family="Constantia")
+
+    theme_change(config["themeType"].strip(), root, style, window_font, title_font)
