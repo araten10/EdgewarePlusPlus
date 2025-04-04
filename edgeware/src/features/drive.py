@@ -36,7 +36,7 @@ def fill_drive(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
 
         path = paths.pop(0)
         for n in range(random.randint(3, 6)):
-            image = pack.random_image()
+            image = pack.random_image(unweighted=True)
             if not image:
                 continue
 
@@ -66,7 +66,7 @@ def replace_images(root: Tk, settings: Settings, pack: Pack) -> None:
 
         if len(images) >= settings.replace_threshold:
             for image in images:
-                replacement = pack.random_image()
+                replacement = pack.random_image(unweighted=True)
                 if not replacement:
                     continue
 
