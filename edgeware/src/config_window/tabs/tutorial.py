@@ -8,7 +8,6 @@ from tkinter import (
     font,
     ttk,
     Message,
-    Canvas,
     Text,
 )
 
@@ -68,28 +67,20 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
         else:
             if theme == "Dark":
                 for widget in all_children(root):
-                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                    if isinstance(widget, Frame):
                         widget.configure(bg="#282c34")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#282c34", fg="ghost white")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="#1b1d23", fg="ghost white")
-                    if isinstance(widget, Message):
-                        widget.configure(bg="#282c34", fg="ghost white", font=(mfont, 8))
+                    if isinstance(widget, HtmlFrame):
+                        widget.add_css("html{background: #282c34; color: #F8F8FF;}")
                 style.configure("TFrame", background="#282c34")
                 style.configure("TNotebook", background="#282c34")
                 style.map("TNotebook.Tab", background=[("selected", "#282c34")])
                 style.configure("TNotebook.Tab", background="#1b1d23", foreground="#f9faff")
             if theme == "The One":
                 for widget in all_children(root):
-                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                    if isinstance(widget, Frame):
                         widget.configure(bg="#282c34")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#282c34", fg="#00ff41")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="#1b1d23", fg="#00ff41")
-                    if isinstance(widget, Message):
-                        widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8))
+                    if isinstance(widget, HtmlFrame):
+                        widget.add_css("html{background: #282c34; color: #00ff41; font-family: Consolas;}")
                 style.configure("TFrame", background="#282c34")
                 style.configure("TNotebook", background="#282c34")
                 style.map("TNotebook.Tab", background=[("selected", "#282c34")])
@@ -98,14 +89,10 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
                 tfont.configure(family="Consolas")
             if theme == "Ransom":
                 for widget in all_children(root):
-                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                    if isinstance(widget, Frame):
                         widget.configure(bg="#841212")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#841212", fg="white")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="white", fg="black")
-                    if isinstance(widget, Message):
-                        widget.configure(bg="#841212", fg="white", font=("Arial", 8))
+                    if isinstance(widget, HtmlFrame):
+                        widget.add_css("html{background: #841212; color: #ffffff; font-family: Arial;}")
                 style.configure("TFrame", background="#841212")
                 style.configure("TNotebook", background="#841212")
                 style.map("TNotebook.Tab", background=[("selected", "#841212")])
@@ -114,14 +101,10 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
                 tfont.configure(family="Arial Bold")
             if theme == "Goth":
                 for widget in all_children(root):
-                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                    if isinstance(widget, Frame):
                         widget.configure(bg="#282c34")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="#282c34", fg="MediumPurple1")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="MediumOrchid2", fg="purple4")
-                    if isinstance(widget, Message):
-                        widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 8))
+                    if isinstance(widget, HtmlFrame):
+                        widget.add_css("html{background: #282c34; color: #AB82FF; font-family: Constantia;}")
                 style.configure("TFrame", background="#282c34")
                 style.configure("TNotebook", background="#282c34")
                 style.map("TNotebook.Tab", background=[("selected", "#282c34")])
@@ -130,14 +113,10 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
                 tfont.configure(family="Constantia")
             if theme == "Bimbo":
                 for widget in all_children(root):
-                    if isinstance(widget, Frame) or isinstance(widget, Canvas):
+                    if isinstance(widget, Frame):
                         widget.configure(bg="pink")
-                    if isinstance(widget, Label):
-                        widget.configure(bg="pink", fg="deep pink")
-                    if isinstance(widget, Text):
-                        widget.configure(bg="light pink", fg="magenta2")
-                    if isinstance(widget, Message):
-                        widget.configure(bg="pink", fg="deep pink", font=("Constantia", 8))
+                    if isinstance(widget, HtmlFrame):
+                        widget.add_css("html{background: #FFC0CB; color: #FF1493; font-family: Constantia;}")
                 style.configure("TFrame", background="pink")
                 style.configure("TNotebook", background="pink")
                 style.map("TNotebook.Tab", background=[("selected", "pink")])
