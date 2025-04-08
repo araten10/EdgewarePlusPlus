@@ -17,8 +17,6 @@
 
 •*Added a "monitor whitelist" feature under Popups, which forces Edgeware to be restricted to certain monitors if enabled*
 
-•*Potentially fixed a crash on linux involving mpv and tkinter conflicts*
-
 •*Fixed some small errors/inaccuracies with help text throughout the config window*
 
 •*Fixed an oversight with tray panic not being disabled by the "disable panic" option*
