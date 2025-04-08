@@ -27,6 +27,11 @@
 
 •*Fixed a bug on Wayland (Linux) where mpv players don't get embedded inside popups*
 
+•*Changed the popup randomization code to lean towards selecting popups that haven't been selected recently*
+
+•*Additionally made popups attempt to spawn on screen locations not already occupied by other popups*
+>Both this and the randomization change is meant to make Edgeware++ more effective at barraging you with as much porn as possible, hopefully this makes the experience more fun for everyone! Don't worry, duplicates and overlapping popups will still spawn, it just won't happen immediately and instead start happening the longer you keep the program open.
+
 **Version 15.5**
 
 This is actually a huge update, possibly one of the biggest heavy hitters in a while. The only reason i'm not giving this the version 16 title is because the tutorial tab is almost on its way, and Marigold is working on settings for restricting Edgeware++ to certain monitors! So there will be two big updates back to back. This way everyone can update more important stuff faster, without waiting for everything to come out in one big update. I'm also like 95% done on a second demo pack, which should hopefully be coming out soon.

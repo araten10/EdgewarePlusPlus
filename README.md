@@ -98,16 +98,20 @@ Planned additions, as well as currently known issues, can now be found on the [i
 
 ## Packs
 
-For most of these packs, we will include a pack config file so you're able to easily test relevant settings. To apply these settings, you can go into the "File" tab once you've imported the pack, and press the "Load Pack Configuration" button. Once they've been loaded, you're free to take a look around and change anything you see fit, as the packs usually will only change a few settings. Make sure you save before you exit!
+For some of these packs, we will include a pack config file so you're able to easily test relevant settings. To apply these settings, you can go into the "File" tab once you've imported the pack, and press the "Load Pack Configuration" button. Once they've been loaded, you're free to take a look around and change anything you see fit, as the packs usually will only change a few settings. Make sure you save before you exit!
 
 Reminder: Check out the "Pack Info" tab for more information on these packs once you download them~
 
 [**Edgeware++ Test Pack**](https://mega.nz/file/VbsEmbLD#gCLx6Ftv161oT7u3yiU8altS07QSElTz-Xo9kRmcugM)
-**Version: 2** *[17MB]*
+**Version: 2** *[17MB]* *[No pack configuration!]*
 The original test pack for Edgeware++! It's fairly old, and i'm not sure how much i'll be updating it in the future. However, it's completely SFW, has examples for most features up to version ~13, and is extremely small in the filesize department. This is a good place to start if you just want to test running Edgeware, or learn how to make a basic pack!
 
+[**DemonDemo++**](https://mega.nz/file/5OcXzRzZ#WUPW1PuGEKO1bM3VJKMT6rNz6c4bxpgjHHAN9YQjr-Q)
+**Version: 1** *[103MB]* *[No pack configuration!]*
+Want to test out Edgeware++ with something a little more suitable for that *addict* brain of yours? Here's a small-sized pack perfect for testing the program's basic features! Comes with captions, a custom splash screen/wallpaper, some basic moods, and plenty of heretical demonic women~ This pack was also made with the new `index.json` method of pack creation, so its an example of how the new backend works, as well! Enjoy submitting to hedonism for us, we'll make sure to drag you aaaaalll the way down <3
+
 [**Furry Therapy**](https://mega.nz/file/dakhzYqS#kHO61V6pEwaXqtTXE7SGVHVdHjUkxtXE6Vyg2uw-FPA)
-**Version: 1.5** *[398MB]*
+**Version: 1.5** *[398MB]* *[Has pack configuration!]*
 Meant to demo corruption and the corruption "fade" feature, this pack is for people who love hentai. That's it! There's no tricks or traps in here, nope, definitely not at all... The pack configuration will only change the corruption and corruption fade settings, so feel free to edit the rest of the payload to what you personally enjoy. And try not to stare for too long, it might have adverse effects~
 
 ## Frequently Asked Questions
@@ -116,9 +120,7 @@ Meant to demo corruption and the corruption "fade" feature, this pack is for peo
 
 A: Unfortunately, packs are kind of scattered about... Since there is no specific place to congregate Edgeware packs (to my knowledge), people usually end up posting them to their personal twitters or discord servers. Additionally, some people charge money for their own packs and/or bundle a complete copy of Edgeware with their pack, making it even harder to give a definite answer to this question.
 
-There are a few places you can start, however. PetitTournesol's original github page has multiple packs, although they don't support new ++ features. ~~/r/edgingware on reddit is mostly focused to tech support, but there are multiple packs there, including a helpful reference pack.~~ [EDIT: subreddit died from automod because reddit sucks] ~~I believe hgoon.booru also has a thread for Edgeware packs on the forum, but since it's a bit of an obscure booru and requires an account to post, i'm sure many still fall through the cracks.~~ [EDIT: doesnt get updated much when I checked recently]
-
-There is an [unofficial discord](https://discord.com/invite/9rxab3BSB8) that hosts a lot of packs, just know that I don't really visit it much since I tend to use discord sparingly.
+There are a few places you can start, however. PetitTournesol's original github page has multiple packs, although they don't support new ++ features. /r/edgingware on reddit is mostly focused to tech support, but there are multiple packs there, including some tech support as well. There is also an [unofficial discord](https://discord.com/invite/9rxab3BSB8) that hosts a lot of packs, just know that I don't really visit it much since I tend to use discord sparingly.
 
 >Q: I found a bug!
 
