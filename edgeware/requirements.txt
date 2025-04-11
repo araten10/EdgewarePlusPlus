@@ -9,10 +9,11 @@ pygame
 pynput
 pypresence
 pystray
+python-vlc
 python-xlib; sys_platform == 'linux'
 requests
 screeninfo
 sounddevice
+tkinterweb
 ttkwidgets
 voluptuous
-tkinterweb

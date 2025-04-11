@@ -34,7 +34,7 @@ class StartupSplash(Toplevel):
 
         if getattr(image, "n_frames", 0) > 1:
             self.player = VideoPlayer(self, settings, width, height)
-            self.player.play(str(pack.startup_splash))
+            self.player.play(pack.startup_splash)
         else:
             label = Label(self, width=width, height=height)
             label.pack()

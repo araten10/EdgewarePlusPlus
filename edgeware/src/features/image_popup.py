@@ -37,19 +37,20 @@ class ImagePopup(Popup):
 
         if getattr(image, "n_frames", 0) > 1:
             self.player = VideoPlayer(self, self.settings, self.width, self.height)
-            self.player.vf = self.try_denial_filter(True)
-            self.player.play(str(self.media))
+            self.player.set_filter(self.try_denial_filter(mpv=True))
+            self.player.play(self.media)
         else:
             resized = image.resize((self.width, self.height), Image.LANCZOS).convert("RGBA")
             filter = self.try_denial_filter(False)
             final = resized.filter(filter) if filter else resized
 
-            if self.subliminal:
+            if self.subliminal and not self.settings.vlc_mode:
+                # TODO: Implement for VLC
                 self.player = VideoPlayer(self, self.settings, self.width, self.height)
-                self.player.video_scale_x = max(self.width / self.height, 1)
-                self.player.video_scale_y = max(self.height / self.width, 1)
+                self.player.mpv_player.video_scale_x = max(self.width / self.height, 1)
+                self.player.mpv_player.video_scale_y = max(self.height / self.width, 1)
                 final.putalpha(int((1 - self.settings.subliminal_opacity) * 255))
-                self.player.create_image_overlay().update(final)
+                self.player.mpv_player.create_image_overlay().update(final)
                 self.player.play(str(self.pack.random_subliminal_overlay()))
             else:
                 label = Label(self, width=self.width, height=self.height)
