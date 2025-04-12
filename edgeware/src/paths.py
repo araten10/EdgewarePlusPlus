@@ -39,6 +39,7 @@ class Assets:
     TUTORIAL = ROOT / "tutorial"
 
     TUTORIAL_INTRO = TUTORIAL / "intro.html"
+    TUTORIAL_GETSTARTED = TUTORIAL / "gettingstarted.html"
 
 
 @dataclass

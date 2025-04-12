@@ -41,6 +41,10 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
     tutorial_notebook.add(tab_about, text="Intro/About")
     tab_about.load_file(str(Assets.TUTORIAL_INTRO))
 
+    #tab_about = HtmlFrame(tutorial_frame, messages_enabled=False)
+    #tutorial_notebook.add(tab_about, text="Getting Started")
+    #tab_about.load_file(str(Assets.TUTORIAL_GETSTARTED))
+
     tab_drive = ScrollFrame(tutorial_frame)
     tutorial_notebook.add(tab_drive, text="Hard Drive")
     Label(tab_drive.viewPort, text=DRIVE_TEXT, anchor="nw", wraplength=460).pack()
