@@ -44,7 +44,7 @@ class VideoPlayer:
         if self.settings.vlc_mode:
             vlc_media = vlc.Media(media)
 
-            if self.settings.video_hardware_acceleration:
+            if not self.settings.video_hardware_acceleration:
                 vlc_media.add_option(":avcodec-hw=none")
 
             if filetype.is_image(media):
