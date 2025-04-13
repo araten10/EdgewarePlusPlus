@@ -2,6 +2,7 @@ from pathlib import Path
 from tkinter import Toplevel
 
 import mpv
+import vlc
 
 
 def init_mpv(player: mpv.MPV) -> None:
@@ -10,6 +11,10 @@ def init_mpv(player: mpv.MPV) -> None:
 
 def close_mpv(player: mpv.MPV) -> None:
     pass
+
+
+def set_vlc_window(player: vlc.MediaPlayer, window_id: int) -> None:
+    player.set_nsobject(window_id)
 
 
 def set_borderless(window: Toplevel) -> None:

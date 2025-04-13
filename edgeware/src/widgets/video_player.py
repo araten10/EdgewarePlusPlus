@@ -3,7 +3,7 @@ from tkinter import Label, Misc
 
 import filetype
 import mpv
-from os_utils import close_mpv, init_mpv
+from os_utils import close_mpv, init_mpv, set_vlc_window
 from settings import Settings
 
 try:
@@ -23,7 +23,7 @@ class VideoPlayer:
         if self.settings.vlc_mode:
             # Max repeat value. This is hacky but seems to be the easiest way to loop the video.
             self.vlc_player = vlc.Instance("--input-repeat=65535").media_player_new()
-            self.vlc_player.set_xwindow(label.winfo_id())  # utils.set_vlc_window(self.player, master.winfo_id())
+            set_vlc_window(self.vlc_player, label.winfo_id())
             self.vlc_player.video_set_mouse_input(False)
             self.vlc_player.video_set_key_input(False)
             self.vlc_player.audio_set_volume(settings.video_volume)

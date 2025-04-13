@@ -7,6 +7,7 @@ from pathlib import Path
 from tkinter import Toplevel
 
 import mpv
+import vlc
 from paths import CustomAssets, Process
 from settings import load_default_config
 
@@ -20,6 +21,10 @@ def init_mpv(player: mpv.MPV) -> None:
 
 def close_mpv(player: mpv.MPV) -> None:
     player.stop()
+
+
+def set_vlc_window(player: vlc.MediaPlayer, window_id: int) -> None:
+    player.set_xwindow(window_id)
 
 
 def set_borderless(window: Toplevel) -> None:
