@@ -13,6 +13,8 @@ class Process:
     MAIN = ROOT / "main.py"
     PANIC = ROOT / "panic.py"
 
+    LINUX_MPV = ROOT / "os_utils" / "linux_mpv_subprocess.py"
+
 
 @dataclass
 class Assets:

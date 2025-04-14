@@ -104,6 +104,10 @@ class Settings:
         self.max_video = int(self.config["maxVideos"]) if bool(self.config["maxVideoBool"]) else float("inf")
         self.video_hardware_acceleration = bool(self.config["videoHardwareAcceleration"])
 
+        import os_utils  # Circular import
+
+        self.mpv_subprocess = bool(self.config["mpvSubprocess"]) and os_utils.is_linux()
+
         # Captions
         self.captions_in_popups = bool(self.config["showCaptions"])
         self.filename_caption_moods = bool(self.config["captionFilename"])  # TODO: How to handle this?

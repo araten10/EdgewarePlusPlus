@@ -4,10 +4,6 @@ from tkinter import Toplevel
 import mpv
 
 
-def init_mpv(player: mpv.MPV) -> None:
-    pass
-
-
 def close_mpv(player: mpv.MPV) -> None:
     pass
 

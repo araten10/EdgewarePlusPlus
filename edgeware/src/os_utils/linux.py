@@ -13,11 +13,6 @@ from settings import load_default_config
 from os_utils.linux_utils import get_desktop_environment, get_wallpaper_commands, get_wallpaper_function
 
 
-def init_mpv(player: mpv.MPV) -> None:
-    player["gpu-context"] = "x11"  # Required on Wayland for embedding the player
-    player["input-cursor-passthrough"] = "yes"  # Required for buttonless closing
-
-
 def close_mpv(player: mpv.MPV) -> None:
     player.stop()
 

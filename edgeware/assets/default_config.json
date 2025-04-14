@@ -94,5 +94,6 @@
   "packPath": null,
   "globalPanicButton": "Key.esc",
   "videoHardwareAcceleration": 1,
-  "disabledMonitors": []
+  "disabledMonitors": [],
+  "mpvSubprocess": 1
 }
