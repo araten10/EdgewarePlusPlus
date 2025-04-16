@@ -25,6 +25,7 @@ class CorruptionConfig:
         "runOnSaveQuit",
         "themeNoConfig",
         "disabledMonitors",
+        "mpvSubprocess",
         # Changing these settings would most likely not do anything with their current implementation
         "desktopIcons",
         "showLoadingFlair",
