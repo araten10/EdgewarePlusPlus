@@ -37,7 +37,7 @@ class ImagePopup(Popup):
 
         if getattr(image, "n_frames", 0) > 1:
             self.player = VideoPlayer(self, self.settings, self.width, self.height)
-            self.player.vf = self.try_denial_filter(True)
+            self.player.properties["vf"] = self.try_denial_filter(True)
             self.player.play(str(self.media))
         else:
             resized = image.resize((self.width, self.height), Image.LANCZOS).convert("RGBA")
@@ -46,11 +46,10 @@ class ImagePopup(Popup):
 
             if self.subliminal:
                 self.player = VideoPlayer(self, self.settings, self.width, self.height)
-                self.player.video_scale_x = max(self.width / self.height, 1)
-                self.player.video_scale_y = max(self.height / self.width, 1)
+                self.player.properties["video-scale-x"] = max(self.width / self.height, 1)
+                self.player.properties["video-scale-y"] = max(self.height / self.width, 1)
                 final.putalpha(int((1 - self.settings.subliminal_opacity) * 255))
-                self.player.create_image_overlay().update(final)
-                self.player.play(str(self.pack.random_subliminal_overlay()))
+                self.player.play(self.pack.random_subliminal_overlay(), final)
             else:
                 label = Label(self, width=self.width, height=self.height)
                 label.pack()

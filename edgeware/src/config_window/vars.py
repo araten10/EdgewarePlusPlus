@@ -123,6 +123,8 @@ class Vars:
 
         self.subliminal_opacity = self.make(IntVar, "subliminalsAlpha")
 
+        self.mpv_subprocess = self.make(BooleanVar, "mpvSubprocess")
+
         self.message_off = self.make(BooleanVar, "messageOff")
 
     def make(self, var_init: type[ConfigVar], key: str) -> ConfigVar:
