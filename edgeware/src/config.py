@@ -45,7 +45,7 @@ from config_window.tabs.modes.corruption import CorruptionModeTab
 from config_window.tabs.modes.dangerous_modes import DangerousModesTab
 from config_window.tabs.modes.hibernate import HibernateModeTab
 from config_window.tabs.troubleshooting import TroubleshootingTab
-from config_window.tabs.tutorial import TutorialTab
+from config_window.tabs.tutorial import open_tutorial
 from config_window.utils import (
     all_children,
     config,
@@ -137,7 +137,17 @@ class Config(Tk):
 
         notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
-        notebook.add(TutorialTab(vars, title_font), text="Tutorial")  # tab for tutorial, etc
+        notebook.add(Frame(), text="Tutorial")  # tab for tutorial, etc
+        last_tab = notebook.index(notebook.select())  # get initial tab to prevent switching to tutorial
+        notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self))
+
+        def tutorial_container(event, self) -> None:
+            global last_tab
+            if event.widget.select() == ".!frame4":
+                open_tutorial(event, self, style, window_font, title_font)
+                notebook.select(last_tab)
+            else:
+                last_tab = notebook.index(notebook.select())
 
         style = ttk.Style(self)  # style setting for left aligned tabs
 

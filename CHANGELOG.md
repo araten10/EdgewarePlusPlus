@@ -17,8 +17,6 @@
 
 •*Added a "monitor whitelist" feature under Popups, which forces Edgeware to be restricted to certain monitors if enabled*
 
-•*Potentially fixed a crash on linux involving mpv and tkinter conflicts*
-
 •*Fixed some small errors/inaccuracies with help text throughout the config window*
 
 •*Fixed an oversight with tray panic not being disabled by the "disable panic" option*
@@ -26,6 +24,11 @@
 •*Fixed a crash with notifications and subliminal messages when there are no captions in the pack*
 
 •*Fixed a bug on Wayland (Linux) where mpv players don't get embedded inside popups*
+
+•*Changed the popup randomization code to lean towards selecting popups that haven't been selected recently*
+
+•*Additionally made popups attempt to spawn on screen locations not already occupied by other popups*
+>Both this and the randomization change is meant to make Edgeware++ more effective at barraging you with as much porn as possible, hopefully this makes the experience more fun for everyone! Don't worry, duplicates and overlapping popups will still spawn, it just won't happen immediately and instead start happening the longer you keep the program open.
 
 **Version 15.5**
 

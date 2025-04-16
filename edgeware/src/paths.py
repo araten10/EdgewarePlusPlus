@@ -13,6 +13,8 @@ class Process:
     MAIN = ROOT / "main.py"
     PANIC = ROOT / "panic.py"
 
+    LINUX_MPV = ROOT / "os_utils" / "linux_mpv_subprocess.py"
+
 
 @dataclass
 class Assets:
@@ -34,6 +36,12 @@ class Assets:
     DEFAULT_STARTUP_SPLASH = ROOT / "default_loading_splash.png"
     DEFAULT_SUBLIMINAL_OVERLAY = ROOT / "default_subliminal_overlay.gif"
     DEFAULT_THEME_DEMO = ROOT / "default_theme_demo.png"
+
+    # Tutorial pages
+    TUTORIAL = ROOT / "tutorial"
+
+    TUTORIAL_INTRO = TUTORIAL / "intro.html"
+    TUTORIAL_GETSTARTED = TUTORIAL / "gettingstarted.html"
 
 
 @dataclass
