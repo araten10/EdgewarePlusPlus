@@ -57,6 +57,13 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
     tutorial_notebook.add(tab_file, text="File")
     Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
 
+
+    #What is this?:
+    #HtmlFrame has a bug that makes it incompatible with Notebook on 64bit windows. This bug is known by the developers and is not being fixed due to it being an error larger than the scope of the program.
+    #The bug makes it so if you swap tabs from an HtmlFrame to a second HtmlFrame, the program crashes after a few seconds.
+    #There is a workaround fix for it that comes included with tkinterweb, however upon trying it it didn't work at all. It rendered everything incorrectly and would have required further rewrites than necessary for a "fix"
+    #So as a workaround to the workaround to the bug, I've made it so when you switch tabs, you briefly switch to a blank Frame before switching to the proper HtmlFrame. This way there is no crashing since you will always be going to a new HtmlFrame tab from a regular Frame.
+    #The tab is a hidden tab and swapping is nearly invisible to the human eye, at least on most modern systems.
     tab_fix = Frame(tutorial_frame)
     tutorial_notebook.add(tab_fix, text="")
     tutorial_notebook.hide(tab_fix)
