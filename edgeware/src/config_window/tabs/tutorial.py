@@ -57,12 +57,14 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
     tutorial_notebook.add(tab_file, text="File")
     Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
 
-    tab_test = Frame(tutorial_frame)
-    tutorial_notebook.add(tab_test, text="")
+    tab_fix = Frame(tutorial_frame)
+    tutorial_notebook.add(tab_fix, text="")
+    tutorial_notebook.hide(tab_fix)
 
     def frame_workaround(event) -> None:
         target_tab = tutorial_notebook.tk.call(tutorial_notebook._w, "identify", "tab", event.x, event.y)
-        tutorial_notebook.select(".!toplevel.!frame.!frame")
+        tutorial_notebook.select(tab_fix)
+        tutorial_notebook.hide(tab_fix)
         tutorial_notebook.select(target_tab)
 
     tutorial_notebook.bind("<Button-1>", frame_workaround)
