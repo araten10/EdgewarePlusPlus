@@ -58,7 +58,7 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
     Label(tab_file.viewPort, text=FILE_TEXT, anchor="nw", wraplength=460).pack()
 
 
-    #What is this?:
+    #HtmlFrame Workaround:
     #HtmlFrame has a bug that makes it incompatible with Notebook on 64bit windows. This bug is known by the developers and is not being fixed due to it being an error larger than the scope of the program.
     #The bug makes it so if you swap tabs from an HtmlFrame to a second HtmlFrame, the program crashes after a few seconds.
     #There is a workaround fix for it that comes included with tkinterweb, however upon trying it it didn't work at all. It rendered everything incorrectly and would have required further rewrites than necessary for a "fix"
@@ -76,11 +76,15 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
 
     tutorial_notebook.bind("<Button-1>", frame_workaround)
 
+    #End of HtmlFrame workaround
+
     def theme_change(theme: str, root, style, mfont, tfont):
         if theme == "Original" or config["themeNoConfig"] is True:
             for widget in all_children(root):
                 if isinstance(widget, Message):
                     widget.configure(font=(mfont, 8))
+                if isinstance(widget, HtmlFrame):
+                    widget.add_css("html{background: #f0f0f0;}")
             style.configure("TFrame", background="#f0f0f0")
             style.configure("TNotebook", background="#f0f0f0")
             style.map("TNotebook.Tab", background=[("selected", "#f0f0f0")])
