@@ -6,6 +6,7 @@ if __name__ == "__main__":
     # Required on Windows
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
+import operator
 import sys
 from dataclasses import dataclass
 from tkinter import Tk
@@ -29,12 +30,9 @@ from state import State
 #          for parse_name_list in parse_expression_list do block end |
 #          function Name FunctionBody |
 
-# exp ::=  ‘(’ exp ‘)’ | exp binop exp | unop exp
+# binop ::= ‘..’
 
-# binop ::=  ‘+’ | ‘-’ | ‘*’ | ‘/’ | ‘//’ | ‘^’ | ‘%’ | ‘..’ | ‘<’ | ‘<=’ |
-#            ‘>’ | ‘>=’ | ‘==’ | ‘~=’ | and | or
-
-# unop ::= ‘-’ | not | ‘#’
+# unop ::= ‘#’
 
 root = Tk()
 root.withdraw()
@@ -57,6 +55,7 @@ hello(world)
 
 class Tokens(list[str]):
     def __init__(self, code: str):
+        # TODO: Tokenize operators
         super().__init__()
         chars = list(code)
         special = ["(", ")", ","]
@@ -194,18 +193,46 @@ class FunctionCall:
 
 
 class Expression:
-    def __init__(self, tokens: Tokens):
-        for token, value in [("nil", None), ("false", False), ("true", True)]:
+    def __init__(self, tokens: Tokens, n_ary: bool = True):
+        self.parts = [self.unary(tokens)]
+        if not n_ary:
+            return
+
+        # TODO: Precedence
+        binary_ops = {
+            "+": operator.add,
+            "-": operator.sub,
+            "*": operator.mul,
+            "/": operator.truediv,
+            "//": operator.floordiv,
+            "^": operator.pow,
+            "%": operator.mod,
+            "<": operator.lt,
+            "<=": operator.le,
+            ">": operator.gt,
+            ">=": operator.ge,
+            "==": operator.eq,
+            "~=": operator.ne,
+            "and": operator.and_,
+            "or": operator.or_,
+        }
+        while tokens.next in binary_ops:
+            op = binary_ops[tokens.get()]
+            exp = Expression(tokens, False)
+            self.parts.append(op)
+            self.parts.append(exp.eval)
+
+    def unary(self, tokens: Tokens) -> Callable:
+        constants = {"nil": None, "false": False, "true": True}
+        for token, value in constants.items():
             if tokens.skip_if(token):
-                self.eval = lambda env: value
-                return
+                return lambda env: value
 
         for numeral in [int, float]:
             try:
                 number = numeral(tokens.next)
                 tokens.skip()
-                self.eval = lambda env: number
-                return
+                return lambda env: number
             except ValueError:
                 pass
 
@@ -214,13 +241,34 @@ class Expression:
             self.eval = lambda env: string[1:-1]
             return
 
+        if tokens.skip_if("("):
+            exp = Expression(tokens)
+            tokens.skip(")")
+            return exp.eval
+
+        unary_ops = {"-": operator.neg, "not": operator.not_}
+        if tokens.next in unary_ops:
+            op = unary_ops[tokens.get()]
+            exp = Expression(tokens)
+            return lambda env: op(exp.eval(env))
+
         if tokens.ahead == "(":
             call = FunctionCall(tokens)
-            self.eval = lambda env: call.eval(env)
-            return
+            return lambda env: call.eval(env)
 
         name = tokens.get_name()
-        self.eval = lambda env: env.get(name)
+        return lambda env: env.get(name)
+
+    def eval(self, env: Environment) -> Any:
+        parts = self.parts.copy()
+
+        exp_eval = parts.pop(0)
+        value = exp_eval(env)
+        while parts:
+            op = parts.pop(0)
+            exp_eval = parts.pop(0)
+            value = op(value, exp_eval(env))
+        return value
 
 
 class Statement:
