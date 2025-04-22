@@ -25,6 +25,8 @@
 
 •*Fixed a bug on Wayland (Linux) where mpv players don't get embedded inside popups*
 
+•*Also fixed a very inconsistent but nasty bug where the mpv player would crash Edgeware++ on Linux*
+
 •*Changed the popup randomization code to lean towards selecting popups that haven't been selected recently*
 
 •*Additionally made popups attempt to spawn on screen locations not already occupied by other popups*
