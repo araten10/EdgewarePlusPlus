@@ -22,12 +22,9 @@ from state import State
 # block ::= {stat} [retstat]
 
 # stat ::= break |
-#          do block end |
-#          repeat block until exp |
 #          if exp then block {elseif exp then block} [else block] end |
 #          for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
 #          for parse_name_list in parse_expression_list do block end |
-#          function Name FunctionBody |
 
 # binop ::= ‘..’
 
@@ -43,12 +40,12 @@ mixer.init()
 mixer.set_num_channels(settings.max_audio)
 
 script = """
-local function hello(what)
-  print("Hello", what)
+function hello()
+  print("Hello", world)
 end
 
-local world = "world!"
-hello(world)
+world = "world!"
+hello()
 """
 
 
@@ -289,6 +286,11 @@ class Expression:
 class Statement:
     def __init__(self, tokens: Tokens):
         match tokens.next:
+            case "do":
+                tokens.skip("do")
+                block = Block(tokens, "end")
+                self.eval = lambda env: block.eval(env)
+                return
             case "while":
                 tokens.skip("while")
                 test_exp = Expression(tokens)
@@ -309,6 +311,12 @@ class Statement:
                 tokens.skip("then")
                 then_block = Block(tokens, "end")
                 self.eval = lambda env: then_block.eval(env) if test_exp.eval(env) else None
+                return
+            case "function":
+                tokens.skip("function")
+                name = tokens.get_name()
+                body = FunctionBody(tokens)
+                self.eval = lambda env: env.assign(name, body.eval(env))
                 return
             case "local":
                 tokens.skip("local")
