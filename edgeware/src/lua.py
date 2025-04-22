@@ -21,8 +21,7 @@ from state import State
 
 # block ::= {stat} [retstat]
 
-# stat ::= Name ‘=’ exp |
-#          break |
+# stat ::= break |
 #          do block end |
 #          repeat block until exp |
 #          if exp then block {elseif exp then block} [else block] end |
@@ -120,23 +119,32 @@ class Environment:
     pass
 
 
-# TODO: Global variables, proper error messages, don't allow defining keywords
+# TODO: Don't allow defining keywords
 class Environment:
-    def __init__(self, local: dict[str, Any] = {}, external: Environment | None = None):
-        self.local = local
+    def __init__(self, scope: dict[str, Any], external: Environment | None = None, closure: set[str] | None = None):
+        self.scope = scope
         self.external = external
+        self.closure = closure
 
-    def find(self, name: str) -> Environment:
-        return self if name in self.local else self.external.find(name)
+    def is_global(self) -> bool:
+        return self.external is None
+
+    def find(self, name: str, closure: set[str] | None = None) -> dict[str, Any]:
+        if self.is_global():
+            return self.scope
+
+        in_scope = name in self.scope and (closure is None or name in closure)
+        next_closure = closure if closure is not None else self.closure
+        return self.scope if in_scope else self.external.find(name, next_closure)
 
     def get(self, name: str) -> Any:
-        return self.find(name).local[name]
+        return self.find(name).get(name)
 
     def define(self, name: str, value: Any) -> None:
-        self.local[name] = value
+        self.scope[name] = value
 
     def assign(self, name: str, value: Any) -> None:
-        self.find(name).local[name] = value
+        self.find(name)[name] = value
 
 
 class NameList(list[str]):
@@ -174,7 +182,14 @@ class FunctionBody:
         self.block = Block(tokens, "end")
 
     def eval(self, env: Environment) -> Callable:
-        return lambda *args: self.block.eval(Environment(dict(zip(self.params, args)), env))
+        closure = set()
+        lexical = env
+        while not lexical.is_global():
+            for name in lexical.scope:
+                closure.add(name)
+            lexical = lexical.external
+
+        return lambda *args: self.block.eval(Environment(dict(zip(self.params, args)), env, closure))
 
 
 class FunctionCall:
@@ -337,7 +352,8 @@ class Block:
             self.return_exp = Expression(tokens) if tokens.next != terminate else ReturnExpression()
         tokens.skip(terminate)
 
-    def eval(self, env: Environment) -> ReturnValue | None:
+    def eval(self, external: Environment) -> ReturnValue | None:
+        env = Environment({}, external)
         for statement in self.statements:
             value = statement.eval(env)
             if isinstance(value, ReturnValue):
