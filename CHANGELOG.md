@@ -9,6 +9,12 @@
 
 **Since last version...**
 
+**Version 16**
+
+Hello again! As incredibly on-brand for me (not going to say *us*, since I think the whole versioning debacle is entirely my fault) this version was delayed longer than expected. The reason this time is the tutorial tab- after writing it out we decided we wanted to reorganize the config window once again. Now with scroll bars, we can make tabs a lot more vertical and remove a lot of tab clutter. We started on doing that, but afterwards I realized that it's probably best to just push this out even if the tutorial isn't the most helpful thing in the world right now...
+
+Once again, there's a lot of huge things in this update, including the often requested monitor whitelist feature! However, I want to make special mention of a specific bug Marigold was working on fixing for months... while the dreaded "linux mpv curse" may have only inconsistently affected certain users on certain OSes, it is now vanquished! Oh, and if you haven't already seen it, there's a new Demo(n) pack out as well, something more basic if you want something to test just the core features of Edgeware++!
+
 •*Removed "Export Pack" from the bottom of the config window, replacing it with the pack switcher and improved pack import buttons*
 >We've moved on to a system that has multiple pack support, allowing you to quickly swap between things... on top of that, exporting packs was becoming increasingly obsolete. The pack creator tool now comes bundled with Edgeware++, and if people still prefer to do it the old fashioned way they can still zip up the resource folder! If you liked having everything in just one folder and didn't make use of the pack switching feature, don't worry- you can choose to import packs as "default" when you click the new "import pack" button.
 
@@ -17,6 +23,9 @@
 
 •*Added a "monitor whitelist" feature under Popups, which forces Edgeware to be restricted to certain monitors if enabled*
 
+•*Replaced the "About" tab with the "Tutorial" tab, which is "sort of" the same thing but with more in depth tutorials (and also pops out into its own window!)*
+>There are currently only two new tabs in the tutorial section, so apologies if you were waiting for them to all be done before trying out edgeware++!
+
 •*Fixed some small errors/inaccuracies with help text throughout the config window*
 
 •*Fixed an oversight with tray panic not being disabled by the "disable panic" option*
@@ -24,6 +33,10 @@
 •*Fixed a crash with notifications and subliminal messages when there are no captions in the pack*
 
 •*Fixed a bug on Wayland (Linux) where mpv players don't get embedded inside popups*
+
+•*mpv was also causing issues with buttonless popups on certain operating systems, which is now fixed as well*
+
+•*Also fixed a very inconsistent but nasty bug where the mpv player would crash Edgeware++ on Linux*
 
 •*Changed the popup randomization code to lean towards selecting popups that haven't been selected recently*
 
