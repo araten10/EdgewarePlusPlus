@@ -40,6 +40,8 @@ class Assets:
     # Tutorial pages
     TUTORIAL = ROOT / "tutorial"
 
+    TUTORIAL_UNDERCONSTRUCTION = TUTORIAL / "construction.html"
+
     TUTORIAL_INTRO = TUTORIAL / "intro.html"
     TUTORIAL_GETSTARTED = TUTORIAL / "gettingstarted.html"
     TUTORIAL_BASICSETTINGS = TUTORIAL / "basicsettings.html"
