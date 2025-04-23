@@ -6,6 +6,7 @@ if __name__ == "__main__":
     # Required on Windows
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
+import sys
 from threading import Thread
 from tkinter import Tk
 
@@ -29,12 +30,12 @@ from features.misc import (
     play_audio,
 )
 from features.prompt import Prompt
-from features.startup_splash import StartupSplash
 from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from pack import Pack
 from panic import start_panic_listener
 from roll import RollTarget, roll_targets
+from scripting import run_script
 from settings import Settings, first_launch_configure
 from state import State
 
@@ -95,9 +96,11 @@ if __name__ == "__main__":
             handle_wallpaper(root, settings, pack, state)
             main(root, settings, pack, targets)
 
-    if settings.startup_splash:
-        StartupSplash(settings, pack, start_main)
-    else:
-        start_main()
+    # if settings.startup_splash:
+    #     StartupSplash(settings, pack, start_main)
+    # else:
+    #     start_main()
 
+    run_script()
+    root.after(1000, sys.exit)
     root.mainloop()

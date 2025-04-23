@@ -1,25 +1,9 @@
-if __name__ == "__main__":
-    import os
-
-    from paths import Data
-
-    # Required on Windows
-    os.environ["PATH"] += os.pathsep + str(Data.ROOT)
-
 import operator
-import sys
 from dataclasses import dataclass
-from tkinter import Tk
 from typing import Any, Callable
 
-from pack import Pack
-from pygame import mixer
-from settings import Settings
-from state import State
-
-# chunk ::= block
-
-# block ::= {stat} [retstat]
+from scripting.environment import Environment
+from scripting.tokens import Tokens
 
 # stat ::= break |
 #          if exp then block {elseif exp then block} [else block] end |
@@ -29,119 +13,6 @@ from state import State
 # binop ::= ‘..’
 
 # unop ::= ‘#’
-
-root = Tk()
-root.withdraw()
-settings = Settings()
-pack = Pack(settings.pack_path)
-state = State()
-
-mixer.init()
-mixer.set_num_channels(settings.max_audio)
-
-script = """
-function hello()
-  print("Hello", world)
-end
-
-world = "world!"
-hello()
-"""
-
-
-class Tokens(list[str]):
-    def __init__(self, code: str):
-        # TODO: Tokenize operators
-        super().__init__()
-        chars = list(code)
-        special = ["(", ")", ","]
-
-        while chars:
-            if chars[0:2] == ["-", "-"]:
-                terminate = ["]", "]"] if chars[2:4] == ["[", "["] else ["\n"]
-                while chars[0 : len(terminate)] != terminate:
-                    chars.pop(0)
-                del chars[0 : len(terminate)]
-                continue
-
-            char = chars.pop(0)
-            if char.isspace():
-                continue
-            elif char in special:
-                self.append(char)
-            elif char == '"':
-                token = char
-                while chars[0] != '"':
-                    char = chars.pop(0)
-                    token += chars.pop(0) if char == "\\" else char  # TODO: Proper escape sequences
-                token += chars.pop(0)
-                self.append(token)
-            else:
-                token = char
-                while not (chars[0].isspace() or chars[0] in special):
-                    token += chars.pop(0)
-                self.append(token)
-
-        self.append("end")
-
-    @property
-    def next(self) -> str:
-        return self[0]
-
-    @property
-    def ahead(self) -> str:
-        return self[1]
-
-    def get(self) -> str:
-        return self.pop(0)
-
-    def get_name(self) -> str:
-        if not all([char.isalnum() or char == "_" for char in self.next]) or self.next[0].isdigit():
-            raise Exception(f"Invalid name {self.next}")
-        return self.get()
-
-    def skip(self, expected: str | None = None) -> None:
-        token = self.get()
-        if token != expected and expected:
-            raise Exception(f"Unexpected token {token}, expected {expected}")
-
-    def skip_if(self, possible: str) -> bool:
-        if self.next == possible:
-            self.skip()
-            return True
-        return False
-
-
-class Environment:
-    pass
-
-
-# TODO: Don't allow defining keywords
-class Environment:
-    def __init__(self, scope: dict[str, Any], external: Environment | None = None, closure: set[str] | None = None):
-        self.scope = scope
-        self.external = external
-        self.closure = closure
-
-    def is_global(self) -> bool:
-        return self.external is None
-
-    def find(self, name: str, closure: set[str] | None = None) -> dict[str, Any]:
-        if self.is_global():
-            return self.scope
-
-        in_scope = name in self.scope and (closure is None or name in closure)
-        next_closure = closure if closure is not None else self.closure
-        return self.scope if in_scope else self.external.find(name, next_closure)
-
-    def get(self, name: str) -> Any:
-        return self.find(name).get(name)
-
-    def define(self, name: str, value: Any) -> None:
-        self.scope[name] = value
-
-    def assign(self, name: str, value: Any) -> None:
-        self.find(name)[name] = value
 
 
 class NameList(list[str]):
@@ -371,10 +242,18 @@ class Block:
             return ReturnValue(self.return_exp.eval(env))
 
 
-env = Environment({"print": lambda *args: print(*args)})
-tokens = Tokens(script)
-block = Block(tokens, "end")
-block.eval(env)
+script = """
+function hello()
+  print("Hello", world)
+end
 
-root.after(1000, sys.exit)
-root.mainloop()
+world = "world!"
+hello()
+"""
+
+
+def run_script() -> None:
+    env = Environment({"print": lambda *args: print(*args)})
+    tokens = Tokens(script)
+    block = Block(tokens, "end")
+    block.eval(env)
