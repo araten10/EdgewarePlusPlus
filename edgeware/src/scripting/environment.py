@@ -5,7 +5,6 @@ class Environment:
     pass
 
 
-# TODO: Don't allow defining keywords
 class Environment:
     def __init__(self, scope: dict[str, Any], external: Environment | None = None, closure: set[str] | None = None):
         self.scope = scope
