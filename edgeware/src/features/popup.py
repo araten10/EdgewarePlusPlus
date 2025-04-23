@@ -93,7 +93,7 @@ class Popup(Toplevel):
 
                     # Compute the weight for this position, preferring positions
                     # that reduce popup overlap and clustering
-                    geometries = self.state.popup_geometries.values()
+                    geometries = self.state.popup_geometries.copy().values()  # Copied in case a popup is closed during iteration
                     weight = float("inf") if geometries else 1
                     for w, h, x, y in geometries:
                         intersection = max(0, min(sx + sw, x + w) - max(sx, x)) * max(0, min(sy + sh, y + h) - max(sy, y))
