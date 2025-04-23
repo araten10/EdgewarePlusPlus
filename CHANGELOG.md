@@ -11,6 +11,7 @@
 
 Multiple changeups to how the config window is sorted. These include:
 
+•*Removing the "File" tab and moving the related settings to "Start" and "Troubleshooting"*
 
 **Version 16**
 
