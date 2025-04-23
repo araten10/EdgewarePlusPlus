@@ -95,7 +95,7 @@ class TroubleshootingTab(ScrollFrame):
             text="Run mpv in a Subprocess (Linux Only)",
             variable=vars.mpv_subprocess,
             cursor="question_arrow",
-            state=("active" if os_utils.is_linux() else "disabled"),
+            state=("normal" if os_utils.is_linux() else "disabled"),
         )
         mpv_subprocess_toggle.pack(fill="x", side="top")
         CreateToolTip(
