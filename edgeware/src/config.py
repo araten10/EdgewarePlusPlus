@@ -37,7 +37,6 @@ from config_window.tabs.annoyance.popup import PopupTab
 from config_window.tabs.annoyance.wallpaper import WallpaperTab
 from config_window.tabs.general.booru import BooruTab
 from config_window.tabs.general.default_file import DefaultFileTab
-from config_window.tabs.general.file import FileTab
 from config_window.tabs.general.info import InfoTab
 from config_window.tabs.general.start import StartTab
 from config_window.tabs.modes.basic import BasicModesTab
@@ -109,8 +108,7 @@ class Config(Tk):
         notebook.add(general_tab, text="General")
         general_notebook = ttk.Notebook(general_tab)
         general_notebook.pack(expand=1, fill="both")
-        general_notebook.add(StartTab(vars, title_font, message_group, local_version, live_version), text="Start")  # startup screen, info and presets
-        general_notebook.add(FileTab(vars, title_font, message_group, pack), text="File/Presets")  # file management tab
+        general_notebook.add(StartTab(vars, title_font, message_group, local_version, live_version, pack), text="Start")  # startup screen, info and presets
         general_notebook.add(InfoTab(vars, title_font, message_group, pack), text="Pack Info")  # pack information
         general_notebook.add(BooruTab(vars, title_font), text="Booru Downloader")  # tab for booru downloader
         general_notebook.add(DefaultFileTab(vars, message_group), text="Change Default Files")  # tab for changing default files
@@ -135,7 +133,7 @@ class Config(Tk):
         modes_notebook.add(HibernateModeTab(vars, title_font), text="Hibernate")  # tab for hibernate mode
         modes_notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
 
-        notebook.add(TroubleshootingTab(vars, title_font), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
+        notebook.add(TroubleshootingTab(vars, title_font, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
         notebook.add(Frame(), text="Tutorial")  # tab for tutorial, etc
         last_tab = notebook.index(notebook.select())  # get initial tab to prevent switching to tutorial

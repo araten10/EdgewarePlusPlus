@@ -9,6 +9,10 @@
 
 **Since last version...**
 
+Multiple changeups to how the config window is sorted. These include:
+
+•*Removing the "File" tab and moving the related settings to "Start" and "Troubleshooting"*
+
 **Version 16**
 
 Hello again! As incredibly on-brand for me (not going to say *us*, since I think the whole versioning debacle is entirely my fault) this version was delayed longer than expected. The reason this time is the tutorial tab- after writing it out we decided we wanted to reorganize the config window once again. Now with scroll bars, we can make tabs a lot more vertical and remove a lot of tab clutter. We started on doing that, but afterwards I realized that it's probably best to just push this out even if the tutorial isn't the most helpful thing in the world right now...

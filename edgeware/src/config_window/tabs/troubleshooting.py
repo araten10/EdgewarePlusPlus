@@ -4,17 +4,48 @@ from tkinter import (
     Checkbutton,
     Frame,
     Label,
+    messagebox,
+    Button,
+
 )
 from tkinter.font import Font
+import os
+import logging
 
 import os_utils
+import utils
 from config_window.vars import Vars
+from config_window.utils import log_file
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
+from paths import Data
+from pack import Pack
 
+def get_log_number() -> int:
+    return len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
+
+
+def delete_logs(log_number_label: Label):
+    try:
+        if not messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete all logs? There are currently {get_log_number()}.", icon="warning"):
+            return
+
+        if not (os.path.exists(Data.LOGS) and os.listdir(Data.LOGS)):
+            return
+
+        logs = os.listdir(Data.LOGS)
+        for file in logs:
+            if os.path.splitext(file)[0] == os.path.splitext(log_file)[0]:
+                continue
+
+            if os.path.splitext(file)[1].lower() == ".txt":
+                os.remove(Data.LOGS / file)
+        log_number_label.configure(text=f"Total Logs: {get_log_number()}")
+    except Exception as e:
+        logging.warning(f"could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}")
 
 class TroubleshootingTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font):
+    def __init__(self, vars: Vars, title_font: Font, pack: Pack):
         super().__init__()
 
         Label(self.viewPort, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)
@@ -64,7 +95,7 @@ class TroubleshootingTab(ScrollFrame):
             text="Run mpv in a Subprocess (Linux Only)",
             variable=vars.mpv_subprocess,
             cursor="question_arrow",
-            state=("active" if os_utils.is_linux() else "disabled"),
+            state=("normal" if os_utils.is_linux() else "disabled"),
         )
         mpv_subprocess_toggle.pack(fill="x", side="top")
         CreateToolTip(
@@ -74,3 +105,46 @@ class TroubleshootingTab(ScrollFrame):
             "You can disable this setting to run mpv in the main process at the risk of an inconsistent experience and crashes.\n\n"
             "This setting is only available on Linux.",
         )
+
+        # Directories
+        Label(self.viewPort, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
+
+        logs_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        logs_frame.pack(fill="x", pady=2)
+
+        logs_col_1 = Frame(logs_frame)
+        logs_col_1.pack(fill="both", side="left", expand=1)
+        log_number_label = Label(logs_col_1, text=f"Total Logs: {get_log_number()}")
+        log_number_label.pack(fill="both", expand=1)
+
+        logs_col_2 = Frame(logs_frame)
+        logs_col_2.pack(fill="both", side="left", expand=1)
+        Button(logs_col_2, text="Open Logs Folder", command=lambda: os_utils.open_directory(Data.LOGS)).pack(fill="x", expand=1)
+        delete_logs_button = Button(logs_col_2, text="Delete All Logs", command=lambda: delete_logs(log_number_label), cursor="question_arrow")
+        delete_logs_button.pack(fill="x", expand=1)
+        CreateToolTip(delete_logs_button, "This will delete every log (except the log currently being written).")
+
+        moods_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        moods_frame.pack(fill="x", pady=2)
+
+        moods_col_1 = Frame(moods_frame)
+        moods_col_1.pack(fill="both", side="left", expand=1)
+        id = pack.info.mood_file.with_suffix("").name
+        using_unique = id == utils.compute_mood_id(pack.paths)
+        Label(moods_col_1, text=("Using Unique ID?: " + ("✓" if using_unique else "✗")), fg=("green" if using_unique else "red")).pack(fill="both", expand=1)
+        Label(moods_col_1, text=(f"Pack ID is: {id}")).pack(fill="both", expand=1)
+
+        moods_col_2 = Frame(moods_frame)
+        moods_col_2.pack(fill="both", side="left", expand=1)
+        open_moods_button = Button(
+            moods_col_2, height=2, text="Open Moods Folder", command=lambda: os_utils.open_directory(Data.MOODS), cursor="question_arrow"
+        )
+        open_moods_button.pack(fill="x", expand=1)
+        CreateToolTip(
+            open_moods_button,
+            'If your currently loaded pack has a "info.json" file, it can be found under the pack name in this folder.\n\n'
+            "If it does not have this file however, Edgeware++ will generate a Unique ID for it, so you can still save your mood settings "
+            'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
+        )
+
+        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: os_utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)
