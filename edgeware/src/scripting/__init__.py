@@ -6,7 +6,6 @@ from scripting.environment import Environment
 from scripting.tokens import Tokens
 
 # stat ::= break |
-#          if exp then block {elseif exp then block} [else block] end |
 #          for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
 #          for parse_name_list in parse_expression_list do block end |
 
@@ -164,12 +163,12 @@ class Statement:
                 return
             case "while":
                 tokens.skip("while")
-                test_exp = Expression(tokens)
+                while_exp = Expression(tokens)
                 tokens.skip("do")
                 block = Block(tokens, "end")
 
                 def while_eval(env: Environment) -> ReturnValue | None:
-                    while test_exp.eval(env):
+                    while while_exp.eval(env):
                         value = block.eval(env)
                         if isinstance(value, ReturnValue):
                             return value
@@ -178,10 +177,33 @@ class Statement:
                 return
             case "if":
                 tokens.skip("if")
-                test_exp = Expression(tokens)
+                if_exp = Expression(tokens)
                 tokens.skip("then")
-                then_block = Block(tokens, "end")
-                self.eval = lambda env: then_block.eval(env) if test_exp.eval(env) else None
+                then_block = Block(tokens, ["elseif", "else", "end"])
+
+                chain = [(if_exp, then_block)]
+
+                while tokens.skip_if("elseif"):
+                    elseif_exp = Expression(tokens)
+                    tokens.skip("then")
+                    elseif_block = Block(tokens, ["elseif", "else", "end"])
+                    chain.append((elseif_exp, elseif_block))
+
+                if tokens.skip_if("else"):
+                    else_block = Block(tokens, "end")
+                    chain.append(else_block)
+
+                def if_eval(env: Environment) -> ReturnValue | None:
+                    for branch in chain:
+                        if isinstance(branch, tuple):
+                            exp, block = branch
+                            if exp.eval(env):
+                                return block.eval(env)
+                        else:
+                            block = branch
+                            return block.eval(env)
+
+                self.eval = if_eval
                 return
             case "function":
                 tokens.skip("function")
@@ -220,16 +242,19 @@ class ReturnExpression:
 
 
 class Block:
-    def __init__(self, tokens: Tokens, terminate: str):
+    def __init__(self, tokens: Tokens, terminate: str | list[str]):
         self.statements = []
         self.return_exp = None
+        terminate_list = terminate if isinstance(terminate, list) else [terminate]
 
-        while tokens.next not in [terminate, "return"]:
+        while tokens.next not in terminate_list + ["return"]:
             self.statements.append(Statement(tokens))
 
         if tokens.skip_if("return"):
-            self.return_exp = Expression(tokens) if tokens.next != terminate else ReturnExpression()
-        tokens.skip(terminate)
+            self.return_exp = Expression(tokens) if tokens.next not in terminate_list else ReturnExpression()
+
+        if not isinstance(terminate, list):
+            tokens.skip(terminate)
 
     def eval(self, external: Environment) -> ReturnValue | None:
         env = Environment({}, external)
