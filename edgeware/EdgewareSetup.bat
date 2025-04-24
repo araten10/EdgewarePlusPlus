@@ -59,8 +59,8 @@ if not exist data\libmpv-2.dll (
   if not exist data mkdir data
   if not exist data\7z.exe curl https://7-zip.org/a/7zr.exe -o data\7z.exe
   if not exist data\mpv.7z (
-    if %OS%==32BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-i686-20250304-git-2542a78.7z -o data\mpv.7z
-    if %OS%==64BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250304/mpv-dev-x86_64-20250304-git-2542a78.7z -o data\mpv.7z
+    if %OS%==32BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250424/mpv-dev-i686-20250424-git-f147df1.7z -o data\mpv.7z
+    if %OS%==64BIT curl -L https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20250424/mpv-dev-x86_64-20250424-git-f147df1.7z -o data\mpv.7z
   )
   data\7z.exe e data\mpv.7z -odata libmpv-2.dll
 
