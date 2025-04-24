@@ -9,10 +9,6 @@ from scripting.tokens import Tokens
 #          for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
 #          for parse_name_list in parse_expression_list do block end |
 
-# binop ::= ‘..’
-
-# unop ::= ‘#’
-
 
 class NameList(list[str]):
     def __init__(self, tokens: Tokens):
@@ -89,6 +85,7 @@ class Expression:
             "//": operator.floordiv,
             "^": operator.pow,
             "%": operator.mod,
+            "..": operator.concat,
             "<": operator.lt,
             "<=": operator.le,
             ">": operator.gt,
@@ -120,15 +117,14 @@ class Expression:
 
         if tokens.next[0] == '"' and tokens.next[-1] == '"':
             string = tokens.get()
-            self.eval = lambda env: string[1:-1]
-            return
+            return lambda env: string[1:-1]
 
         if tokens.skip_if("("):
             exp = Expression(tokens)
             tokens.skip(")")
             return exp.eval
 
-        unary_ops = {"-": operator.neg, "not": operator.not_}
+        unary_ops = {"-": operator.neg, "#": len, "not": operator.not_}
         if tokens.next in unary_ops:
             op = unary_ops[tokens.get()]
             exp = Expression(tokens)
