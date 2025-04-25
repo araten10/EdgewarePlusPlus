@@ -9,6 +9,8 @@
 
 **Since last version...**
 
+•*Added secondary URL backups to the mpv library download, to fix issues with the download link not working due to updates*
+
 Multiple changeups to how the config window is sorted. These include:
 
 •*Removing the "File" tab and moving the related settings to "Start" and "Troubleshooting"*
