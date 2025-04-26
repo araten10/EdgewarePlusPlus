@@ -5,10 +5,6 @@ from typing import Any, Callable
 from scripting.environment import Environment
 from scripting.tokens import Tokens
 
-# stat ::= break |
-#          for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
-#          for parse_name_list in parse_expression_list do block end |
-
 UN_OPS = {"-": operator.neg, "#": len, "not": operator.not_}
 UN_PREC = 10
 
@@ -82,7 +78,7 @@ class FunctionBody:
                 closure.add(name)
             lexical = lexical.external
 
-        return lambda *args: self.block.eval(Environment(dict(zip(self.params, args)), env, closure))
+        return lambda env, *args: self.block.eval(Environment(dict(zip(self.params, args)), env, closure))
 
 
 class FunctionCall:
@@ -95,7 +91,7 @@ class FunctionCall:
             tokens.skip(")")
 
     def eval(self, env: Environment) -> Any:
-        value = env.get(self.name)(*[arg.eval(env) for arg in self.args])
+        value = env.get(self.name)(env, *[arg.eval(env) for arg in self.args])
         if isinstance(value, ReturnValue):
             return value.value
 
@@ -305,7 +301,18 @@ hello()
 
 
 def run_script() -> None:
-    env = Environment({"print": lambda *args: print(*args)})
+    modules = {
+        "edgeware": {}
+    }
+
+    def require(env: Environment, module: str) -> None:
+        for name, value in modules[module].items():
+            env.assign(name, value)
+
+    env = Environment({
+        "print": lambda env, *args: print(*args),
+        "require": require,
+    })
     tokens = Tokens(script)
     block = Block(tokens, "end")
     block.eval(env)
