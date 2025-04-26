@@ -212,6 +212,8 @@ class Statement:
                 if tokens.skip_if("else"):
                     else_block = Block(tokens, "end")
                     chain.append(else_block)
+                else:
+                    tokens.skip("end")
 
                 def if_eval(env: Environment) -> ReturnValue | None:
                     for branch in chain:
@@ -236,7 +238,12 @@ class Statement:
                 if tokens.skip_if("function"):
                     name = tokens.get_name()
                     body = FunctionBody(tokens)
-                    self.eval = lambda env: env.define(name, body.eval(env))
+
+                    def local_function_eval(env: Environment) -> None:
+                        env.define(name, None)
+                        env.assign(name, body.eval(env))
+
+                    self.eval = local_function_eval
                     return
                 else:
                     name = tokens.get_name()
