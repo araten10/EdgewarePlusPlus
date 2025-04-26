@@ -3,7 +3,18 @@ from dataclasses import dataclass
 from tkinter import Tk
 from typing import Any, Callable
 
+from features.image_popup import ImagePopup
+from features.misc import (
+    display_notification,
+    open_web,
+    play_audio,
+)
+from features.prompt import Prompt
+from features.subliminal_message_popup import SubliminalMessagePopup
+from features.video_popup import VideoPopup
 from pack import Pack
+from settings import Settings
+from state import State
 
 from scripting.environment import Environment
 from scripting.tokens import Tokens
@@ -294,8 +305,19 @@ class Block:
             return ReturnValue(self.return_exp.eval(env))
 
 
-def run_script(root: Tk, pack: Pack) -> None:
-    modules = {"edgeware": {"after": lambda env, ms, callback: root.after(ms, lambda: callback(env))}}
+def run_script(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
+    modules = {
+        "edgeware": {
+            "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
+            "image": lambda env: ImagePopup(root, settings, pack, state),
+            "video": lambda env: VideoPopup(root, settings, pack, state),
+            "audio": lambda env: play_audio(pack),
+            "prompt": lambda env: Prompt(settings, pack, state),
+            "web": lambda env: open_web(pack),
+            "subliminal_message": lambda env: SubliminalMessagePopup(settings, pack),
+            "notification": lambda env: display_notification(settings, pack),
+        }
+    }
 
     def require(env: Environment, module: str) -> None:
         for name, value in modules[module].items():
