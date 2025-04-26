@@ -9,6 +9,36 @@ from scripting.tokens import Tokens
 #          for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
 #          for parse_name_list in parse_expression_list do block end |
 
+UN_OPS = {"-": operator.neg, "#": len, "not": operator.not_}
+UN_PREC = 10
+
+BINARY = {
+    "+": (operator.add, 8, False),
+    "-": (operator.sub, 8, False),
+    "*": (operator.mul, 9, False),
+    "/": (operator.truediv, 9, False),
+    "//": (operator.floordiv, 9, False),
+    "^": (operator.pow, 11, True),
+    "%": (operator.mod, 9, False),
+    "..": (operator.concat, 7, True),
+    "<": (operator.lt, 2, False),
+    "<=": (operator.le, 2, False),
+    ">": (operator.gt, 2, False),
+    ">=": (operator.ge, 2, False),
+    "==": (operator.eq, 2, False),
+    "~=": (operator.ne, 2, False),
+    "and": (operator.and_, 1, False),
+    "or": (operator.or_, 0, False),
+}
+
+BIN_OPS = {token: data[0] for token, data in BINARY.items()}
+BIN_PREC = {token: data[1] for token, data in BINARY.items()}
+RIGHT_ASSOC = {token: data[2] for token, data in BINARY.items()}
+
+
+def identity(value: Any) -> Any:
+    return value
+
 
 class NameList(list[str]):
     def __init__(self, tokens: Tokens):
@@ -70,83 +100,77 @@ class FunctionCall:
             return value.value
 
 
-class Expression:
-    def __init__(self, tokens: Tokens, n_ary: bool = True):
-        self.parts = [self.unary(tokens)]
-        if not n_ary:
-            return
-
-        # TODO: Precedence
-        binary_ops = {
-            "+": operator.add,
-            "-": operator.sub,
-            "*": operator.mul,
-            "/": operator.truediv,
-            "//": operator.floordiv,
-            "^": operator.pow,
-            "%": operator.mod,
-            "..": operator.concat,
-            "<": operator.lt,
-            "<=": operator.le,
-            ">": operator.gt,
-            ">=": operator.ge,
-            "==": operator.eq,
-            "~=": operator.ne,
-            "and": operator.and_,
-            "or": operator.or_,
-        }
-        while tokens.next in binary_ops:
-            op = binary_ops[tokens.get()]
-            exp = Expression(tokens, False)
-            self.parts.append(op)
-            self.parts.append(exp.eval)
-
-    def unary(self, tokens: Tokens) -> Callable:
+class PrimaryExpression:
+    def __init__(self, tokens: Tokens):
         constants = {"nil": None, "false": False, "true": True}
-        for token, value in constants.items():
-            if tokens.skip_if(token):
-                return lambda env: value
+        if tokens.next in constants:
+            value = constants[tokens.get()]
+            self.eval = lambda env: value
+            return
 
         for numeral in [int, float]:
             try:
                 number = numeral(tokens.next)
                 tokens.skip()
-                return lambda env: number
+                self.eval = lambda env: number
+                return
             except ValueError:
                 pass
 
         if tokens.next[0] == '"' and tokens.next[-1] == '"':
             string = tokens.get()
-            return lambda env: string[1:-1]
+            self.eval = lambda env: string[1:-1]
+            return
 
         if tokens.skip_if("("):
             exp = Expression(tokens)
             tokens.skip(")")
-            return exp.eval
-
-        unary_ops = {"-": operator.neg, "#": len, "not": operator.not_}
-        if tokens.next in unary_ops:
-            op = unary_ops[tokens.get()]
-            exp = Expression(tokens)
-            return lambda env: op(exp.eval(env))
+            self.eval = exp.eval
+            return
 
         if tokens.ahead == "(":
             call = FunctionCall(tokens)
-            return lambda env: call.eval(env)
+            self.eval = lambda env: call.eval(env)
+            return
 
         name = tokens.get_name()
-        return lambda env: env.get(name)
+        self.eval = lambda env: env.get(name)
 
-    def eval(self, env: Environment) -> Any:
-        parts = self.parts.copy()
 
-        exp_eval = parts.pop(0)
-        value = exp_eval(env)
-        while parts:
-            op = parts.pop(0)
-            exp_eval = parts.pop(0)
-            value = op(value, exp_eval(env))
-        return value
+class Expression:
+    def __init__(self, tokens: Tokens):
+        l_un = self.unary(tokens)
+        left = PrimaryExpression(tokens)
+        self.eval = self.binary(tokens, l_un, left.eval)
+
+    # Modified version of the precedence climbing algorithm from Wikipedia
+    # https://en.wikipedia.org/wiki/Operator-precedence_parser#Pseudocode
+    def binary(self, tokens: Tokens, l_un: Callable, l_eval: Callable, min_precedence: int = 0) -> Callable:
+        while tokens.next in BIN_OPS and (BIN_PREC[tokens.next] >= min_precedence):
+            token = tokens.get()
+            op = BIN_OPS[token]
+            prec = BIN_PREC[token]
+
+            r_un = self.unary(tokens)
+            right = PrimaryExpression(tokens)
+            r_eval = right.eval
+            while tokens.next in BIN_OPS and ((BIN_PREC[tokens.next] > prec) or ((BIN_PREC[tokens.next] == prec) and RIGHT_ASSOC[tokens.next])):
+                r_eval = self.binary(tokens, r_un, right.eval, prec + (1 if BIN_PREC[tokens.next] > prec else 0))
+                r_un = identity
+
+            l_eval = lambda env, lu=l_un, le=l_eval, op=op, prec=prec, ru=r_un, re=r_eval: (  # noqa: E731
+                lu(op(le(env), ru(re(env)))) if prec > UN_PREC else op(lu(le(env)), ru(re(env)))
+            )
+            l_un = identity
+
+        return lambda env: l_un(l_eval(env))
+
+    def unary(self, tokens: Tokens) -> Callable:
+        chain = identity
+        while tokens.next in UN_OPS:
+            op = UN_OPS[tokens.get()]
+            chain = lambda value, chain=chain, op=op: chain(op(value))  # noqa: E731
+        return chain
 
 
 class Statement:
