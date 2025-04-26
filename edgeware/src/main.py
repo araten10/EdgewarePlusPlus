@@ -101,6 +101,6 @@ if __name__ == "__main__":
     # else:
     #     start_main()
 
-    run_script()
-    root.after(1000, sys.exit)
+    run_script(root, pack)
+    root.after(5000, sys.exit)
     root.mainloop()

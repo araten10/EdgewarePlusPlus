@@ -117,6 +117,7 @@ class PackPaths:
         self.icon = self.root / "icon.ico"
         self.index = self.root / "index.json"
         self.info = self.root / "info.json"
+        self.script = self.root / "script.lua"
         self.splash = [self.root / f"loading_splash.{extension}" for extension in ["png", "gif", "jpg", "jpeg", "bmp"]]
         self.wallpaper = self.root / "wallpaper.png"
 

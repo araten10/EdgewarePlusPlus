@@ -1,6 +1,9 @@
 import operator
 from dataclasses import dataclass
+from tkinter import Tk
 from typing import Any, Callable
+
+from pack import Pack
 
 from scripting.environment import Environment
 from scripting.tokens import Tokens
@@ -91,6 +94,7 @@ class FunctionCall:
             tokens.skip(")")
 
     def eval(self, env: Environment) -> Any:
+        # TODO: Adjustment https://www.lua.org/manual/5.4/manual.html#3.4.12
         value = env.get(self.name)(env, *[arg.eval(env) for arg in self.args])
         if isinstance(value, ReturnValue):
             return value.value
@@ -290,29 +294,23 @@ class Block:
             return ReturnValue(self.return_exp.eval(env))
 
 
-script = """
-function hello()
-  print("Hello", world)
-end
-
-world = "world!"
-hello()
-"""
-
-
-def run_script() -> None:
-    modules = {
-        "edgeware": {}
-    }
+def run_script(root: Tk, pack: Pack) -> None:
+    modules = {"edgeware": {"after": lambda env, ms, callback: root.after(ms, lambda: callback(env))}}
 
     def require(env: Environment, module: str) -> None:
         for name, value in modules[module].items():
             env.assign(name, value)
 
-    env = Environment({
-        "print": lambda env, *args: print(*args),
-        "require": require,
-    })
+    env = Environment(
+        {
+            "print": lambda env, *args: print(*args),
+            "require": require,
+        }
+    )
+
+    with open(pack.paths.script, "r") as f:
+        script = f.read()
+
     tokens = Tokens(script)
     block = Block(tokens, "end")
     block.eval(env)
