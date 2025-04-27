@@ -21,7 +21,7 @@ from widgets.tooltip import CreateToolTip
 
 
 class HibernateModeTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font):
+    def __init__(self, vars: Vars, title_font: Font) -> None:
         super().__init__()
 
         Label(self.viewPort, text="Hibernate Mode", font=title_font, relief=GROOVE).pack(pady=2)

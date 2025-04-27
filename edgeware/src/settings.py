@@ -44,7 +44,7 @@ def load_default_config() -> dict:
 
 
 class Settings:
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = load_config()
         self.load_settings()
         logging.info(f"Config loaded: {self.config}")

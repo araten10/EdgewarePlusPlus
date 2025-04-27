@@ -21,7 +21,7 @@ from widgets.tooltip import CreateToolTip
 
 
 class AudioVideoTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
         # Audio

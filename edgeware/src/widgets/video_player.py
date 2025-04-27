@@ -14,7 +14,7 @@ from settings import Settings
 
 
 class VideoPlayer(Label):
-    def __init__(self, master: Misc, settings: Settings, width: int, height: int):
+    def __init__(self, master: Misc, settings: Settings, width: int, height: int) -> None:
         super().__init__(master, width=width, height=height, bg="black")
         self.pack()
 

@@ -9,7 +9,7 @@ from state import State
 
 
 class Prompt(Toplevel):
-    def __init__(self, settings: Settings, pack: Pack, state: State):
+    def __init__(self, settings: Settings, pack: Pack, state: State) -> None:
         self.prompt = pack.random_prompt()
         self.state = state
         if not self.should_init():

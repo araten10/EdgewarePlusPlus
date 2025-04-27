@@ -34,7 +34,7 @@ def validate_booru(name: str) -> bool:
 
 
 class BooruTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font):
+    def __init__(self, vars: Vars, title_font: Font) -> None:
         super().__init__()
 
         Label(self.viewPort, text="Image Download Settings", font=title_font, relief=GROOVE).pack(pady=2)
