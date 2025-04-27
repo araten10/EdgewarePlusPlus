@@ -1,4 +1,5 @@
 from tkinter import Button, Label, Text, Toplevel
+from typing import Callable
 
 import os_utils
 import utils
@@ -9,7 +10,7 @@ from state import State
 
 
 class Prompt(Toplevel):
-    def __init__(self, settings: Settings, pack: Pack, state: State, prompt: str | None = None):
+    def __init__(self, settings: Settings, pack: Pack, state: State, prompt: str | None = None, on_close: Callable[[], None] | None = None):
         self.prompt = prompt or pack.random_prompt()
         self.state = state
         if not self.should_init():
@@ -17,6 +18,7 @@ class Prompt(Toplevel):
         super().__init__()
 
         self.theme = get_theme(settings)
+        self.on_close = on_close
 
         self.attributes("-topmost", True)
         os_utils.set_borderless(self)
@@ -72,3 +74,5 @@ class Prompt(Toplevel):
         if d[len(a)][len(b)] <= max_mistakes:
             self.destroy()
             self.state.prompt_active = False
+            if self.on_close:
+                self.on_close()
