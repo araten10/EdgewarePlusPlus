@@ -1,3 +1,4 @@
+from pathlib import Path
 from tkinter import Tk
 
 from features.popup import Popup
@@ -9,8 +10,8 @@ from widgets.video_player import VideoPlayer
 
 
 class VideoPopup(Popup):
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State):
-        self.media = pack.random_video()
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, media: Path | None = None):
+        self.media = media or pack.random_video()
         if not self.should_init(settings, state):
             return
         super().__init__(root, settings, pack, state)

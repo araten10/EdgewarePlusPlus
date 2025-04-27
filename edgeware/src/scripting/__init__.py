@@ -309,13 +309,13 @@ def run_script(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     modules = {
         "edgeware": {
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
-            "image": lambda env: ImagePopup(root, settings, pack, state),
-            "video": lambda env: VideoPopup(root, settings, pack, state),
-            "audio": lambda env: play_audio(pack),
-            "prompt": lambda env: Prompt(settings, pack, state),
-            "web": lambda env: open_web(pack),
-            "subliminal_message": lambda env: SubliminalMessagePopup(settings, pack),
-            "notification": lambda env: display_notification(settings, pack),
+            "image": lambda env, image: ImagePopup(root, settings, pack, state, pack.paths.image / image if image else None),
+            "video": lambda env, video: VideoPopup(root, settings, pack, state, pack.paths.video / video if video else None),
+            "audio": lambda env, audio: play_audio(pack, pack.paths.audio / audio if audio else None),
+            "prompt": lambda env, prompt: Prompt(settings, pack, state, prompt),
+            "web": lambda env, web: open_web(pack, web),
+            "subliminal_message": lambda env, subliminal_message: SubliminalMessagePopup(settings, pack, subliminal_message),
+            "notification": lambda env, notification: display_notification(settings, pack, notification),
         }
     }
 

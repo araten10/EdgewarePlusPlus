@@ -8,8 +8,8 @@ from settings import Settings
 
 
 class SubliminalMessagePopup(Toplevel):
-    def __init__(self, settings: Settings, pack: Pack):
-        self.subliminal_message = pack.random_subliminal_message()
+    def __init__(self, settings: Settings, pack: Pack, subliminal_message: str | None = None):
+        self.subliminal_message = subliminal_message or pack.random_subliminal_message()
         if not self.should_init():
             return
         super().__init__()

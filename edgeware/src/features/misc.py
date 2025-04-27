@@ -5,6 +5,7 @@ import subprocess
 import time
 import webbrowser
 from collections.abc import Callable
+from pathlib import Path
 from threading import Thread
 from tkinter import Tk
 
@@ -24,10 +25,10 @@ from settings import Settings
 from state import State
 
 
-def play_audio(pack: Pack) -> None:
+def play_audio(pack: Pack, audio: Path | None = None) -> None:
     # Pygame will not stop additional sounds from being played when the max is
     # reached, so we need to check if there are empty channels
-    audio = pack.random_audio()
+    audio = audio or pack.random_audio()
     if audio and mixer.find_channel():
         sound = mixer.Sound(str(audio))
         # TODO POTENTIAL SETTINGS: Volume, fadein, fadeout, separating music from sounds
@@ -35,14 +36,14 @@ def play_audio(pack: Pack) -> None:
         sound.play()
 
 
-def open_web(pack: Pack) -> None:
-    web = pack.random_web()
+def open_web(pack: Pack, web: str | None = None) -> None:
+    web = web or pack.random_web()
     if web:
         webbrowser.open(web)
 
 
-def display_notification(settings: Settings, pack: Pack) -> None:
-    notification = pack.random_notification()
+def display_notification(settings: Settings, pack: Pack, notification: str | None = None) -> None:
+    notification = notification or pack.random_notification()
     if not notification:
         return
 
