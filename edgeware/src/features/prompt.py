@@ -10,7 +10,7 @@ from state import State
 
 
 class Prompt(Toplevel):
-    def __init__(self, settings: Settings, pack: Pack, state: State, prompt: str | None = None, on_close: Callable[[], None] | None = None):
+    def __init__(self, settings: Settings, pack: Pack, state: State, prompt: str | None = None, on_close: Callable[[], None] | None = None) -> None:
         self.prompt = prompt or pack.random_prompt()
         self.state = state
         if not self.should_init():

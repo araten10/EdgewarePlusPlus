@@ -26,7 +26,7 @@ NOTIFICATION_TEXT = 'These are a special type of caption-centric popup that uses
 
 
 class CaptionsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
         # Captions

@@ -25,7 +25,7 @@ def list_length(pack: Pack, attr: str) -> list:
 
 
 class StatusItem(Frame):
-    def __init__(self, master: Misc, text: str, includes: bool, tooltip: str | None = None):
+    def __init__(self, master: Misc, text: str, includes: bool, tooltip: str | None = None) -> None:
         super().__init__(master)
 
         self.pack(fill="x", side="left", expand=1)
@@ -40,7 +40,7 @@ class StatusItem(Frame):
 
 
 class StatsItem(Frame):
-    def __init__(self, master: Misc, text: str, number: int):
+    def __init__(self, master: Misc, text: str, number: int) -> None:
         super().__init__(master)
 
         self.pack(fill="x", side="left", expand=1)
@@ -51,7 +51,7 @@ class StatsItem(Frame):
 
 
 class InfoTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
         super().__init__()
 
         multi_pack_message = Message(self.viewPort, text=MULTI_PACK_TEXT, justify=CENTER, width=675)

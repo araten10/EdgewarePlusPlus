@@ -35,7 +35,7 @@ def update_max(obj, value: int):
 
 
 class WallpaperTab(ScrollFrame):
-    def __init__(self, vars: Vars, message_group: list[Message], pack: Pack):
+    def __init__(self, vars: Vars, message_group: list[Message], pack: Pack) -> None:
         super().__init__()
 
         self.pack = pack

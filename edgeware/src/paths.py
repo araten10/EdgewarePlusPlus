@@ -101,7 +101,7 @@ class CustomAssets:
 
 @dataclass
 class PackPaths:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path) -> None:
         self.root = root
 
         # Directories

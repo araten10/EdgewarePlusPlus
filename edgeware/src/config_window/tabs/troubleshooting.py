@@ -1,25 +1,25 @@
+import logging
+import os
 from tkinter import (
     GROOVE,
     RAISED,
+    Button,
     Checkbutton,
     Frame,
     Label,
     messagebox,
-    Button,
-
 )
 from tkinter.font import Font
-import os
-import logging
 
 import os_utils
 import utils
-from config_window.vars import Vars
 from config_window.utils import log_file
+from config_window.vars import Vars
+from pack import Pack
+from paths import Data
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
-from paths import Data
-from pack import Pack
+
 
 def get_log_number() -> int:
     return len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
@@ -44,8 +44,9 @@ def delete_logs(log_number_label: Label):
     except Exception as e:
         logging.warning(f"could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}")
 
+
 class TroubleshootingTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
         super().__init__()
 
         Label(self.viewPort, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)

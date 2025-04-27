@@ -14,7 +14,7 @@ from widgets.video_player import VideoPlayer
 
 
 class ImagePopup(Popup):
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, media: Path | None = None):
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, media: Path | None = None) -> None:
         self.media = media or pack.random_image()
         self.subliminal = roll(settings.subliminal_chance)
         if not self.should_init(settings, state):

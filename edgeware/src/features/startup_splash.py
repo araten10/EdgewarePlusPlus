@@ -10,7 +10,7 @@ from widgets.video_player import VideoPlayer
 
 
 class StartupSplash(Toplevel):
-    def __init__(self, settings: Settings, pack: Pack, callback: Callable[[], None]):
+    def __init__(self, settings: Settings, pack: Pack, callback: Callable[[], None]) -> None:
         super().__init__(bg="black")
 
         self.callback = callback

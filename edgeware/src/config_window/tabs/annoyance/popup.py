@@ -16,7 +16,7 @@ OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them
 
 
 class MonitorCheckbutton(Checkbutton):
-    def __init__(self, master: Misc, monitor: Monitor):
+    def __init__(self, master: Misc, monitor: Monitor) -> None:
         self.monitor = monitor
         self.var = BooleanVar(master, self.monitor.name not in config["disabledMonitors"])
         super().__init__(master, text=f"{self.monitor.name} ({self.monitor.width}x{self.monitor.height})", variable=self.var, command=self.update_monitors)
@@ -29,7 +29,7 @@ class MonitorCheckbutton(Checkbutton):
 
 
 class PopupTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
         intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)

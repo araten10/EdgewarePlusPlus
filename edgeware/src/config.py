@@ -75,7 +75,7 @@ if not pack.info.mood_file.is_file() or isinstance(pack.active_moods, UniversalS
 
 
 class Config(Tk):
-    def __init__(self):
+    def __init__(self) -> None:
         global config, vars
         super().__init__()
 
@@ -140,7 +140,7 @@ class Config(Tk):
         notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self))
 
         def tutorial_container(event, self) -> None:
-            global last_tab
+            nonlocal last_tab
             if event.widget.select() == ".!frame4":
                 open_tutorial(event, self, style, window_font, title_font)
                 notebook.select(last_tab)

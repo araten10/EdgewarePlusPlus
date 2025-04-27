@@ -46,7 +46,7 @@ def update_moods(pack: Pack, mood_name: str, check: bool) -> None:
 # if you are working on this i'm just letting you know there's like almost no documentation for ttkwidgets
 # source code is here https://github.com/TkinterEP/ttkwidgets/blob/master/ttkwidgets/checkboxtreeview.py
 class MoodsTreeview(CheckboxTreeview):
-    def __init__(self, master: Misc, pack: Pack, **kw):
+    def __init__(self, master: Misc, pack: Pack, **kw) -> None:
         super().__init__(master, **kw)
         # disabled tag to mar disabled items
         self.tag_configure("disabled", foreground="grey")
@@ -70,7 +70,7 @@ class MoodsTreeview(CheckboxTreeview):
 
 
 class MoodsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
         super().__init__()
 
         Label(self.viewPort, text="Moods", font=title_font, relief=GROOVE).pack(pady=2)
