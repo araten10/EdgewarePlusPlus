@@ -45,7 +45,7 @@ class CorruptionConfig:
     ]
 
     # Settings I found that are maybe dead currently since I can't find use (feel free to delete this once it's taken care of):
-    # pumpScareOffset (used to be for offsetting the pumpscare audio, might be irrelevant once we force vlc)
+    # pumpScareOffset (used to be for offsetting the pumpscare audio, could be removed now that mpv is forced)
 
     # TO CONSIDER FOR DANGEROUS:
     # mitosismode/mitosis_strength can potentially cause a dangerous payload of popups if set incorrectly

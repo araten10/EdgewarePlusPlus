@@ -13,7 +13,7 @@ from tkinter import (
     font,
 )
 
-class ManualScale(tk.Frame):
+class ManualScale(Frame):
     def __init__(self, label: Label, *args, **kwargs):
         super().__init__(borderwidth=1, relief="groove", *args, **kwargs)
         inner = Frame(self)
@@ -25,7 +25,7 @@ class ManualScale(tk.Frame):
         super().pack(padx=4, pady=4, side="left", expand=True, fill="x")
 
 
-class Toggle(tk.Checkbutton):
+class Toggle(Checkbutton):
     def __init__(self, text: str, *args, **kwargs):
         super().__init__(text=text, borderwidth=1, relief="groove", *args, **kwargs)
 
@@ -33,7 +33,7 @@ class Toggle(tk.Checkbutton):
         super().pack(padx=4, pady=4, ipadx=4, ipady=4, side="left", expand=True)
 
 
-class Section(tk.Frame):
+class Section(Frame):
     def __init__(self, title: str, message: str, *args, **kwargs):
         super().__init__(borderwidth=2, relief="raised", *args, **kwargs)
         title_font = font.Font(font="Default")
@@ -45,6 +45,6 @@ class Section(tk.Frame):
         super().pack(padx=8, pady=8, fill="x")
 
 
-class SettingsRow(tk.Frame):
+class SettingsRow(Frame):
     def pack(self):
         super().pack(fill="x")

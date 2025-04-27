@@ -27,8 +27,14 @@ from paths import Assets
 from PIL import ImageTk
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
+from widgets.config_widgets import (
+    ManualScale,
+    Toggle,
+    Section,
+    SettingsRow
+)
 
-INTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and help like this elsewhere, but I realize that this is probably the most complex and in-depth feature to be added to Edgeware. Don't worry, we'll work through it together!\n\nEach tab will go over a feature of corruption, while also highlighting where the settings are for reference. Any additional details not covered here can be found in the \"About\" tab!"
+INTRO_TEXT = "Corruption is a highly specialized mode that packs have to explicitly support. When corruption is enabled, it will turn off and on moods based on a trigger set down below. For example, a pack might start off with only vanilla moods but get more fetish-oriented every 10 popups opened.\n\n\"Full Permissions Mode\" can be enabled to allow the pack to change Edgeware++ settings on top of also changing moods. While this allows for very unique packs with lots of changes, this can also be potentially dangerous. Only turn it on for packs you trust!"
 START_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
 TRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
 
@@ -36,6 +42,27 @@ TRANSITION_TEXT = "Transitions are how each corruption level fades into eachothe
 class CorruptionModeTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, pack: Pack):
         super().__init__()
+
+        corruption_start_section = Section("Corruption", INTRO_TEXT, self.viewPort)
+        corruption_start_section.pack()
+        corruption_start_row = SettingsRow(corruption_start_section)
+        corruption_start_row.pack()
+        corruption_toggle = Toggle("Turn on Corruption", corruption_start_row, variable=vars.corruption_mode, cursor="question_arrow")
+        corruption_toggle.pack()
+        CreateToolTip(
+            corruption_toggle,
+            "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
+            " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
+            "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
+            ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
+            ' Edgeware. For more information, check out the \"Tutorial\" tab.',
+        )
+        full_permission_toggle = Toggle("Full Permissions Mode", corruption_start_row, variable=vars.corruption_full, cursor="question_arrow")
+        full_permission_toggle.pack()
+        CreateToolTip(
+            full_permission_toggle,
+            "This setting allows corruption mode to change config settings as it goes through corruption levels.\n\nThere are certain settings that can\'t be changed, but usually because they\'d either do nothing or serve no purpose... That means that a lot of \"dangerous settings\" are still fair game! Please only enable this for packs you trust!\n\nIf you are a pack creator or just want to see what settings don\'t work with this mode, you can view the full blacklist in \"src\\features\\corruption_config.py\" (open with your text editor of choice!)"
+        )
 
         corruption_frame = Frame(self.viewPort)
         corruption_frame.pack(fill="x")
@@ -49,19 +76,6 @@ class CorruptionModeTab(ScrollFrame):
         # Start
         start_frame = Frame(basic_settings_frame, borderwidth=5, relief=RAISED)
         start_frame.pack(fill="both", side="left")
-        corruption_toggle = Checkbutton(start_frame, text="Turn on Corruption", variable=vars.corruption_mode, cursor="question_arrow")
-        corruption_toggle.pack(fill="x", expand=1)
-        CreateToolTip(
-            corruption_toggle,
-            "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
-            " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
-            "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
-            ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
-            ' Edgeware.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
-        )
-        full_permission_toggle = Checkbutton(start_frame, text="Full Permissions Mode", variable=vars.corruption_full, cursor="question_arrow")
-        full_permission_toggle.pack(fill="x", expand=1)
-        CreateToolTip(full_permission_toggle, "This setting allows corruption mode to change config settings as it goes through corruption levels.")
         recommended_settings_button = Button(
             start_frame,
             text="Recommended Settings",
@@ -155,24 +169,6 @@ class CorruptionModeTab(ScrollFrame):
         level_launch_group = [level_launches_scale, level_launches_manual]
 
         Button(level_frame, text="Reset Launches", height=3, command=lambda: clear_launches(True)).pack(side="left", fill="x", padx=1, expand=1)
-
-        # Tutorial
-        tutorial_frame = Frame(corruption_frame)
-        tutorial_frame.pack(side="left", fill="both", expand=1)
-        tutorial_notebook = ttk.Notebook(tutorial_frame)
-        tutorial_notebook.pack(fill="both", expand=1)
-
-        tutorial_intro_tab = Frame(None)
-        tutorial_notebook.add(tutorial_intro_tab, text="Intro")
-        Label(tutorial_intro_tab, text=INTRO_TEXT, wraplength=300).pack(fill="both", padx=2, pady=2)
-
-        tutorial_start_tab = Frame(None)
-        tutorial_notebook.add(tutorial_start_tab, text="Start")
-        Label(tutorial_start_tab, text=START_TEXT, wraplength=300).pack(fill="both", padx=2, pady=2)
-
-        tutorial_transition_tab = Frame(None)
-        tutorial_notebook.add(tutorial_transition_tab, text="Transitions")
-        Label(tutorial_transition_tab, text=TRANSITION_TEXT, wraplength=300).pack(fill="both", padx=2, pady=2)
 
         # Miscellaneous settings
         misc_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
@@ -335,8 +331,6 @@ class CorruptionModeTab(ScrollFrame):
                 set_widget_states(True, tutorial_transition_group)
                 trigger_helper(vars.corruption_trigger.get(), False)
             set_widget_states(os.path.isfile(pack.paths.corruption), start_group)
-
-        tutorial_notebook.bind("<<NotebookTabChanged>>", corruption_tutorial_helper)
 
         fade_helper(vars.corruption_fade.get())
         trigger_helper(vars.corruption_trigger.get(), False)
