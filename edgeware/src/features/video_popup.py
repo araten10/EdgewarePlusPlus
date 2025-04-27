@@ -9,7 +9,7 @@ from widgets.video_player import VideoPlayer
 
 
 class VideoPopup(Popup):
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State):
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         self.media = pack.random_video()
         if not self.should_init(settings, state):
             return

@@ -24,7 +24,7 @@ from state import State
 class Popup(Toplevel):
     media: Path  # Defined by subclasses
 
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State):
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         state.popup_number += 1
         super().__init__(bg="black")
 

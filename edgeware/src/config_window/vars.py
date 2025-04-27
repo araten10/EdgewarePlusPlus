@@ -6,7 +6,7 @@ ConfigVar = IntVar | BooleanVar | StringVar
 class Vars:
     entries: dict[str, ConfigVar] = {}
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict) -> None:
         self.config = config
 
         self.delay = self.make(IntVar, "delay")

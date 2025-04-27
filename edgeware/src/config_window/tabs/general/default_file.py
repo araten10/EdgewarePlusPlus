@@ -30,7 +30,7 @@ class DefaultImageFrame(Frame):
         current_text: str,
         change_text: str,
         message: str,
-    ):
+    ) -> None:
         super().__init__(master, borderwidth=5, relief=RAISED)
 
         self.custom_file = custom_file
@@ -68,7 +68,7 @@ class DefaultImageFrame(Frame):
 
 
 class DefaultFileTab(ScrollFrame):
-    def __init__(self, vars: Vars, message_group: list[Message]):
+    def __init__(self, vars: Vars, message_group: list[Message]) -> None:
         super().__init__()
 
         intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)

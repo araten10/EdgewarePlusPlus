@@ -100,7 +100,7 @@ def get_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
 
 
 def get_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], None] | None:
-    def razor_qt():
+    def razor_qt() -> None:
         desktop_conf = ConfigParser()
 
         config_home = os.environ.get("XDG_CONFIG_HOME") or os.environ.get("XDG_HOME_CONFIG", os.path.expanduser(".config"))

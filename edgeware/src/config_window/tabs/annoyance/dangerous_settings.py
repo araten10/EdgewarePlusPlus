@@ -42,7 +42,7 @@ def assign_path(path_entry: Entry, vars: Vars) -> None:
 
 
 class DangerousSettingsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
         # Drive

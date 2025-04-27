@@ -14,7 +14,7 @@ class Pack:
     video_ranks = {}
     audio_ranks = {}
 
-    def __init__(self, root: Path):
+    def __init__(self, root: Path) -> None:
         logging.info(f"Loading pack at {root.relative_to(PATH)}.")
 
         self.paths = PackPaths(root)

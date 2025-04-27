@@ -22,7 +22,7 @@ from widgets.tooltip import CreateToolTip
 
 
 class BasicModesTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font):
+    def __init__(self, vars: Vars, title_font: Font) -> None:
         super().__init__()
 
         # Unsure if not calling this lowkey/moving in the tab will confuse people, consider renaming if people find it annoying

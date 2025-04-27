@@ -40,7 +40,7 @@ TRANSITION_TEXT = "Transitions are how each corruption level fades into eachothe
 
 
 class CorruptionModeTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
         super().__init__()
 
         corruption_start_section = Section("Corruption", INTRO_TEXT, self.viewPort)
