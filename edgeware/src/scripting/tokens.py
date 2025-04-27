@@ -75,7 +75,7 @@ ESCAPE_SEQUENCES = {
 
 
 class Chars(list[str]):
-    def __init__(self, code: str):
+    def __init__(self, code: str) -> None:
         super().__init__(list(code))
 
     def get(self) -> str:
@@ -92,7 +92,7 @@ class Chars(list[str]):
 
 
 class Tokens(list[str]):
-    def __init__(self, code: str):
+    def __init__(self, code: str) -> None:
         super().__init__()
         chars = Chars(code)
 

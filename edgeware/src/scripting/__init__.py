@@ -51,7 +51,7 @@ def identity(value: Any) -> Any:
 
 
 class NameList(list[str]):
-    def __init__(self, tokens: Tokens):
+    def __init__(self, tokens: Tokens) -> None:
         super().__init__()
         self.append(tokens.get_name())
         while tokens.skip_if(","):
@@ -63,7 +63,7 @@ class Expression:
 
 
 class ExpressionList(list[Expression]):
-    def __init__(self, tokens: Tokens):
+    def __init__(self, tokens: Tokens) -> None:
         super().__init__()
         self.append(Expression(tokens))
         while tokens.skip_if(","):
@@ -76,7 +76,7 @@ class ReturnValue:
 
 
 class FunctionBody:
-    def __init__(self, tokens: Tokens):
+    def __init__(self, tokens: Tokens) -> None:
         tokens.skip("(")
         self.params = []
         if not tokens.skip_if(")"):
@@ -96,7 +96,7 @@ class FunctionBody:
 
 
 class FunctionCall:
-    def __init__(self, tokens: Tokens):
+    def __init__(self, tokens: Tokens) -> None:
         self.name = tokens.get_name()
         tokens.skip("(")
         self.args = []
@@ -112,7 +112,7 @@ class FunctionCall:
 
 
 class PrimaryExpression:
-    def __init__(self, tokens: Tokens):
+    def __init__(self, tokens: Tokens) -> None:
         constants = {"nil": None, "false": False, "true": True}
         if tokens.next in constants:
             value = constants[tokens.get()]
@@ -133,6 +133,11 @@ class PrimaryExpression:
             self.eval = lambda env: string[1:-1]
             return
 
+        if tokens.skip_if("function"):
+            body = FunctionBody(tokens)
+            self.eval = lambda env: body.eval(env)
+            return
+
         if tokens.skip_if("("):
             exp = Expression(tokens)
             tokens.skip(")")
@@ -149,7 +154,7 @@ class PrimaryExpression:
 
 
 class Expression:
-    def __init__(self, tokens: Tokens):
+    def __init__(self, tokens: Tokens) -> None:
         l_un = self.unary(tokens)
         left = PrimaryExpression(tokens)
         self.eval = self.binary(tokens, l_un, left.eval)
@@ -185,7 +190,7 @@ class Expression:
 
 
 class Statement:
-    def __init__(self, tokens: Tokens):
+    def __init__(self, tokens: Tokens) -> None:
         match tokens.next:
             case "do":
                 tokens.skip("do")
@@ -280,7 +285,7 @@ class ReturnExpression:
 
 
 class Block:
-    def __init__(self, tokens: Tokens, terminate: str | list[str]):
+    def __init__(self, tokens: Tokens, terminate: str | list[str]) -> None:
         self.statements = []
         self.return_exp = None
         terminate_list = terminate if isinstance(terminate, list) else [terminate]

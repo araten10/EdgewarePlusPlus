@@ -6,7 +6,7 @@ class Environment:
 
 
 class Environment:
-    def __init__(self, scope: dict[str, Any], external: Environment | None = None, closure: set[str] | None = None):
+    def __init__(self, scope: dict[str, Any], external: Environment | None = None, closure: set[str] | None = None) -> None:
         self.scope = scope
         self.external = external
         self.closure = closure
