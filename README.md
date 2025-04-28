@@ -175,3 +175,7 @@ The changelog can be viewed [here](CHANGELOG.md).
 ## Content Removal Policy
 
 If you are the owner of any art or assets used by this program or linked demo packs and are unhappy with their usage, feel free to contact us through twitter or discord and we will happily work things out (assuming we are still active/around/alive at the time of messaging). Please note however, that any pack *not* linked on this page is either by somebody else or for private use. We offer "pack creation tools" for users to make packs of their own liking, but we have no control over what is done with them or how they're distributed.
+
+## License
+
+As of April 28 2025 all future versions of Edgeware++ are licensed under the GNU General Public License version 3 or any later version. Contributions prior to the specified date are licensed under the MIT License.
