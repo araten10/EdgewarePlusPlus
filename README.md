@@ -128,9 +128,13 @@ A: Fantastic! (well, not really.) The best place to post something like this is 
 
 To help make the issue easier for us to solve, [here](https://twitter.com/ara10ten/status/1789414192702730718) is a short (NSFW!) guide on how to properly report bugs!
 
+>Q: I'm having a problem running Edgeware, should I run it as administrator?
+
+A: No! With the only possible exception of the Python installer, no part of Edgeware should require elevated privileges. This includes the setup script, the config, Edgeware itself, and the Pack Tool. Running any part of Edgeware as administrator is unlikely to solve your problem and may only create more.
+
 >Q: Somebody sent me this pack and it's not working! I checked inside of it, and it has an entire copy of Edgeware with it? Can I put it into my pre-existing Edgeware installation?
 
-You can go into the resource folder of the pack you got, extract everything inside of it, and zip it with a desired name. This way, you can import the pack normally. If you already have an install of Edgeware++, it is recommended you do this over using their installation unless it comes from a trusted source. While many people make packs like this to make using Edgeware simpler for people who have never heard of it before, there's also the possibility of the files being modified to be malicious.
+A: You can go into the resource folder of the pack you got, extract everything inside of it, and zip it with a desired name. This way, you can import the pack normally. If you already have an install of Edgeware++, it is recommended you do this over using their installation unless it comes from a trusted source. While many people make packs like this to make using Edgeware simpler for people who have never heard of it before, there's also the possibility of the files being modified to be malicious.
 
 If you know that the pack creator set specific config settings for their Edgeware installation pack, you can also create a "config.json" file inside your newly created pack zip, and copy all of the contents of their "config.cfg" into it. This will allow you to import their config settings in the *Pack Info* tab, near the bottom.
 
@@ -171,3 +175,7 @@ The changelog can be viewed [here](CHANGELOG.md).
 ## Content Removal Policy
 
 If you are the owner of any art or assets used by this program or linked demo packs and are unhappy with their usage, feel free to contact us through twitter or discord and we will happily work things out (assuming we are still active/around/alive at the time of messaging). Please note however, that any pack *not* linked on this page is either by somebody else or for private use. We offer "pack creation tools" for users to make packs of their own liking, but we have no control over what is done with them or how they're distributed.
+
+## License
+
+As of April 28 2025 all future versions of Edgeware++ are licensed under the GNU General Public License version 3 or any later version. Contributions prior to the specified date are licensed under the MIT License.
