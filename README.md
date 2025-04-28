@@ -128,9 +128,13 @@ A: Fantastic! (well, not really.) The best place to post something like this is 
 
 To help make the issue easier for us to solve, [here](https://twitter.com/ara10ten/status/1789414192702730718) is a short (NSFW!) guide on how to properly report bugs!
 
+>Q: I'm having a problem running Edgeware, should I run it as administrator?
+
+A: No! With the only possible exception of the Python installer, no part of Edgeware should require elevated privileges. This includes the setup script, the config, Edgeware itself, and the Pack Tool. Running any part of Edgeware as administrator is unlikely to solve your problem and may only create more.
+
 >Q: Somebody sent me this pack and it's not working! I checked inside of it, and it has an entire copy of Edgeware with it? Can I put it into my pre-existing Edgeware installation?
 
-You can go into the resource folder of the pack you got, extract everything inside of it, and zip it with a desired name. This way, you can import the pack normally. If you already have an install of Edgeware++, it is recommended you do this over using their installation unless it comes from a trusted source. While many people make packs like this to make using Edgeware simpler for people who have never heard of it before, there's also the possibility of the files being modified to be malicious.
+A: You can go into the resource folder of the pack you got, extract everything inside of it, and zip it with a desired name. This way, you can import the pack normally. If you already have an install of Edgeware++, it is recommended you do this over using their installation unless it comes from a trusted source. While many people make packs like this to make using Edgeware simpler for people who have never heard of it before, there's also the possibility of the files being modified to be malicious.
 
 If you know that the pack creator set specific config settings for their Edgeware installation pack, you can also create a "config.json" file inside your newly created pack zip, and copy all of the contents of their "config.cfg" into it. This will allow you to import their config settings in the *Pack Info* tab, near the bottom.
 
