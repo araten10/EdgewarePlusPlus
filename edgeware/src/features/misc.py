@@ -103,11 +103,7 @@ def handle_booru_download(settings: Settings, state: State) -> None:
     root = f"https://{settings.booru_name}.booru.org"
     url = f"{root}/index.php?page=post&s=list&tags={settings.booru_tags}"
 
-    with open(Data.GALLERY_DL_CONFIG, "w") as f:
-        json.dump({"extractor": {"gelbooru_v01": {settings.booru_name: {"root": root}}}}, f)
-
-    args = f'gallery-dl -D "{settings.download_path}" -c "{Data.GALLERY_DL_CONFIG}" "{url}"'
-    state.gallery_dl_process = subprocess.Popen(args, shell=True)
+    # TODO: Reimplement with a different library
 
 
 def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> None:

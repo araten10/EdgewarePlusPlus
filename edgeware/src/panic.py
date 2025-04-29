@@ -52,8 +52,6 @@ def panic(root: Tk, settings: Settings, state: State, legacy_key: str | None = N
 
     os_utils.set_wallpaper(CustomAssets.panic_wallpaper())
     root.destroy()
-    if state.gallery_dl_process:
-        state.gallery_dl_process.kill()
 
 
 def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:

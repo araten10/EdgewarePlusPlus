@@ -91,7 +91,7 @@ class BooruTab(ScrollFrame):
             ),
         )
         booru_validate.pack(fill="x")
-        # TODO: Currently nonfunctional, consider removing completely if this isn't possible with gallery-dl
+        # TODO: Currently nonfunctional
         # Label(booru_frame, text="Download Mode").pack(fill="x")
         # min_score_slider = Scale(booru_frame, from_=-50, to=100, orient="horizontal", variable=vars.min_score, label="Minimum Score")
         # min_score_slider.pack(fill="x")
