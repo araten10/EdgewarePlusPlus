@@ -1,3 +1,4 @@
+booru
 desktop-notifier
 filetype
 get-video-properties

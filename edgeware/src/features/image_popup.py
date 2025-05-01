@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-import random
+import asyncio
+import logging
 from tkinter import Label, Tk
 
-import filetype
+import booru
+import requests
 from features.popup import Popup
 from pack import Pack
 from PIL import Image, ImageTk
@@ -37,14 +38,18 @@ class ImagePopup(Popup):
             return
         super().__init__(root, settings, pack, state)
 
-        # TODO: Better way to use downloaded images
-        if settings.download_path.is_dir() and self.settings.booru_download and roll(50):
-            dir = settings.download_path
-            choices = [dir / file for file in os.listdir(dir) if filetype.is_image(dir / file)]
-            if len(choices) > 0:
-                self.media = random.choice(choices)
-
-        image = Image.open(self.media)
+        # TODO: Better booru integration
+        if self.settings.booru_download and roll(50):
+            try:
+                gel = booru.Gelbooru()
+                result = booru.resolve(asyncio.run(gel.search_image(query=self.settings.booru_tags, limit=1)))
+                data = requests.get(result[0], stream=True)
+                image = Image.open(data.raw)
+            except KeyError:
+                logging.error(f'No results for tags "{self.settings.booru_tags}" on Gelbooru')
+                image = Image.open(self.media)
+        else:
+            image = Image.open(self.media)
         self.compute_geometry(image.width, image.height)
 
         # Static               -> image

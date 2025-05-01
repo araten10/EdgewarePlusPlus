@@ -34,7 +34,6 @@ from features.hibernate import main_hibernate, start_main_hibernate
 from features.image_popup import ImagePopup
 from features.misc import (
     display_notification,
-    handle_booru_download,
     handle_discord,
     handle_keyboard,
     handle_mitosis_mode,
@@ -99,7 +98,6 @@ if __name__ == "__main__":
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
         make_desktop_icons(settings)
         handle_corruption(root, settings, pack, state)
-        handle_booru_download(settings, state)
         handle_discord(root, settings, pack)
         handle_timer_mode(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)

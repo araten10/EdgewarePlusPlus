@@ -70,7 +70,6 @@ class Data:
 
     # Directories
     BACKUPS = ROOT / "backups"
-    DOWNLOAD = ROOT / "download"
     LOGS = ROOT / "logs"
     MOODS = ROOT / "moods"
     PACKS = ROOT / "packs"

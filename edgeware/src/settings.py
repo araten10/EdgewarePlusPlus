@@ -80,10 +80,8 @@ class Settings:
 
         # Booru downloader
         self.booru_download = bool(self.config["downloadEnabled"])
-        self.booru_name = self.config["booruName"]
         # self.min_score = int(self.config["booruMinScore"])  # TODO
-        self.booru_tags = self.config["tagList"].replace(">", "+")  # TODO: Store in a better way
-        self.download_path = Data.DOWNLOAD / f"{self.booru_name}-{self.booru_tags}"
+        self.booru_tags = self.config["tagList"].replace(">", " ")  # TODO: Store in a better way
 
         # Popups
         self.delay = int(self.config["delay"])  # Milliseconds
