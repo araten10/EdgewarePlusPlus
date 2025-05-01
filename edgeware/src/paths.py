@@ -70,7 +70,6 @@ class Data:
 
     # Directories
     BACKUPS = ROOT / "backups"
-    DOWNLOAD = ROOT / "download"
     LOGS = ROOT / "logs"
     MOODS = ROOT / "moods"
     PACKS = ROOT / "packs"
@@ -80,7 +79,6 @@ class Data:
     # Files
     CONFIG = ROOT / "config.json"
     CORRUPTION_LAUNCHES = ROOT / "corruption_launches.dat"
-    GALLERY_DL_CONFIG = ROOT / "gallery-dl.json"
 
     # Changed defaults
     CONFIG_ICON = ROOT / "config_icon.ico"

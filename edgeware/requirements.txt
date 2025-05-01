@@ -1,6 +1,6 @@
+booru
 desktop-notifier
 filetype
-gallery-dl
 get-video-properties
 mpv
 pillow
@@ -12,6 +12,7 @@ python-xlib; sys_platform == 'linux'
 requests
 screeninfo
 sounddevice
+tkinter-tooltip
 tkinterweb
 ttkwidgets
 voluptuous

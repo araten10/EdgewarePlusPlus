@@ -56,8 +56,6 @@ class State:
     corruption_popup_number = 0
     corruption_launches_number = 1
 
-    gallery_dl_process = None
-
     alt_held = False
 
     @property

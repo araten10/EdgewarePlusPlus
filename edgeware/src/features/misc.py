@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-import json
 import logging
 import random
-import subprocess
 import time
 import webbrowser
 from collections.abc import Callable
@@ -32,7 +30,7 @@ from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from pack import Pack
 from panic import panic
-from paths import CustomAssets, Data, Process
+from paths import CustomAssets, Process
 from PIL import Image
 from pygame import mixer
 from pynput import keyboard
@@ -95,20 +93,6 @@ def make_desktop_icons(settings: Settings) -> None:
         os_utils.make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon())
         os_utils.make_shortcut("Edgeware++ Config", Process.CONFIG, CustomAssets.config_icon())
         os_utils.make_shortcut("Edgeware++ Panic", Process.PANIC, CustomAssets.panic_icon())
-
-
-def handle_booru_download(settings: Settings, state: State) -> None:
-    if not settings.booru_download:
-        return
-
-    root = f"https://{settings.booru_name}.booru.org"
-    url = f"{root}/index.php?page=post&s=list&tags={settings.booru_tags}"
-
-    with open(Data.GALLERY_DL_CONFIG, "w") as f:
-        json.dump({"extractor": {"gelbooru_v01": {settings.booru_name: {"root": root}}}}, f)
-
-    args = f'gallery-dl -D "{settings.download_path}" -c "{Data.GALLERY_DL_CONFIG}" "{url}"'
-    state.gallery_dl_process = subprocess.Popen(args, shell=True)
 
 
 def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> None:

@@ -21,15 +21,12 @@ from tkinter import (
     SINGLE,
     Button,
     Checkbutton,
-    Entry,
     Frame,
     Label,
     Listbox,
-    messagebox,
 )
 from tkinter.font import Font
 
-import requests
 from config_window.utils import (
     add_list,
     config,
@@ -39,15 +36,6 @@ from config_window.utils import (
 )
 from config_window.vars import Vars
 from widgets.scroll_frame import ScrollFrame
-
-BOORU_FLAG = "<BOORU_INSERT>"  # flag to replace w/ booru name
-BOORU_URL = f"https://{BOORU_FLAG}.booru.org/index.php?page=post&s=list&tags="  # basic url
-BOORU_VIEW = f"https://{BOORU_FLAG}.booru.org/index.php?page=post&s=view&id="  # post view url
-BOORU_PTAG = "&pid="  # page id tag
-
-
-def validate_booru(name: str) -> bool:
-    return requests.get(BOORU_URL.replace(BOORU_FLAG, name)).status_code == 200
 
 
 class BooruTab(ScrollFrame):
@@ -76,29 +64,14 @@ class BooruTab(ScrollFrame):
         reset_tags = Button(tag_frame, text="Reset Tags", command=lambda: reset_list(tag_listbox, "tagList", "all"))
         reset_tags.pack(fill="x")
 
-        booru_frame = Frame(download_frame)
-        booru_frame.pack(fill="y", side="left")
-        Label(booru_frame, text="Booru Name").pack(fill="x")
-        booru_name_entry = Entry(booru_frame, textvariable=vars.booru_name)
-        booru_name_entry.pack(fill="x")
-        booru_validate = Button(
-            booru_frame,
-            text="Validate",
-            command=lambda: (
-                messagebox.showinfo("Success!", "Booru is valid.")
-                if validate_booru(vars.booru_name.get())
-                else messagebox.showerror("Failed", "Booru is invalid.")
-            ),
-        )
-        booru_validate.pack(fill="x")
-        # TODO: Currently nonfunctional, consider removing completely if this isn't possible with gallery-dl
+        # TODO: Currently nonfunctional
+        # booru_frame = Frame(download_frame)
+        # booru_frame.pack(fill="y", side="left")
         # Label(booru_frame, text="Download Mode").pack(fill="x")
         # min_score_slider = Scale(booru_frame, from_=-50, to=100, orient="horizontal", variable=vars.min_score, label="Minimum Score")
         # min_score_slider.pack(fill="x")
 
-        download_group = [tag_listbox, add_tag, remove_tag, reset_tags, booru_name_entry, booru_validate]
-        # See comment above
-        # download_group.append(min_score_slider)
+        download_group = [tag_listbox, add_tag, remove_tag, reset_tags]
         set_widget_states_with_colors(vars.booru_download.get(), download_group, "white", "gray25")
 
         enable_frame = Frame(download_frame)
