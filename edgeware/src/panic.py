@@ -1,3 +1,20 @@
+# Copyright (C) 2024 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 if __name__ == "__main__":
     import os
 
@@ -35,8 +52,6 @@ def panic(root: Tk, settings: Settings, state: State, legacy_key: str | None = N
 
     os_utils.set_wallpaper(CustomAssets.panic_wallpaper())
     root.destroy()
-    if state.gallery_dl_process:
-        state.gallery_dl_process.kill()
 
 
 def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:

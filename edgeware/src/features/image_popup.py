@@ -1,8 +1,26 @@
-import os
-import random
+# Copyright (C) 2024 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
+import asyncio
+import logging
 from tkinter import Label, Tk
 
-import filetype
+import booru
+import requests
 from features.popup import Popup
 from pack import Pack
 from PIL import Image, ImageTk
@@ -20,14 +38,18 @@ class ImagePopup(Popup):
             return
         super().__init__(root, settings, pack, state)
 
-        # TODO: Better way to use downloaded images
-        if settings.download_path.is_dir() and self.settings.booru_download and roll(50):
-            dir = settings.download_path
-            choices = [dir / file for file in os.listdir(dir) if filetype.is_image(dir / file)]
-            if len(choices) > 0:
-                self.media = random.choice(choices)
-
-        image = Image.open(self.media)
+        # TODO: Better booru integration
+        if self.settings.booru_download and roll(50):
+            try:
+                gel = booru.Gelbooru()
+                result = booru.resolve(asyncio.run(gel.search_image(query=self.settings.booru_tags, limit=1)))
+                data = requests.get(result[0], stream=True)
+                image = Image.open(data.raw)
+            except KeyError:
+                logging.error(f'No results for tags "{self.settings.booru_tags}" on Gelbooru')
+                image = Image.open(self.media)
+        else:
+            image = Image.open(self.media)
         self.compute_geometry(image.width, image.height)
 
         # Static               -> image
