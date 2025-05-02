@@ -1,25 +1,42 @@
+# Copyright (C) 2025 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
+import logging
+import os
 from tkinter import (
     GROOVE,
     RAISED,
+    Button,
     Checkbutton,
     Frame,
     Label,
     messagebox,
-    Button,
-
 )
 from tkinter.font import Font
-import os
-import logging
 
 import os_utils
 import utils
-from config_window.vars import Vars
 from config_window.utils import log_file
+from config_window.vars import Vars
+from pack import Pack
+from paths import Data
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
-from paths import Data
-from pack import Pack
+
 
 def get_log_number() -> int:
     return len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
@@ -44,8 +61,9 @@ def delete_logs(log_number_label: Label):
     except Exception as e:
         logging.warning(f"could not clear logs. this might be an issue with attempting to delete the log currently in use. if so, ignore this prompt. {e}")
 
+
 class TroubleshootingTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
         super().__init__()
 
         Label(self.viewPort, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)

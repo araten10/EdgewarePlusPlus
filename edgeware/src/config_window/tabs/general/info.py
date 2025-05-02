@@ -1,3 +1,20 @@
+# Copyright (C) 2025 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 import textwrap
 from tkinter import (
     CENTER,
@@ -25,7 +42,7 @@ def list_length(pack: Pack, attr: str) -> list:
 
 
 class StatusItem(Frame):
-    def __init__(self, master: Misc, text: str, includes: bool, tooltip: str | None = None):
+    def __init__(self, master: Misc, text: str, includes: bool, tooltip: str | None = None) -> None:
         super().__init__(master)
 
         self.pack(fill="x", side="left", expand=1)
@@ -40,7 +57,7 @@ class StatusItem(Frame):
 
 
 class StatsItem(Frame):
-    def __init__(self, master: Misc, text: str, number: int):
+    def __init__(self, master: Misc, text: str, number: int) -> None:
         super().__init__(master)
 
         self.pack(fill="x", side="left", expand=1)
@@ -51,7 +68,7 @@ class StatsItem(Frame):
 
 
 class InfoTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
         super().__init__()
 
         multi_pack_message = Message(self.viewPort, text=MULTI_PACK_TEXT, justify=CENTER, width=675)

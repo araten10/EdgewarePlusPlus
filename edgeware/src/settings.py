@@ -1,3 +1,20 @@
+# Copyright (C) 2024 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 import ast
 import json
 import logging
@@ -44,7 +61,7 @@ def load_default_config() -> dict:
 
 
 class Settings:
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = load_config()
         self.load_settings()
         logging.info(f"Config loaded: {self.config}")
@@ -63,10 +80,8 @@ class Settings:
 
         # Booru downloader
         self.booru_download = bool(self.config["downloadEnabled"])
-        self.booru_name = self.config["booruName"]
-        # self.min_score = int(self.config["booruMinScore"])  # TODO: Can this be used with gallery-dl?
-        self.booru_tags = self.config["tagList"].replace(">", "+")  # TODO: Store in a better way
-        self.download_path = Data.DOWNLOAD / f"{self.booru_name}-{self.booru_tags}"
+        # self.min_score = int(self.config["booruMinScore"])  # TODO
+        self.booru_tags = self.config["tagList"].replace(">", " ")  # TODO: Store in a better way
 
         # Popups
         self.delay = int(self.config["delay"])  # Milliseconds

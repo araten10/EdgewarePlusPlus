@@ -1,3 +1,20 @@
+# Copyright (C) 2025 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 from tkinter import (
     GROOVE,
@@ -27,15 +44,94 @@ from paths import Assets
 from PIL import ImageTk
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
+from widgets.config_widgets import (
+    SettingsScale,
+    SettingsToggle,
+    Section,
+    SettingsRow
+)
 
-INTRO_TEXT = "Welcome to the Corruption tab!\n\n Normally I'd put tutorials and help like this elsewhere, but I realize that this is probably the most complex and in-depth feature to be added to Edgeware. Don't worry, we'll work through it together!\n\nEach tab will go over a feature of corruption, while also highlighting where the settings are for reference. Any additional details not covered here can be found in the \"About\" tab!"
-START_TEXT = 'To start corruption mode, you can use these settings in the top left to turn it on. If turning it on is greyed out, it means the current pack does not support corruption! Down below are more toggle settings for fine-tuning corruption to work how you want it.\n\n Remember, for any of these settings, if your mouse turns into a "question mark" while hovering over it, you can stay hovered to view a tooltip on what the setting does!'
-TRANSITION_TEXT = "Transitions are how each corruption level fades into eachother. While running corruption mode, the current level and next level are accessed simultaneously to blend the two together. You can choose the blending modes with the top option, and how edgeware transitions from one corruption level to the next with the bottom option. The visualizer image is purely to help understand how the transitions work, with the two colours representing both accessed levels. The sliders below fine-tune how long each level will last, so for a rough estimation on how long full corruption will take, you can multiply the active slider by the number of levels."
-
+INTRO_TEXT = "Corruption is a highly specialized mode that packs have to explicitly support. When corruption is enabled, it will turn off and on moods based on a trigger set down below. For example, a pack might start off with only vanilla moods but get more fetish-oriented every 10 popups opened.\n\n\"Full Permissions Mode\" can be enabled to allow the pack to change Edgeware++ settings on top of also changing moods. While this allows for very unique packs with lots of changes, this can also be potentially dangerous. Only turn it on for packs you trust!"
+TRIGGER_TEXT = 'Triggers are the goals that define how corruption changes over time. Whenever the selected condition is reached, they tell Edgeware++ to advance to the next \"corruption level\". Each setting is per level transition, *not* the total time it takes for corruption to finish.\n\nFor example, let\'s say you set the trigger type to \"timed\" and the time to 60 seconds. That means that every 60 seconds you run Edgeware++ the corruption level will increase, changing the current moods available.\n\nAdditionally, you can change the behaviour of how Edgeware++ transitions from level to level. For example, \"Abrupt\" will immediately change to the next moods when the trigger condition is met, whereas \"Normal\" will gradually increase the chance of pulling media from the next corruption level up until the trigger condition.'
 
 class CorruptionModeTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
         super().__init__()
+
+        #Start
+        corruption_start_section = Section("Corruption", INTRO_TEXT, self.viewPort)
+        corruption_start_section.pack()
+        corruption_start_row = SettingsRow(corruption_start_section)
+        corruption_start_row.pack()
+        corruption_toggle = SettingsToggle("Turn on Corruption", corruption_start_row, variable=vars.corruption_mode, cursor="question_arrow")
+        corruption_toggle.pack()
+        CreateToolTip(
+            corruption_toggle,
+            "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
+            " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
+            "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
+            ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
+            ' Edgeware. For more information, check out the \"Tutorial\" tab.',
+        )
+        full_permission_toggle = SettingsToggle("Full Permissions Mode", corruption_start_row, variable=vars.corruption_full, cursor="question_arrow")
+        full_permission_toggle.pack()
+        CreateToolTip(
+            full_permission_toggle,
+            "This setting allows corruption mode to change config settings as it goes through corruption levels.\n\nThere are certain settings that can\'t be changed, but usually because they\'d either do nothing or serve no purpose... That means that a lot of \"dangerous settings\" are still fair game! Please only enable this for packs you trust!\n\nIf you are a pack creator or just want to see what settings don\'t work with this mode, you can view the full blacklist in \"src\\features\\corruption_config.py\" (open with your text editor of choice!)"
+        )
+
+        #Triggers
+        corruption_triggers_section = Section("Triggers", TRIGGER_TEXT, self.viewPort)
+        corruption_triggers_section.pack()
+
+        select_trigger_row = SettingsRow(corruption_triggers_section)
+        select_trigger_row.pack()
+        trigger_frame = Frame(select_trigger_row, borderwidth=1, relief="groove")
+        trigger_frame.pack(pady=4, ipady=4, side="left", expand=True)
+
+        trigger_selection_frame = Frame(trigger_frame)
+        trigger_selection_frame.pack(side="left", fill="x")
+        trigger_types = ["Timed", "Popup", "Launch"]
+        trigger_dropdown = OptionMenu(trigger_selection_frame, vars.corruption_trigger, *trigger_types, command=lambda key: trigger_helper(key, False))
+        trigger_dropdown.configure(width=9, highlightthickness=0)
+        trigger_dropdown.pack(side="top", padx=4)
+
+        trigger_description = Label(trigger_frame, text="Error loading trigger description!", wraplength=150)
+        trigger_description.configure(height=3, width=22)
+        trigger_description.pack(side="left", fill="y", ipadx=4)
+
+        transition_frame = Frame(select_trigger_row, borderwidth=1, relief="groove")
+        transition_frame.pack(pady=4, ipady=4, side="left", expand=True)
+
+        fade_frame = Frame(transition_frame)
+        fade_frame.pack(side="top", fill="both", pady=1)
+
+        fade_selection_frame = Frame(fade_frame)
+        fade_selection_frame.pack(side="left", fill="x")
+        fade_types = ["Normal", "Abrupt"]
+        fade_dropdown = OptionMenu(fade_selection_frame, vars.corruption_fade, *fade_types, command=lambda key: fade_helper(key))
+        fade_dropdown.configure(width=9, highlightthickness=0)
+        fade_dropdown.pack(side="top", padx=4)
+        fade_normal_image = ImageTk.PhotoImage(file=Assets.CORRUPTION_DEFAULT)
+        fade_abrupt_image = ImageTk.PhotoImage(file=Assets.CORRUPTION_ABRUPT)
+        fade_image = Label(fade_selection_frame, image=fade_normal_image, borderwidth=2, relief=GROOVE)
+        fade_image.pack(side="top", padx=4)
+
+        fade_description = Label(fade_frame, text="Error loading fade description!", wraplength=150)
+        fade_description.configure(height=3, width=22)
+        fade_description.pack(side="left", fill="y", ipadx=4)
+
+        corruption_triggers_row = SettingsRow(corruption_triggers_section)
+        corruption_triggers_row.pack()
+        corruption_time_scale = SettingsScale(corruption_triggers_row, "Level Time (seconds)", vars.corruption_time, 5, 1800)
+        corruption_time_scale.pack()
+        level_time_group = [corruption_time_scale]
+        corruption_popup_scale = SettingsScale(corruption_triggers_row, "Level Popups", vars.corruption_popups, 1, 100)
+        corruption_popup_scale.pack()
+        level_popup_group = [corruption_popup_scale]
+        corruption_launches_scale = SettingsScale(corruption_triggers_row, "Level Launches", vars.corruption_launches, 2, 31)
+        corruption_launches_scale.pack()
+        level_launch_group = [corruption_launches_scale]
 
         corruption_frame = Frame(self.viewPort)
         corruption_frame.pack(fill="x")
@@ -49,19 +145,6 @@ class CorruptionModeTab(ScrollFrame):
         # Start
         start_frame = Frame(basic_settings_frame, borderwidth=5, relief=RAISED)
         start_frame.pack(fill="both", side="left")
-        corruption_toggle = Checkbutton(start_frame, text="Turn on Corruption", variable=vars.corruption_mode, cursor="question_arrow")
-        corruption_toggle.pack(fill="x", expand=1)
-        CreateToolTip(
-            corruption_toggle,
-            "Corruption Mode gradually makes the pack more depraved, by slowly toggling on previously hidden"
-            " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
-            "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
-            ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
-            ' Edgeware.\n\nFor more information, check out the "About" tab. \n\nNOTE: currently not implemented! Holy god I hope I remember to remove this notice later!',
-        )
-        full_permission_toggle = Checkbutton(start_frame, text="Full Permissions Mode", variable=vars.corruption_full, cursor="question_arrow")
-        full_permission_toggle.pack(fill="x", expand=1)
-        CreateToolTip(full_permission_toggle, "This setting allows corruption mode to change config settings as it goes through corruption levels.")
         recommended_settings_button = Button(
             start_frame,
             text="Recommended Settings",
@@ -78,101 +161,11 @@ class CorruptionModeTab(ScrollFrame):
         )
         start_group = [corruption_toggle]
 
-        # Transition
-        transition_frame = Frame(basic_settings_frame, borderwidth=5, relief=RAISED)
-        transition_frame.pack(fill="both", side="left")
-
-        fade_frame = Frame(transition_frame)
-        fade_frame.pack(side="top", fill="both", pady=1)
-
-        fade_selection_frame = Frame(fade_frame)
-        fade_selection_frame.pack(side="left", fill="x")
-        fade_types = ["Normal", "Abrupt"]
-        fade_dropdown = OptionMenu(fade_selection_frame, vars.corruption_fade, *fade_types, command=lambda key: fade_helper(key))
-        fade_dropdown.configure(width=9, highlightthickness=0)
-        fade_dropdown.pack(side="top")
-        fade_normal_image = ImageTk.PhotoImage(file=Assets.CORRUPTION_DEFAULT)
-        fade_abrupt_image = ImageTk.PhotoImage(file=Assets.CORRUPTION_ABRUPT)
-        fade_image = Label(fade_selection_frame, image=fade_normal_image, borderwidth=2, relief=GROOVE)
-        fade_image.pack(side="top")
-
-        fade_description = Label(fade_frame, text="Error loading fade description!", borderwidth=2, relief=GROOVE, wraplength=150)
-        fade_description.configure(height=3, width=22)
-        fade_description.pack(side="left", fill="y", padx=3, ipadx=2, ipady=2)
-
-        trigger_frame = Frame(transition_frame)
-        trigger_frame.pack(side="top", fill="both", pady=1)
-
-        trigger_selection_frame = Frame(trigger_frame)
-        trigger_selection_frame.pack(side="left", fill="x")
-        trigger_types = ["Timed", "Popup", "Launch"]
-        trigger_dropdown = OptionMenu(trigger_selection_frame, vars.corruption_trigger, *trigger_types, command=lambda key: trigger_helper(key, False))
-        trigger_dropdown.configure(width=9, highlightthickness=0)
-        trigger_dropdown.pack(side="top")
-
-        trigger_description = Label(trigger_frame, text="Error loading trigger description!", borderwidth=2, relief=GROOVE, wraplength=150)
-        trigger_description.configure(height=3, width=22)
-        trigger_description.pack(side="left", fill="y", padx=3, ipadx=2, ipady=2)
-
         # Level progress
         level_frame = Frame(corruption_settings_frame)
         level_frame.pack(fill="x", side="top")
 
-        level_time_frame = Frame(level_frame)
-        level_time_frame.pack(side="left", fill="x", padx=1, expand=1)
-        level_time_scale = Scale(level_time_frame, label="Level Time", variable=vars.corruption_time, orient="horizontal", from_=5, to=1800)
-        level_time_scale.pack(fill="y")
-        level_time_manual = Button(
-            level_time_frame,
-            text="Manual time...",
-            command=lambda: assign(vars.corruption_time, simpledialog.askinteger("Manual Level Time (sec)", prompt="[5-1800]: ")),
-        )
-        level_time_manual.pack(fill="y")
-        level_time_group = [level_time_scale, level_time_manual]
-
-        level_popups_frame = Frame(level_frame)
-        level_popups_frame.pack(side="left", fill="x", padx=1, expand=1)
-        level_popups_scale = Scale(level_popups_frame, label="Level Popups", variable=vars.corruption_popups, orient="horizontal", from_=1, to=100)
-        level_popups_scale.pack(fill="y")
-        level_popups_manual = Button(
-            level_popups_frame,
-            text="Manual popups...",
-            command=lambda: assign(vars.corruption_popups, simpledialog.askinteger("Manual Level Popups (per transition)", prompt="[1-100]: ")),
-        )
-        level_popups_manual.pack(fill="y")
-        level_popup_group = [level_popups_scale, level_popups_manual]
-
-        level_launches_frame = Frame(level_frame)
-        level_launches_frame.pack(side="left", fill="x", padx=1, expand=1)
-        level_launches_scale = Scale(level_launches_frame, label="Level Launches", variable=vars.corruption_launches, orient="horizontal", from_=2, to=31)
-        level_launches_scale.pack(fill="y")
-        level_launches_manual = Button(
-            level_launches_frame,
-            text="Manual launches...",
-            command=lambda: assign(vars.corruption_launches, simpledialog.askinteger("Manual Level Launches (per transition)", prompt="[2-31]: ")),
-        )
-        level_launches_manual.pack(fill="y")
-        level_launch_group = [level_launches_scale, level_launches_manual]
-
         Button(level_frame, text="Reset Launches", height=3, command=lambda: clear_launches(True)).pack(side="left", fill="x", padx=1, expand=1)
-
-        # Tutorial
-        tutorial_frame = Frame(corruption_frame)
-        tutorial_frame.pack(side="left", fill="both", expand=1)
-        tutorial_notebook = ttk.Notebook(tutorial_frame)
-        tutorial_notebook.pack(fill="both", expand=1)
-
-        tutorial_intro_tab = Frame(None)
-        tutorial_notebook.add(tutorial_intro_tab, text="Intro")
-        Label(tutorial_intro_tab, text=INTRO_TEXT, wraplength=300).pack(fill="both", padx=2, pady=2)
-
-        tutorial_start_tab = Frame(None)
-        tutorial_notebook.add(tutorial_start_tab, text="Start")
-        Label(tutorial_start_tab, text=START_TEXT, wraplength=300).pack(fill="both", padx=2, pady=2)
-
-        tutorial_transition_tab = Frame(None)
-        tutorial_notebook.add(tutorial_transition_tab, text="Transitions")
-        Label(tutorial_transition_tab, text=TRANSITION_TEXT, wraplength=300).pack(fill="both", padx=2, pady=2)
 
         # Miscellaneous settings
         misc_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
@@ -247,38 +240,6 @@ class CorruptionModeTab(ScrollFrame):
         for i, level in enumerate(pack.corruption_levels):
             path_tree.insert("", "end", values=[i + 1, str(list(level.moods)), level.wallpaper, level.config])
 
-        tutorial_start_group = [
-            start_frame,
-            corruption_toggle,
-            full_permission_toggle,
-            recommended_settings_button,
-            misc_frame,
-            misc_col_1,
-            wallpaper_toggle,
-            theme_toggle,
-            misc_col_2,
-            purity_toggle,
-            dev_toggle,
-        ]
-
-        tutorial_transition_group = [
-            transition_frame,
-            fade_frame,
-            fade_selection_frame,
-            fade_dropdown,
-            fade_description,
-            trigger_frame,
-            trigger_selection_frame,
-            trigger_dropdown,
-            trigger_description,
-            level_time_scale,
-            level_time_manual,
-            level_popups_scale,
-            level_popups_manual,
-            level_launches_scale,
-            level_launches_manual,
-        ]
-
         def fade_helper(key):
             if key == "Normal":
                 fade_description.configure(text="Gradually transitions between corruption levels.")
@@ -318,25 +279,6 @@ class CorruptionModeTab(ScrollFrame):
                     set_widget_states(False, level_time_group)
                     set_widget_states(False, level_popup_group)
                     set_widget_states(True, level_launch_group)
-
-        def corruption_tutorial_helper(event):
-            tab = event.widget.tab("current")["text"]
-            config["themeType"].strip()
-            if tab == "Start":
-                set_widget_states_with_colors(True, tutorial_start_group, "lime green", "forest green")
-                set_widget_states(True, tutorial_transition_group)
-                trigger_helper(vars.corruption_trigger.get(), False)
-            elif tab == "Transitions":
-                set_widget_states_with_colors(True, tutorial_transition_group, "lime green", "forest green")
-                set_widget_states(True, tutorial_start_group)
-                trigger_helper(vars.corruption_trigger.get(), True)
-            else:
-                set_widget_states(True, tutorial_start_group)
-                set_widget_states(True, tutorial_transition_group)
-                trigger_helper(vars.corruption_trigger.get(), False)
-            set_widget_states(os.path.isfile(pack.paths.corruption), start_group)
-
-        tutorial_notebook.bind("<<NotebookTabChanged>>", corruption_tutorial_helper)
 
         fade_helper(vars.corruption_fade.get())
         trigger_helper(vars.corruption_trigger.get(), False)

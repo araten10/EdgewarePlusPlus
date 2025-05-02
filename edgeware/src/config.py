@@ -1,3 +1,20 @@
+# Copyright (C) 2024 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 if __name__ == "__main__":
     import os
 
@@ -75,7 +92,7 @@ if not pack.info.mood_file.is_file() or isinstance(pack.active_moods, UniversalS
 
 
 class Config(Tk):
-    def __init__(self):
+    def __init__(self) -> None:
         global config, vars
         super().__init__()
 
@@ -135,13 +152,14 @@ class Config(Tk):
 
         notebook.add(TroubleshootingTab(vars, title_font, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
-        notebook.add(Frame(), text="Tutorial")  # tab for tutorial, etc
+        notebook.add(Frame(name="tutorial"), text="Tutorial")  # tab for tutorial, etc
         last_tab = notebook.index(notebook.select())  # get initial tab to prevent switching to tutorial
         notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self))
 
         def tutorial_container(event, self) -> None:
-            global last_tab
-            if event.widget.select() == ".!frame4":
+            nonlocal last_tab
+            #print(event.widget.select())
+            if event.widget.select() == ".tutorial":
                 open_tutorial(event, self, style, window_font, title_font)
                 notebook.select(last_tab)
             else:

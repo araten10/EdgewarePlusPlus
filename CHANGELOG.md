@@ -9,9 +9,17 @@
 
 **Since last version...**
 
-Multiple changeups to how the config window is sorted. These include:
 
-•*Removing the "File" tab and moving the related settings to "Start" and "Troubleshooting"*
+
+**Version 16.1**
+
+Deployed this version ASAP to ping everybody so they can patch Edgeware++ to remove some critical bugs. Some other behind-the-scenes work is in progress, but only some of it is visible right now.
+
+•*Fixed a bug with popup randomization that made Edgeware hang with a black square instead of displaying images*
+
+•*Added secondary URL backups to the mpv library download, to fix issues with the download link not working due to updates*
+
+•*Removing the "File" tab and moving the related settings to "Start" and "Troubleshooting". This is part of a larger config window rework coming in later patches*
 
 **Version 16**
 

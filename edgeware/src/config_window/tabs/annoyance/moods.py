@@ -1,3 +1,20 @@
+# Copyright (C) 2025 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import logging
 from tkinter import (
@@ -46,7 +63,7 @@ def update_moods(pack: Pack, mood_name: str, check: bool) -> None:
 # if you are working on this i'm just letting you know there's like almost no documentation for ttkwidgets
 # source code is here https://github.com/TkinterEP/ttkwidgets/blob/master/ttkwidgets/checkboxtreeview.py
 class MoodsTreeview(CheckboxTreeview):
-    def __init__(self, master: Misc, pack: Pack, **kw):
+    def __init__(self, master: Misc, pack: Pack, **kw) -> None:
         super().__init__(master, **kw)
         # disabled tag to mar disabled items
         self.tag_configure("disabled", foreground="grey")
@@ -70,7 +87,7 @@ class MoodsTreeview(CheckboxTreeview):
 
 
 class MoodsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
         super().__init__()
 
         Label(self.viewPort, text="Moods", font=title_font, relief=GROOVE).pack(pady=2)

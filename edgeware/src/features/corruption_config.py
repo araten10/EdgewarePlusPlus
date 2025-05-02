@@ -1,3 +1,20 @@
+# Copyright (C) 2024 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 from dataclasses import dataclass
 
 
@@ -45,7 +62,7 @@ class CorruptionConfig:
     ]
 
     # Settings I found that are maybe dead currently since I can't find use (feel free to delete this once it's taken care of):
-    # pumpScareOffset (used to be for offsetting the pumpscare audio, might be irrelevant once we force vlc)
+    # pumpScareOffset (used to be for offsetting the pumpscare audio, could be removed now that mpv is forced)
 
     # TO CONSIDER FOR DANGEROUS:
     # mitosismode/mitosis_strength can potentially cause a dangerous payload of popups if set incorrectly

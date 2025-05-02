@@ -1,3 +1,20 @@
+# Copyright (C) 2024 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -53,7 +70,6 @@ class Data:
 
     # Directories
     BACKUPS = ROOT / "backups"
-    DOWNLOAD = ROOT / "download"
     LOGS = ROOT / "logs"
     MOODS = ROOT / "moods"
     PACKS = ROOT / "packs"
@@ -63,7 +79,6 @@ class Data:
     # Files
     CONFIG = ROOT / "config.json"
     CORRUPTION_LAUNCHES = ROOT / "corruption_launches.dat"
-    GALLERY_DL_CONFIG = ROOT / "gallery-dl.json"
 
     # Changed defaults
     CONFIG_ICON = ROOT / "config_icon.ico"
@@ -101,7 +116,7 @@ class CustomAssets:
 
 @dataclass
 class PackPaths:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path) -> None:
         self.root = root
 
         # Directories

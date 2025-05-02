@@ -1,3 +1,20 @@
+# Copyright (C) 2025 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 from tkinter import (
     CENTER,
     GROOVE,
@@ -26,7 +43,7 @@ NOTIFICATION_TEXT = 'These are a special type of caption-centric popup that uses
 
 
 class CaptionsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
         # Captions
