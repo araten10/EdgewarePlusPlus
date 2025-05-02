@@ -46,9 +46,9 @@ class Prompt(Toplevel):
         y = monitor.y + (monitor.height - height) // 2
         self.geometry(f"{width}x{height}+{x}+{y}")
 
-        Label(self, text="\n" + pack.index.default.prompt_command + "\n", fg=self.theme.fg, bg=self.theme.bg).pack()
+        Label(self, text="\n" + pack.index.default.prompt_command + "\n", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font).pack()
 
-        Label(self, text=self.prompt, wraplength=width, fg=self.theme.fg, bg=self.theme.bg).pack()
+        Label(self, text=self.prompt, wraplength=width, fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font).pack()
 
         input = Text(self, fg=self.theme.text_fg, bg=self.theme.text_bg)
         input.pack()
@@ -60,6 +60,7 @@ class Prompt(Toplevel):
             bg=self.theme.bg,
             activeforeground=self.theme.fg,
             activebackground=self.theme.bg,
+            font=self.theme.font[0]+" "+str(self.theme.font[1])
         )
         button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 

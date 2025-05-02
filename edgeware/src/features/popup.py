@@ -180,6 +180,7 @@ class Popup(Toplevel):
                 bg=self.theme.bg,
                 activeforeground=self.theme.fg,
                 activebackground=self.theme.bg,
+                font=self.theme.font[0]+" "+str(self.theme.font[1])
             )
             button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 
