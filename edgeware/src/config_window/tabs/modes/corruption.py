@@ -48,7 +48,7 @@ from widgets.config_widgets import (
     SettingsScale,
     SettingsToggle,
     Section,
-    Row
+    SettingsRow
 )
 
 INTRO_TEXT = "Corruption is a highly specialized mode that packs have to explicitly support. When corruption is enabled, it will turn off and on moods based on a trigger set down below. For example, a pack might start off with only vanilla moods but get more fetish-oriented every 10 popups opened.\n\n\"Full Permissions Mode\" can be enabled to allow the pack to change Edgeware++ settings on top of also changing moods. While this allows for very unique packs with lots of changes, this can also be potentially dangerous. Only turn it on for packs you trust!"
@@ -61,7 +61,7 @@ class CorruptionModeTab(ScrollFrame):
         #Start
         corruption_start_section = Section("Corruption", INTRO_TEXT, self.viewPort)
         corruption_start_section.pack()
-        corruption_start_row = Row(corruption_start_section)
+        corruption_start_row = SettingsRow(corruption_start_section)
         corruption_start_row.pack()
         corruption_toggle = SettingsToggle("Turn on Corruption", corruption_start_row, variable=vars.corruption_mode, cursor="question_arrow")
         corruption_toggle.pack()
@@ -84,7 +84,7 @@ class CorruptionModeTab(ScrollFrame):
         corruption_triggers_section = Section("Triggers", TRIGGER_TEXT, self.viewPort)
         corruption_triggers_section.pack()
 
-        select_trigger_row = Row(corruption_triggers_section)
+        select_trigger_row = SettingsRow(corruption_triggers_section)
         select_trigger_row.pack()
         trigger_frame = Frame(select_trigger_row, borderwidth=1, relief="groove")
         trigger_frame.pack(pady=4, ipady=4, side="left", expand=True)
@@ -121,7 +121,7 @@ class CorruptionModeTab(ScrollFrame):
         fade_description.configure(height=3, width=22)
         fade_description.pack(side="left", fill="y", ipadx=4)
 
-        corruption_triggers_row = Row(corruption_triggers_section)
+        corruption_triggers_row = SettingsRow(corruption_triggers_section)
         corruption_triggers_row.pack()
         corruption_time_scale = SettingsScale(corruption_triggers_row, "Level Time (seconds)", vars.corruption_time, 5, 1800)
         corruption_time_scale.pack()
