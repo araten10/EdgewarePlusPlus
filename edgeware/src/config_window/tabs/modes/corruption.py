@@ -38,6 +38,7 @@ from pack import Pack
 from paths import Assets
 from PIL import ImageTk
 from widgets.config_widgets import (
+    ConfigDropdown,
     ConfigRow,
     ConfigScale,
     ConfigSection,
@@ -83,18 +84,15 @@ class CorruptionModeTab(ScrollFrame):
         select_trigger_row = ConfigRow(corruption_triggers_section)
         select_trigger_row.pack()
 
-        trigger_frame = Frame(select_trigger_row, borderwidth=1, relief="groove")
-        trigger_frame.pack(pady=4, ipady=4, side="left", expand=True)
-        trigger_selection_frame = Frame(trigger_frame)
-        trigger_selection_frame.pack(side="left", fill="x")
-        trigger_types = ["Timed", "Popup", "Launch"]
-        trigger_dropdown = OptionMenu(trigger_selection_frame, vars.corruption_trigger, *trigger_types, command=lambda key: trigger_helper(key, False))
-        trigger_dropdown.configure(width=9, highlightthickness=0)
-        trigger_dropdown.pack(side="top", padx=4)
-
-        trigger_description = Label(trigger_frame, text="Error loading trigger description!", wraplength=150)
-        trigger_description.configure(height=3, width=22)
-        trigger_description.pack(side="left", fill="y", ipadx=4)
+        ConfigDropdown(
+            select_trigger_row,
+            vars.corruption_trigger,
+            {
+                "Timed": "Transitions based on time elapsed in current session.",
+                "Popup": "Transitions based on number of popups in current session.",
+                "Launch": "Transitions based on number of Edgeware launches.",
+            },
+        ).pack()
 
         transition_frame = Frame(select_trigger_row, borderwidth=1, relief="groove")
         transition_frame.pack(pady=4, ipady=4, side="left", expand=True)
@@ -117,17 +115,11 @@ class CorruptionModeTab(ScrollFrame):
         fade_description.configure(height=3, width=22)
         fade_description.pack(side="left", fill="y", ipadx=4)
 
-        corruption_triggers_row = ConfigRow(corruption_triggers_section)
-        corruption_triggers_row.pack()
-        corruption_time_scale = ConfigScale(corruption_triggers_row, "Level Time (seconds)", vars.corruption_time, 5, 1800)
-        corruption_time_scale.pack()
-        level_time_group = [corruption_time_scale]
-        corruption_popup_scale = ConfigScale(corruption_triggers_row, "Level Popups", vars.corruption_popups, 1, 100)
-        corruption_popup_scale.pack()
-        level_popup_group = [corruption_popup_scale]
-        corruption_launches_scale = ConfigScale(corruption_triggers_row, "Level Launches", vars.corruption_launches, 2, 31)
-        corruption_launches_scale.pack()
-        level_launch_group = [corruption_launches_scale]
+        triggers_row = ConfigRow(corruption_triggers_section)
+        triggers_row.pack()
+        ConfigScale(triggers_row, "Level Time (seconds)", vars.corruption_time, 5, 1800, (vars.corruption_trigger, "Timed")).pack()
+        ConfigScale(triggers_row, "Level Popups", vars.corruption_popups, 1, 100, (vars.corruption_trigger, "Popup")).pack()
+        ConfigScale(triggers_row, "Level Launches", vars.corruption_launches, 2, 31, (vars.corruption_trigger, "Launch")).pack()
 
         corruption_frame = Frame(self.viewPort)
         corruption_frame.pack(fill="x")
@@ -244,23 +236,5 @@ class CorruptionModeTab(ScrollFrame):
                 fade_description.configure(text="Immediately switches to new level upon timer completion.")
                 fade_image.configure(image=fade_abrupt_image)
 
-        def trigger_helper(key, tutorial_mode):
-            if key == "Timed":
-                trigger_description.configure(text="Transitions based on time elapsed in current session.")
-                set_widget_states(True, level_time_group)
-                set_widget_states(False, level_popup_group)
-                set_widget_states(False, level_launch_group)
-            if key == "Popup":
-                trigger_description.configure(text="Transitions based on number of popups in current session.")
-                set_widget_states(False, level_time_group)
-                set_widget_states(True, level_popup_group)
-                set_widget_states(False, level_launch_group)
-            if key == "Launch":
-                trigger_description.configure(text="Transitions based on number of Edgeware launches.")
-                set_widget_states(False, level_time_group)
-                set_widget_states(False, level_popup_group)
-                set_widget_states(True, level_launch_group)
-
         fade_helper(vars.corruption_fade.get())
-        trigger_helper(vars.corruption_trigger.get(), False)
         set_widget_states(os.path.isfile(pack.paths.corruption), start_group)

@@ -29,14 +29,16 @@ from tkinter import (
     font,
     simpledialog,
 )
+from typing import Tuple
 
-from config_window.utils import assign
+from config_window.utils import assign, set_widget_states
+from config_window.vars import ConfigVar
 
 PAD = 4
 
 
 class ConfigScale(Frame):
-    def __init__(self, master: Misc, label: str, variable: IntVar, from_: int, to: int) -> None:
+    def __init__(self, master: Misc, label: str, variable: IntVar, from_: int, to: int, enabled: Tuple[ConfigVar, int | bool | str] | None = None) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
 
         inner = Frame(self)
@@ -45,6 +47,12 @@ class ConfigScale(Frame):
         Button(inner, text="Manual", command=lambda: assign(variable, simpledialog.askinteger(f"{label}", prompt=f"[{from_}-{to}]: "))).pack(
             fill="x", expand=True, pady=[4, 0]
         )
+
+        if enabled:
+            toggle, value = enabled
+            set_state = lambda *args: set_widget_states(toggle.get() == value, [self])
+            set_state()
+            toggle.trace_add("write", set_state)
 
     def pack(self) -> None:
         super().pack(padx=PAD, pady=PAD, side="left", expand=True, fill="x")
@@ -57,7 +65,9 @@ class ConfigDropdown(Frame):
 
         inner = Frame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
-        OptionMenu(inner, variable, *items.keys(), command=self.on_change).pack(side="left")
+        menu = OptionMenu(inner, variable, *items.keys(), command=self.on_change)
+        menu.configure(width=9)
+        menu.pack(side="left")
         self.label = Label(inner, wraplength=150, height=3, width=22)
         self.label.pack(side="left", fill="y")
 
