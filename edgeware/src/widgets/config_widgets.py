@@ -35,11 +35,6 @@ from config_window.utils import assign
 PAD = 4
 
 
-# Tkinter variable notify callbacks
-# How do we enable and disable multiple widgets?
-# themes?
-
-
 class ConfigScale(Frame):
     def __init__(self, master: Misc, label: str, variable: IntVar, from_: int, to: int) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
