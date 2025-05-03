@@ -24,46 +24,42 @@ from tkinter import (
     Frame,
     Label,
     OptionMenu,
-    Scale,
-    simpledialog,
     ttk,
 )
 from tkinter.font import Font
 
 from config_window.preset import apply_preset
 from config_window.utils import (
-    assign,
     clear_launches,
-    config,
     set_widget_states,
-    set_widget_states_with_colors,
 )
 from config_window.vars import Vars
 from pack import Pack
 from paths import Assets
 from PIL import ImageTk
+from widgets.config_widgets import (
+    ConfigRow,
+    ConfigScale,
+    ConfigSection,
+    ConfigToggle,
+)
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
-from widgets.config_widgets import (
-    SettingsScale,
-    SettingsToggle,
-    Section,
-    SettingsRow
-)
 
-INTRO_TEXT = "Corruption is a highly specialized mode that packs have to explicitly support. When corruption is enabled, it will turn off and on moods based on a trigger set down below. For example, a pack might start off with only vanilla moods but get more fetish-oriented every 10 popups opened.\n\n\"Full Permissions Mode\" can be enabled to allow the pack to change Edgeware++ settings on top of also changing moods. While this allows for very unique packs with lots of changes, this can also be potentially dangerous. Only turn it on for packs you trust!"
-TRIGGER_TEXT = 'Triggers are the goals that define how corruption changes over time. Whenever the selected condition is reached, they tell Edgeware++ to advance to the next \"corruption level\". Each setting is per level transition, *not* the total time it takes for corruption to finish.\n\nFor example, let\'s say you set the trigger type to \"timed\" and the time to 60 seconds. That means that every 60 seconds you run Edgeware++ the corruption level will increase, changing the current moods available.\n\nAdditionally, you can change the behaviour of how Edgeware++ transitions from level to level. For example, \"Abrupt\" will immediately change to the next moods when the trigger condition is met, whereas \"Normal\" will gradually increase the chance of pulling media from the next corruption level up until the trigger condition.'
+INTRO_TEXT = 'Corruption is a highly specialized mode that packs have to explicitly support. When corruption is enabled, it will turn off and on moods based on a trigger set down below. For example, a pack might start off with only vanilla moods but get more fetish-oriented every 10 popups opened.\n\n"Full Permissions Mode" can be enabled to allow the pack to change Edgeware++ settings on top of also changing moods. While this allows for very unique packs with lots of changes, this can also be potentially dangerous. Only turn it on for packs you trust!'
+TRIGGER_TEXT = 'Triggers are the goals that define how corruption changes over time. Whenever the selected condition is reached, they tell Edgeware++ to advance to the next "corruption level". Each setting is per level transition, *not* the total time it takes for corruption to finish.\n\nFor example, let\'s say you set the trigger type to "timed" and the time to 60 seconds. That means that every 60 seconds you run Edgeware++ the corruption level will increase, changing the current moods available.\n\nAdditionally, you can change the behaviour of how Edgeware++ transitions from level to level. For example, "Abrupt" will immediately change to the next moods when the trigger condition is met, whereas "Normal" will gradually increase the chance of pulling media from the next corruption level up until the trigger condition.'
+
 
 class CorruptionModeTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
         super().__init__()
 
-        #Start
-        corruption_start_section = Section("Corruption", INTRO_TEXT, self.viewPort)
+        # Start
+        corruption_start_section = ConfigSection(self.viewPort, "Corruption", INTRO_TEXT)
         corruption_start_section.pack()
-        corruption_start_row = SettingsRow(corruption_start_section)
+        corruption_start_row = ConfigRow(corruption_start_section)
         corruption_start_row.pack()
-        corruption_toggle = SettingsToggle("Turn on Corruption", corruption_start_row, variable=vars.corruption_mode, cursor="question_arrow")
+        corruption_toggle = ConfigToggle(corruption_start_row, "Turn on Corruption", variable=vars.corruption_mode, cursor="question_arrow")
         corruption_toggle.pack()
         CreateToolTip(
             corruption_toggle,
@@ -71,24 +67,24 @@ class CorruptionModeTab(ScrollFrame):
             " content. Or at least that's the idea, pack creators can do whatever they want with it.\n\n"
             "Corruption uses the 'mood' feature, which must be supported with a corruption.json file in the resource"
             ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
-            ' Edgeware. For more information, check out the \"Tutorial\" tab.',
+            ' Edgeware. For more information, check out the "Tutorial" tab.',
         )
-        full_permission_toggle = SettingsToggle("Full Permissions Mode", corruption_start_row, variable=vars.corruption_full, cursor="question_arrow")
+        full_permission_toggle = ConfigToggle(corruption_start_row, "Full Permissions Mode", variable=vars.corruption_full, cursor="question_arrow")
         full_permission_toggle.pack()
         CreateToolTip(
             full_permission_toggle,
-            "This setting allows corruption mode to change config settings as it goes through corruption levels.\n\nThere are certain settings that can\'t be changed, but usually because they\'d either do nothing or serve no purpose... That means that a lot of \"dangerous settings\" are still fair game! Please only enable this for packs you trust!\n\nIf you are a pack creator or just want to see what settings don\'t work with this mode, you can view the full blacklist in \"src\\features\\corruption_config.py\" (open with your text editor of choice!)"
+            'This setting allows corruption mode to change config settings as it goes through corruption levels.\n\nThere are certain settings that can\'t be changed, but usually because they\'d either do nothing or serve no purpose... That means that a lot of "dangerous settings" are still fair game! Please only enable this for packs you trust!\n\nIf you are a pack creator or just want to see what settings don\'t work with this mode, you can view the full blacklist in "src\\features\\corruption_config.py" (open with your text editor of choice!)',
         )
 
-        #Triggers
-        corruption_triggers_section = Section("Triggers", TRIGGER_TEXT, self.viewPort)
+        # Triggers
+        corruption_triggers_section = ConfigSection(self.viewPort, "Triggers", TRIGGER_TEXT)
         corruption_triggers_section.pack()
 
-        select_trigger_row = SettingsRow(corruption_triggers_section)
+        select_trigger_row = ConfigRow(corruption_triggers_section)
         select_trigger_row.pack()
+
         trigger_frame = Frame(select_trigger_row, borderwidth=1, relief="groove")
         trigger_frame.pack(pady=4, ipady=4, side="left", expand=True)
-
         trigger_selection_frame = Frame(trigger_frame)
         trigger_selection_frame.pack(side="left", fill="x")
         trigger_types = ["Timed", "Popup", "Launch"]
@@ -121,15 +117,15 @@ class CorruptionModeTab(ScrollFrame):
         fade_description.configure(height=3, width=22)
         fade_description.pack(side="left", fill="y", ipadx=4)
 
-        corruption_triggers_row = SettingsRow(corruption_triggers_section)
+        corruption_triggers_row = ConfigRow(corruption_triggers_section)
         corruption_triggers_row.pack()
-        corruption_time_scale = SettingsScale(corruption_triggers_row, "Level Time (seconds)", vars.corruption_time, 5, 1800)
+        corruption_time_scale = ConfigScale(corruption_triggers_row, "Level Time (seconds)", vars.corruption_time, 5, 1800)
         corruption_time_scale.pack()
         level_time_group = [corruption_time_scale]
-        corruption_popup_scale = SettingsScale(corruption_triggers_row, "Level Popups", vars.corruption_popups, 1, 100)
+        corruption_popup_scale = ConfigScale(corruption_triggers_row, "Level Popups", vars.corruption_popups, 1, 100)
         corruption_popup_scale.pack()
         level_popup_group = [corruption_popup_scale]
-        corruption_launches_scale = SettingsScale(corruption_triggers_row, "Level Launches", vars.corruption_launches, 2, 31)
+        corruption_launches_scale = ConfigScale(corruption_triggers_row, "Level Launches", vars.corruption_launches, 2, 31)
         corruption_launches_scale.pack()
         level_launch_group = [corruption_launches_scale]
 
@@ -251,34 +247,19 @@ class CorruptionModeTab(ScrollFrame):
         def trigger_helper(key, tutorial_mode):
             if key == "Timed":
                 trigger_description.configure(text="Transitions based on time elapsed in current session.")
-                if tutorial_mode:
-                    set_widget_states_with_colors(True, level_time_group, "lime green", "forest green")
-                    set_widget_states_with_colors(False, level_popup_group, "lime green", "forest green")
-                    set_widget_states_with_colors(False, level_launch_group, "lime green", "forest green")
-                else:
-                    set_widget_states(True, level_time_group)
-                    set_widget_states(False, level_popup_group)
-                    set_widget_states(False, level_launch_group)
+                set_widget_states(True, level_time_group)
+                set_widget_states(False, level_popup_group)
+                set_widget_states(False, level_launch_group)
             if key == "Popup":
                 trigger_description.configure(text="Transitions based on number of popups in current session.")
-                if tutorial_mode:
-                    set_widget_states_with_colors(False, level_time_group, "lime green", "forest green")
-                    set_widget_states_with_colors(True, level_popup_group, "lime green", "forest green")
-                    set_widget_states_with_colors(False, level_launch_group, "lime green", "forest green")
-                else:
-                    set_widget_states(False, level_time_group)
-                    set_widget_states(True, level_popup_group)
-                    set_widget_states(False, level_launch_group)
+                set_widget_states(False, level_time_group)
+                set_widget_states(True, level_popup_group)
+                set_widget_states(False, level_launch_group)
             if key == "Launch":
                 trigger_description.configure(text="Transitions based on number of Edgeware launches.")
-                if tutorial_mode:
-                    set_widget_states_with_colors(False, level_time_group, "lime green", "forest green")
-                    set_widget_states_with_colors(False, level_popup_group, "lime green", "forest green")
-                    set_widget_states_with_colors(True, level_launch_group, "lime green", "forest green")
-                else:
-                    set_widget_states(False, level_time_group)
-                    set_widget_states(False, level_popup_group)
-                    set_widget_states(True, level_launch_group)
+                set_widget_states(False, level_time_group)
+                set_widget_states(False, level_popup_group)
+                set_widget_states(True, level_launch_group)
 
         fade_helper(vars.corruption_fade.get())
         trigger_helper(vars.corruption_trigger.get(), False)

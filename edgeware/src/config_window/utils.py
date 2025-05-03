@@ -23,7 +23,7 @@ import subprocess
 import sys
 import urllib
 from pathlib import Path
-from tkinter import BooleanVar, Frame, IntVar, Label, Listbox, StringVar, Widget, messagebox, simpledialog
+from tkinter import BooleanVar, IntVar, Listbox, StringVar, TclError, Widget, messagebox, simpledialog
 
 import os_utils
 import utils
@@ -254,9 +254,17 @@ def set_widget_states(state: bool, widgets: list[Widget], demo: bool = False) ->
 
 def set_widget_states_with_colors(state: bool, widgets: list[Widget], color_on: str, color_off: str) -> None:
     for widget in widgets:
-        if not (isinstance(widget, Frame) or isinstance(widget, Label)):
-            widget.configure(state=("normal" if state else "disabled"))
-        widget.configure(bg=(color_on if state else color_off))
+        for child in [widget, *all_children(widget)]:
+            # TODO: Better way to check if state and bg exist as options
+            try:
+                child.configure(state=("normal" if state else "disabled"))
+            except TclError:
+                pass
+
+            try:
+                child.configure(bg=(color_on if state else color_off))
+            except TclError:
+                pass
 
 
 def refresh():

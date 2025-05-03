@@ -158,7 +158,7 @@ class Config(Tk):
 
         def tutorial_container(event, self) -> None:
             nonlocal last_tab
-            #print(event.widget.select())
+            # print(event.widget.select())
             if event.widget.select() == ".tutorial":
                 open_tutorial(event, self, style, window_font, title_font)
                 notebook.select(last_tab)
