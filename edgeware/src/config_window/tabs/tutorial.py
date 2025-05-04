@@ -54,17 +54,24 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
     tutorial_notebook = ttk.Notebook(tutorial_frame, style="lefttab.TNotebook")
     tutorial_notebook.pack(expand=1, fill="both")
 
-    tab_about = HtmlFrame(tutorial_frame, messages_enabled=False)
-    tutorial_notebook.add(tab_about, text="Intro/About")
-    tab_about.load_file(str(Assets.TUTORIAL_INTRO))
+    #without this and that miserable mess in htmlframe's base_url, the place that tkinterweb would look for images would differ completely between linux and windows
+    #there's so many problems here I don't even want to get into it...
+    def image_workaround(file) -> str:
+        with open(file, "r", encoding="utf-8") as f:
+            string = f.read()
+            return string
 
     tab_about = HtmlFrame(tutorial_frame, messages_enabled=False)
-    tutorial_notebook.add(tab_about, text="Getting Started")
-    tab_about.load_file(str(Assets.TUTORIAL_GETSTARTED))
+    tutorial_notebook.add(tab_about, text="Intro/About")
+    tab_about.load_html(image_workaround(Assets.TUTORIAL_INTRO), base_url=f"file:///{Assets.TUTORIAL_IMAGES}".replace("\\", "/"))
+
+    tab_start = HtmlFrame(tutorial_frame, messages_enabled=False)
+    tutorial_notebook.add(tab_start, text="Getting Started")
+    tab_start.load_html(image_workaround(Assets.TUTORIAL_GETSTARTED), base_url=f"file:///{Assets.TUTORIAL_IMAGES}".replace("\\", "/"))
 
     tab_basic_settings = HtmlFrame(tutorial_frame, messages_enabled=False)
     tutorial_notebook.add(tab_basic_settings, text="Settings 101")
-    tab_basic_settings.load_file(str(Assets.TUTORIAL_UNDERCONSTRUCTION))
+    tab_basic_settings.load_html(image_workaround(Assets.TUTORIAL_UNDERCONSTRUCTION), base_url=f"file:///{Assets.TUTORIAL_IMAGES}".replace("\\", "/"))
 
     tab_drive = ScrollFrame(tutorial_frame)
     tutorial_notebook.add(tab_drive, text="Hard Drive")
