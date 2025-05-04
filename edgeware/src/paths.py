@@ -56,7 +56,6 @@ class Assets:
 
     # Tutorial pages
     TUTORIAL = ROOT / "tutorial"
-    TUTORIAL_IMAGES = TUTORIAL / "images"
 
     TUTORIAL_UNDERCONSTRUCTION = TUTORIAL / "construction.html"
 
