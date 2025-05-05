@@ -52,7 +52,7 @@ PRESET_TEXT = "Please be careful before importing unknown config presets! Double
 
 
 class KeyListenerWindow(Toplevel):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.resizable(False, False)
         self.title("Key Listener")
@@ -91,7 +91,7 @@ def request_global_panic_key(button: Button, var: StringVar) -> None:
 
 
 class StartTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: str, live_version: str, pack: Pack):
+    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: str, live_version: str, pack: Pack) -> None:
         super().__init__()
 
         intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)
@@ -120,7 +120,7 @@ class StartTab(ScrollFrame):
         Label(self.viewPort, text="Theme", font=title_font, relief=GROOVE).pack(pady=2)
 
         # TODO: Use Theme object
-        def theme_helper(theme):
+        def theme_helper(theme: str) -> None:
             skiplist = [
                 theme_demo_frame,
                 theme_demo_popup_frame,

@@ -103,7 +103,7 @@ def write_save(vars: Vars, exit_at_end: bool = False) -> None:
         messagebox.showinfo("Success!", "Settings saved successfully!")
 
 
-def assign(obj: StringVar | IntVar | BooleanVar, var: str | int | bool):
+def assign(obj: StringVar | IntVar | BooleanVar, var: str | int | bool) -> None:
     try:
         obj.set(var)
     except Exception as e:
@@ -168,7 +168,7 @@ def safe_check(vars: Vars) -> bool:
     return True
 
 
-def clear_launches(confirmation: bool):
+def clear_launches(confirmation: bool) -> None:
     try:
         if os.path.exists(Data.CORRUPTION_LAUNCHES):
             os.remove(Data.CORRUPTION_LAUNCHES)
@@ -190,14 +190,14 @@ def clear_launches(confirmation: bool):
         logging.warning(f"could not delete the corruption launches file. {e}")
 
 
-def add_list(tk_list_obj: Listbox, key: str, title: str, text: str):
+def add_list(tk_list_obj: Listbox, key: str, title: str, text: str) -> None:
     name = simpledialog.askstring(title, text)
     if name != "" and name is not None:
         config[key] = f"{config[key]}>{name}"
         tk_list_obj.insert(2, name)
 
 
-def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
+def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str) -> None:
     index = int(tk_list_obj.curselection()[0])
     item_name = tk_list_obj.get(index)
     if index > 0:
@@ -207,7 +207,7 @@ def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
         messagebox.showwarning(title, text)
 
 
-def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str):
+def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str) -> None:
     index = int(tk_list_obj.curselection()[0])
     item_name = tk_list_obj.get(index)
     print(config[key])
@@ -223,7 +223,7 @@ def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str):
         messagebox.showwarning(title, text)
 
 
-def reset_list(tk_list_obj: Listbox, key: str, default):
+def reset_list(tk_list_obj: Listbox, key: str, default: str) -> None:
     try:
         tk_list_obj.delete(0, 999)
     except Exception as e:
@@ -267,6 +267,6 @@ def set_widget_states_with_colors(state: bool, widgets: list[Widget], color_on: 
                 pass
 
 
-def refresh():
+def refresh() -> None:
     subprocess.Popen([sys.executable, Process.CONFIG])
     sys.exit()

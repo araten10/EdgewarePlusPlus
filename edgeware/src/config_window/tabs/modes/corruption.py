@@ -228,7 +228,7 @@ class CorruptionModeTab(ScrollFrame):
         for i, level in enumerate(pack.corruption_levels):
             path_tree.insert("", "end", values=[i + 1, str(list(level.moods)), level.wallpaper, level.config])
 
-        def fade_helper(key):
+        def fade_helper(key: str) -> None:
             if key == "Normal":
                 fade_description.configure(text="Gradually transitions between corruption levels.")
                 fade_image.configure(image=fade_normal_image)

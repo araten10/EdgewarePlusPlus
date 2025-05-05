@@ -105,7 +105,7 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
 
     # End of HtmlFrame workaround
 
-    def theme_change(theme: str, root, style, mfont, tfont):
+    def theme_change(theme: str, root, style, mfont, tfont) -> None:
         if theme == "Original" or config["themeNoConfig"] is True:
             for widget in all_children(root):
                 if isinstance(widget, Message):

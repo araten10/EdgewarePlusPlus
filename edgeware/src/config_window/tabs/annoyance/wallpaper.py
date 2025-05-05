@@ -47,7 +47,7 @@ ROTATE_TEXT = "Turning on wallpaper rotate disables built-in pack wallpapers, al
 PANIC_TEXT = "This is the panic wallpaper, make sure to set it to your default wallpaper ASAP! Otherwise quitting edgeware via panic will leave you with a nice and generic windows one instead."
 
 
-def update_max(obj, value: int):
+def update_max(obj, value: int) -> None:
     obj.configure(to=int(value))
 
 

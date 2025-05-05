@@ -224,7 +224,7 @@ class Config(Tk):
 
 
 # helper funcs for lambdas =======================================================
-def theme_change(theme: str, root, style, mfont, tfont):
+def theme_change(theme: str, root, style, mfont, tfont) -> None:
     if theme == "Original" or config["themeNoConfig"] is True:
         for widget in all_children(root):
             if isinstance(widget, Message):
@@ -374,7 +374,7 @@ def theme_change(theme: str, root, style, mfont, tfont):
             tfont.configure(family="Constantia")
 
 
-def toggle_help(state: bool, messages: list):
+def toggle_help(state: bool, messages: list) -> None:
     if state is True:
         try:
             for widget in messages:

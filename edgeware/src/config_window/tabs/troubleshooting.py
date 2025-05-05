@@ -42,7 +42,7 @@ def get_log_number() -> int:
     return len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
 
 
-def delete_logs(log_number_label: Label):
+def delete_logs(log_number_label: Label) -> None:
     try:
         if not messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete all logs? There are currently {get_log_number()}.", icon="warning"):
             return
