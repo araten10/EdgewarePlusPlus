@@ -140,7 +140,7 @@ class CorruptionModeTab(ScrollFrame):
         Button(corruption_triggers_section, text="Reset Launches", height=3, command=lambda: clear_launches(True)).pack(side="left", fill="x", padx=1, expand=1)
 
         # Miscellaneous settings
-        corruption_misc_section = ConfigSection(self.viewPort, "Misc. Settings", "")
+        corruption_misc_section = ConfigSection(self.viewPort, "Misc. Settings")
         corruption_misc_section.pack()
 
         misc_row_1 = ConfigRow(corruption_misc_section)
@@ -181,7 +181,7 @@ class CorruptionModeTab(ScrollFrame):
         )
 
         # Corruption path
-        corruption_path_frame = ConfigSection(self.viewPort, "Corruption Path", "")
+        corruption_path_frame = ConfigSection(self.viewPort, "Corruption Path")
         corruption_path_frame.pack()
 
         path_tree_frame = Frame(corruption_path_frame)
