@@ -70,11 +70,27 @@ class CorruptionModeTab(ScrollFrame):
             ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
             ' Edgeware. For more information, check out the "Tutorial" tab.',
         )
+        start_group = [corruption_toggle]
         full_permission_toggle = ConfigToggle(corruption_start_row, "Full Permissions Mode", variable=vars.corruption_full, cursor="question_arrow")
         full_permission_toggle.pack()
         CreateToolTip(
             full_permission_toggle,
             'This setting allows corruption mode to change config settings as it goes through corruption levels.\n\nThere are certain settings that can\'t be changed, but usually because they\'d either do nothing or serve no purpose... That means that a lot of "dangerous settings" are still fair game! Please only enable this for packs you trust!\n\nIf you are a pack creator or just want to see what settings don\'t work with this mode, you can view the full blacklist in "src\\features\\corruption_config.py" (open with your text editor of choice!)',
+        )
+
+        recommended_settings_button = Button(
+            corruption_start_section,
+            text="Recommended Settings",
+            cursor="question_arrow",
+            height=2,
+            command=lambda: apply_preset(pack.config, vars, ["corruptionMode", "corruptionTime", "corruptionFadeType"]),
+        )
+        recommended_settings_button.pack(fill="x", padx=2, pady=2)
+        CreateToolTip(
+            recommended_settings_button,
+            'Pack creators can set "default corruption settings" for their pack, to give'
+            " users a more designed and consistent experience. This setting turns those on (if they exist)."
+            '\n\nSidenote: this will load configurations similarly to the option in the "Pack Info" tab, however this one will only load corruption-specific settings.',
         )
 
         # Triggers
@@ -121,75 +137,42 @@ class CorruptionModeTab(ScrollFrame):
         ConfigScale(triggers_row, "Level Popups", vars.corruption_popups, 1, 100, (vars.corruption_trigger, "Popup")).pack()
         ConfigScale(triggers_row, "Level Launches", vars.corruption_launches, 2, 31, (vars.corruption_trigger, "Launch")).pack()
 
-        corruption_frame = Frame(self.viewPort)
-        corruption_frame.pack(fill="x")
-
-        corruption_settings_frame = Frame(corruption_frame)
-        corruption_settings_frame.pack(fill="x", side="left")
-
-        basic_settings_frame = Frame(corruption_settings_frame)
-        basic_settings_frame.pack(fill="both", side="top")
-
-        # Start
-        start_frame = Frame(basic_settings_frame, borderwidth=5, relief=RAISED)
-        start_frame.pack(fill="both", side="left")
-        recommended_settings_button = Button(
-            start_frame,
-            text="Recommended Settings",
-            cursor="question_arrow",
-            height=2,
-            command=lambda: apply_preset(pack.config, vars, ["corruptionMode", "corruptionTime", "corruptionFadeType"]),
-        )
-        recommended_settings_button.pack(fill="x", padx=2, pady=2)
-        CreateToolTip(
-            recommended_settings_button,
-            'Pack creators can set "default corruption settings" for their pack, to give'
-            " users a more designed and consistent experience. This setting turns those on (if they exist)."
-            '\n\nSidenote: this will load configurations similarly to the option in the "Pack Info" tab, however this one will only load corruption-specific settings.',
-        )
-        start_group = [corruption_toggle]
-
-        # Level progress
-        level_frame = Frame(corruption_settings_frame)
-        level_frame.pack(fill="x", side="top")
-
-        Button(level_frame, text="Reset Launches", height=3, command=lambda: clear_launches(True)).pack(side="left", fill="x", padx=1, expand=1)
+        Button(corruption_triggers_section, text="Reset Launches", height=3, command=lambda: clear_launches(True)).pack(side="left", fill="x", padx=1, expand=1)
 
         # Miscellaneous settings
-        misc_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        misc_frame.pack(fill="x")
+        corruption_misc_section = ConfigSection(self.viewPort, "Misc. Settings", "")
+        corruption_misc_section.pack()
 
-        misc_col_1 = Frame(misc_frame)
-        misc_col_1.pack(fill="both", side="left", expand=1)
-
-        wallpaper_toggle = Checkbutton(misc_col_1, text="Don't Cycle Wallpaper", variable=vars.corruption_wallpaper, cursor="question_arrow")
-        wallpaper_toggle.pack(fill="x", side="top")
+        misc_row_1 = ConfigRow(corruption_misc_section)
+        misc_row_1.pack()
+        wallpaper_toggle = ConfigToggle(misc_row_1, text="Don't Cycle Wallpaper", variable=vars.corruption_wallpaper, cursor="question_arrow")
+        wallpaper_toggle.pack()
         CreateToolTip(
             wallpaper_toggle,
             "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to a pack defined static one.",
         )
 
-        theme_toggle = Checkbutton(misc_col_1, text="Don't Cycle Themes", variable=vars.corruption_themes, cursor="question_arrow")
-        theme_toggle.pack(fill="x", side="top")
+        theme_toggle = ConfigToggle(misc_row_1, text="Don't Cycle Themes", variable=vars.corruption_themes, cursor="question_arrow")
+        theme_toggle.pack()
         CreateToolTip(
             theme_toggle,
             "Prevents the theme from cycling as you go through corruption levels, instead staying as "
             'the theme you set in the "General" tab of the config window.',
         )
 
-        misc_col_2 = Frame(misc_frame)
-        misc_col_2.pack(fill="both", side="left", expand=1)
+        misc_row_2 = ConfigRow(corruption_misc_section)
+        misc_row_2.pack()
 
-        purity_toggle = Checkbutton(misc_col_2, text="Purity Mode", variable=vars.corruption_purity, cursor="question_arrow")
-        purity_toggle.pack(fill="x", side="top")
+        purity_toggle = ConfigToggle(misc_row_2, text="Purity Mode", variable=vars.corruption_purity, cursor="question_arrow")
+        purity_toggle.pack()
         CreateToolTip(
             purity_toggle,
             "Starts corruption mode at the highest corruption level, then works backwards to level 1. "
             "Retains all of your other settings for this mode, if applicable.",
         )
 
-        dev_toggle = Checkbutton(misc_col_2, text="Corruption Dev View", variable=vars.corruption_dev_mode, cursor="question_arrow")
-        dev_toggle.pack(fill="x", side="top")
+        dev_toggle = ConfigToggle(misc_row_2, text="Corruption Dev View", variable=vars.corruption_dev_mode, cursor="question_arrow")
+        dev_toggle.pack()
         CreateToolTip(
             dev_toggle,
             "Enables captions on popups that show various info.\n\n Mood: the mood in which the popup belongs to\n"
@@ -198,10 +181,8 @@ class CorruptionModeTab(ScrollFrame):
         )
 
         # Corruption path
-        corruption_path_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        corruption_path_frame.pack(fill="x")
-
-        Label(corruption_path_frame, text="--CORRUPTION PATH--").pack(pady=1, fill="x", side="top")
+        corruption_path_frame = ConfigSection(self.viewPort, "Corruption Path", "")
+        corruption_path_frame.pack()
 
         path_tree_frame = Frame(corruption_path_frame)
         path_tree_frame.pack(fill="both", side="left", expand=1)
