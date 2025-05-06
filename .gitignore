@@ -171,6 +171,7 @@ edgeware/config.pyw
 edgeware/edgeware.pyw
 edgeware/panic.pyw
 edgeware/resource/
+edgeware/data/
 !edgeware/data/presets
 !edgeware/data/presets/default.cfg
 !edgeware/data/presets/default.txt
