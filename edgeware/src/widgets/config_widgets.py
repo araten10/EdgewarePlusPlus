@@ -43,7 +43,7 @@ class ConfigScale(Frame):
 
         inner = Frame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
-        Scale(inner, label=label, orient="horizontal", variable=variable, from_=from_, to=to).pack(fill="x", expand=True)
+        Scale(inner, label=label, orient="horizontal", highlightthickness=0, variable=variable, from_=from_, to=to).pack(fill="x", expand=True)
         Button(inner, text="Manual", command=lambda: assign(variable, simpledialog.askinteger(f"{label}", prompt=f"[{from_}-{to}]: "))).pack(
             fill="x", expand=True, pady=[4, 0]
         )
@@ -66,7 +66,7 @@ class ConfigDropdown(Frame):
         inner = Frame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
         menu = OptionMenu(inner, variable, *items.keys(), command=self.on_change)
-        menu.configure(width=9)
+        menu.configure(width=9,highlightthickness= 0)
         menu.pack(side="left")
         self.label = Label(inner, wraplength=150, height=3, width=22)
         self.label.pack(side="left", fill="y")
