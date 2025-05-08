@@ -252,10 +252,6 @@ def theme_change(theme: str, root, style, mfont, tfont) -> None:
                     widget.configure(bg="#282c34", fg="ghost white", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="ghost white")
                 if isinstance(widget, Message):
                     widget.configure(bg="#282c34", fg="ghost white", font=(mfont, 8))
-            for widget in CreateToolTip.instances:
-                widget.background = "#1b1d23"
-                widget.foreground = "#ffffff"
-                widget.bordercolor = "#ffffff"
             style.configure("TFrame", background="#282c34")
             style.configure("TNotebook", background="#282c34")
             style.map("TNotebook.Tab", background=[("selected", "#282c34")])
@@ -278,10 +274,6 @@ def theme_change(theme: str, root, style, mfont, tfont) -> None:
                     widget.configure(bg="#282c34", fg="#00ff41", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="#00ff41")
                 if isinstance(widget, Message):
                     widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8))
-            for widget in CreateToolTip.instances:
-                widget.background = "#1b1d23"
-                widget.foreground = "#00ff41"
-                widget.bordercolor = "#00ff41"
             style.configure("TFrame", background="#282c34")
             style.configure("TNotebook", background="#282c34")
             style.map("TNotebook.Tab", background=[("selected", "#282c34")])
@@ -306,10 +298,6 @@ def theme_change(theme: str, root, style, mfont, tfont) -> None:
                     widget.configure(bg="#841212", fg="white", selectcolor="#5c0d0d", activebackground="#841212", activeforeground="white")
                 if isinstance(widget, Message):
                     widget.configure(bg="#841212", fg="white", font=("Arial", 8))
-            for widget in CreateToolTip.instances:
-                widget.background = "#ff2600"
-                widget.foreground = "#ffffff"
-                widget.bordercolor = "#000000"
             style.configure("TFrame", background="#841212")
             style.configure("TNotebook", background="#841212")
             style.map("TNotebook.Tab", background=[("selected", "#841212")])
@@ -334,10 +322,6 @@ def theme_change(theme: str, root, style, mfont, tfont) -> None:
                     widget.configure(bg="#282c34", fg="MediumPurple1", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="MediumPurple1")
                 if isinstance(widget, Message):
                     widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 8))
-            for widget in CreateToolTip.instances:
-                widget.background = "#1b1d23"
-                widget.foreground = "#cc60ff"
-                widget.bordercolor = "#b999fe"
             style.configure("TFrame", background="#282c34")
             style.configure("TNotebook", background="#282c34")
             style.map("TNotebook.Tab", background=[("selected", "#282c34")])
@@ -362,10 +346,6 @@ def theme_change(theme: str, root, style, mfont, tfont) -> None:
                     widget.configure(bg="pink", fg="deep pink", selectcolor="light pink", activebackground="pink", activeforeground="deep pink")
                 if isinstance(widget, Message):
                     widget.configure(bg="pink", fg="deep pink", font=("Constantia", 8))
-            for widget in CreateToolTip.instances:
-                widget.background = "#ffc5cd"
-                widget.foreground = "#ff3aa3"
-                widget.bordercolor = "#ff84c1"
             style.configure("TFrame", background="pink")
             style.configure("TNotebook", background="pink")
             style.map("TNotebook.Tab", background=[("selected", "pink")])
