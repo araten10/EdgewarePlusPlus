@@ -29,8 +29,8 @@ from tkinter import (
 from tkinter.font import Font
 
 from config_window.utils import set_widget_states
-from config_window.vars import Vars
 from pack import Pack
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

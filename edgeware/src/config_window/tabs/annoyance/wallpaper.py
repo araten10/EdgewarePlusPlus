@@ -36,10 +36,10 @@ from config_window.utils import (
     config,
     set_widget_states,
 )
-from config_window.vars import Vars
 from pack import Pack
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

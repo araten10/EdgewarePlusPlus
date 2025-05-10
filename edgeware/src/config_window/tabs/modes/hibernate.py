@@ -32,7 +32,7 @@ from config_window.utils import (
     assign,
     set_widget_states,
 )
-from config_window.vars import Vars
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

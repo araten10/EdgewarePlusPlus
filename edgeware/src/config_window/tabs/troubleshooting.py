@@ -31,9 +31,9 @@ from tkinter.font import Font
 import os_utils
 import utils
 from config_window.utils import log_file
-from config_window.vars import Vars
 from pack import Pack
 from paths import Data
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
