@@ -36,36 +36,33 @@ from config_window.utils import (
 from config_window.vars import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
+from widgets.config_widgets import (
+    ConfigDropdown,
+    ConfigRow,
+    ConfigScale,
+    ConfigSection,
+    ConfigToggle,
+)
 
+LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with Popup Timeout or high delay as popups will stack on top of eachother."
 
 class BasicModesTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font) -> None:
         super().__init__()
 
-        # Unsure if not calling this lowkey/moving in the tab will confuse people, consider renaming if people find it annoying
-
         # Lowkey
-        Label(self.viewPort, text="Lowkey Mode", font=title_font, relief=GROOVE).pack(pady=2)
+        lowkey_section = ConfigSection(self.viewPort, "Lowkey Mode", LOWKEY_TEXT)
+        lowkey_section.pack()
 
-        lowkey_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        lowkey_frame.pack(fill="x")
+        lowkey_row = ConfigRow(lowkey_section)
+        lowkey_row.pack()
 
-        lowkey_toggle = Checkbutton(
-            lowkey_frame,
-            text="Lowkey Mode",
-            variable=vars.lowkey_mode,
-            command=lambda: set_widget_states(vars.lowkey_mode.get(), lowkey_group),
-            cursor="question_arrow",
-        )
-        lowkey_toggle.pack(fill="both", expand=1)
-        CreateToolTip(
-            lowkey_toggle,
-            "Makes popups appear in a corner of the screen instead of the middle.\n\nBest used with Popup Timeout or high delay as popups will stack.",
-        )
+        lowkey_toggle = ConfigToggle(lowkey_row, "Lowkey Mode", variable=vars.lowkey_mode, command=lambda: set_widget_states(vars.lowkey_mode.get(), lowkey_group))
+        lowkey_toggle.pack()
         lowkey_corners = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
         lowkey_corner_string = StringVar(self, lowkey_corners[vars.lowkey_corner.get()])
-        lowkey_dropdown = OptionMenu(lowkey_frame, lowkey_corner_string, *lowkey_corners, command=lambda x: (vars.lowkey_corner.set(lowkey_corners.index(x))))
-        lowkey_dropdown.pack(fill="x", padx=2, pady=5)
+        lowkey_dropdown = OptionMenu(lowkey_row, lowkey_corner_string, *lowkey_corners, command=lambda x: (vars.lowkey_corner.set(lowkey_corners.index(x))))
+        lowkey_dropdown.pack(side="left", expand=True)
 
         lowkey_group = [lowkey_dropdown]
         set_widget_states(vars.lowkey_mode.get(), lowkey_group)
