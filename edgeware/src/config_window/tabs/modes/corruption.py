@@ -18,9 +18,7 @@
 import os
 from tkinter import (
     GROOVE,
-    RAISED,
     Button,
-    Checkbutton,
     Frame,
     Label,
     OptionMenu,
@@ -33,10 +31,10 @@ from config_window.utils import (
     clear_launches,
     set_widget_states,
 )
-from config_window.vars import Vars
 from pack import Pack
 from paths import Assets
 from PIL import ImageTk
+from settings import Vars
 from widgets.config_widgets import (
     ConfigDropdown,
     ConfigRow,

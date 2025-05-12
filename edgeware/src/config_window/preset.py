@@ -23,8 +23,8 @@ from json.decoder import JSONDecodeError
 from tkinter import BooleanVar, IntVar, StringVar, messagebox, simpledialog
 
 from config_window.utils import confirm_overwrite
-from config_window.vars import Vars
 from paths import Data
+from settings import Vars
 
 
 def list_presets() -> list[str]:

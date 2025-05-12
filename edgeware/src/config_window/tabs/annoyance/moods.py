@@ -33,8 +33,8 @@ from tkinter.font import Font
 from config_window.utils import (
     config,
 )
-from config_window.vars import Vars
 from pack import Pack
+from settings import Vars
 from ttkwidgets import CheckboxTreeview
 from widgets.scroll_frame import ScrollFrame
 

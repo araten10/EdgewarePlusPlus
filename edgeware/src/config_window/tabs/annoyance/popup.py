@@ -23,8 +23,8 @@ from config_window.utils import (
     config,
     set_widget_states,
 )
-from config_window.vars import Vars
 from screeninfo import Monitor, get_monitors
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

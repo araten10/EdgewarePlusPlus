@@ -69,12 +69,10 @@ from config_window.utils import (
     refresh,
     write_save,
 )
-from config_window.vars import Vars
 from pack import Pack
 from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, CustomAssets, Data
-from settings import load_default_config
-from widgets.tooltip import CreateToolTip
+from settings import Vars, load_default_config
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()

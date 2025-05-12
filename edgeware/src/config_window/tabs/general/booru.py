@@ -34,7 +34,7 @@ from config_window.utils import (
     reset_list,
     set_widget_states_with_colors,
 )
-from config_window.vars import Vars
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 
 

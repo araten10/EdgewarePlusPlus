@@ -32,7 +32,7 @@ from tkinter import (
 from typing import Tuple
 
 from config_window.utils import assign, set_widget_states
-from config_window.vars import ConfigVar
+from settings import ConfigVar
 
 PAD = 4
 
@@ -66,7 +66,7 @@ class ConfigDropdown(Frame):
         inner = Frame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
         menu = OptionMenu(inner, variable, *items.keys(), command=self.on_change)
-        menu.configure(width=9,highlightthickness= 0)
+        menu.configure(width=9, highlightthickness=0)
         menu.pack(side="left")
         self.label = Label(inner, wraplength=150, height=3, width=22)
         self.label.pack(side="left", fill="y")
