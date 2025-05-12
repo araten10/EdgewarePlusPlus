@@ -51,7 +51,7 @@ class Item:
     key: str
     schema: Callable
     var: Callable
-    setting: Callable
+    setting: Callable | None
 
 
 # fmt: off
@@ -59,15 +59,15 @@ CONFIG_ITEMS = {
     # Start
     "pack_path": Item("packPath", Schema(Union(str, None)), StringVar, str),
     "theme": Item("themeType", Schema(Union("Original", "Dark", "The One", "Ransom", "Goth", "Bimbo")), StringVar, str),
-    "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, bool),
+    "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, None),
     "startup_splash": Item("showLoadingFlair", BOOLEAN, BooleanVar, bool),
-    "run_on_save_quit": Item("runOnSaveQuit", BOOLEAN, BooleanVar, bool),
+    "run_on_save_quit": Item("runOnSaveQuit", BOOLEAN, BooleanVar, None),
     "desktop_icons": Item("desktopIcons", BOOLEAN, BooleanVar, bool),
-    "safe_mode": Item("safeMode", BOOLEAN, BooleanVar, bool),
-    "message_off": Item("messageOff", BOOLEAN, BooleanVar, bool),
+    "safe_mode": Item("safeMode", BOOLEAN, BooleanVar, None),
+    "message_off": Item("messageOff", BOOLEAN, BooleanVar, None),
     "global_panic_key": Item("globalPanicButton", STRING, StringVar, str),
     "panic_key": Item("panicButton", STRING, StringVar, str),
-    "preset_danger": Item("presetsDanger", BOOLEAN, BooleanVar, bool),
+    "preset_danger": Item("presetsDanger", BOOLEAN, BooleanVar, None),
 
     # Booru Downloader
     "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),
@@ -123,7 +123,7 @@ CONFIG_ITEMS = {
     "replace_threshold": Item("replaceThresh", NONNEGATIVE, IntVar, int),
     "drive_path": Item("drivePath", STRING, StringVar, str),
     "panic_disabled": Item("panicDisabled", BOOLEAN, BooleanVar, bool),
-    "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, bool),
+    "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None),
     "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool),
 
     # Basic Modes
@@ -164,8 +164,8 @@ CONFIG_ITEMS = {
 
     # Troubleshooting
     "toggle_hibernate_skip": Item("toggleHibSkip", BOOLEAN, BooleanVar, bool),
-    "toggle_internet": Item("toggleInternet", BOOLEAN, BooleanVar, bool),
-    "toggle_mood_set": Item("toggleMoodSet", BOOLEAN, BooleanVar, bool),
+    "toggle_internet": Item("toggleInternet", BOOLEAN, BooleanVar, None),
+    "toggle_mood_set": Item("toggleMoodSet", BOOLEAN, BooleanVar, None),
     "mpv_subprocess": Item("mpvSubprocess", BOOLEAN, BooleanVar, bool),
 }
 # fmt: on
@@ -214,6 +214,8 @@ class Settings:
 
     def load_settings(self) -> None:
         for name, item in CONFIG_ITEMS.items():
+            if not item.setting:
+                continue
             value = self.config[item.key]
             item.schema(value)
             setattr(self, name, item.setting(value))
