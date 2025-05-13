@@ -244,18 +244,9 @@ class Settings:
         self.wallpapers = list(ast.literal_eval(self.config["wallpaperDat"]).values())  # TODO: Can fail, store in a better way
 
         self.pack_path = Data.PACKS / self.pack_path if self.pack_path else DEFAULT_PACK_PATH
-
-        self.timeout_enabled = self.timeout_enabled or self.lowkey_mode
-        self.timeout = self.timeout if not self.lowkey_mode else self.delay
-        self.web_on_popup_close = self.web_on_popup_close and not self.lowkey_mode
         self.subliminal_chance = self.subliminal_chance if self.popup_subliminals else 0
         self.denial_chance = self.denial_chance if self.denial_mode else 0
-
         self.max_video = self.max_video if self.max_video_enabled else float("inf")
-
-        self.mitosis_mode = self.mitosis_mode or self.lowkey_mode
-        self.mitosis_strength = self.mitosis_strength if not self.lowkey_mode else 1
-
         self.hibernate_fix_wallpaper = self.hibernate_fix_wallpaper and self.hibernate_mode
 
         import os_utils  # Circular import
