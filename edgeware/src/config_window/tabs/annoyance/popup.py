@@ -238,3 +238,29 @@ class PopupTab(ScrollFrame):
         monitor_frame.pack(fill="x")
         for monitor in get_monitors():
             MonitorCheckbutton(monitor_frame, monitor).pack(fill="x", expand=1)
+
+        # Movement
+        Label(self.viewPort, text="Movement Mode", font=title_font, relief=GROOVE).pack(pady=2)
+
+        movement_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        movement_frame.pack(fill="x")
+
+        movement_chance_frame = Frame(movement_frame)
+        movement_chance_frame.pack(fill="x", side="left")
+        movement_chance = Scale(movement_chance_frame, label="Moving Chance", orient="horizontal", variable=vars.moving_chance, cursor="question_arrow")
+        movement_chance.pack(fill="x")
+        CreateToolTip(
+            movement_chance,
+            'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
+            "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
+        )
+        movement_direction = Checkbutton(movement_chance_frame, text="Random Direction", variable=vars.moving_random, cursor="question_arrow")
+        movement_direction.pack(fill="x")
+        CreateToolTip(movement_direction, "Makes moving popups move in a random direction rather than the static diagonal one.")
+
+        movement_speed_frame = Frame(movement_frame)
+        movement_speed_frame.pack(fill="x", side="left")
+        Scale(movement_speed_frame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed).pack(fill="x")
+        Button(
+            movement_speed_frame, text="Manual speed...", command=lambda: assign(vars.moving_speed, simpledialog.askinteger("Manual Speed", prompt="[1-15]: "))
+        ).pack(fill="x")

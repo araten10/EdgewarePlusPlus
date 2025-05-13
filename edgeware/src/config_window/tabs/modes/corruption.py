@@ -47,7 +47,7 @@ from widgets.tooltip import CreateToolTip
 
 INTRO_TEXT = 'Corruption is a highly specialized mode that packs have to explicitly support. When corruption is enabled, it will turn off and on moods based on a trigger set down below. For example, a pack might start off with only vanilla moods but get more fetish-oriented every 10 popups opened.\n\n"Full Permissions Mode" can be enabled to allow the pack to change Edgeware++ settings on top of also changing moods. While this allows for very unique packs with lots of changes, this can also be potentially dangerous. Only turn it on for packs you trust!'
 TRIGGER_TEXT = 'Triggers are the goals that define how corruption changes over time. Whenever the selected condition is reached, they tell Edgeware++ to advance to the next "corruption level". Each setting is per level transition, *not* the total time it takes for corruption to finish.\n\nFor example, let\'s say you set the trigger type to "timed" and the time to 60 seconds. That means that every 60 seconds you run Edgeware++ the corruption level will increase, changing the current moods available.\n\nAdditionally, you can change the behaviour of how Edgeware++ transitions from level to level. For example, "Abrupt" will immediately change to the next moods when the trigger condition is met, whereas "Normal" will gradually increase the chance of pulling media from the next corruption level up until the trigger condition.'
-
+PATH_TEXT = 'Here is a chart that shows a basic view of the path that the currently loaded path will take during corruption. Consider this a spoiler warning, as sometimes the excitement comes from not knowing what will happen~\n\nIf nothing is displaying here, the pack likely doesn\'t support corruption. (There\'s also a chance that corruption may be configured incorrectly in the pack, or there\'s currently a bug in the config window- hopefully not..!)'
 
 class CorruptionModeTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
@@ -179,7 +179,7 @@ class CorruptionModeTab(ScrollFrame):
         )
 
         # Corruption path
-        corruption_path_frame = ConfigSection(self.viewPort, "Corruption Path")
+        corruption_path_frame = ConfigSection(self.viewPort, "Corruption Path", PATH_TEXT)
         corruption_path_frame.pack()
 
         path_tree_frame = Frame(corruption_path_frame)
@@ -195,6 +195,7 @@ class CorruptionModeTab(ScrollFrame):
         path_tree.heading("config", text="CONFIG", anchor="w")
         path_tree.column("config", anchor="w", stretch=True)
 
+        #TODO: x scrollbar doesn't seem to work- see if possible to fix so config is more easily visible
         path_scrollbar_x = ttk.Scrollbar(path_tree_frame, orient="horizontal", command=path_tree.xview)
         path_scrollbar_y = ttk.Scrollbar(corruption_path_frame, orient="vertical", command=path_tree.yview)
         path_tree.configure(yscroll=path_scrollbar_y.set, xscroll=path_scrollbar_x.set)
