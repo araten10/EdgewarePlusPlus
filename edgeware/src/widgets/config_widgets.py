@@ -59,16 +59,20 @@ class ConfigScale(Frame):
 
 
 class ConfigDropdown(Frame):
-    def __init__(self, master: Misc, variable: StringVar, items: dict[str, str]) -> None:
+    def __init__(self, master: Misc, variable: StringVar, items: dict[str, str], height: int | None = None, width: int | None = None, wrap: int | None = None) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
         self.items = items
+        height = height if height else 3
+        width = width if width else 22
+        wrap = wrap if wrap else 150
+
 
         inner = Frame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
         menu = OptionMenu(inner, variable, *items.keys(), command=self.on_change)
         menu.configure(width=9, highlightthickness=0)
         menu.pack(side="left")
-        self.label = Label(inner, wraplength=150, height=3, width=22)
+        self.label = Label(inner, wraplength=wrap, height=height, width=width)
         self.label.pack(side="left", fill="y")
 
         self.on_change(variable.get())
