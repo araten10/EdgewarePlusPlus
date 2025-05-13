@@ -23,10 +23,10 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from tkinter import BooleanVar, IntVar, StringVar
-from typing import Callable
+from typing import Callable, Tuple
 
 from paths import DEFAULT_PACK_PATH, Assets, Data, Process
-from voluptuous import All, Length, Range, Schema, Union
+from voluptuous import All, Range, Schema, Union
 
 NONNEGATIVE = Schema(All(int, Range(min=0)))
 PERCENTAGE = Schema(All(int, Range(min=0, max=100)))
@@ -50,8 +50,13 @@ def negation(value: bool) -> bool:
 class Item:
     key: str
     schema: Callable
-    var: Callable
+    var: Callable | None
     setting: Callable | None
+
+    # TODO: Find a better solution for these corruption variables
+    block: bool = False
+    danger: bool = False
+    safe_range: Tuple[int | None, int | None] | None = None  # When the setting has a value outside the given range, it is considered dangerous (min, max)
 
 
 # fmt: off
@@ -59,22 +64,22 @@ CONFIG_ITEMS = {
     # Start
     "pack_path": Item("packPath", Schema(Union(str, None)), StringVar, str),
     "theme": Item("themeType", Schema(Union("Original", "Dark", "The One", "Ransom", "Goth", "Bimbo")), StringVar, str),
-    "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, None),
-    "startup_splash": Item("showLoadingFlair", BOOLEAN, BooleanVar, bool),
-    "run_on_save_quit": Item("runOnSaveQuit", BOOLEAN, BooleanVar, None),
-    "desktop_icons": Item("desktopIcons", BOOLEAN, BooleanVar, bool),
-    "safe_mode": Item("safeMode", BOOLEAN, BooleanVar, None),
-    "message_off": Item("messageOff", BOOLEAN, BooleanVar, None),
-    "global_panic_key": Item("globalPanicButton", STRING, StringVar, str),
-    "panic_key": Item("panicButton", STRING, StringVar, str),
-    "preset_danger": Item("presetsDanger", BOOLEAN, BooleanVar, None),
+    "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, None, block=True),
+    "startup_splash": Item("showLoadingFlair", BOOLEAN, BooleanVar, bool, block=True),
+    "run_on_save_quit": Item("runOnSaveQuit", BOOLEAN, BooleanVar, None, block=True),
+    "desktop_icons": Item("desktopIcons", BOOLEAN, BooleanVar, bool, block=True),
+    "safe_mode": Item("safeMode", BOOLEAN, BooleanVar, None, block=True),
+    "message_off": Item("messageOff", BOOLEAN, BooleanVar, None, block=True),
+    "global_panic_key": Item("globalPanicButton", STRING, StringVar, str, block=True),  # while disabling panic could be used for danger-chasing fetishists, changing the hotkey serves little purpose
+    "panic_key": Item("panicButton", STRING, StringVar, str, block=True),
+    "preset_danger": Item("presetsDanger", BOOLEAN, BooleanVar, None, block=True),
 
     # Booru Downloader
     "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),
     "min_score": Item("booruMinScore", Schema(int), IntVar, int),
 
     # Popups
-    "delay": Item("delay", NONNEGATIVE, IntVar, int),
+    "delay": Item("delay", NONNEGATIVE, IntVar, int, safe_range=(2000, None)),
     "image_chance": Item("popupMod", PERCENTAGE, IntVar, int),
     "web_chance": Item("webMod", PERCENTAGE, IntVar, int),
     "prompt_chance": Item("promptMod", PERCENTAGE, IntVar, int),
@@ -82,7 +87,7 @@ CONFIG_ITEMS = {
     "opacity": Item("lkScaling", PERCENTAGE, IntVar, to_float),
     "timeout_enabled": Item("timeoutPopups", BOOLEAN, BooleanVar, bool),
     "timeout": Item("popupTimeout", NONNEGATIVE, IntVar, s_to_ms),
-    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool),
+    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # opens up web popup on popup close, this one could be cut from this list as it's not listed as dangerous in config but could lead to bad performance
     "buttonless": Item("buttonless", BOOLEAN, BooleanVar, bool),
     "single_mode": Item("singleMode", BOOLEAN, BooleanVar, bool),
     "popup_subliminals": Item("popupSubliminals", BOOLEAN, BooleanVar, bool),
@@ -91,6 +96,7 @@ CONFIG_ITEMS = {
     "max_subliminals": Item("maxSubliminals", NONNEGATIVE, IntVar, int),
     "denial_mode": Item("denialMode", BOOLEAN, BooleanVar, bool),
     "denial_chance": Item("denialChance", PERCENTAGE, IntVar, int),
+    "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
 
     # Audio/Video
     "audio_chance": Item("audioMod", PERCENTAGE, IntVar, int),
@@ -112,19 +118,20 @@ CONFIG_ITEMS = {
     "notification_image_chance": Item("notificationImageChance", PERCENTAGE, IntVar, int),
 
     # Wallpaper
-    "rotate_wallpaper": Item("rotateWallpaper", BOOLEAN, BooleanVar, bool),
+    "rotate_wallpaper": Item("rotateWallpaper", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
     "wallpaper_timer": Item("wallpaperTimer", NONNEGATIVE, IntVar, s_to_ms),
     "wallpaper_variance": Item("wallpaperVariance", NONNEGATIVE, IntVar, s_to_ms),
 
     # Dangerous Settings
-    "fill_drive": Item("fill", BOOLEAN, BooleanVar, bool),
-    "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: int(value) * 10),
-    "replace_images": Item("replace", BOOLEAN, BooleanVar, bool),
-    "replace_threshold": Item("replaceThresh", NONNEGATIVE, IntVar, int),
-    "drive_path": Item("drivePath", STRING, StringVar, str),
-    "panic_disabled": Item("panicDisabled", BOOLEAN, BooleanVar, bool),
-    "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None),
-    "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool),
+    "drive_avoid_list": Item("avoidList", STRING, None, lambda value: str(value).split(">"), block=True),
+    "fill_drive": Item("fill", BOOLEAN, BooleanVar, bool, danger=True),
+    "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: int(value) * 10, danger=True),
+    "replace_images": Item("replace", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "replace_threshold": Item("replaceThresh", NONNEGATIVE, IntVar, int, block=True),  # Corruption won't work
+    "drive_path": Item("drivePath", STRING, StringVar, str, block=True),  # We can't know what paths exist and they look different on Linux and Windows
+    "panic_disabled": Item("panicDisabled", BOOLEAN, BooleanVar, bool, danger=True),
+    "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None, block=True),
+    "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
 
     # Basic Modes
     "lowkey_mode": Item("lkToggle", BOOLEAN, BooleanVar, bool),
@@ -134,24 +141,24 @@ CONFIG_ITEMS = {
     "moving_speed": Item("movingSpeed", NONNEGATIVE, IntVar, int),
 
     # Dangerous Modes
-    "timer_mode": Item("timerMode", BOOLEAN, BooleanVar, bool),
-    "timer_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: int(value) * 60 * 1000),
-    "timer_password": Item("safeword", STRING, StringVar, str),
-    "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool),
+    "timer_mode": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "timer_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: int(value) * 60 * 1000, block=True),  # Corruption won't work
+    "timer_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
+    "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption may not work
     "mitosis_strength": Item("mitosisStrength", NONNEGATIVE, IntVar, int),
 
     # Hibernate
-    "hibernate_mode": Item("hibernateMode", BOOLEAN, BooleanVar, bool),
+    "hibernate_mode": Item("hibernateMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
     "hibernate_fix_wallpaper": Item("fixWallpaper", BOOLEAN, BooleanVar, bool),
     "hibernate_type": Item("hibernateType", Schema(Union("Original", "Spaced", "Glitch", "Ramp", "Pump-Scare")), StringVar, str),
     "hibernate_delay_min": Item("hibernateMin", NONNEGATIVE, IntVar, s_to_ms),
-    "hibernate_delay_max": Item("hibernateMax", NONNEGATIVE, IntVar, s_to_ms),
-    "hibernate_activity": Item("wakeupActivity", NONNEGATIVE, IntVar, int),
+    "hibernate_delay_max": Item("hibernateMax", NONNEGATIVE, IntVar, s_to_ms, safe_range=(10, None)),
+    "hibernate_activity": Item("wakeupActivity", NONNEGATIVE, IntVar, int, safe_range=(0, 35)),
     "hibernate_activity_length": Item("hibernateLength", NONNEGATIVE, IntVar, s_to_ms),
 
     # Corruption
-    "corruption_mode": Item("corruptionMode", BOOLEAN, BooleanVar, bool),
-    "corruption_full": Item("corruptionFullPerm", BOOLEAN, BooleanVar, bool),
+    "corruption_mode": Item("corruptionMode", BOOLEAN, BooleanVar, bool, block=True),  # if you're turning off corruption mode with corruption just make it the final level lmao
+    "corruption_full": Item("corruptionFullPerm", BOOLEAN, BooleanVar, bool, block=True),
     "corruption_trigger": Item("corruptionTrigger", Schema(Union("Timed", "Popup", "Launch")), StringVar, str),
     "corruption_fade": Item("corruptionFadeType", Schema(Union("Normal", "Abrupt")), StringVar, str),
     "corruption_time": Item("corruptionTime", NONNEGATIVE, IntVar, s_to_ms),
@@ -160,13 +167,13 @@ CONFIG_ITEMS = {
     "corruption_wallpaper": Item("corruptionWallpaperCycle", BOOLEAN, BooleanVar, negation),
     "corruption_themes": Item("corruptionThemeCycle", BOOLEAN, BooleanVar, negation),
     "corruption_purity": Item("corruptionPurityMode", BOOLEAN, BooleanVar, bool),
-    "corruption_dev_mode": Item("corruptionDevMode", BOOLEAN, BooleanVar, bool),
+    "corruption_dev_mode": Item("corruptionDevMode", BOOLEAN, BooleanVar, bool, block=True),
 
     # Troubleshooting
-    "toggle_hibernate_skip": Item("toggleHibSkip", BOOLEAN, BooleanVar, bool),
-    "toggle_internet": Item("toggleInternet", BOOLEAN, BooleanVar, None),
-    "toggle_mood_set": Item("toggleMoodSet", BOOLEAN, BooleanVar, None),
-    "mpv_subprocess": Item("mpvSubprocess", BOOLEAN, BooleanVar, bool),
+    "toggle_hibernate_skip": Item("toggleHibSkip", BOOLEAN, BooleanVar, bool, block=True),
+    "toggle_internet": Item("toggleInternet", BOOLEAN, BooleanVar, None, block=True),
+    "toggle_mood_set": Item("toggleMoodSet", BOOLEAN, BooleanVar, None, block=True),
+    "mpv_subprocess": Item("mpvSubprocess", BOOLEAN, BooleanVar, bool, block=True),
 }
 # fmt: on
 
@@ -207,10 +214,22 @@ def load_default_config() -> dict:
 
 
 class Settings:
+    corruption_block = []
+    corruption_danger = []
+    corruption_safe_range = {}
+
     def __init__(self) -> None:
         self.config = load_config()
         self.load_settings()
         logging.info(f"Config loaded: {self.config}")
+
+        for item in CONFIG_ITEMS.values():
+            if item.block:
+                self.corruption_block.append(item.key)
+            if item.danger:
+                self.corruption_danger.append(item.key)
+            if item.safe_range:
+                self.corruption_safe_range[item.key] = item.safe_range
 
     def load_settings(self) -> None:
         for name, item in CONFIG_ITEMS.items():
@@ -222,9 +241,7 @@ class Settings:
 
         # TODO: Include these in CONFIG_ITEMS?
         self.booru_tags = self.config["tagList"].replace(">", " ")  # TODO: Store in a better way
-        self.disabled_monitors = self.config["disabledMonitors"]
         self.wallpapers = list(ast.literal_eval(self.config["wallpaperDat"]).values())  # TODO: Can fail, store in a better way
-        self.drive_avoid_list = self.config["avoidList"].split(">")  # TODO: Store in a better way
 
         self.pack_path = Data.PACKS / self.pack_path if self.pack_path else DEFAULT_PACK_PATH
 
@@ -257,6 +274,8 @@ class Vars:
 
         self.config["packPath"] = self.config["packPath"] or "default"
         for name, item in CONFIG_ITEMS.items():
+            if not item.var:
+                continue
             value = self.config[item.key]
             item.schema(value)
             setattr(self, name, self.make(item.var, item.key))
