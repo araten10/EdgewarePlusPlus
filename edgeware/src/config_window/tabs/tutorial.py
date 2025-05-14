@@ -16,15 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from pathlib import Path
-from tkinter import (
-    Frame,
-    Label,
-    Message,
-    Tk,
-    Toplevel,
-    font,
-    ttk,
-)
+from tkinter import Event, Frame, Label, Message, Tk, Toplevel, font, ttk
 from tkinter.font import Font
 
 from config_window.utils import (
@@ -41,7 +33,7 @@ HIBERNATE_TYPE_TEXT = "Original: The original hibernate type that came with base
 FILE_TEXT = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the "total logs in folder" stat will always display as "1".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a "moods json file", which is tapped into when selecting what moods you want to see in the "Pack Info" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want Edgeware++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.'
 
 
-def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_font: Font) -> None:
+def open_tutorial(parent: Tk, style: ttk.Style, window_font: Font, title_font: Font) -> None:
     root = Toplevel(parent)
     root.geometry("740x900")
     root.focus_force()
@@ -95,7 +87,7 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
     tutorial_notebook.add(tab_fix, text="")
     tutorial_notebook.hide(tab_fix)
 
-    def frame_workaround(event) -> None:
+    def frame_workaround(event: Event) -> None:
         target_tab = tutorial_notebook.tk.call(tutorial_notebook._w, "identify", "tab", event.x, event.y)
         tutorial_notebook.select(tab_fix)
         tutorial_notebook.hide(tab_fix)

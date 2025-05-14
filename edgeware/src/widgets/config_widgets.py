@@ -39,7 +39,10 @@ PAD = 4
 
 def set_enabled_when(widget: Misc, enabled: Tuple[ConfigVar, int | bool | str]) -> None:
     toggle, value = enabled
-    set_state = lambda *args: set_widget_states(toggle.get() == value, [widget])
+
+    def set_state(*args) -> None:
+        set_widget_states(toggle.get() == value, [widget])
+
     set_state()
     toggle.trace_add("write", set_state)
 
@@ -56,10 +59,7 @@ class ConfigScale(Frame):
         )
 
         if enabled:
-            toggle, value = enabled
-            set_state = lambda *args: set_widget_states(toggle.get() == value, [self])
-            set_state()
-            toggle.trace_add("write", set_state)
+            set_enabled_when(self, enabled)
 
     def pack(self) -> None:
         super().pack(padx=PAD, pady=PAD, side="left", expand=True, fill="x")

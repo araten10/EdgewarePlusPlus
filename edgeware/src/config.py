@@ -31,6 +31,7 @@ from tkinter import (
     Button,
     Canvas,
     Checkbutton,
+    Event,
     Frame,
     Label,
     Listbox,
@@ -152,11 +153,11 @@ class Config(Tk):
         last_tab = notebook.index(notebook.select())  # get initial tab to prevent switching to tutorial
         notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self))
 
-        def tutorial_container(event, self) -> None:
+        def tutorial_container(event: Event, root: Tk) -> None:
             nonlocal last_tab
             # print(event.widget.select())
             if event.widget.select() == ".tutorial":
-                open_tutorial(event, self, style, window_font, title_font)
+                open_tutorial(root, style, window_font, title_font)
                 notebook.select(last_tab)
             else:
                 last_tab = notebook.index(notebook.select())
