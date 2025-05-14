@@ -36,10 +36,10 @@ from config_window.utils import (
     config,
     set_widget_states,
 )
-from config_window.vars import Vars
 from pack import Pack
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
@@ -47,7 +47,7 @@ ROTATE_TEXT = "Turning on wallpaper rotate disables built-in pack wallpapers, al
 PANIC_TEXT = "This is the panic wallpaper, make sure to set it to your default wallpaper ASAP! Otherwise quitting edgeware via panic will leave you with a nice and generic windows one instead."
 
 
-def update_max(obj, value: int):
+def update_max(obj, value: int) -> None:
     obj.configure(to=int(value))
 
 

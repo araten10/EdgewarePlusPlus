@@ -21,7 +21,6 @@ from tkinter import (
     GROOVE,
     RAISED,
     Button,
-    Checkbutton,
     Frame,
     Label,
     messagebox,
@@ -31,9 +30,14 @@ from tkinter.font import Font
 import os_utils
 import utils
 from config_window.utils import log_file
-from config_window.vars import Vars
 from pack import Pack
 from paths import Data
+from settings import Vars
+from widgets.config_widgets import (
+    ConfigRow,
+    ConfigSection,
+    ConfigToggle,
+)
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
@@ -42,7 +46,7 @@ def get_log_number() -> int:
     return len(os.listdir(Data.LOGS)) if os.path.exists(Data.LOGS) else 0
 
 
-def delete_logs(log_number_label: Label):
+def delete_logs(log_number_label: Label) -> None:
     try:
         if not messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete all logs? There are currently {get_log_number()}.", icon="warning"):
             return
@@ -66,24 +70,20 @@ class TroubleshootingTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
         super().__init__()
 
-        Label(self.viewPort, text="Troubleshooting", font=title_font, relief=GROOVE).pack(pady=2)
+        troubleshooting_section = ConfigSection(self.viewPort, "Troubleshooting")
+        troubleshooting_section.pack()
 
-        troubleshooting_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        troubleshooting_frame.pack(fill="x")
-
-        troubleshooting_col_1 = Frame(troubleshooting_frame)
-        troubleshooting_col_1.pack(fill="both", side="left", expand=1)
-        hibernate_skip_toggle = Checkbutton(
-            troubleshooting_col_1, text="Toggle Tray Hibernate Skip", variable=vars.toggle_hibernate_skip, cursor="question_arrow"
-        )
-        hibernate_skip_toggle.pack(fill="x", side="top")
+        troubleshooting_row_1 = ConfigRow(troubleshooting_section)
+        troubleshooting_row_1.pack()
+        hibernate_skip_toggle = ConfigToggle(troubleshooting_row_1, "Toggle Tray Hibernate Skip", variable=vars.toggle_hibernate_skip, cursor="question_arrow")
+        hibernate_skip_toggle.pack()
         CreateToolTip(
             hibernate_skip_toggle,
             "Want to test out how hibernate mode works with your current settings, and hate waiting for the minimum time? Me too!\n\n"
             "This adds a feature in the tray that allows you to skip to the start of hibernate.",
         )
-        mood_settings_toggle = Checkbutton(troubleshooting_col_1, text="Turn Off Mood Settings", variable=vars.toggle_mood_set, cursor="question_arrow")
-        mood_settings_toggle.pack(fill="x", side="top")
+        mood_settings_toggle = ConfigToggle(troubleshooting_row_1, "Turn Off Mood Settings", variable=vars.toggle_mood_set, cursor="question_arrow")
+        mood_settings_toggle.pack()
         CreateToolTip(
             mood_settings_toggle,
             "If your pack does not have a 'info.json' file with a valid pack name, it will generate a mood setting file based on a unique identifier.\n\n"
@@ -95,27 +95,24 @@ class TroubleshootingTab(ScrollFrame):
             " deal with all this mood business, you can disable the mood saving feature here.",
         )
 
-        troubleshooting_col_2 = Frame(troubleshooting_frame)
-        troubleshooting_col_2.pack(fill="both", side="left", expand=1)
-        github_connection_toggle = Checkbutton(
-            troubleshooting_col_2, text="Disable Connection to GitHub", variable=vars.toggle_internet, cursor="question_arrow"
-        )
-        github_connection_toggle.pack(fill="x", side="top")
+        troubleshooting_row_2 = ConfigRow(troubleshooting_section)
+        troubleshooting_row_2.pack()
+        github_connection_toggle = ConfigToggle(troubleshooting_row_2, "Disable Connection to GitHub", variable=vars.toggle_internet, cursor="question_arrow")
+        github_connection_toggle.pack()
         CreateToolTip(
             github_connection_toggle,
             "In some cases, having a slow internet connection can cause the config window to delay opening for a long time.\n\n"
             "Edgeware connects to GitHub just to check if there's a new update, but sometimes even this can take a while.\n\n"
             "If you have noticed this, try enabling this setting- it will disable all connections to GitHub on future launches.",
         )
-
-        mpv_subprocess_toggle = Checkbutton(
-            troubleshooting_col_2,
-            text="Run mpv in a Subprocess (Linux Only)",
+        mpv_subprocess_toggle = ConfigToggle(
+            troubleshooting_row_2,
+            "Run mpv in a Subprocess (Linux Only)",
             variable=vars.mpv_subprocess,
             cursor="question_arrow",
             state=("normal" if os_utils.is_linux() else "disabled"),
         )
-        mpv_subprocess_toggle.pack(fill="x", side="top")
+        mpv_subprocess_toggle.pack()
         CreateToolTip(
             mpv_subprocess_toggle,
             "By default, the video player of Edgeware++, mpv, is ran in a subprocess to fix a crash resulting from an X error when a popup"

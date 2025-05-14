@@ -41,7 +41,7 @@ class SubliminalMessagePopup(Toplevel):
 
         monitor = utils.random_monitor(settings)
 
-        font = (self.theme.font, min(monitor.width, monitor.height) // 10)
+        font = (self.theme.font[0], min(monitor.width, monitor.height) // 10)
         label = Label(
             self,
             text=self.subliminal_message,

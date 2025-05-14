@@ -16,20 +16,24 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from tkinter import (
-    GROOVE,
-    RAISED,
-    Checkbutton,
     Entry,
     Frame,
     Label,
-    Scale,
 )
 from tkinter.font import Font
 
-from config_window.utils import set_widget_states
-from config_window.vars import Vars
+from settings import Vars
+from widgets.config_widgets import (
+    ConfigRow,
+    ConfigScale,
+    ConfigSection,
+    ConfigToggle,
+    set_enabled_when,
+)
 from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
+
+TIMER_TEXT = 'Makes it so you cannot panic for a specified duration, essentially forcing you to endure the payload until the timer is up.\n\nA safeword can be used if you wish to still use panic during this time. It is recommended that you generate one via a password generator/keysmash and save it somewhere easily accessible; not only does this help in emergency situations where you need to turn off Edgeware++, but also makes it harder to memorize so the "fetishistic danger" remains.'
+MITOSIS_TEXT = "When a popup is closed, more popups will spawn in its place depending on the mitosis strength.\n\nWhile not dangerous by itself, this can easily cause performance issues and other problems if the popup delay is set too low and mitosis strength too high. It is generally safe to experiment with this at slower popup intervals, but make sure you know what you're doing before increasing it too high."
 
 
 class DangerousModesTab(ScrollFrame):
@@ -37,55 +41,26 @@ class DangerousModesTab(ScrollFrame):
         super().__init__()
 
         # Timer
-        Label(self.viewPort, text="Timer Settings", font=title_font, relief=GROOVE).pack(pady=2)
+        timer_section = ConfigSection(self.viewPort, "Timer Mode", TIMER_TEXT)
+        timer_section.pack()
 
-        timer_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        timer_frame.pack(fill="x")
-
-        timer_toggle = Checkbutton(
-            timer_frame,
-            text="Timer Mode",
-            variable=vars.timer_mode,
-            command=lambda: set_widget_states(vars.timer_mode.get(), timer_group),
-            cursor="question_arrow",
-        )
-        timer_toggle.pack(side="left", fill="x", padx=5)
-        CreateToolTip(
-            timer_toggle,
-            'Enables "Run on Startup" and disables the Panic function until the time limit is reached.\n\n'
-            '"Safeword" allows you to set a password to re-enable Panic, if need be.\n\n'
-            "Note: Run on Startup does not need to stay enabled for Timer Mode to work. However, disabling it may cause "
-            "instability when running Edgeware multiple times without changing config settings.",
-        )
-        timer_slider = Scale(timer_frame, label="Timer Time (mins)", from_=1, to=1440, orient="horizontal", variable=vars.timer_time)
-        timer_slider.pack(side="left", fill="x", expand=1, padx=10)
-
-        safeword_frame = Frame(timer_frame)
-        safeword_frame.pack(side="right", fill="x", padx=5)
+        timer_row = ConfigRow(timer_section)
+        timer_row.pack()
+        ConfigToggle(timer_row, "Enable Timer Mode", variable=vars.timer_mode).pack()
+        safeword_frame = Frame(timer_row)
+        safeword_frame.pack(side="left", expand=True)
         Label(safeword_frame, text="Emergency Safeword").pack()
         timer_safeword = Entry(safeword_frame, show="*", textvariable=vars.timer_password)
         timer_safeword.pack(expand=1, fill="both")
+        set_enabled_when(timer_safeword, enabled=(vars.timer_mode, True))
 
-        timer_group = [timer_safeword, timer_slider]
-        set_widget_states(vars.timer_mode.get(), timer_group)
+        ConfigScale(timer_section, "Timer Lockout Time (minutes)", vars.timer_time, 1, 1440, enabled=(vars.timer_mode, True)).pack()
 
         # Mitosis
-        Label(self.viewPort, text="Mitosis Mode", font=title_font, relief=GROOVE).pack(pady=2)
+        mitosis_section = ConfigSection(self.viewPort, "Mitosis Mode", MITOSIS_TEXT)
+        mitosis_section.pack()
 
-        mitosis_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        mitosis_frame.pack(fill="x")
-
-        mitosis_toggle = Checkbutton(
-            mitosis_frame,
-            text="Mitosis Mode",
-            variable=vars.mitosis_mode,
-            command=lambda: set_widget_states(vars.mitosis_mode.get(), mitosis_group),
-            cursor="question_arrow",
-        )
-        mitosis_toggle.pack(side="left", fill="x", padx=5)
-        CreateToolTip(mitosis_toggle, "When a popup is closed, more popups will spawn in it's place based on the mitosis strength.")
-        mitosis_strength = Scale(mitosis_frame, label="Mitosis Strength", orient="horizontal", from_=2, to=10, variable=vars.mitosis_strength)
-        mitosis_strength.pack(side="left", fill="x", expand=1, padx=10)
-
-        mitosis_group = [mitosis_strength]
-        set_widget_states(vars.mitosis_mode.get(), mitosis_group)
+        mitosis_row = ConfigRow(mitosis_section)
+        mitosis_row.pack()
+        ConfigToggle(mitosis_row, "Enable Mitosis Mode", variable=vars.mitosis_mode).pack()
+        ConfigScale(mitosis_section, "Mitosis Strength (number of popups)", vars.mitosis_strength, 2, 10, enabled=(vars.mitosis_mode, True)).pack()

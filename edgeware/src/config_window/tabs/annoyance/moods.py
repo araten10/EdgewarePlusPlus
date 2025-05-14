@@ -33,8 +33,8 @@ from tkinter.font import Font
 from config_window.utils import (
     config,
 )
-from config_window.vars import Vars
 from pack import Pack
+from settings import Vars
 from ttkwidgets import CheckboxTreeview
 from widgets.scroll_frame import ScrollFrame
 
@@ -69,7 +69,7 @@ class MoodsTreeview(CheckboxTreeview):
         self.tag_configure("disabled", foreground="grey")
         self.edgeware_pack = pack
 
-    def _box_click(self, event):
+    def _box_click(self, event) -> None:
         """Check or uncheck box when clicked."""
         x, y, widget = event.x, event.y, event.widget
         elem = widget.identify("element", x, y)

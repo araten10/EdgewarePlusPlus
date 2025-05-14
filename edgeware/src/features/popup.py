@@ -143,13 +143,13 @@ class Popup(Toplevel):
 
     def try_denial_text(self) -> None:
         if self.denial:
-            label = Label(self, text=self.pack.random_denial(), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg)
+            label = Label(self, text=self.pack.random_denial(), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
             label.place(relx=0.5, rely=0.5, anchor="c")
 
     def try_caption(self) -> None:
         caption = self.pack.random_caption(self.media)
         if self.settings.captions_in_popups and caption:
-            label = Label(self, text=caption, wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg)
+            label = Label(self, text=caption, wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
             label.place(x=5, y=5)
 
     def try_corruption_dev(self) -> None:
@@ -180,6 +180,7 @@ class Popup(Toplevel):
                 bg=self.theme.bg,
                 activeforeground=self.theme.fg,
                 activebackground=self.theme.bg,
+                font=self.theme.font[0] + " " + str(self.theme.font[1]),
             )
             button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 

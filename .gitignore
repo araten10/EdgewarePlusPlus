@@ -166,7 +166,7 @@ cython_debug/
 edgeware/config.sh
 edgeware/edgeware.sh
 edgeware/panic.sh
-edgeware/data/*
+edgeware/data/
 edgeware/config.pyw
 edgeware/edgeware.pyw
 edgeware/panic.pyw

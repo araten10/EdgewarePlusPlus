@@ -23,13 +23,12 @@ import subprocess
 import sys
 import urllib
 from pathlib import Path
-from tkinter import BooleanVar, Frame, IntVar, Label, Listbox, StringVar, Widget, messagebox, simpledialog
+from tkinter import BooleanVar, IntVar, Listbox, StringVar, TclError, Widget, messagebox, simpledialog
 
 import os_utils
 import utils
-from config_window.vars import Vars
 from paths import Data, Process
-from settings import load_config
+from settings import Vars, load_config
 
 BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"
 
@@ -103,7 +102,7 @@ def write_save(vars: Vars, exit_at_end: bool = False) -> None:
         messagebox.showinfo("Success!", "Settings saved successfully!")
 
 
-def assign(obj: StringVar | IntVar | BooleanVar, var: str | int | bool):
+def assign(obj: StringVar | IntVar | BooleanVar, var: str | int | bool) -> None:
     try:
         obj.set(var)
     except Exception as e:
@@ -168,7 +167,7 @@ def safe_check(vars: Vars) -> bool:
     return True
 
 
-def clear_launches(confirmation: bool):
+def clear_launches(confirmation: bool) -> None:
     try:
         if os.path.exists(Data.CORRUPTION_LAUNCHES):
             os.remove(Data.CORRUPTION_LAUNCHES)
@@ -190,14 +189,14 @@ def clear_launches(confirmation: bool):
         logging.warning(f"could not delete the corruption launches file. {e}")
 
 
-def add_list(tk_list_obj: Listbox, key: str, title: str, text: str):
+def add_list(tk_list_obj: Listbox, key: str, title: str, text: str) -> None:
     name = simpledialog.askstring(title, text)
     if name != "" and name is not None:
         config[key] = f"{config[key]}>{name}"
         tk_list_obj.insert(2, name)
 
 
-def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
+def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str) -> None:
     index = int(tk_list_obj.curselection()[0])
     item_name = tk_list_obj.get(index)
     if index > 0:
@@ -207,7 +206,7 @@ def remove_list(tk_list_obj: Listbox, key: str, title: str, text: str):
         messagebox.showwarning(title, text)
 
 
-def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str):
+def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str) -> None:
     index = int(tk_list_obj.curselection()[0])
     item_name = tk_list_obj.get(index)
     print(config[key])
@@ -223,7 +222,7 @@ def remove_list_(tk_list_obj: Listbox, key: str, title: str, text: str):
         messagebox.showwarning(title, text)
 
 
-def reset_list(tk_list_obj: Listbox, key: str, default):
+def reset_list(tk_list_obj: Listbox, key: str, default: str) -> None:
     try:
         tk_list_obj.delete(0, 999)
     except Exception as e:
@@ -254,11 +253,19 @@ def set_widget_states(state: bool, widgets: list[Widget], demo: bool = False) ->
 
 def set_widget_states_with_colors(state: bool, widgets: list[Widget], color_on: str, color_off: str) -> None:
     for widget in widgets:
-        if not (isinstance(widget, Frame) or isinstance(widget, Label)):
-            widget.configure(state=("normal" if state else "disabled"))
-        widget.configure(bg=(color_on if state else color_off))
+        for child in [widget, *all_children(widget)]:
+            # TODO: Better way to check if state and bg exist as options
+            try:
+                child.configure(state=("normal" if state else "disabled"))
+            except TclError:
+                pass
+
+            try:
+                child.configure(bg=(color_on if state else color_off))
+            except TclError:
+                pass
 
 
-def refresh():
+def refresh() -> None:
     subprocess.Popen([sys.executable, Process.CONFIG])
     sys.exit()

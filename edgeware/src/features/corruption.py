@@ -21,7 +21,6 @@ import time
 from tkinter import Tk, messagebox
 
 import os_utils
-from features.corruption_config import CorruptionConfig
 from pack import Pack
 from paths import Data
 from roll import roll
@@ -37,10 +36,10 @@ def corruption_danger_check(settings: Settings, pack: Pack) -> None:
     for level in pack.corruption_levels:
         if level.config is not None:
             for key, value in level.config.items():
-                if key in CorruptionConfig.DANGEROUS and key not in dangers:
+                if key in settings.corruption_danger and key not in dangers:
                     dangers.append(key)
 
-                range = CorruptionConfig.SAFE_RANGE.get(key)
+                range = settings.corruption_safe_range.get(key)
                 if range:
                     min, max = range
                     if min and value < min:
@@ -74,7 +73,7 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
 
     if settings.corruption_full:
         for key, value in level.config.items():
-            if key in CorruptionConfig.BLACKLIST or (not settings.corruption_themes and key == "themeType"):
+            if key in settings.corruption_block or (not settings.corruption_themes and key == "themeType"):
                 continue
 
             if settings.corruption_dev_mode:

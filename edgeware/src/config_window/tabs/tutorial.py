@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+from pathlib import Path
 from tkinter import (
     Frame,
     Label,
@@ -54,17 +55,23 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
     tutorial_notebook = ttk.Notebook(tutorial_frame, style="lefttab.TNotebook")
     tutorial_notebook.pack(expand=1, fill="both")
 
-    tab_about = HtmlFrame(tutorial_frame, messages_enabled=False)
-    tutorial_notebook.add(tab_about, text="Intro/About")
-    tab_about.load_file(str(Assets.TUTORIAL_INTRO))
+    # TkinterWeb looks for images in different places on Linux and Windows with load_file, this is a workaround
+    def load_html(tab: HtmlFrame, file: Path) -> None:
+        with open(file, "r", encoding="utf-8") as f:
+            # base_url ignores the last part of the path and seems to expect a path to a file
+            tab.load_html(f.read(), base_url=f"file:///{file}".replace("\\", "/"))
 
     tab_about = HtmlFrame(tutorial_frame, messages_enabled=False)
-    tutorial_notebook.add(tab_about, text="Getting Started")
-    tab_about.load_file(str(Assets.TUTORIAL_GETSTARTED))
+    tutorial_notebook.add(tab_about, text="Intro/About")
+    load_html(tab_about, Assets.TUTORIAL_INTRO)
+
+    tab_start = HtmlFrame(tutorial_frame, messages_enabled=False)
+    tutorial_notebook.add(tab_start, text="Getting Started")
+    load_html(tab_start, Assets.TUTORIAL_GETSTARTED)
 
     tab_basic_settings = HtmlFrame(tutorial_frame, messages_enabled=False)
     tutorial_notebook.add(tab_basic_settings, text="Settings 101")
-    tab_basic_settings.load_file(str(Assets.TUTORIAL_UNDERCONSTRUCTION))
+    load_html(tab_basic_settings, Assets.TUTORIAL_UNDERCONSTRUCTION)
 
     tab_drive = ScrollFrame(tutorial_frame)
     tutorial_notebook.add(tab_drive, text="Hard Drive")
@@ -98,7 +105,7 @@ def open_tutorial(event, parent: Tk, style: ttk.Style, window_font: Font, title_
 
     # End of HtmlFrame workaround
 
-    def theme_change(theme: str, root, style, mfont, tfont):
+    def theme_change(theme: str, root, style, mfont, tfont) -> None:
         if theme == "Original" or config["themeNoConfig"] is True:
             for widget in all_children(root):
                 if isinstance(widget, Message):

@@ -9,7 +9,11 @@
 
 **Since last version...**
 
+•*Reworked several config window tabs into a less compact (but easier to understand) format. The end goal is to make each tab less overwhelming to new users, utilizing the scroll bars now implemented into Edgeware++.*
 
+•*Removed the "Hibernate" tab and merged it into "Basic Modes"*
+
+•*Moved "moving popups" settings to the "Popup" tab, since it wasn't really a mode in the first place*
 
 **Version 16.1**
 

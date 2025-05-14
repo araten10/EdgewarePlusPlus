@@ -32,7 +32,7 @@ from config_window.utils import (
     assign,
     set_widget_states,
 )
-from config_window.vars import Vars
+from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 
@@ -127,7 +127,7 @@ class HibernateModeTab(ScrollFrame):
         activity_group = [activity_scale, activity_manual]
         length_group = [length_scale, length_manual]
 
-        def widget_state_helper(key: str):
+        def widget_state_helper(key: str) -> None:
             if key == "Original":
                 description.configure(text="Creates an immediate quantity of popups on wakeup based on the awaken activity.\n\n")
                 if vars.hibernate_mode.get():
