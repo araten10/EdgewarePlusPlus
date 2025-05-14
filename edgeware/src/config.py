@@ -59,7 +59,6 @@ from config_window.tabs.general.start import StartTab
 from config_window.tabs.modes.basic import BasicModesTab
 from config_window.tabs.modes.corruption import CorruptionModeTab
 from config_window.tabs.modes.dangerous_modes import DangerousModesTab
-from config_window.tabs.modes.hibernate import HibernateModeTab
 from config_window.tabs.troubleshooting import TroubleshootingTab
 from config_window.tabs.tutorial import open_tutorial
 from config_window.utils import (

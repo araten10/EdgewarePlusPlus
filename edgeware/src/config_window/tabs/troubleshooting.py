@@ -21,7 +21,6 @@ from tkinter import (
     GROOVE,
     RAISED,
     Button,
-    Checkbutton,
     Frame,
     Label,
     messagebox,
@@ -34,15 +33,13 @@ from config_window.utils import log_file
 from pack import Pack
 from paths import Data
 from settings import Vars
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
 from widgets.config_widgets import (
-    ConfigDropdown,
     ConfigRow,
-    ConfigScale,
     ConfigSection,
     ConfigToggle,
 )
+from widgets.scroll_frame import ScrollFrame
+from widgets.tooltip import CreateToolTip
 
 
 def get_log_number() -> int:

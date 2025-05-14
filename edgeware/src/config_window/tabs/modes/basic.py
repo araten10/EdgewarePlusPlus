@@ -16,36 +16,28 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from tkinter import (
-    GROOVE,
-    RAISED,
-    Button,
-    Checkbutton,
-    Frame,
-    Label,
     OptionMenu,
-    Scale,
     StringVar,
-    simpledialog,
 )
 from tkinter.font import Font
 
 from config_window.utils import (
-    assign,
     set_widget_states,
 )
 from settings import Vars
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
 from widgets.config_widgets import (
     ConfigDropdown,
     ConfigRow,
     ConfigScale,
     ConfigSection,
     ConfigToggle,
+    set_enabled_when,
 )
+from widgets.scroll_frame import ScrollFrame
 
 LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with popup timeout or high delay as popups will stack on top of eachother."
 HIBERNATE_TEXT = "Runs Edgeware++ covertly, without any popups. Instead, after a certain amount of time a barrage of popups will all spawn at once depending on the hibernate mode set.\n\nMinimum/maximum sleep durations determine the range of the payload timer- hibernate mode will activate sometime between these two values.\nAwaken activity determines the intensity of the hibernate mode payload, essentially the amount of popups spawned when it triggers.\nMax activity length is how long the payload lasts, if using a hibernate type that has a duration."
+
 
 class BasicModesTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font) -> None:
@@ -58,23 +50,23 @@ class BasicModesTab(ScrollFrame):
         lowkey_row = ConfigRow(lowkey_section)
         lowkey_row.pack()
 
-        ConfigToggle(lowkey_row, "Enable Lowkey Mode", variable=vars.lowkey_mode, command=lambda: set_widget_states(vars.lowkey_mode.get(), lowkey_group)).pack()
+        ConfigToggle(lowkey_row, "Enable Lowkey Mode", variable=vars.lowkey_mode).pack()
         lowkey_corners = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
         lowkey_corner_string = StringVar(self, lowkey_corners[vars.lowkey_corner.get()])
         lowkey_dropdown = OptionMenu(lowkey_row, lowkey_corner_string, *lowkey_corners, command=lambda x: (vars.lowkey_corner.set(lowkey_corners.index(x))))
         lowkey_dropdown.pack(side="left", expand=True)
+        set_enabled_when(lowkey_dropdown, enabled=(vars.lowkey_mode, True))
 
-        lowkey_group = [lowkey_dropdown]
-        set_widget_states(vars.lowkey_mode.get(), lowkey_group)
-
-        #Hibernate
+        # Hibernate
         hibernate_section = ConfigSection(self.viewPort, "Hibernate Mode", HIBERNATE_TEXT)
         hibernate_section.pack()
 
         hibernate_row_1 = ConfigRow(hibernate_section)
         hibernate_row_1.pack()
 
-        ConfigToggle(hibernate_row_1, "Enable Hibernate Mode", variable=vars.hibernate_mode, command=lambda: widget_state_helper(vars.hibernate_type.get())).pack()
+        ConfigToggle(
+            hibernate_row_1, "Enable Hibernate Mode", variable=vars.hibernate_mode, command=lambda: widget_state_helper(vars.hibernate_type.get())
+        ).pack()
         ConfigDropdown(
             hibernate_row_1,
             vars.hibernate_type,
@@ -84,9 +76,10 @@ class BasicModesTab(ScrollFrame):
                 "Glitch": "Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.",
                 "Ramp": "Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay.",
                 "Pump-Scare": "Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?",
-                "Chaos": "Every time hibernate activates, a random type (other than chaos) is selected."
+                "Chaos": "Every time hibernate activates, a random type (other than chaos) is selected.",
             },
-            width=42, wrap=295
+            width=42,
+            wrap=295,
         ).pack()
 
         hibernate_row_2 = ConfigRow(hibernate_section)
@@ -108,8 +101,8 @@ class BasicModesTab(ScrollFrame):
         activity_group = [activity_scale]
         length_group = [length_scale]
 
-        #Hibernate Lambda
-        #TODO: Fix this
+        # Hibernate Lambda
+        # TODO: Fix this
         def widget_state_helper(key: str) -> None:
             if key == "Original":
                 if vars.hibernate_mode.get():

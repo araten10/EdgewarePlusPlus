@@ -37,6 +37,13 @@ from settings import ConfigVar
 PAD = 4
 
 
+def set_enabled_when(widget: Misc, enabled: Tuple[ConfigVar, int | bool | str]) -> None:
+    toggle, value = enabled
+    set_state = lambda *args: set_widget_states(toggle.get() == value, [widget])
+    set_state()
+    toggle.trace_add("write", set_state)
+
+
 class ConfigScale(Frame):
     def __init__(self, master: Misc, label: str, variable: IntVar, from_: int, to: int, enabled: Tuple[ConfigVar, int | bool | str] | None = None) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
@@ -59,13 +66,9 @@ class ConfigScale(Frame):
 
 
 class ConfigDropdown(Frame):
-    def __init__(self, master: Misc, variable: StringVar, items: dict[str, str], height: int | None = None, width: int | None = None, wrap: int | None = None) -> None:
+    def __init__(self, master: Misc, variable: StringVar, items: dict[str, str], height: int = 3, width: int = 22, wrap: int = 150) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
         self.items = items
-        height = height if height else 3
-        width = width if width else 22
-        wrap = wrap if wrap else 150
-
 
         inner = Frame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
