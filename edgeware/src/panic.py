@@ -16,12 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 if __name__ == "__main__":
-    import os
-
-    from paths import Data
-
-    # Required on Windows
-    os.environ["PATH"] += os.pathsep + str(Data.ROOT)
+    import os_utils.windows_init  # noqa: F401
 
 import logging
 from multiprocessing.connection import Client, Listener
