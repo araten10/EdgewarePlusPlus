@@ -62,7 +62,7 @@ class Item:
 # fmt: off
 CONFIG_ITEMS = {
     # Start
-    "pack_path": Item("packPath", Schema(Union(str, None)), StringVar, str),
+    "pack_path": Item("packPath", Schema(Union(str, None)), StringVar, lambda value: value),
     "theme": Item("themeType", Schema(Union("Original", "Dark", "The One", "Ransom", "Goth", "Bimbo")), StringVar, str),
     "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, None, block=True),
     "startup_splash": Item("showLoadingFlair", BOOLEAN, BooleanVar, bool, block=True),

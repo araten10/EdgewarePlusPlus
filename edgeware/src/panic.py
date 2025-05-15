@@ -20,7 +20,15 @@ if __name__ == "__main__":
 
     from paths import Data
 
-    # Required on Windows
+    # Fix scaling on high resolution displays
+    try:
+        from ctypes import windll
+
+        windll.shcore.SetProcessDpiAwareness(0)  # Tell Windows that you aren't DPI aware.
+    except Exception:
+        pass  # Fails on non-Windows systems or if shcore is not available
+
+    # Add mpv to PATH
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
 import logging

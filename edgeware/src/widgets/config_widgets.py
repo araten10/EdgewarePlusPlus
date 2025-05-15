@@ -36,16 +36,25 @@ from settings import ConfigVar
 
 PAD = 4
 
+Value = int | bool | str
+EnabledTuple = Tuple[ConfigVar, Value | list[Value]]
+EnabledSpec = EnabledTuple | list[EnabledTuple]
 
-def set_enabled_when(widget: Misc, enabled: Tuple[ConfigVar, int | bool | str]) -> None:
-    toggle, value = enabled
-    set_state = lambda *args: set_widget_states(toggle.get() == value, [widget])
+
+def set_enabled_when(widget: Misc, enabled: EnabledSpec) -> None:
+    def to_list(value: object) -> list[object]:
+        return value if isinstance(value, list) else [value]
+
+    def set_state(*args) -> None:
+        set_widget_states(all([var.get() in to_list(value) for var, value in to_list(enabled)]), [widget])
+
     set_state()
-    toggle.trace_add("write", set_state)
+    for var, value in to_list(enabled):
+        var.trace_add("write", set_state)
 
 
 class ConfigScale(Frame):
-    def __init__(self, master: Misc, label: str, variable: IntVar, from_: int, to: int, enabled: Tuple[ConfigVar, int | bool | str] | None = None) -> None:
+    def __init__(self, master: Misc, label: str, variable: IntVar, from_: int, to: int, enabled: EnabledSpec | None = None) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
 
         inner = Frame(self)
@@ -56,10 +65,7 @@ class ConfigScale(Frame):
         )
 
         if enabled:
-            toggle, value = enabled
-            set_state = lambda *args: set_widget_states(toggle.get() == value, [self])
-            set_state()
-            toggle.trace_add("write", set_state)
+            set_enabled_when(self, enabled)
 
     def pack(self) -> None:
         super().pack(padx=PAD, pady=PAD, side="left", expand=True, fill="x")
