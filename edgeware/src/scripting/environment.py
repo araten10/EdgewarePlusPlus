@@ -15,15 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Any
-
 
 class Environment:
     pass
 
 
 class Environment:
-    def __init__(self, scope: dict[str, Any], external: Environment | None = None, closure: set[str] | None = None) -> None:
+    def __init__(self, scope: dict[str, object], external: Environment | None = None, closure: set[str] | None = None) -> None:
         self.scope = scope
         self.external = external
         self.closure = closure
@@ -31,7 +29,7 @@ class Environment:
     def is_global(self) -> bool:
         return self.external is None
 
-    def find(self, name: str, closure: set[str] | None = None) -> dict[str, Any]:
+    def find(self, name: str, closure: set[str] | None = None) -> dict[str, object]:
         if self.is_global():
             return self.scope
 
@@ -39,11 +37,11 @@ class Environment:
         next_closure = closure if closure is not None else self.closure
         return self.scope if in_scope else self.external.find(name, next_closure)
 
-    def get(self, name: str) -> Any:
+    def get(self, name: str) -> object:
         return self.find(name).get(name)
 
-    def define(self, name: str, value: Any) -> None:
+    def define(self, name: str, value: object) -> None:
         self.scope[name] = value
 
-    def assign(self, name: str, value: Any) -> None:
+    def assign(self, name: str, value: object) -> None:
         self.find(name)[name] = value

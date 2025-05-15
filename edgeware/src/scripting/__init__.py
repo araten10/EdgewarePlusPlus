@@ -18,7 +18,7 @@
 import operator
 from dataclasses import dataclass
 from tkinter import Tk
-from typing import Any, Callable
+from typing import Callable
 
 from features.image_popup import ImagePopup
 from features.misc import (
@@ -63,7 +63,7 @@ BIN_PREC = {token: data[1] for token, data in BINARY.items()}
 RIGHT_ASSOC = {token: data[2] for token, data in BINARY.items()}
 
 
-def identity(value: Any) -> Any:
+def identity(value: object) -> object:
     return value
 
 
@@ -89,7 +89,7 @@ class ExpressionList(list[Expression]):
 
 @dataclass
 class ReturnValue:
-    value: Any
+    value: object
 
 
 class FunctionBody:
@@ -121,7 +121,7 @@ class FunctionCall:
             self.args = ExpressionList(tokens)
             tokens.skip(")")
 
-    def eval(self, env: Environment) -> Any:
+    def eval(self, env: Environment) -> object:
         # TODO: Adjustment https://www.lua.org/manual/5.4/manual.html#3.4.12
         value = env.get(self.name)(env, *[arg.eval(env) for arg in self.args])
         if isinstance(value, ReturnValue):
