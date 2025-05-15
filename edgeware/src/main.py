@@ -16,7 +16,20 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 if __name__ == "__main__":
-    import os_utils.windows_init  # noqa: F401
+    import os
+
+    from paths import Data
+
+    # Fix scaling on high resolution displays
+    try:
+        from ctypes import windll
+
+        windll.shcore.SetProcessDpiAwareness(0)  # Tell Windows that you aren't DPI aware.
+    except Exception:
+        pass  # Fails on non-Windows systems or if shcore is not available
+
+    # Add mpv to PATH
+    os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
 from threading import Thread
 from tkinter import Tk
