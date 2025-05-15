@@ -22,7 +22,7 @@ from tkinter import (
 from tkinter.font import Font
 
 from settings import Vars
-from widgets.config_widgets import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, EnabledSpec, set_enabled_when
+from widgets.config_widgets import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
 from widgets.scroll_frame import ScrollFrame
 
 LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with popup timeout or high delay as popups will stack on top of eachother."
@@ -68,9 +68,6 @@ class BasicModesTab(ScrollFrame):
             width=42,
             wrap=295,
         ).pack()
-
-        def hibernate_spec(types: list[str]) -> EnabledSpec:
-            return [(vars.hibernate_mode, True), (vars.hibernate_type, types)]
 
         hibernate_row_2 = ConfigRow(hibernate_section)
         hibernate_row_2.pack()
