@@ -21,18 +21,8 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from config_window.utils import (
-    set_widget_states,
-)
 from settings import Vars
-from widgets.config_widgets import (
-    ConfigDropdown,
-    ConfigRow,
-    ConfigScale,
-    ConfigSection,
-    ConfigToggle,
-    set_enabled_when,
-)
+from widgets.config_widgets import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, EnabledSpec, set_enabled_when
 from widgets.scroll_frame import ScrollFrame
 
 LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with popup timeout or high delay as popups will stack on top of eachother."
@@ -63,10 +53,7 @@ class BasicModesTab(ScrollFrame):
 
         hibernate_row_1 = ConfigRow(hibernate_section)
         hibernate_row_1.pack()
-
-        ConfigToggle(
-            hibernate_row_1, "Enable Hibernate Mode", variable=vars.hibernate_mode, command=lambda: widget_state_helper(vars.hibernate_type.get())
-        ).pack()
+        ConfigToggle(hibernate_row_1, "Enable Hibernate Mode", variable=vars.hibernate_mode).pack()
         ConfigDropdown(
             hibernate_row_1,
             vars.hibernate_type,
@@ -82,61 +69,29 @@ class BasicModesTab(ScrollFrame):
             wrap=295,
         ).pack()
 
+        def hibernate_spec(types: list[str]) -> EnabledSpec:
+            return [(vars.hibernate_mode, True), (vars.hibernate_type, types)]
+
         hibernate_row_2 = ConfigRow(hibernate_section)
         hibernate_row_2.pack()
-
-        min_sleep_scale = ConfigScale(hibernate_row_2, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200)
-        min_sleep_scale.pack()
-        max_sleep_scale = ConfigScale(hibernate_row_2, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400)
-        max_sleep_scale.pack()
-        sleep_group = [min_sleep_scale, max_sleep_scale]
+        ConfigScale(hibernate_row_2, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200, enabled=(vars.hibernate_mode, True)).pack()
+        ConfigScale(hibernate_row_2, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400, enabled=(vars.hibernate_mode, True)).pack()
 
         hibernate_row_3 = ConfigRow(hibernate_section)
         hibernate_row_3.pack()
-
-        activity_scale = ConfigScale(hibernate_row_3, "Awaken Activity", vars.hibernate_activity, 1, 50)
-        activity_scale.pack()
-        length_scale = ConfigScale(hibernate_row_3, "Max Activity Length (seconds)", vars.hibernate_activity_length, 5, 300)
-        length_scale.pack()
-        activity_group = [activity_scale]
-        length_group = [length_scale]
-
-        # Hibernate Lambda
-        # TODO: Fix this
-        def widget_state_helper(key: str) -> None:
-            if key == "Original":
-                if vars.hibernate_mode.get():
-                    set_widget_states(False, length_group)
-                    set_widget_states(True, activity_group)
-                    set_widget_states(True, sleep_group)
-            if key == "Spaced":
-                if vars.hibernate_mode.get():
-                    set_widget_states(False, activity_group)
-                    set_widget_states(True, length_group)
-                    set_widget_states(True, sleep_group)
-            if key == "Glitch":
-                if vars.hibernate_mode.get():
-                    set_widget_states(True, length_group)
-                    set_widget_states(True, activity_group)
-                    set_widget_states(True, sleep_group)
-            if key == "Ramp":
-                if vars.hibernate_mode.get():
-                    set_widget_states(True, length_group)
-                    set_widget_states(True, activity_group)
-                    set_widget_states(True, sleep_group)
-            if key == "Pump-Scare":
-                if vars.hibernate_mode.get():
-                    set_widget_states(False, length_group)
-                    set_widget_states(False, activity_group)
-                    set_widget_states(True, sleep_group)
-            if key == "Chaos":
-                if vars.hibernate_mode.get():
-                    set_widget_states(True, length_group)
-                    set_widget_states(True, activity_group)
-                    set_widget_states(True, sleep_group)
-            if not vars.hibernate_mode.get():
-                set_widget_states(False, length_group)
-                set_widget_states(False, activity_group)
-                set_widget_states(False, sleep_group)
-
-        widget_state_helper(vars.hibernate_type.get())
+        ConfigScale(
+            hibernate_row_3,
+            "Awaken Activity",
+            vars.hibernate_activity,
+            1,
+            50,
+            enabled=[(vars.hibernate_mode, True), (vars.hibernate_type, ["Original", "Glitch", "Ramp", "Chaos"])],
+        ).pack()
+        ConfigScale(
+            hibernate_row_3,
+            "Max Activity Length (seconds)",
+            vars.hibernate_activity_length,
+            5,
+            300,
+            enabled=[(vars.hibernate_mode, True), (vars.hibernate_type, ["Spaced", "Glitch", "Ramp", "Chaos"])],
+        ).pack()
