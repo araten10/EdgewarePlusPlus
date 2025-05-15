@@ -74,7 +74,7 @@ def get_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
         "hyprland": [f'hyprctl hyprpaper preload "{wallpaper}"', f'hyprctl hyprpaper wallpaper ",{wallpaper}"'],
         "kde": [f'plasma-apply-wallpaperimage "{wallpaper}"'],
         **dict.fromkeys(
-            ["gnome", "unity", "cinnamon"],
+            ["gnome", "unity", "cinnamon", "x-cinnamon"],
             [
                 f'gsettings set org.gnome.desktop.background picture-uri "file://{wallpaper}"',
                 f'gsettings set org.gnome.desktop.background picture-uri-dark "file://{wallpaper}"',
