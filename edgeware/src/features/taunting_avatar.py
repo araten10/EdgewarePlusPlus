@@ -20,7 +20,7 @@ class TauntingAvatar:
         self.avatar_window = Toplevel(master)
         self.avatar_window.overrideredirect(True) # Remove window decorations
         self.avatar_window.attributes('-topmost', True) # Always on top
-        self.avatar_window.wm_attributes("-transparentcolor", "white") # Optional for non-rectangular window
+        self.avatar_window.wm_attributes("-transparentcolor", self.theme.bg) # Optional for non-rectangular window
         
         # Position at bottom corner of screen
         screen_width = self.avatar_window.winfo_screenwidth()
@@ -32,7 +32,7 @@ class TauntingAvatar:
         # For simplicity, we'll use a colored label for now
         self.image = ImageTk.PhotoImage(file=CustomAssets.theme_demo())
         self.avatar = Label(self.avatar_window,
-            image=self.image)
+            image=self.image, bg= self.theme.bg)
         
         self.avatar.pack(padx=10, pady=10)
         
@@ -49,20 +49,6 @@ class TauntingAvatar:
                                 font=self.theme.font, bg=self.theme.bg, 
                                 wraplength=200, padx=10, pady=10)
         self.bubble_text.pack()
-        
-        # List of taunts
-        self.taunts = [
-            "Having computer problems? What a coincidence!",
-            "Oops, did you need that file? Too late now!",
-            "Your antivirus can't save you from me!",
-            "Try clicking faster, that always helps!",
-            "Have you tried turning it off and... oh wait, I won't let you!",
-            "Is your computer running slow? Let me help make it slower!",
-            "Alt+F4 might work... just kidding, I disabled that!",
-            "I'm just getting started, you ain't seen nothing yet!",
-            "Thanks for running me! Your computer is now my playground!",
-            "Looking for Task Manager? Good luck with that!"
-        ]
         
         # Start taunting behavior
         self.start_taunting()
@@ -93,7 +79,7 @@ class TauntingAvatar:
     
     def start_taunting(self):
         # Show random taunt every 8-20 seconds
-        taunt = random.choice(self.taunts)
+        taunt = self.pack.random_subliminal_message()
         #taunt = self.Pack.random_caption()
         self.show_taunt(taunt)
         
