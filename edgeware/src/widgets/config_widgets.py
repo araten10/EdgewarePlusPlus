@@ -103,7 +103,9 @@ class ConfigSection(Frame):
         title_font.configure(size=15)
 
         Label(self, text=title, font=title_font).pack()
-        Message(self, text=message, width=675).pack(fill="both")
+
+        if message != "":
+            Message(self, text=message, width=675).pack(fill="both")
 
     def pack(self) -> None:
         super().pack(padx=8, pady=8, fill="x")

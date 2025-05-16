@@ -94,5 +94,6 @@
   "globalPanicButton": "Key.esc",
   "videoHardwareAcceleration": 1,
   "disabledMonitors": [],
-  "mpvSubprocess": 1
+  "mpvSubprocess": 1,
+  "audioVolume": 100
 }

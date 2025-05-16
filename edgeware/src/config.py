@@ -55,7 +55,7 @@ from tkinter import (
 )
 
 from config_window.import_pack import import_pack
-from config_window.tabs.annoyance.audio_video import AudioVideoTab
+from config_window.tabs.annoyance.audio_video import TweaksTab
 from config_window.tabs.annoyance.captions import CaptionsTab
 from config_window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
 from config_window.tabs.annoyance.moods import MoodsTab
@@ -140,8 +140,8 @@ class Config(Tk):
         notebook.add(annoyance_tab, text="Annoyance/Runtime")
         annoyance_notebook = ttk.Notebook(annoyance_tab)
         annoyance_notebook.pack(expand=1, fill="both")
-        annoyance_notebook.add(PopupTab(vars, title_font, message_group), text="Popups")  # tab for popup settings
-        annoyance_notebook.add(AudioVideoTab(vars, title_font, message_group), text="Audio/Video")  # tab for managing audio and video settings
+        annoyance_notebook.add(PopupTab(vars, title_font, message_group), text="Popup Types")  # tab for popup types
+        annoyance_notebook.add(TweaksTab(vars, title_font, message_group), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
         annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
