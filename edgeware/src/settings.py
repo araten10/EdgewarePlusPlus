@@ -104,7 +104,6 @@ CONFIG_ITEMS = {
     "audio_volume": Item("audioVolume", PERCENTAGE, IntVar, int),
     "video_chance": Item("vidMod", PERCENTAGE, IntVar, int),
     "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),
-    "max_video_enabled": Item("maxVideoBool", BOOLEAN, BooleanVar, bool),
     "max_video": Item("maxVideos", NONNEGATIVE, IntVar, int),
     "video_hardware_acceleration": Item("videoHardwareAcceleration", BOOLEAN, BooleanVar, bool),
 
@@ -247,7 +246,6 @@ class Settings:
         self.pack_path = Data.PACKS / self.pack_path if self.pack_path else DEFAULT_PACK_PATH
         self.subliminal_chance = self.subliminal_chance if self.popup_subliminals else 0
         self.denial_chance = self.denial_chance if self.denial_mode else 0
-        self.max_video = self.max_video if self.max_video_enabled else float("inf")
         self.hibernate_fix_wallpaper = self.hibernate_fix_wallpaper and self.hibernate_mode
 
         import os_utils  # Circular import
