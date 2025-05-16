@@ -101,7 +101,7 @@ CONFIG_ITEMS = {
     # Audio/Video
     "audio_chance": Item("audioMod", PERCENTAGE, IntVar, int),
     "max_audio": Item("maxAudio", NONNEGATIVE, IntVar, int),
-    "audio_volume": Item("audioVolume", PERCENTAGE, IntVar, int),
+    "audio_volume": Item("audioVolume", PERCENTAGE, IntVar, to_float),
     "video_chance": Item("vidMod", PERCENTAGE, IntVar, int),
     "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),
     "max_video": Item("maxVideos", NONNEGATIVE, IntVar, int),
