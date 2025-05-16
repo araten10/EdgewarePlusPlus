@@ -102,7 +102,7 @@ class ConfigToggle(Checkbutton):
 
 
 class ConfigSection(Frame):
-    def __init__(self, master: Misc, title: str, message: str = "") -> None:
+    def __init__(self, master: Misc, title: str, message: str | None = None) -> None:
         super().__init__(master, borderwidth=2, relief="raised")
 
         title_font = font.Font(font="Default")
@@ -110,7 +110,7 @@ class ConfigSection(Frame):
 
         Label(self, text=title, font=title_font).pack()
 
-        if message != "":
+        if message:
             Message(self, text=message, width=675).pack(fill="both")
 
     def pack(self) -> None:
