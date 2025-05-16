@@ -15,41 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import (
-    CENTER,
-    GROOVE,
-    RAISED,
-    Button,
-    Checkbutton,
-    Frame,
-    Label,
-    Message,
-    Scale,
-    simpledialog,
-    Misc,
-    BooleanVar
-)
+from tkinter import CENTER, GROOVE, RAISED, BooleanVar, Checkbutton, Frame, Label, Message, Misc, Scale
 from tkinter.font import Font
 
 from config_window.utils import (
-    assign,
     config,
     set_widget_states,
 )
-from settings import Vars
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
 from screeninfo import Monitor, get_monitors
-
+from settings import Vars
 from widgets.config_widgets import (
-    ConfigDropdown,
-    ConfigRow,
     ConfigScale,
-    ConfigSection,
     ConfigToggle,
 )
+from widgets.scroll_frame import ScrollFrame
+from widgets.tooltip import CreateToolTip
 
 OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
+
 
 class MonitorCheckbutton(ConfigToggle):
     def __init__(self, master: Misc, monitor: Monitor) -> None:
@@ -63,7 +46,8 @@ class MonitorCheckbutton(ConfigToggle):
         else:
             config["disabledMonitors"].append(self.monitor.name)
 
-class TweaksTab(ScrollFrame):
+
+class PopupTweaksTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
@@ -130,9 +114,7 @@ class TweaksTab(ScrollFrame):
 
         subliminal_chance_frame = Frame(subliminal_frame)
         subliminal_chance_frame.pack(fill="x", side="left", padx=3)
-        subliminal_chance_scale = ConfigScale(
-            subliminal_chance_frame, label="Sublim. Chance (%)", from_=1, to=100, variable=vars.subliminal_chance
-        )
+        subliminal_chance_scale = ConfigScale(subliminal_chance_frame, label="Sublim. Chance (%)", from_=1, to=100, variable=vars.subliminal_chance)
         subliminal_chance_scale.pack()
 
         subliminal_alpha_frame = Frame(subliminal_frame)
@@ -154,9 +136,7 @@ class TweaksTab(ScrollFrame):
 
         denial_frame = Frame(overlay_frame)
         denial_frame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        ConfigToggle(
-            denial_frame, "Denial Overlays", variable=vars.denial_mode, command=lambda: set_widget_states(vars.denial_mode.get(), denial_group)
-        ).pack()
+        ConfigToggle(denial_frame, "Denial Overlays", variable=vars.denial_mode, command=lambda: set_widget_states(vars.denial_mode.get(), denial_group)).pack()
         denial_chance_slider = ConfigScale(denial_frame, label="Denial Chance", from_=1, to=100, variable=vars.denial_chance)
         denial_chance_slider.pack()
 
@@ -193,7 +173,6 @@ class TweaksTab(ScrollFrame):
         movement_speed_frame = Frame(movement_frame)
         movement_speed_frame.pack(fill="x", side="left")
         Scale(movement_speed_frame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed).pack(fill="x")
-
 
         hardware_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         hardware_frame.pack(fill="x")

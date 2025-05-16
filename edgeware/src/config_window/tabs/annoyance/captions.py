@@ -19,19 +19,13 @@ from tkinter import (
     CENTER,
     GROOVE,
     RAISED,
-    Button,
     Checkbutton,
     Frame,
     Label,
     Message,
-    Scale,
-    simpledialog,
 )
 from tkinter.font import Font
 
-from config_window.utils import (
-    assign,
-)
 from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
