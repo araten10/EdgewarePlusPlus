@@ -128,5 +128,5 @@ if __name__ == "__main__":
     root.geometry("800x600")
     # Your other application code here
     # Create the taunting avatar
-    avatar = TauntingAvatar(root)
+    avatar = TauntingAvatar(root,settings, pack, state)
     root.mainloop()

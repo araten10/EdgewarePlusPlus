@@ -1,14 +1,22 @@
 import tkinter as tk
-from tkinter import Label, Toplevel
+from tkinter import Label, Toplevel, GROOVE
 import random
 import time
-from PIL import Image, ImageTk # You'll need pillow installed
+from PIL import Image, ImageTk
+from pack import Pack
+from paths import CustomAssets
+from settings import Settings
+from state import State
+from features.theme import get_theme
 
 class TauntingAvatar:
-    def __init__(self, master):
+    def __init__(self, master,settings: Settings, pack: Pack, state: State) -> None:
         self.master = master
-        
+        self.pack = pack
+        self.settings = settings
+        self.theme = get_theme(settings)
         # Create a separate always-on-top window for the avatar
+
         self.avatar_window = Toplevel(master)
         self.avatar_window.overrideredirect(True) # Remove window decorations
         self.avatar_window.attributes('-topmost', True) # Always on top
@@ -17,12 +25,15 @@ class TauntingAvatar:
         # Position at bottom corner of screen
         screen_width = self.avatar_window.winfo_screenwidth()
         screen_height = self.avatar_window.winfo_screenheight()
-        self.avatar_window.geometry(f"150x150+{screen_width-170}+{screen_height-170}")
+        self.avatar_window.geometry(f"150x75+{screen_width-170}+{screen_height-170}")
         
         # Load avatar images (you would replace with your own images)
         # self.avatar_images = self.load_avatar_images()
         # For simplicity, we'll use a colored label for now
-        self.avatar = Label(self.avatar_window, text="😈", font=("Arial", 60), bg="white")
+        self.image = ImageTk.PhotoImage(file=CustomAssets.theme_demo())
+        self.avatar = Label(self.avatar_window,
+            image=self.image)
+        
         self.avatar.pack(padx=10, pady=10)
         
         # Speech bubble
@@ -31,11 +42,11 @@ class TauntingAvatar:
         self.bubble_window.attributes('-topmost', True)
         self.bubble_window.withdraw() # Initially hidden
         
-        self.bubble_frame = tk.Frame(self.bubble_window, bg="white", bd=2, relief=tk.RAISED)
+        self.bubble_frame = tk.Frame(self.bubble_window, bg= self.theme.bg, bd=2, relief=tk.RAISED)
         self.bubble_frame.pack(padx=5, pady=5)
         
         self.bubble_text = Label(self.bubble_frame, text="", 
-                                font=("Arial", 12), bg="white", 
+                                font=self.theme.font, bg=self.theme.bg, 
                                 wraplength=200, padx=10, pady=10)
         self.bubble_text.pack()
         
@@ -83,6 +94,7 @@ class TauntingAvatar:
     def start_taunting(self):
         # Show random taunt every 8-20 seconds
         taunt = random.choice(self.taunts)
+        #taunt = self.Pack.random_caption()
         self.show_taunt(taunt)
         
         # Schedule next taunt
@@ -100,5 +112,5 @@ class TauntingAvatar:
             screen_height = self.avatar_window.winfo_screenheight() - 170
             new_x = random.randint(0, screen_width)
             new_y = random.randint(0, screen_height)
-            self.avatar_window.geometry(f"150x150+{new_x}+{new_y}")
-            self.show_taunt("Too slow! Can't catch me!")
+            self.avatar_window.geometry(f"150x75+{new_x}+{new_y}")
+            self.show_taunt(self.pack.random_caption())
