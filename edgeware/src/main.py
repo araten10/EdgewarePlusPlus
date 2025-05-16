@@ -63,6 +63,7 @@ from settings import Settings, first_launch_configure
 from state import State
 
 
+
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
     roll_targets(settings, targets)
     Thread(target=lambda: fill_drive(root, settings, pack, state), daemon=True).start()  # Thread for performance reasons
@@ -122,5 +123,10 @@ if __name__ == "__main__":
         StartupSplash(settings, pack, start_main)
     else:
         start_main()
-
+    from features.taunting_avatar import TauntingAvatar
+    root.title("Virus Simulator")
+    root.geometry("800x600")
+    # Your other application code here
+    # Create the taunting avatar
+    avatar = TauntingAvatar(root)
     root.mainloop()
