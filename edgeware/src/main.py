@@ -61,7 +61,7 @@ from panic import start_panic_listener
 from roll import RollTarget, roll_targets
 from settings import Settings, first_launch_configure
 from state import State
-
+from features.taunting_avatar import TauntingAvatar
 
 
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
@@ -112,6 +112,7 @@ if __name__ == "__main__":
         handle_mitosis_mode(root, settings, pack, state)
         handle_keyboard(root, settings, state)
         start_panic_listener(root, settings, state)
+        avatar = TauntingAvatar(root,settings, pack, state)
 
         if settings.hibernate_mode:
             start_main_hibernate(root, settings, pack, state, targets)
@@ -123,10 +124,5 @@ if __name__ == "__main__":
         StartupSplash(settings, pack, start_main)
     else:
         start_main()
-    from features.taunting_avatar import TauntingAvatar
-    root.title("Virus Simulator")
-    root.geometry("800x600")
-    # Your other application code here
-    # Create the taunting avatar
-    avatar = TauntingAvatar(root,settings, pack, state)
+    
     root.mainloop()
