@@ -26,9 +26,12 @@ from widgets.config_widgets import (
 )
 from widgets.scroll_frame import ScrollFrame
 
-INTRO_TEXT = 'Here is where you can change the most important settings of Edgeware: the frequency and behaviour of popups. The "Popup Timer Delay" is how long a popup takes to spawn, and the overall "Popup Chance" then rolls to see if the popup spawns. Keeping the chance at 100% allows for a consistent experience, while lowering it makes for a more random one.\n\nOnce ready to spawn, a popup can be many things: A regular image, a website link (opens in your default browser), a prompt you need to fill out, autoplaying audio or videos, or a subliminal message. All of these are rolled for corresponding to their respective frequency settings, which can be found in the "Audio/Video" tab, "Captions" tab, and this tab as well. There are also plenty of other settings there to configure popups to your liking~! '
+INTRO_TEXT = 'This tab dictates the frequency of every popup type you will see during runtime, which in turn affects nearly every other tab in the config window! Each popup here will have a short description to help you decide how much you want to see of it. To check and see what types of popups your currently loaded pack supports, you can head on over to \"Pack Info\" (Underneath \"General\") and see how much media there is of each type.\n\nThe \"Popup Timer Delay\" setting affects the duration between each popup spawning, no matter the type. Once the timer has elapsed, a new popup will spawn, and then the type is randomly chosen from the chances set. It\'s recommended that you don\'t set this number too low to start- try 8000ms-10000ms (8-10 seconds) and adjust it from there based on how you feel!'
+IMAGE_TEXT = 'Image popups are the most common type of popup. Every single pack will have these, and most of your time using Edgeware++ will be spent staring at these lovely things~\n\nThe reason a percentage slider exists for this is to create a more inconsistent experience. If no probability slider is set to 100% on this tab, there\'s a chance that nothing will spawn. If you want Edgeware++ to surprise you, consider turning this down to 60% or so!'
+AUDIO_TEXT = 'Audio popups have no visuals attached, focusing only on sound. Because of this, there\'s no way to disable them once they stop, but maybe that\'s something you want...~\n\nGenerally, you probably want a low maximum count on this, as well as a low frequency. Packs sometimes use long files for audio (hypno, binural, ASMR, etc), so you might have to set the maximum to \"1\" in this case, assuming the pack doesn\'t have suggested settings to do it for you.'
+VIDEO_TEXT = 'Video popups are functionally exactly the same as image popups, just animated and with sound support. Edgeware++ uses MPV to play videos, and if you run into any trouble displaying these you may want to check out the \"Troubleshooting\" tab for a few video debugging options.'
 NOTIFICATION_TEXT = 'These are a special type of caption-centric popup that uses your operating system\'s notification feature. For examples, this system is usually used for things like alerts ("You may now safely remove your USB device") or web browser notifications if you have those enabled. ("User XYZ has liked your youtube comment")'
-SUBLIMINAL_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. "Use Subliminal specific mood" allows for this without interfering with other captions, as it uses the special mood "subliminals" which don\'t appear in the regular caption pool. However, these subliminals are set by the pack creator, so if none are set the default will be used instead.'
+SUBLIMINAL_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. To help with this, they can tap into a specific \"subliminal mood\" if the pack creator sets it up. Otherwise default captions will be used instead. (See \"Popup Tweaks\" for more info on captions)'
 
 
 class PopupTypesTab(ScrollFrame):
@@ -36,7 +39,7 @@ class PopupTypesTab(ScrollFrame):
         super().__init__()
 
         # Popup Frequency
-        popup_freq_section = ConfigSection(self.viewPort, "General Popup Frequency")
+        popup_freq_section = ConfigSection(self.viewPort, "General Popup Frequency", INTRO_TEXT)
         popup_freq_section.pack()
 
         popup_freq_row = ConfigRow(popup_freq_section)
@@ -44,11 +47,14 @@ class PopupTypesTab(ScrollFrame):
 
         ConfigScale(popup_freq_row, label="Popup Timer Delay (ms)", from_=10, to=60000, variable=vars.delay).pack()
 
-        image_chance_scale = ConfigScale(popup_freq_row, label="Popup Chance (%)", from_=0, to=100, variable=vars.image_chance)
-        image_chance_scale.pack()
+        # Image
+        popup_freq_section = ConfigSection(self.viewPort, "Image Popups", IMAGE_TEXT)
+        popup_freq_section.pack()
+
+        ConfigScale(popup_freq_row, label="Popup Chance (%)", from_=0, to=100, variable=vars.image_chance).pack()
 
         # Audio
-        audio_section = ConfigSection(self.viewPort, "Audio Popups")
+        audio_section = ConfigSection(self.viewPort, "Audio Popups", AUDIO_TEXT)
         audio_section.pack()
 
         audio_row = ConfigRow(audio_section)
@@ -59,7 +65,7 @@ class PopupTypesTab(ScrollFrame):
         ConfigScale(audio_row, label="Audio Volume (%)", from_=1, to=100, variable=vars.audio_volume).pack()
 
         # Video
-        video_section = ConfigSection(self.viewPort, "Video Popups")
+        video_section = ConfigSection(self.viewPort, "Video Popups", VIDEO_TEXT)
         video_section.pack()
 
         video_row = ConfigRow(video_section)
@@ -69,6 +75,11 @@ class PopupTypesTab(ScrollFrame):
         ConfigScale(video_row, label="Max Video Popups", from_=1, to=50, variable=vars.max_video).pack()
         ConfigScale(video_row, label="Video Volume (%)", from_=1, to=100, variable=vars.video_volume).pack()
 
+        # Website
+        web_section = ConfigSection(self.viewPort, "Website Popups")
+        web_section.pack()
+        ConfigScale(web_section, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
+        
         # Prompts
         prompt_section = ConfigSection(self.viewPort, "Prompt Popups")
         prompt_section.pack()
@@ -78,11 +89,6 @@ class PopupTypesTab(ScrollFrame):
 
         ConfigScale(prompt_row, label="Prompt Chance (%)", from_=0, to=100, variable=vars.prompt_chance).pack()
         ConfigScale(prompt_row, label="Prompt Mistakes", from_=0, to=150, variable=vars.prompt_max_mistakes).pack()
-
-        # Website
-        web_section = ConfigSection(self.viewPort, "Website Popups")
-        web_section.pack()
-        ConfigScale(web_section, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
 
         # Subliminal
         subliminal_section = ConfigSection(self.viewPort, "Subliminal Popups", SUBLIMINAL_TEXT)

@@ -159,7 +159,7 @@ class PopupTweaksTab(ScrollFrame):
 
         movement_chance_frame = Frame(movement_frame)
         movement_chance_frame.pack(fill="x", side="left")
-        movement_chance = ConfigScale(movement_chance_frame, label="Moving Chance", from_=1, to=100, variable=vars.moving_chance)
+        movement_chance = ConfigScale(movement_chance_frame, label="Moving Chance", from_=0, to=100, variable=vars.moving_chance)
         movement_chance.pack()
         CreateToolTip(
             movement_chance,
