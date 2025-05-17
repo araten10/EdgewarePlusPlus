@@ -73,17 +73,18 @@ class TroubleshootingTab(ScrollFrame):
         troubleshooting_section = ConfigSection(self.viewPort, "Troubleshooting")
         troubleshooting_section.pack()
 
-        troubleshooting_row_1 = ConfigRow(troubleshooting_section)
-        troubleshooting_row_1.pack()
-        hibernate_skip_toggle = ConfigToggle(troubleshooting_row_1, "Toggle Tray Hibernate Skip", variable=vars.toggle_hibernate_skip, cursor="question_arrow")
-        hibernate_skip_toggle.pack()
+        troubleshooting_row = ConfigRow(troubleshooting_section)
+        troubleshooting_row.pack()
+
+        hibernate_skip_toggle = ConfigToggle(troubleshooting_row, "Toggle Tray Hibernate Skip", variable=vars.toggle_hibernate_skip, cursor="question_arrow")
+        hibernate_skip_toggle.grid(0, 0)
         CreateToolTip(
             hibernate_skip_toggle,
             "Want to test out how hibernate mode works with your current settings, and hate waiting for the minimum time? Me too!\n\n"
             "This adds a feature in the tray that allows you to skip to the start of hibernate.",
         )
-        mood_settings_toggle = ConfigToggle(troubleshooting_row_1, "Turn Off Mood Settings", variable=vars.toggle_mood_set, cursor="question_arrow")
-        mood_settings_toggle.pack()
+        mood_settings_toggle = ConfigToggle(troubleshooting_row, "Turn Off Mood Settings", variable=vars.toggle_mood_set, cursor="question_arrow")
+        mood_settings_toggle.grid(0, 1)
         CreateToolTip(
             mood_settings_toggle,
             "If your pack does not have a 'info.json' file with a valid pack name, it will generate a mood setting file based on a unique identifier.\n\n"
@@ -95,10 +96,8 @@ class TroubleshootingTab(ScrollFrame):
             " deal with all this mood business, you can disable the mood saving feature here.",
         )
 
-        troubleshooting_row_2 = ConfigRow(troubleshooting_section)
-        troubleshooting_row_2.pack()
-        github_connection_toggle = ConfigToggle(troubleshooting_row_2, "Disable Connection to GitHub", variable=vars.toggle_internet, cursor="question_arrow")
-        github_connection_toggle.pack()
+        github_connection_toggle = ConfigToggle(troubleshooting_row, "Disable Connection to GitHub", variable=vars.toggle_internet, cursor="question_arrow")
+        github_connection_toggle.grid(1, 0)
         CreateToolTip(
             github_connection_toggle,
             "In some cases, having a slow internet connection can cause the config window to delay opening for a long time.\n\n"
@@ -106,13 +105,13 @@ class TroubleshootingTab(ScrollFrame):
             "If you have noticed this, try enabling this setting- it will disable all connections to GitHub on future launches.",
         )
         mpv_subprocess_toggle = ConfigToggle(
-            troubleshooting_row_2,
+            troubleshooting_row,
             "Run mpv in a Subprocess (Linux Only)",
             variable=vars.mpv_subprocess,
             cursor="question_arrow",
             state=("normal" if os_utils.is_linux() else "disabled"),
         )
-        mpv_subprocess_toggle.pack()
+        mpv_subprocess_toggle.grid(1, 1)
         CreateToolTip(
             mpv_subprocess_toggle,
             "By default, the video player of Edgeware++, mpv, is ran in a subprocess to fix a crash resulting from an X error when a popup"

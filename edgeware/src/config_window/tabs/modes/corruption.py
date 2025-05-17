@@ -142,36 +142,34 @@ class CorruptionModeTab(ScrollFrame):
         corruption_misc_section = ConfigSection(self.viewPort, "Misc. Settings")
         corruption_misc_section.pack()
 
-        misc_row_1 = ConfigRow(corruption_misc_section)
-        misc_row_1.pack()
-        wallpaper_toggle = ConfigToggle(misc_row_1, text="Don't Cycle Wallpaper", variable=vars.corruption_wallpaper, cursor="question_arrow")
-        wallpaper_toggle.pack()
+        misc_row = ConfigRow(corruption_misc_section)
+        misc_row.pack()
+
+        wallpaper_toggle = ConfigToggle(misc_row, text="Don't Cycle Wallpaper", variable=vars.corruption_wallpaper, cursor="question_arrow")
+        wallpaper_toggle.grid(0, 0)
         CreateToolTip(
             wallpaper_toggle,
             "Prevents the wallpaper from cycling as you go through corruption levels, instead defaulting to a pack defined static one.",
         )
 
-        theme_toggle = ConfigToggle(misc_row_1, text="Don't Cycle Themes", variable=vars.corruption_themes, cursor="question_arrow")
-        theme_toggle.pack()
+        theme_toggle = ConfigToggle(misc_row, text="Don't Cycle Themes", variable=vars.corruption_themes, cursor="question_arrow")
+        theme_toggle.grid(0, 1)
         CreateToolTip(
             theme_toggle,
             "Prevents the theme from cycling as you go through corruption levels, instead staying as "
             'the theme you set in the "General" tab of the config window.',
         )
 
-        misc_row_2 = ConfigRow(corruption_misc_section)
-        misc_row_2.pack()
-
-        purity_toggle = ConfigToggle(misc_row_2, text="Purity Mode", variable=vars.corruption_purity, cursor="question_arrow")
-        purity_toggle.pack()
+        purity_toggle = ConfigToggle(misc_row, text="Purity Mode", variable=vars.corruption_purity, cursor="question_arrow")
+        purity_toggle.grid(1, 0)
         CreateToolTip(
             purity_toggle,
             "Starts corruption mode at the highest corruption level, then works backwards to level 1. "
             "Retains all of your other settings for this mode, if applicable.",
         )
 
-        dev_toggle = ConfigToggle(misc_row_2, text="Corruption Dev View", variable=vars.corruption_dev_mode, cursor="question_arrow")
-        dev_toggle.pack()
+        dev_toggle = ConfigToggle(misc_row, text="Corruption Dev View", variable=vars.corruption_dev_mode, cursor="question_arrow")
+        dev_toggle.grid(1, 1)
         CreateToolTip(
             dev_toggle,
             "Enables captions on popups that show various info.\n\n Mood: the mood in which the popup belongs to\n"

@@ -100,6 +100,10 @@ class ConfigToggle(Checkbutton):
     def pack(self) -> None:
         super().pack(padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, side="left", expand=True)
 
+    def grid(self, row: int, column: int) -> None:
+        super().grid(row=row, column=column, padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, sticky="ew")
+        self.master.columnconfigure(column, weight=1)
+
 
 class ConfigSection(Frame):
     def __init__(self, master: Misc, title: str, message: str | None = None) -> None:
