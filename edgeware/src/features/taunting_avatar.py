@@ -102,10 +102,9 @@ class TauntingAvatar:
     
     def start_taunting(self):
         # Show random taunt every 8-20 seconds
-        taunt = self.pack.random_caption
-        #taunt = self.Pack.random_caption()
+        taunt = self.pack.random_caption()
         self.show_taunt(taunt)
-        
+
         # Schedule next taunt
         next_taunt_time = random.randint(8000, 20000) # 8-20 seconds
         self.master.after(next_taunt_time, self.start_taunting)
