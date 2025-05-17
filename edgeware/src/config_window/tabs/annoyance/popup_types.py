@@ -51,7 +51,7 @@ class PopupTypesTab(ScrollFrame):
         popup_image_section = ConfigSection(self.viewPort, "Image Popups", IMAGE_TEXT)
         popup_image_section.pack()
 
-        ConfigScale(popup_image_section, label="Popup Chance (%)", from_=0, to=100, variable=vars.image_chance).pack()
+        ConfigScale(popup_image_section, label="Image Popup Chance (%)", from_=0, to=100, variable=vars.image_chance).pack()
 
         # Audio
         audio_section = ConfigSection(self.viewPort, "Audio Popups", AUDIO_TEXT)
