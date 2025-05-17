@@ -9,9 +9,17 @@
 
 **Since last version...**
 
+•*Removed the toggle setting for max audio and max videos, as it was pretty much pointless (you can just set the maximum to 50 etc if you want these uncapped)*
+
+•*Added a "Audio Volume" setting*
+
+Major reorganization effort in the config window. This includes:
+
 •*Reworked several config window tabs into a less compact (but easier to understand) format. The end goal is to make each tab less overwhelming to new users, utilizing the scroll bars now implemented into Edgeware++.*
 
 •*Removed the "Hibernate" tab and merged it into "Basic Modes"*
+
+•*Condensed "Popups", "Audio/Video" and "Captions" into "Popup Types" and "Popup Tweaks"*
 
 •*Moved "moving popups" settings to the "Popup" tab, since it wasn't really a mode in the first place*
 
