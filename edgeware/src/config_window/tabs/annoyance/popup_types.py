@@ -48,10 +48,10 @@ class PopupTypesTab(ScrollFrame):
         ConfigScale(popup_freq_row, label="Popup Timer Delay (ms)", from_=10, to=60000, variable=vars.delay).pack()
 
         # Image
-        popup_freq_section = ConfigSection(self.viewPort, "Image Popups", IMAGE_TEXT)
-        popup_freq_section.pack()
+        popup_image_section = ConfigSection(self.viewPort, "Image Popups", IMAGE_TEXT)
+        popup_image_section.pack()
 
-        ConfigScale(popup_freq_row, label="Popup Chance (%)", from_=0, to=100, variable=vars.image_chance).pack()
+        ConfigScale(popup_image_section, label="Popup Chance (%)", from_=0, to=100, variable=vars.image_chance).pack()
 
         # Audio
         audio_section = ConfigSection(self.viewPort, "Audio Popups", AUDIO_TEXT)
@@ -79,7 +79,7 @@ class PopupTypesTab(ScrollFrame):
         web_section = ConfigSection(self.viewPort, "Website Popups")
         web_section.pack()
         ConfigScale(web_section, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
-        
+
         # Prompts
         prompt_section = ConfigSection(self.viewPort, "Prompt Popups")
         prompt_section.pack()
