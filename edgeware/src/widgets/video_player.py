@@ -52,7 +52,7 @@ class VideoPlayer(Label):
                     self.properties["gpu-context"] = context
                     break
                 except TypeError:
-                    logging.info(f"mpv GPU context {context} is not supported")
+                    logging.warning(f"mpv GPU context {context} is not supported")
 
     def play(self, media: Path, overlay: Image.Image | None = None) -> None:
         if not self.settings.mpv_subprocess:

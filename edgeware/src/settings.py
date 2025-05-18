@@ -27,6 +27,7 @@ from typing import Callable, Tuple
 
 from paths import DEFAULT_PACK_PATH, Assets, Data, Process
 from voluptuous import All, Range, Schema, Union
+from voluptuous.error import Invalid
 
 NONNEGATIVE = Schema(All(int, Range(min=0)))
 PERCENTAGE = Schema(All(int, Range(min=0, max=100)))
@@ -232,11 +233,19 @@ class Settings:
                 self.corruption_safe_range[item.key] = item.safe_range
 
     def load_settings(self) -> None:
+        default_config = load_default_config()
         for name, item in CONFIG_ITEMS.items():
             if not item.setting:
                 continue
             value = self.config[item.key]
-            item.schema(value)
+
+            try:
+                item.schema(value)
+            except Invalid:
+                default_value = default_config[item.key]
+                logging.warning(f'Invalid value "{value}" for config "{item.key}", using default value "{default_value}"')
+                value = default_value
+
             setattr(self, name, item.setting(value))
 
         # TODO: Include these in CONFIG_ITEMS?
@@ -261,13 +270,21 @@ class Vars:
 
     def __init__(self, config: dict) -> None:
         self.config = config
+        default_config = load_default_config()
 
         self.config["packPath"] = self.config["packPath"] or "default"
         for name, item in CONFIG_ITEMS.items():
             if not item.var:
                 continue
             value = self.config[item.key]
-            item.schema(value)
+
+            try:
+                item.schema(value)
+            except Invalid:
+                default_value = default_config[item.key]
+                logging.warning(f'Invalid value "{value}" for config "{item.key}", using default value "{default_value}"')
+                value = default_value
+
             setattr(self, name, self.make(item.var, item.key))
 
     def make(self, var_init: type[ConfigVar], key: str) -> ConfigVar:
