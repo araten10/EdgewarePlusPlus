@@ -73,7 +73,7 @@ class PopupTypesTab(ScrollFrame):
 
         ConfigScale(video_row, label="Video Popup Chance (%)", from_=0, to=100, variable=vars.video_chance).pack()
         ConfigScale(video_row, label="Max Video Popups", from_=1, to=50, variable=vars.max_video).pack()
-        ConfigScale(video_row, label="Video Volume (%)", from_=1, to=100, variable=vars.video_volume).pack()
+        ConfigScale(video_row, label="Video Volume (%)", from_=0, to=100, variable=vars.video_volume).pack()
 
         # Website
         web_section = ConfigSection(self.viewPort, "Website Popups")
