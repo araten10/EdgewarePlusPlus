@@ -23,13 +23,13 @@ from config.window.utils import (
     config,
     set_widget_states,
 )
-from screeninfo import Monitor, get_monitors
-from widgets.config_widgets import (
+from config.window.widgets.layout import (
     ConfigScale,
     ConfigToggle,
 )
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
+from screeninfo import Monitor, get_monitors
 
 OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
 

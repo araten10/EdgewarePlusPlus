@@ -19,12 +19,12 @@ from tkinter import Message
 from tkinter.font import Font
 
 from config.vars import Vars
-from widgets.config_widgets import (
+from config.window.widgets.layout import (
     ConfigRow,
     ConfigScale,
     ConfigSection,
 )
-from widgets.scroll_frame import ScrollFrame
+from config.window.widgets.scroll_frame import ScrollFrame
 
 INTRO_TEXT = 'This tab dictates the frequency of every popup type you will see during runtime, which in turn affects nearly every other tab in the config window! Each popup here will have a short description to help you decide how much you want to see of it. To check and see what types of popups your currently loaded pack supports, you can head on over to "Pack Info" (Underneath "General") and see how much media there is of each type.\n\nThe "Popup Timer Delay" setting affects the duration between each popup spawning, no matter the type. Once the timer has elapsed, a new popup will spawn, and then the type is randomly chosen from the chances set. It\'s recommended that you don\'t set this number too low to start- try 8000ms-10000ms (8-10 seconds) and adjust it from there based on how you feel!'
 IMAGE_TEXT = "Image popups are the most common type of popup. Every single pack will have these, and most of your time using Edgeware++ will be spent staring at these lovely things~\n\nThe reason a percentage slider exists for this is to create a more inconsistent experience. If no probability slider is set to 100% on this tab, there's a chance that nothing will spawn. If you want Edgeware++ to surprise you, consider turning this down to 60% or so!"

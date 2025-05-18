@@ -33,8 +33,8 @@ from config.window.utils import (
     assign,
     set_widget_states,
 )
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
 
 
 class HibernateModeTab(ScrollFrame):

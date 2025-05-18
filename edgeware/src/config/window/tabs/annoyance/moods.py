@@ -35,9 +35,9 @@ from config.vars import Vars
 from config.window.utils import (
     config,
 )
+from config.window.widgets.scroll_frame import ScrollFrame
 from pack import Pack
 from ttkwidgets import CheckboxTreeview
-from widgets.scroll_frame import ScrollFrame
 
 MOOD_TEXT = 'Moods are a very important part of edgeware, but also something completely optional to the end-user. Every piece of media has a mood attached to it, and edgeware checks to see if that mood is enabled before deciding to show it. Think of moods like booru tags, categories, or genres.\n\nIn this tab you can disable or enable moods. Don\'t like a particular fetish included in a pack? Turn it off! By default, all moods are turned on...\n\n...Except for packs that utilize corruption. A more in-depth explanation can be found on the "corruption" tab (under modes), but the quick summary is that corruption turns on and off moods automatically over a period of time.\n\nPS: Moods date back all the way to the original edgeware- they just had no purpose. Because of this, every pack is "compatible" with the moods feature- but most older ones just have everything set to "default", which might not show up in this window.'
 

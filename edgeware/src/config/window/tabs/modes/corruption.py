@@ -32,18 +32,18 @@ from config.window.utils import (
     clear_launches,
     set_widget_states,
 )
-from pack import Pack
-from paths import Assets
-from PIL import ImageTk
-from widgets.config_widgets import (
+from config.window.widgets.layout import (
     ConfigDropdown,
     ConfigRow,
     ConfigScale,
     ConfigSection,
     ConfigToggle,
 )
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
+from pack import Pack
+from paths import Assets
+from PIL import ImageTk
 
 INTRO_TEXT = 'Corruption is a highly specialized mode that packs have to explicitly support. When corruption is enabled, it will turn off and on moods based on a trigger set down below. For example, a pack might start off with only vanilla moods but get more fetish-oriented every 10 popups opened.\n\n"Full Permissions Mode" can be enabled to allow the pack to change Edgeware++ settings on top of also changing moods. While this allows for very unique packs with lots of changes, this can also be potentially dangerous. Only turn it on for packs you trust!'
 TRIGGER_TEXT = 'Triggers are the goals that define how corruption changes over time. Whenever the selected condition is reached, they tell Edgeware++ to advance to the next "corruption level". Each setting is per level transition, *not* the total time it takes for corruption to finish.\n\nFor example, let\'s say you set the trigger type to "timed" and the time to 60 seconds. That means that every 60 seconds you run Edgeware++ the corruption level will increase, changing the current moods available.\n\nAdditionally, you can change the behaviour of how Edgeware++ transitions from level to level. For example, "Abrupt" will immediately change to the next moods when the trigger condition is met, whereas "Normal" will gradually increase the chance of pulling media from the next corruption level up until the trigger condition.'

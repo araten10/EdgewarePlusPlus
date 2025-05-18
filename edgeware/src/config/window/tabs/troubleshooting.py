@@ -31,15 +31,15 @@ import os_utils
 import utils
 from config.vars import Vars
 from config.window.utils import log_file
-from pack import Pack
-from paths import Data
-from widgets.config_widgets import (
+from config.window.widgets.layout import (
     ConfigRow,
     ConfigSection,
     ConfigToggle,
 )
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
+from pack import Pack
+from paths import Data
 
 
 def get_log_number() -> int:

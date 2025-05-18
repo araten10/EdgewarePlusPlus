@@ -30,9 +30,9 @@ from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.utils import set_widget_states
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
 
 MULTI_PACK_TEXT = 'NOTE: If you have multiple packs loaded, make sure to apply the pack you want using the "Switch Pack" button at the bottom of the window! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
 

@@ -23,11 +23,11 @@ import booru
 import requests
 from config.settings import Settings
 from features.popup import Popup
+from features.video_player import VideoPlayer
 from pack import Pack
 from PIL import Image, ImageTk
 from roll import roll
 from state import State
-from widgets.video_player import VideoPlayer
 
 
 class ImagePopup(Popup):

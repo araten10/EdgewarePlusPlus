@@ -27,8 +27,8 @@ from tkinter import (
 from tkinter.font import Font
 
 from config.vars import Vars
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
 
 INTRO_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
 CAPTION_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."

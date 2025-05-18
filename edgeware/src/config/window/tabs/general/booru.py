@@ -35,7 +35,7 @@ from config.window.utils import (
     reset_list,
     set_widget_states_with_colors,
 )
-from widgets.scroll_frame import ScrollFrame
+from config.window.widgets.scroll_frame import ScrollFrame
 
 
 class BooruTab(ScrollFrame):

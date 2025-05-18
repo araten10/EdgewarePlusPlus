@@ -21,9 +21,9 @@ from tkinter import Label, Toplevel
 import os_utils
 import utils
 from config.settings import Settings
+from features.video_player import VideoPlayer
 from pack import Pack
 from PIL import Image, ImageTk
-from widgets.video_player import VideoPlayer
 
 
 class StartupSplash(Toplevel):

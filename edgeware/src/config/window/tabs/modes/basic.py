@@ -22,8 +22,8 @@ from tkinter import (
 from tkinter.font import Font
 
 from config.vars import Vars
-from widgets.config_widgets import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
-from widgets.scroll_frame import ScrollFrame
+from config.window.widgets.layout import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
+from config.window.widgets.scroll_frame import ScrollFrame
 
 LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with popup timeout or high delay as popups will stack on top of eachother."
 HIBERNATE_TEXT = "Runs Edgeware++ covertly, without any popups. Instead, after a certain amount of time a barrage of popups will all spawn at once depending on the hibernate mode set.\n\nMinimum/maximum sleep durations determine the range of the payload timer- hibernate mode will activate sometime between these two values.\nAwaken activity determines the intensity of the hibernate mode payload, essentially the amount of popups spawned when it triggers.\nMax activity length is how long the payload lasts, if using a hibernate type that has a duration."

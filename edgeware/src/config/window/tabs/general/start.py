@@ -38,13 +38,13 @@ from tkinter.font import Font
 from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
 from config.window.utils import BUTTON_FACE, all_children, set_widget_states
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
 from panic import send_panic
 from paths import CustomAssets
 from PIL import ImageTk
 from pynput import keyboard
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
 
 INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
 PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'

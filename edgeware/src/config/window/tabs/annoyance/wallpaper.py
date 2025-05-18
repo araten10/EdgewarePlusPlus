@@ -37,11 +37,11 @@ from config.window.utils import (
     config,
     set_widget_states,
 )
+from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
-from widgets.scroll_frame import ScrollFrame
-from widgets.tooltip import CreateToolTip
 
 ROTATE_TEXT = "Turning on wallpaper rotate disables built-in pack wallpapers, allowing you to cycle through your own instead. Keep in mind some packs use the corruption feature to rotate wallpapers without this setting enabled."
 PANIC_TEXT = "This is the panic wallpaper, make sure to set it to your default wallpaper ASAP! Otherwise quitting edgeware via panic will leave you with a nice and generic windows one instead."

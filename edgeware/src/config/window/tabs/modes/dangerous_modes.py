@@ -23,14 +23,14 @@ from tkinter import (
 from tkinter.font import Font
 
 from config.vars import Vars
-from widgets.config_widgets import (
+from config.window.widgets.layout import (
     ConfigRow,
     ConfigScale,
     ConfigSection,
     ConfigToggle,
     set_enabled_when,
 )
-from widgets.scroll_frame import ScrollFrame
+from config.window.widgets.scroll_frame import ScrollFrame
 
 TIMER_TEXT = 'Makes it so you cannot panic for a specified duration, essentially forcing you to endure the payload until the timer is up.\n\nA safeword can be used if you wish to still use panic during this time. It is recommended that you generate one via a password generator/keysmash and save it somewhere easily accessible; not only does this help in emergency situations where you need to turn off Edgeware++, but also makes it harder to memorize so the "fetishistic danger" remains.'
 MITOSIS_TEXT = "When a popup is closed, more popups will spawn in its place depending on the mitosis strength.\n\nWhile not dangerous by itself, this can easily cause performance issues and other problems if the popup delay is set too low and mitosis strength too high. It is generally safe to experiment with this at slower popup intervals, but make sure you know what you're doing before increasing it too high."
