@@ -16,6 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import io
+import logging
 import subprocess
 import sys
 from pathlib import Path
@@ -43,7 +44,15 @@ class VideoPlayer(Label):
         }
 
         if os_utils.is_linux():
-            self.properties["gpu-context"] = "x11"  # Required on Wayland for embedding the player
+            # Required on Wayland for embedding the player
+            temp = mpv.MPV()
+            for context in ["x11", "x11egl", "x11vk"]:
+                try:
+                    temp["gpu-context"] = context  # Check if context is supported
+                    self.properties["gpu-context"] = context
+                    break
+                except TypeError:
+                    logging.info(f"mpv GPU context {context} is not supported")
 
     def play(self, media: Path, overlay: Image.Image | None = None) -> None:
         if not self.settings.mpv_subprocess:
