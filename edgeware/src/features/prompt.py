@@ -20,9 +20,9 @@ from typing import Callable
 
 import os_utils
 import utils
+from config.settings import Settings
 from features.theme import get_theme
 from pack import Pack
-from settings import Settings
 from state import State
 
 
@@ -62,7 +62,7 @@ class Prompt(Toplevel):
             bg=self.theme.bg,
             activeforeground=self.theme.fg,
             activebackground=self.theme.bg,
-            font=self.theme.font[0] + " " + str(self.theme.font[1]),
+            font=self.theme.font,
         )
         button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 

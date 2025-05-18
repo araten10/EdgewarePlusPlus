@@ -18,12 +18,12 @@
 from pathlib import Path
 from tkinter import Tk
 
+from config.settings import Settings
 from features.popup import Popup
+from features.video_player import VideoPlayer
 from pack import Pack
-from settings import Settings
 from state import State
 from videoprops import get_video_properties
-from widgets.video_player import VideoPlayer
 
 
 class VideoPopup(Popup):

@@ -26,6 +26,7 @@ from tkinter import Tk
 
 import os_utils
 import pystray
+from config.settings import Settings
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from pack import Pack
@@ -36,18 +37,18 @@ from pygame import mixer
 from pynput import keyboard
 from pypresence import Presence
 from roll import roll
-from settings import Settings
 from state import State
 
 
-def play_audio(pack: Pack, audio: Path | None = None) -> None:
+def play_audio(settings: Settings, pack: Pack, audio: Path | None = None) -> None:
     # Pygame will not stop additional sounds from being played when the max is
     # reached, so we need to check if there are empty channels
     audio = audio or pack.random_audio()
     if audio and mixer.find_channel():
-        sound = mixer.Sound(str(audio))
-        # TODO POTENTIAL SETTINGS: Volume, fadein, fadeout, separating music from sounds
+        # TODO POTENTIAL SETTINGS: Fade in and out, separating music from sounds
         # https://www.pygame.org/docs/ref/mixer.html#pygame.mixer.Sound
+        sound = mixer.Sound(str(audio))
+        sound.set_volume(settings.audio_volume)
         sound.play()
 
 

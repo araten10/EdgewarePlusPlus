@@ -26,8 +26,8 @@ DEFAULT_PACK_PATH = PATH / "resource"
 class Process:
     ROOT = PATH / "src"
 
-    CONFIG = ROOT / "config.py"
-    MAIN = ROOT / "main.py"
+    CONFIG = ROOT / "main_config.py"
+    MAIN = ROOT / "main_edgeware.py"
     PANIC = ROOT / "panic.py"
 
     LINUX_MPV = ROOT / "os_utils" / "linux_mpv_subprocess.py"

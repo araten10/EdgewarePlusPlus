@@ -22,12 +22,12 @@ from threading import Thread
 from tkinter import Tk
 
 import os_utils
+from config.settings import Settings
 from features.drive import fill_drive
 from features.misc import handle_wallpaper
 from pack import Pack
 from paths import CustomAssets
 from roll import RollTarget, roll_targets
-from settings import Settings
 from state import State
 
 

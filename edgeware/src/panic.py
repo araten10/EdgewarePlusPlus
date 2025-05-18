@@ -37,8 +37,8 @@ from threading import Thread
 from tkinter import Tk, simpledialog
 
 import os_utils
+from config.settings import Settings
 from paths import CustomAssets
-from settings import Settings
 from state import State
 
 ADDRESS = ("localhost", 6000)

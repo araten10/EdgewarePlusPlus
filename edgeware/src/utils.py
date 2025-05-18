@@ -23,9 +23,9 @@ import sys
 import time
 from hashlib import md5
 
+from config.settings import Settings
 from paths import Data, PackPaths
 from screeninfo import Monitor, get_monitors
-from settings import Settings
 
 
 class RedactUsernameFormatter(logging.Formatter):

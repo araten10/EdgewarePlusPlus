@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 
-from settings import Settings
+from config.settings import Settings
 
 
 @dataclass

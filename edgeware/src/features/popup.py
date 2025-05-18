@@ -25,6 +25,7 @@ from tkinter import Button, Label, TclError, Tk, Toplevel
 
 import os_utils
 import utils
+from config.settings import Settings
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
@@ -34,7 +35,6 @@ from panic import panic
 from paths import Data
 from PIL import ImageFilter
 from roll import roll
-from settings import Settings
 from state import State
 
 
@@ -160,9 +160,9 @@ class Popup(Toplevel):
                 if mood in level.moods:
                     levels.append(self.pack.corruption_levels.index(level) + 1)
 
-            label_mood = Label(self, text=f"Popup mood: {mood}", fg=self.theme.fg, bg=self.theme.bg)
-            label_level = Label(self, text=f"Valid Levels: {levels}", fg=self.theme.fg, bg=self.theme.bg)
-            label_current_level = Label(self, text=f"Current Level: {self.state.corruption_level}", fg=self.theme.fg, bg=self.theme.bg)
+            label_mood = Label(self, text=f"Popup mood: {mood}", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
+            label_level = Label(self, text=f"Valid Levels: {levels}", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
+            label_current_level = Label(self, text=f"Current Level: {self.state.corruption_level}", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
 
             label_mood.place(x=5, y=(self.height // 2))
             label_level.place(x=5, y=(self.height // 2 + label_mood.winfo_reqheight() + 2))
@@ -180,7 +180,7 @@ class Popup(Toplevel):
                 bg=self.theme.bg,
                 activeforeground=self.theme.fg,
                 activebackground=self.theme.bg,
-                font=self.theme.font[0] + " " + str(self.theme.font[1]),
+                font=self.theme.font,
             )
             button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 
