@@ -21,11 +21,11 @@ from tkinter import Label, Tk
 
 import booru
 import requests
+from config.settings import Settings
 from features.popup import Popup
 from pack import Pack
 from PIL import Image, ImageTk
 from roll import roll
-from settings import Settings
 from state import State
 from widgets.video_player import VideoPlayer
 

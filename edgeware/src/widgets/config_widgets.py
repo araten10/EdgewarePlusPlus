@@ -31,8 +31,8 @@ from tkinter import (
 )
 from typing import Tuple
 
-from config_window.utils import assign, set_widget_states
-from settings import ConfigVar
+from config.vars import ConfigVar
+from config.window.utils import assign, set_widget_states
 
 PAD = 4
 

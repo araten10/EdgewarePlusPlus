@@ -26,15 +26,15 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from config_window.preset import apply_preset
-from config_window.utils import (
+from config.vars import Vars
+from config.window.preset import apply_preset
+from config.window.utils import (
     clear_launches,
     set_widget_states,
 )
 from pack import Pack
 from paths import Assets
 from PIL import ImageTk
-from settings import Vars
 from widgets.config_widgets import (
     ConfigDropdown,
     ConfigRow,

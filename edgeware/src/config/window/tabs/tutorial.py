@@ -19,7 +19,7 @@ from pathlib import Path
 from tkinter import Event, Frame, Label, Message, Tk, Toplevel, font, ttk
 from tkinter.font import Font
 
-from config_window.utils import (
+from config.window.utils import (
     all_children,
     config,
 )

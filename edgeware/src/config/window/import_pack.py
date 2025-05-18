@@ -21,8 +21,9 @@ import zipfile
 from pathlib import Path
 from tkinter import filedialog, messagebox
 
-from config_window.utils import confirm_overwrite, refresh
 from paths import DEFAULT_PACK_PATH, Data, PackPaths
+
+from config.window.utils import confirm_overwrite, refresh
 
 
 def import_pack(default: bool) -> None:

@@ -21,10 +21,10 @@ import time
 from tkinter import Tk, messagebox
 
 import os_utils
+from config.settings import Settings
 from pack import Pack
 from paths import Data
 from roll import roll
-from settings import Settings
 from state import State
 
 

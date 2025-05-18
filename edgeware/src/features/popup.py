@@ -25,6 +25,7 @@ from tkinter import Button, Label, TclError, Tk, Toplevel
 
 import os_utils
 import utils
+from config.settings import Settings
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
@@ -34,7 +35,6 @@ from panic import panic
 from paths import Data
 from PIL import ImageFilter
 from roll import roll
-from settings import Settings
 from state import State
 
 

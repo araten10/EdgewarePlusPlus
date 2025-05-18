@@ -15,26 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-if __name__ == "__main__":
-    import os
-
-    from paths import Data
-
-    # Fix scaling on high resolution displays
-    try:
-        from ctypes import windll
-
-        windll.shcore.SetProcessDpiAwareness(0)  # Tell Windows that you aren't DPI aware.
-    except Exception:
-        pass  # Fails on non-Windows systems or if shcore is not available
-
-    # Add mpv to PATH
-    os.environ["PATH"] += os.pathsep + str(Data.ROOT)
-
 import ast
 import json
 import logging
-import traceback
+import os
 from tkinter import (
     Button,
     Canvas,
@@ -54,33 +38,35 @@ from tkinter import (
     ttk,
 )
 
-from config_window.import_pack import import_pack
-from config_window.tabs.annoyance.captions import CaptionsTab
-from config_window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
-from config_window.tabs.annoyance.moods import MoodsTab
-from config_window.tabs.annoyance.popup_tweaks import PopupTweaksTab
-from config_window.tabs.annoyance.popup_types import PopupTypesTab
-from config_window.tabs.annoyance.wallpaper import WallpaperTab
-from config_window.tabs.general.booru import BooruTab
-from config_window.tabs.general.default_file import DefaultFileTab
-from config_window.tabs.general.info import InfoTab
-from config_window.tabs.general.start import StartTab
-from config_window.tabs.modes.basic import BasicModesTab
-from config_window.tabs.modes.corruption import CorruptionModeTab
-from config_window.tabs.modes.dangerous_modes import DangerousModesTab
-from config_window.tabs.troubleshooting import TroubleshootingTab
-from config_window.tabs.tutorial import open_tutorial
-from config_window.utils import (
+from pack import Pack
+from pack.data import UniversalSet
+from paths import DEFAULT_PACK_PATH, CustomAssets, Data
+
+from config import load_default_config
+from config.vars import Vars
+from config.window.import_pack import import_pack
+from config.window.tabs.annoyance.captions import CaptionsTab
+from config.window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
+from config.window.tabs.annoyance.moods import MoodsTab
+from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
+from config.window.tabs.annoyance.popup_types import PopupTypesTab
+from config.window.tabs.annoyance.wallpaper import WallpaperTab
+from config.window.tabs.general.booru import BooruTab
+from config.window.tabs.general.default_file import DefaultFileTab
+from config.window.tabs.general.info import InfoTab
+from config.window.tabs.general.start import StartTab
+from config.window.tabs.modes.basic import BasicModesTab
+from config.window.tabs.modes.corruption import CorruptionModeTab
+from config.window.tabs.modes.dangerous_modes import DangerousModesTab
+from config.window.tabs.troubleshooting import TroubleshootingTab
+from config.window.tabs.tutorial import open_tutorial
+from config.window.utils import (
     all_children,
     config,
     get_live_version,
     refresh,
     write_save,
 )
-from pack import Pack
-from pack.data import UniversalSet
-from paths import DEFAULT_PACK_PATH, CustomAssets, Data
-from settings import Vars, load_default_config
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()
@@ -97,7 +83,7 @@ if not pack.info.mood_file.is_file() or isinstance(pack.active_moods, UniversalS
         f.write(json.dumps({"active": list(map(lambda mood: mood.name, pack.index.moods))}))
 
 
-class Config(Tk):
+class ConfigWindow(Tk):
     def __init__(self) -> None:
         global config, vars
         super().__init__()
@@ -422,11 +408,3 @@ def switch_window(parent: Tk, vars: Vars) -> None:
     Button(switch_buttons_frame, text="Switch", command=lambda: switch_pack(vars, get_list_entry(switch_list))).pack(side="left")
     Button(switch_buttons_frame, text="Default", command=lambda: switch_pack(vars, "default")).pack(side="left", padx=5)
     Button(switch_buttons_frame, text="Cancel", command=lambda: root.destroy()).pack(side="left")
-
-
-if __name__ == "__main__":
-    try:
-        Config()
-    except Exception as e:
-        logging.fatal(f"Config encountered fatal error: {e}\n\n{traceback.format_exc()}")
-        messagebox.showerror("Could not start", f"Could not start config.\n[{e}]")

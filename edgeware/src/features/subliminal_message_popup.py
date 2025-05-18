@@ -19,9 +19,9 @@ from tkinter import Label, Toplevel
 
 import os_utils
 import utils
+from config.settings import Settings
 from features.theme import get_theme
 from pack import Pack
-from settings import Settings
 
 
 class SubliminalMessagePopup(Toplevel):

@@ -22,7 +22,7 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from settings import Vars
+from config.vars import Vars
 from widgets.config_widgets import (
     ConfigRow,
     ConfigScale,

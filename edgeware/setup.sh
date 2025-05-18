@@ -45,6 +45,6 @@ shortcut() {
     fi
 }
 
-shortcut "main" "edgeware"
-shortcut "config"
+shortcut "main_edgeware" "edgeware"
+shortcut "main_config" "config"
 shortcut "panic"

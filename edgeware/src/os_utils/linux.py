@@ -24,8 +24,8 @@ from pathlib import Path
 from tkinter import Toplevel
 
 import mpv
+from config import load_default_config
 from paths import CustomAssets, Process
-from settings import load_default_config
 
 from os_utils.linux_utils import get_desktop_environment, get_wallpaper_commands, get_wallpaper_function
 

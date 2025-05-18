@@ -32,14 +32,14 @@ from tkinter import (
     simpledialog,
 )
 
-from config_window.utils import (
+from config.vars import Vars
+from config.window.utils import (
     config,
     set_widget_states,
 )
 from pack import Pack
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
-from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

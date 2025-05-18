@@ -25,6 +25,7 @@ from tkinter import Tk
 
 import os_utils
 import pystray
+from config.settings import Settings
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from pack import Pack
@@ -35,7 +36,6 @@ from pygame import mixer
 from pynput import keyboard
 from pypresence import Presence
 from roll import roll
-from settings import Settings
 from state import State
 
 

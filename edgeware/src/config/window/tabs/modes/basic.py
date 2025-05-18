@@ -21,7 +21,7 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from settings import Vars
+from config.vars import Vars
 from widgets.config_widgets import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
 from widgets.scroll_frame import ScrollFrame
 

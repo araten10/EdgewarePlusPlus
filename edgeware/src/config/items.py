@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Araten & Marigold
+# Copyright (C) 2025 Araten & Marigold
 #
 # This file is part of Edgeware++.
 #
@@ -16,18 +16,11 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import ast
-import json
-import logging
-import shutil
-import subprocess
-import sys
 from dataclasses import dataclass
 from tkinter import BooleanVar, IntVar, StringVar
 from typing import Callable, Tuple
 
-from paths import DEFAULT_PACK_PATH, Assets, Data, Process
 from voluptuous import All, Range, Schema, Union
-from voluptuous.error import Invalid
 
 NONNEGATIVE = Schema(All(int, Range(min=0)))
 PERCENTAGE = Schema(All(int, Range(min=0, max=100)))
@@ -179,122 +172,3 @@ CONFIG_ITEMS = {
     "mpv_subprocess": Item("mpvSubprocess", BOOLEAN, BooleanVar, bool, block=True),
 }
 # fmt: on
-
-
-def first_launch_configure() -> None:
-    if not Data.CONFIG.is_file():
-        subprocess.run([sys.executable, Process.CONFIG, "--first-launch-configure"])
-
-
-def load_config() -> dict:
-    if not Data.CONFIG.is_file():
-        Data.ROOT.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(Assets.DEFAULT_CONFIG, Data.CONFIG)
-
-    default_config = load_default_config()
-    with open(Data.CONFIG, "r+") as f:
-        config = json.loads(f.read())
-
-        new_keys = False
-        for key, value in default_config.items():
-            if key not in config:
-                config[key] = value
-                new_keys = True
-
-        if new_keys:
-            f.seek(0)
-            f.write(json.dumps(config))
-            f.truncate()
-
-    return config
-
-
-def load_default_config() -> dict:
-    with open(Assets.DEFAULT_CONFIG) as f:
-        default_config = json.loads(f.read())
-
-    return default_config
-
-
-class Settings:
-    corruption_block = []
-    corruption_danger = []
-    corruption_safe_range = {}
-
-    def __init__(self) -> None:
-        self.config = load_config()
-        self.load_settings()
-        logging.info(f"Config loaded: {self.config}")
-
-        for item in CONFIG_ITEMS.values():
-            if item.block:
-                self.corruption_block.append(item.key)
-            if item.danger:
-                self.corruption_danger.append(item.key)
-            if item.safe_range:
-                self.corruption_safe_range[item.key] = item.safe_range
-
-    def load_settings(self) -> None:
-        default_config = load_default_config()
-        for name, item in CONFIG_ITEMS.items():
-            if not item.setting:
-                continue
-            value = self.config[item.key]
-
-            try:
-                item.schema(value)
-            except Invalid:
-                default_value = default_config[item.key]
-                logging.warning(f'Invalid value "{value}" for config "{item.key}", using default value "{default_value}"')
-                value = default_value
-
-            setattr(self, name, item.setting(value))
-
-        self.pack_path = Data.PACKS / self.pack_path if self.pack_path else DEFAULT_PACK_PATH
-        self.subliminal_chance = self.subliminal_chance if self.popup_subliminals else 0
-        self.denial_chance = self.denial_chance if self.denial_mode else 0
-        self.hibernate_fix_wallpaper = self.hibernate_fix_wallpaper and self.hibernate_mode
-
-        import os_utils  # Circular import
-
-        self.mpv_subprocess = self.mpv_subprocess and os_utils.is_linux()
-
-
-ConfigVar = IntVar | BooleanVar | StringVar
-
-
-class Vars:
-    entries: dict[str, ConfigVar] = {}
-
-    def __init__(self, config: dict) -> None:
-        self.config = config
-        default_config = load_default_config()
-
-        self.config["packPath"] = self.config["packPath"] or "default"
-        for name, item in CONFIG_ITEMS.items():
-            if not item.var:
-                continue
-            value = self.config[item.key]
-
-            try:
-                item.schema(value)
-            except Invalid:
-                default_value = default_config[item.key]
-                logging.warning(f'Invalid value "{value}" for config "{item.key}", using default value "{default_value}"')
-                value = default_value
-
-            setattr(self, name, self.make(item.var, item.key))
-
-    def make(self, var_init: type[ConfigVar], key: str) -> ConfigVar:
-        value = self.config[key]
-        var = var_init()
-        match var:
-            case IntVar():
-                var.set(int(value))
-            case BooleanVar():
-                var.set(bool(value))
-            case StringVar():
-                var.set(value.strip())
-
-        self.entries[key] = var
-        return var

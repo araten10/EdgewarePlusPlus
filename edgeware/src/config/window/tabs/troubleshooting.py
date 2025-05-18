@@ -29,10 +29,10 @@ from tkinter.font import Font
 
 import os_utils
 import utils
-from config_window.utils import log_file
+from config.vars import Vars
+from config.window.utils import log_file
 from pack import Pack
 from paths import Data
-from settings import Vars
 from widgets.config_widgets import (
     ConfigRow,
     ConfigSection,

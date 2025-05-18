@@ -27,14 +27,14 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from config_window.utils import (
+from config.vars import Vars
+from config.window.utils import (
     add_list,
     config,
     remove_list_,
     reset_list,
     set_widget_states_with_colors,
 )
-from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 
 

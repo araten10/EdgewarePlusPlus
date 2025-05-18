@@ -35,14 +35,14 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from config_window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
-from config_window.utils import BUTTON_FACE, all_children, set_widget_states
+from config.vars import Vars
+from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
+from config.window.utils import BUTTON_FACE, all_children, set_widget_states
 from pack import Pack
 from panic import send_panic
 from paths import CustomAssets
 from PIL import ImageTk
 from pynput import keyboard
-from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

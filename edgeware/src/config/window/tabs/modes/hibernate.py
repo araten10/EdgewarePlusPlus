@@ -28,11 +28,11 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from config_window.utils import (
+from config.vars import Vars
+from config.window.utils import (
     assign,
     set_widget_states,
 )
-from settings import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

@@ -18,12 +18,12 @@
 from tkinter import CENTER, GROOVE, RAISED, BooleanVar, Checkbutton, Frame, Label, Message, Misc, Scale
 from tkinter.font import Font
 
-from config_window.utils import (
+from config.vars import Vars
+from config.window.utils import (
     config,
     set_widget_states,
 )
 from screeninfo import Monitor, get_monitors
-from settings import Vars
 from widgets.config_widgets import (
     ConfigScale,
     ConfigToggle,

@@ -25,10 +25,10 @@ from tkinter import Label, Misc
 
 import mpv
 import os_utils
+from config.settings import Settings
 from os_utils import close_mpv
 from paths import Process
 from PIL import Image
-from settings import Settings
 
 
 class VideoPlayer(Label):

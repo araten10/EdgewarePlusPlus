@@ -36,6 +36,8 @@ from tkinter import Tk
 
 import pygame
 import utils
+from config import first_launch_configure
+from config.settings import Settings
 from features.corruption import corruption_danger_check, handle_corruption
 from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
@@ -59,7 +61,6 @@ from features.video_popup import VideoPopup
 from pack import Pack
 from panic import start_panic_listener
 from roll import RollTarget, roll_targets
-from settings import Settings, first_launch_configure
 from state import State
 
 

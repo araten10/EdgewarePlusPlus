@@ -26,7 +26,7 @@ from tkinter import (
 )
 from tkinter.font import Font
 
-from settings import Vars
+from config.vars import Vars
 from widgets.scroll_frame import ScrollFrame
 from widgets.tooltip import CreateToolTip
 

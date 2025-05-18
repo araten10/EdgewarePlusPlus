@@ -28,7 +28,9 @@ from tkinter import BooleanVar, IntVar, Listbox, StringVar, TclError, Widget, me
 import os_utils
 import utils
 from paths import Data, Process
-from settings import Vars, load_config
+
+from config import load_config
+from config.vars import Vars
 
 BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"
 

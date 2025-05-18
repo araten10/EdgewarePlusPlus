@@ -24,9 +24,9 @@ from pathlib import Path
 from tkinter import Tk
 
 import filetype
+from config.settings import Settings
 from pack import Pack
 from paths import Data
-from settings import Settings
 from state import State
 
 
