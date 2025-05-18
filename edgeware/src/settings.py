@@ -77,6 +77,7 @@ CONFIG_ITEMS = {
 
     # Booru Downloader
     "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),
+    "booru_tags": Item("tagList", STRING, None, lambda value: value.replace(">", " ")),
     "min_score": Item("booruMinScore", Schema(int), IntVar, int),
 
     # Popups
@@ -119,14 +120,15 @@ CONFIG_ITEMS = {
     "notification_image_chance": Item("notificationImageChance", PERCENTAGE, IntVar, int),
 
     # Wallpaper
+    "wallpapers": Item("wallpaperDat", STRING, None, lambda value: list(ast.literal_eval(value).values())),
     "rotate_wallpaper": Item("rotateWallpaper", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
     "wallpaper_timer": Item("wallpaperTimer", NONNEGATIVE, IntVar, s_to_ms),
     "wallpaper_variance": Item("wallpaperVariance", NONNEGATIVE, IntVar, s_to_ms),
 
     # Dangerous Settings
-    "drive_avoid_list": Item("avoidList", STRING, None, lambda value: str(value).split(">"), block=True),
+    "drive_avoid_list": Item("avoidList", STRING, None, lambda value: value.split(">"), block=True),
     "fill_drive": Item("fill", BOOLEAN, BooleanVar, bool, danger=True),
-    "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: int(value) * 10, danger=True),
+    "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: value * 10, danger=True),
     "replace_images": Item("replace", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
     "replace_threshold": Item("replaceThresh", NONNEGATIVE, IntVar, int, block=True),  # Corruption won't work
     "drive_path": Item("drivePath", STRING, StringVar, str, block=True),  # We can't know what paths exist and they look different on Linux and Windows
@@ -143,7 +145,7 @@ CONFIG_ITEMS = {
 
     # Dangerous Modes
     "timer_mode": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "timer_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: int(value) * 60 * 1000, block=True),  # Corruption won't work
+    "timer_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
     "timer_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
     "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption may not work
     "mitosis_strength": Item("mitosisStrength", NONNEGATIVE, IntVar, int),
@@ -247,10 +249,6 @@ class Settings:
                 value = default_value
 
             setattr(self, name, item.setting(value))
-
-        # TODO: Include these in CONFIG_ITEMS?
-        self.booru_tags = self.config["tagList"].replace(">", " ")  # TODO: Store in a better way
-        self.wallpapers = list(ast.literal_eval(self.config["wallpaperDat"]).values())  # TODO: Can fail, store in a better way
 
         self.pack_path = Data.PACKS / self.pack_path if self.pack_path else DEFAULT_PACK_PATH
         self.subliminal_chance = self.subliminal_chance if self.popup_subliminals else 0
