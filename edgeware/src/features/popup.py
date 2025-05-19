@@ -29,7 +29,6 @@ from config.settings import Settings
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
-from features.theme import get_theme
 from pack import Pack
 from panic import panic
 from paths import Data
@@ -50,7 +49,7 @@ class Popup(Toplevel):
         self.pack = pack
         self.state = state
         self.popup_id = state.get_popup_id()
-        self.theme = get_theme(settings)
+        self.theme = settings.theme
 
         self.denial = roll(self.settings.denial_chance)
 
