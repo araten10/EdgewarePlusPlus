@@ -82,17 +82,6 @@ class PopupTweaksTab(ScrollFrame):
             "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
         )
 
-        single_mode_toggle = ConfigToggle(popup_frame_3, "Single Roll Per Popup", variable=vars.single_mode, cursor="question_arrow")
-        single_mode_toggle.pack()
-        CreateToolTip(
-            single_mode_toggle,
-            'The randomization in Edgeware does not check to see if a previous "roll" succeeded or not when a popup is spawned.\n\n'
-            "For example, if you have audio, videos, and prompts all turned on, there's a very real chance you will get all of them popping up at the same "
-            "time if the percentage for each is high enough.\n\nThis mode ensures that only one of these types will spawn whenever a popup is created. It "
-            "delivers a more consistent experience and less double (or triple) popups.\n\nADVANCED DETAILS: In this mode, the chance of a popup appearing "
-            "is used as a weight to choose a single popup type to spawn.",
-        )
-
         # Overlays
         Label(self.viewPort, text="Popup Overlays", font=title_font, relief=GROOVE).pack(pady=2)
 

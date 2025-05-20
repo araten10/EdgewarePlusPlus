@@ -21,7 +21,6 @@ from typing import Callable
 import os_utils
 import utils
 from config.settings import Settings
-from features.theme import get_theme
 from pack import Pack
 from state import State
 
@@ -34,12 +33,11 @@ class Prompt(Toplevel):
             return
         super().__init__()
 
-        self.theme = get_theme(settings)
         self.on_close = on_close
 
         self.attributes("-topmost", True)
         os_utils.set_borderless(self)
-        self.configure(background=self.theme.bg)
+        self.configure(background=settings.theme.bg)
 
         monitor = utils.primary_monitor()
         width = monitor.width // 4
@@ -48,21 +46,21 @@ class Prompt(Toplevel):
         y = monitor.y + (monitor.height - height) // 2
         self.geometry(f"{width}x{height}+{x}+{y}")
 
-        Label(self, text="\n" + pack.index.default.prompt_command + "\n", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font).pack()
+        Label(self, text="\n" + pack.index.default.prompt_command + "\n", fg=settings.theme.fg, bg=settings.theme.bg, font=settings.theme.font).pack()
 
-        Label(self, text=self.prompt, wraplength=width, fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font).pack()
+        Label(self, text=self.prompt, wraplength=width, fg=settings.theme.fg, bg=settings.theme.bg, font=settings.theme.font).pack()
 
-        input = Text(self, fg=self.theme.text_fg, bg=self.theme.text_bg)
+        input = Text(self, fg=settings.theme.text_fg, bg=settings.theme.text_bg)
         input.pack()
         button = Button(
             self,
             text=pack.index.default.prompt_submit,
             command=lambda: self.submit(settings.prompt_max_mistakes, self.prompt, input.get(1.0, "end-1c")),
-            fg=self.theme.fg,
-            bg=self.theme.bg,
-            activeforeground=self.theme.fg,
-            activebackground=self.theme.bg,
-            font=self.theme.font,
+            fg=settings.theme.fg,
+            bg=settings.theme.bg,
+            activeforeground=settings.theme.fg,
+            activebackground=settings.theme.bg,
+            font=settings.theme.font,
         )
         button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 
