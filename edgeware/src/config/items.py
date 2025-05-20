@@ -59,7 +59,7 @@ class Item:
 CONFIG_ITEMS = {
     # Start
     "pack_path": Item("packPath", Schema(Union(str, None)), StringVar, lambda value: value),
-    "theme": Item("themeType", Schema(Union("Original", "Dark", "The One", "Ransom", "Goth", "Bimbo")), StringVar, lambda value: THEMES.get(value, THEMES["Original"])),
+    "theme": Item("themeType", Schema(Union("Original", "Dark", "The One", "Ransom", "Goth", "Bimbo")), StringVar, lambda value: THEMES[value]),
     "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, None, block=True),
     "startup_splash": Item("showLoadingFlair", BOOLEAN, BooleanVar, bool, block=True),
     "run_on_save_quit": Item("runOnSaveQuit", BOOLEAN, BooleanVar, None, block=True),
