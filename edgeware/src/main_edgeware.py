@@ -31,7 +31,6 @@ if __name__ == "__main__":
     # Add mpv to PATH
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
-import sys
 from threading import Thread
 from tkinter import Tk
 
@@ -131,5 +130,4 @@ if __name__ == "__main__":
     else:
         start_main()
 
-    root.after(5000, sys.exit)
     root.mainloop()

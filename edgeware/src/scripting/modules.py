@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import sys
 from tkinter import Tk
 
 from config.settings import Settings
@@ -33,10 +34,7 @@ from state import State
 
 def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     return {
-        "standard": {
-            "print": lambda env, *args: print(*args),
-            "take_main": lambda env: setattr(state, "main_taken", True),
-        },
+        "standard": {"print": lambda env, *args: print(*args), "take_main": lambda env: setattr(state, "main_taken", True), "exit": lambda env: sys.exit()},
         "edgeware": {
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             "image": lambda env, image: ImagePopup(root, settings, pack, state, pack.paths.image / image if image else None),
