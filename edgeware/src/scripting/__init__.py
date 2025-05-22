@@ -21,19 +21,11 @@ from tkinter import Tk
 from typing import Callable
 
 from config.settings import Settings
-from features.image_popup import ImagePopup
-from features.misc import (
-    display_notification,
-    open_web,
-    play_audio,
-)
-from features.prompt import Prompt
-from features.subliminal_message_popup import SubliminalMessagePopup
-from features.video_popup import VideoPopup
 from pack import Pack
 from state import State
 
 from scripting.environment import Environment
+from scripting.modules import get_modules
 from scripting.tokens import Tokens
 
 UN_OPS = {"-": operator.neg, "#": len, "not": operator.not_}
@@ -328,29 +320,12 @@ class Block:
 
 
 def run_script(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
-    modules = {
-        "edgeware": {
-            "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
-            "image": lambda env, image: ImagePopup(root, settings, pack, state, pack.paths.image / image if image else None),
-            "video": lambda env, video: VideoPopup(root, settings, pack, state, pack.paths.video / video if video else None),
-            "audio": lambda env, audio: play_audio(pack, pack.paths.audio / audio if audio else None),
-            "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, (lambda: on_close(env)) if on_close else None),
-            "web": lambda env, web: open_web(pack, web),
-            "subliminal_message": lambda env, subliminal_message: SubliminalMessagePopup(settings, pack, subliminal_message),
-            "notification": lambda env, notification: display_notification(settings, pack, notification),
-        }
-    }
-
+    modules = get_modules(root, settings, pack, state)
     def require(env: Environment, module: str) -> None:
         for name, value in modules[module].items():
             env.assign(name, value)
 
-    env = Environment(
-        {
-            "print": lambda env, *args: print(*args),
-            "require": require,
-        }
-    )
+    env = Environment({"require": require})
 
     with open(pack.paths.script, "r") as f:
         script = f.read()

@@ -16,6 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+import math
 import random
 import time
 import webbrowser
@@ -40,16 +41,20 @@ from roll import roll
 from state import State
 
 
-def play_audio(settings: Settings, pack: Pack, audio: Path | None = None) -> None:
+def play_audio(root: Tk, settings: Settings, pack: Pack, audio: Path | None = None, on_stop: Callable[[], None] | None = None) -> None:
     # Pygame will not stop additional sounds from being played when the max is
     # reached, so we need to check if there are empty channels
     audio = audio or pack.random_audio()
-    if audio and mixer.find_channel():
-        # TODO POTENTIAL SETTINGS: Fade in and out, separating music from sounds
-        # https://www.pygame.org/docs/ref/mixer.html#pygame.mixer.Sound
-        sound = mixer.Sound(str(audio))
-        sound.set_volume(settings.audio_volume)
-        sound.play()
+    if not (audio and mixer.find_channel()):
+        return
+
+    # TODO POTENTIAL SETTINGS: Fade in and out, separating music from sounds
+    # https://www.pygame.org/docs/ref/mixer.html#pygame.mixer.Sound
+    sound = mixer.Sound(str(audio))
+    sound.set_volume(settings.audio_volume)
+    sound.play()
+    if on_stop:
+        root.after(math.ceil(sound.get_length() * 1000), on_stop)
 
 
 def open_web(pack: Pack, web: str | None = None) -> None:
