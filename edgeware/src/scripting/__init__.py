@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from tkinter import Tk
 from typing import Callable
 
+from config.settings import Settings
 from features.image_popup import ImagePopup
 from features.misc import (
     display_notification,
@@ -30,7 +31,6 @@ from features.prompt import Prompt
 from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from pack import Pack
-from settings import Settings
 from state import State
 
 from scripting.environment import Environment
