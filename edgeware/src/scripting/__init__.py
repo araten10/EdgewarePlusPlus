@@ -321,6 +321,7 @@ class Block:
 
 def run_script(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     modules = get_modules(root, settings, pack, state)
+
     def require(env: Environment, module: str) -> None:
         for name, value in modules[module].items():
             env.assign(name, value)

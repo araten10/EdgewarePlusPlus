@@ -35,15 +35,18 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     return {
         "standard": {
             "print": lambda env, *args: print(*args),
+            "take_main": lambda env: setattr(state, "main_taken", True),
         },
         "edgeware": {
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             "image": lambda env, image: ImagePopup(root, settings, pack, state, pack.paths.image / image if image else None),
             "video": lambda env, video: VideoPopup(root, settings, pack, state, pack.paths.video / video if video else None),
-            "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, pack.paths.audio / audio if audio else None, (lambda: on_stop(env)) if on_stop else None),
+            "audio": lambda env, audio, on_stop: play_audio(
+                root, settings, pack, pack.paths.audio / audio if audio else None, (lambda: on_stop(env)) if on_stop else None
+            ),
             "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, (lambda: on_close(env)) if on_close else None),
             "web": lambda env, web: open_web(pack, web),
             "subliminal": lambda env, subliminal: SubliminalMessagePopup(settings, pack, subliminal),
             "notification": lambda env, notification: display_notification(settings, pack, notification),
-        }
+        },
     }

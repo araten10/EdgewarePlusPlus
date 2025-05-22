@@ -56,6 +56,7 @@ from features.misc import (
     play_audio,
 )
 from features.prompt import Prompt
+from features.startup_splash import StartupSplash
 from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from pack import Pack
@@ -104,15 +105,19 @@ if __name__ == "__main__":
     ]
 
     def start_main() -> None:
-        Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
         make_desktop_icons(settings)
+        handle_keyboard(root, settings, state)
+        start_panic_listener(root, settings, state)
+
+        if state.main_taken:
+            return
+
+        Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
         handle_corruption(root, settings, pack, state)
         handle_discord(root, settings, pack)
         handle_timer_mode(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
-        handle_keyboard(root, settings, state)
-        start_panic_listener(root, settings, state)
 
         if settings.hibernate_mode:
             start_main_hibernate(root, settings, pack, state, targets)
@@ -120,11 +125,11 @@ if __name__ == "__main__":
             handle_wallpaper(root, settings, pack, state)
             main(root, settings, pack, targets)
 
-    # if settings.startup_splash:
-    #     StartupSplash(settings, pack, start_main)
-    # else:
-    #     start_main()
-
     run_script(root, settings, pack, state)
+    if settings.startup_splash:
+        StartupSplash(settings, pack, start_main)
+    else:
+        start_main()
+
     root.after(5000, sys.exit)
     root.mainloop()
