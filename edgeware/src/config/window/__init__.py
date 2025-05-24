@@ -50,12 +50,12 @@ from config.window.tabs.annoyance.moods import MoodsTab
 from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
 from config.window.tabs.annoyance.popup_types import PopupTypesTab
 from config.window.tabs.annoyance.wallpaper import WallpaperTab
+from config.window.tabs.corruption import CorruptionModeTab
 from config.window.tabs.general.booru import BooruTab
 from config.window.tabs.general.default_file import DefaultFileTab
 from config.window.tabs.general.info import InfoTab
 from config.window.tabs.general.start import StartTab
 from config.window.tabs.modes import BasicModesTab
-from config.window.tabs.corruption import CorruptionModeTab
 from config.window.tabs.troubleshooting import TroubleshootingTab
 from config.window.tabs.tutorial import open_tutorial
 from config.window.utils import (
@@ -130,7 +130,7 @@ class ConfigWindow(Tk):
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
         annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
 
-        notebook.add(BasicModesTab(vars, title_font), text="Modes") # tab for general modes
+        notebook.add(BasicModesTab(vars, title_font), text="Modes")  # tab for general modes
         notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
 
         notebook.add(TroubleshootingTab(vars, title_font, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
