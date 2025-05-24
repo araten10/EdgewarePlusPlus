@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-import sys
 from pathlib import Path
 from tkinter import Tk
 from typing import Callable
@@ -32,6 +31,7 @@ from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
 from os_utils import set_wallpaper
 from pack import Pack
+from panic import panic
 from state import State
 
 from scripting.environment import Environment
@@ -60,7 +60,7 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "standard": {"print": lambda env, *args: print(*args)},
         "edgeware": {
             "take_main": lambda env: setattr(state, "main_taken", True),
-            "exit": lambda env: sys.exit(),
+            "panic": lambda env: panic(root, settings, state, disable=False),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             "set_wallpaper": lambda env, wallpaper: set_wallpaper(pack.paths.root / wallpaper),
             **popups,
