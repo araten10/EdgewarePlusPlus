@@ -87,11 +87,9 @@ CONFIG_ITEMS = {
     "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # opens up web popup on popup close, this one could be cut from this list as it's not listed as dangerous in config but could lead to bad performance
     "buttonless": Item("buttonless", BOOLEAN, BooleanVar, bool),
     "single_mode": Item("singleMode", BOOLEAN, BooleanVar, bool),
-    "popup_subliminals": Item("popupSubliminals", BOOLEAN, BooleanVar, bool),
     "subliminal_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
     "subliminal_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
     "max_subliminals": Item("maxSubliminals", NONNEGATIVE, IntVar, int),
-    "denial_mode": Item("denialMode", BOOLEAN, BooleanVar, bool),
     "denial_chance": Item("denialChance", PERCENTAGE, IntVar, int),
     "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
 
@@ -106,7 +104,6 @@ CONFIG_ITEMS = {
 
     # Captions
     "captions_in_popups": Item("showCaptions", BOOLEAN, BooleanVar, bool),
-    "filename_caption_moods": Item("captionFilename", BOOLEAN, BooleanVar, bool),
     "multi_click_popups": Item("multiClick", BOOLEAN, BooleanVar, bool),
     "subliminal_message_popup_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
     "subliminal_message_popup_opacity": Item("capPopOpacity", PERCENTAGE, IntVar, to_float),

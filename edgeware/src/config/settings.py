@@ -59,8 +59,6 @@ class Settings:
             setattr(self, name, item.setting(value))
 
         self.pack_path = Data.PACKS / self.pack_path if self.pack_path else DEFAULT_PACK_PATH
-        self.subliminal_chance = self.subliminal_chance if self.popup_subliminals else 0
-        self.denial_chance = self.denial_chance if self.denial_mode else 0
         self.hibernate_fix_wallpaper = self.hibernate_fix_wallpaper and self.hibernate_mode
 
         import os_utils  # Circular import
