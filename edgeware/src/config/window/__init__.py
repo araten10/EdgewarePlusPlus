@@ -45,7 +45,6 @@ from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from config import load_default_config
 from config.vars import Vars
 from config.window.import_pack import import_pack
-from config.window.tabs.annoyance.captions import CaptionsTab
 from config.window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
 from config.window.tabs.annoyance.moods import MoodsTab
 from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
@@ -127,7 +126,6 @@ class ConfigWindow(Tk):
         annoyance_notebook.pack(expand=1, fill="both")
         annoyance_notebook.add(PopupTypesTab(vars, title_font, message_group), text="Popup Types")  # tab for popup types
         annoyance_notebook.add(PopupTweaksTab(vars, title_font, message_group), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
-        annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
         annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings

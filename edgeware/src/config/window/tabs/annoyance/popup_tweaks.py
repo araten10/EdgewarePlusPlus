@@ -23,15 +23,14 @@ from config.window.utils import (
     config,
     set_widget_states,
 )
-from config.window.widgets.layout import (
-    ConfigScale,
-    ConfigToggle,
-)
+from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from screeninfo import Monitor, get_monitors
 
 OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
+CAPTION_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
+CAPTION_SETTINGS_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
 
 
 class MonitorCheckbutton(ConfigToggle):
@@ -80,6 +79,43 @@ class PopupTweaksTab(ScrollFrame):
             buttonless_toggle,
             'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
             "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
+        )
+
+        # Captions
+
+        captions_section = ConfigSection(self.viewPort, "Captions", CAPTION_TEXT)
+        captions_section.pack()
+
+        captions_row_1 = ConfigRow(captions_section)
+        captions_row_1.pack()
+
+        ConfigToggle(captions_row_1, "Enable Popup Captions", variable=vars.captions_in_popups).pack()
+
+        caption_message = Message(captions_section, text=CAPTION_SETTINGS_TEXT, justify=CENTER, width=675)
+        caption_message.pack(fill="both")
+        message_group.append(caption_message)
+
+        captions_row_2 = ConfigRow(captions_section)
+        captions_row_2.pack()
+
+        filename_mood_toggle = ConfigToggle(captions_row_2, "Use filename for caption moods", variable=vars.filename_caption_moods, cursor="question_arrow")
+        filename_mood_toggle.pack()
+        CreateToolTip(
+            filename_mood_toggle,
+            "When enabled, captions will try and match the filename of the image they attach to.\n\n"
+            'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
+            'of images named things like "goon300242", "goon-love", "goon_ytur8843", etc.\n\n'
+            "This is how Edgeware processed captions before moods were implemented fully in Edgeware++. The reason you'd turn this off, however, "
+            "is that if the mood doesn't match the filename, it won't display at all.\n\n For example, if you had a mood named \"succubus\", but "
+            'no filtered files started with "succubus", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
+            "the pack supports it.",
+        )
+        multi_click_toggle = ConfigToggle(captions_row_2, "Multi-Click popups", variable=vars.multi_click_popups, cursor="question_arrow")
+        multi_click_toggle.pack()
+        CreateToolTip(
+            multi_click_toggle,
+            "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
+            "to close. This feature must be set-up beforehand and won't do anything if not supported.",
         )
 
         # Overlays

@@ -17,7 +17,9 @@ Major reorganization effort in the config window. This includes:
 
 •*Reworked several config window tabs into a less compact (but easier to understand) format. The end goal is to make each tab less overwhelming to new users, utilizing the scroll bars now implemented into Edgeware++.*
 
-•*Removed the "Hibernate" tab and merged it into "Basic Modes"*
+•*Condensed "Basic Modes", "Dangerous Modes", "Hibernate", and "Corruption" tabs into "Modes" and "Corruption" tabs*
+
+•*"Timer Mode" has been moved from "Dangerous Modes" to "Dangerous Settings", as it was the only truly "dangerous" mode (and didn't even really fit our definition of a mode to begin with)*
 
 •*Condensed "Popups", "Audio/Video" and "Captions" into "Popup Types" and "Popup Tweaks"*
 
