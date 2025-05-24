@@ -28,7 +28,7 @@ from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from screeninfo import Monitor, get_monitors
 
-OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
+OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it.'
 CAPTION_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
 CAPTION_SETTINGS_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
 
@@ -53,6 +53,14 @@ class PopupTweaksTab(ScrollFrame):
         popup_frame_2 = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         popup_frame_2.pack(fill="x")
         ConfigScale(popup_frame_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
+
+        multi_click_toggle = ConfigToggle(popup_frame_2, "Multi-Click popups", variable=vars.multi_click_popups, cursor="question_arrow")
+        multi_click_toggle.pack()
+        CreateToolTip(
+            multi_click_toggle,
+            "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
+            "to close. This feature must be set-up beforehand and won't do anything if not supported.",
+        )
 
         timeout_frame = Frame(popup_frame_2)
         timeout_frame.pack(fill="y", side="left", padx=3, expand=1)
@@ -86,87 +94,30 @@ class PopupTweaksTab(ScrollFrame):
         captions_section = ConfigSection(self.viewPort, "Captions", CAPTION_TEXT)
         captions_section.pack()
 
-        captions_row_1 = ConfigRow(captions_section)
-        captions_row_1.pack()
+        captions_row = ConfigRow(captions_section)
+        captions_row.pack()
 
-        ConfigToggle(captions_row_1, "Enable Popup Captions", variable=vars.captions_in_popups).pack()
+        ConfigToggle(captions_row, "Enable Popup Captions", variable=vars.captions_in_popups).pack()
 
         caption_message = Message(captions_section, text=CAPTION_SETTINGS_TEXT, justify=CENTER, width=675)
         caption_message.pack(fill="both")
         message_group.append(caption_message)
 
-        captions_row_2 = ConfigRow(captions_section)
-        captions_row_2.pack()
-
-        filename_mood_toggle = ConfigToggle(captions_row_2, "Use filename for caption moods", variable=vars.filename_caption_moods, cursor="question_arrow")
-        filename_mood_toggle.pack()
-        CreateToolTip(
-            filename_mood_toggle,
-            "When enabled, captions will try and match the filename of the image they attach to.\n\n"
-            'This is done using the start of the filename. For example, a mood named "goon" would match captions of that mood to popups '
-            'of images named things like "goon300242", "goon-love", "goon_ytur8843", etc.\n\n'
-            "This is how Edgeware processed captions before moods were implemented fully in Edgeware++. The reason you'd turn this off, however, "
-            "is that if the mood doesn't match the filename, it won't display at all.\n\n For example, if you had a mood named \"succubus\", but "
-            'no filtered files started with "succubus", the captions of that mood would never show up. Thus it is recommended to only turn this on if '
-            "the pack supports it.",
-        )
-        multi_click_toggle = ConfigToggle(captions_row_2, "Multi-Click popups", variable=vars.multi_click_popups, cursor="question_arrow")
-        multi_click_toggle.pack()
-        CreateToolTip(
-            multi_click_toggle,
-            "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
-            "to close. This feature must be set-up beforehand and won't do anything if not supported.",
-        )
-
         # Overlays
-        Label(self.viewPort, text="Popup Overlays", font=title_font, relief=GROOVE).pack(pady=2)
+        overlays_section = ConfigSection(self.viewPort, "Overlays", OVERLAY_TEXT)
+        overlays_section.pack()
 
-        overlay_message = Message(self.viewPort, text=OVERLAY_TEXT, justify=CENTER, width=675)
-        overlay_message.pack(fill="both")
-        message_group.append(overlay_message)
+        hypno_row = ConfigRow(overlays_section)
+        hypno_row.pack()
 
-        overlay_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        overlay_frame.pack(fill="x")
+        ConfigScale(hypno_row, label="Hypno Chance (%)", from_=0, to=100, variable=vars.subliminal_chance).pack()
 
-        subliminal_frame = Frame(overlay_frame)
-        subliminal_frame.pack(fill="x", side="left", padx=(3, 0))
-        ConfigToggle(
-            subliminal_frame,
-            "Subliminal Overlays",
-            variable=vars.popup_subliminals,
-            command=lambda: set_widget_states(vars.popup_subliminals.get(), subliminals_group),
-        ).pack()
+        ConfigScale(hypno_row, label="Hypno Opacity (%)", from_=0, to=99, variable=vars.subliminal_opacity).pack()
 
-        subliminal_chance_frame = Frame(subliminal_frame)
-        subliminal_chance_frame.pack(fill="x", side="left", padx=3)
-        subliminal_chance_scale = ConfigScale(subliminal_chance_frame, label="Sublim. Chance (%)", from_=1, to=100, variable=vars.subliminal_chance)
-        subliminal_chance_scale.pack()
+        denial_row = ConfigRow(overlays_section)
+        denial_row.pack()
 
-        subliminal_alpha_frame = Frame(subliminal_frame)
-        subliminal_alpha_frame.pack(fill="x", side="left", padx=3)
-        subliminal_alpha_scale = ConfigScale(subliminal_alpha_frame, label="Sublim. Alpha (%)", from_=1, to=99, variable=vars.subliminal_opacity)
-        subliminal_alpha_scale.pack()
-
-        max_subliminal_frame = Frame(subliminal_frame)
-        max_subliminal_frame.pack(fill="x", side="left", padx=3)
-        max_subliminal_scale = ConfigScale(max_subliminal_frame, label="Max Subliminals", from_=1, to=200, variable=vars.max_subliminals)
-        max_subliminal_scale.pack()
-
-        subliminals_group = [
-            subliminal_chance_scale,
-            subliminal_alpha_scale,
-            max_subliminal_scale,
-        ]
-        set_widget_states(vars.popup_subliminals.get(), subliminals_group)
-
-        denial_frame = Frame(overlay_frame)
-        denial_frame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        ConfigToggle(denial_frame, "Denial Overlays", variable=vars.denial_mode, command=lambda: set_widget_states(vars.denial_mode.get(), denial_group)).pack()
-        denial_chance_slider = ConfigScale(denial_frame, label="Denial Chance", from_=1, to=100, variable=vars.denial_chance)
-        denial_chance_slider.pack()
-
-        denial_group = [denial_chance_slider]
-        set_widget_states(vars.denial_mode.get(), denial_group)
+        ConfigScale(denial_row, label="Denial Chance", from_=1, to=100, variable=vars.denial_chance).pack()
 
         # Monitors
         Label(self.viewPort, text="Enabled Monitors", font=title_font, relief=GROOVE).pack(pady=2)
