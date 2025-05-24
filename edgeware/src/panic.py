@@ -63,10 +63,12 @@ def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
     def listen() -> None:
         try:
             with Listener(address=ADDRESS, authkey=AUTHKEY) as listener:
-                with listener.accept() as connection:
-                    message = connection.recv()
-                    if message == PANIC_MESSAGE:
-                        panic(root, settings, state, disable=False)
+                while True:
+                    with listener.accept() as connection:
+                        message = connection.recv()
+                        if message == PANIC_MESSAGE:
+                            # Make Tkinter call panic from the main thread
+                            root.after(0, lambda: panic(root, settings, state, disable=False))
         except OSError as e:
             logging.warning(f"Failed to start panic listener, some panic sources may not be functional. Reason: {e}")
 

@@ -175,6 +175,7 @@ def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
     def on_release(key: keyboard.Key) -> None:
         if key in alt:
             state.alt_held = False
-        panic(root, settings, state, condition=(str(key) == settings.global_panic_key))
+        # Make Tkinter call panic from the main thread
+        root.after(0, lambda: panic(root, settings, state, condition=(str(key) == settings.global_panic_key)))
 
     keyboard.Listener(on_press=on_press, on_release=on_release).start()
