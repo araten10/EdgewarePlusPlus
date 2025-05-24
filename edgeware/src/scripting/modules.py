@@ -30,6 +30,7 @@ from features.misc import (
 from features.prompt import Prompt
 from features.subliminal_message_popup import SubliminalMessagePopup
 from features.video_popup import VideoPopup
+from os_utils import set_wallpaper
 from pack import Pack
 from state import State
 
@@ -45,18 +46,23 @@ def wrap(env: Environment, function: Callable | None) -> Callable | None:
 
 
 def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
+    popups = {
+        "image": lambda env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
+        "video": lambda env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
+        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, media(pack.paths.audio, audio), wrap(env, on_stop)),
+        "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
+        "web": lambda env, web: open_web(pack, web),
+        "subliminal": lambda env, subliminal: SubliminalMessagePopup(settings, pack, subliminal),
+        "notification": lambda env, notification: display_notification(settings, pack, notification),
+    }
+
     return {
         "standard": {"print": lambda env, *args: print(*args)},
         "edgeware": {
             "take_main": lambda env: setattr(state, "main_taken", True),
             "exit": lambda env: sys.exit(),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
-            "image": lambda env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
-            "video": lambda env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
-            "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, media(pack.paths.audio, audio), wrap(env, on_stop)),
-            "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
-            "web": lambda env, web: open_web(pack, web),
-            "subliminal": lambda env, subliminal: SubliminalMessagePopup(settings, pack, subliminal),
-            "notification": lambda env, notification: display_notification(settings, pack, notification),
+            "set_wallpaper": lambda env, wallpaper: set_wallpaper(pack.paths.root / wallpaper),
+            **popups,
         },
     }
