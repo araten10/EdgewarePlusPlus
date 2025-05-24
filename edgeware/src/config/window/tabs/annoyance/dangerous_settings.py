@@ -72,12 +72,12 @@ class DangerousSettingsTab(ScrollFrame):
         super().__init__()
 
         # Timer
-        timer_section = ConfigSection(self.viewPort, "Timer Mode", TIMER_TEXT)
+        timer_section = ConfigSection(self.viewPort, "Panic Lockout", TIMER_TEXT)
         timer_section.pack()
 
         timer_row = ConfigRow(timer_section)
         timer_row.pack()
-        ConfigToggle(timer_row, "Enable Timer Mode", variable=vars.timer_mode).pack()
+        ConfigToggle(timer_row, "Enable Panic Lockout", variable=vars.timer_mode).pack()
         safeword_frame = Frame(timer_row)
         safeword_frame.pack(side="left", expand=True)
         Label(safeword_frame, text="Emergency Safeword").pack()
