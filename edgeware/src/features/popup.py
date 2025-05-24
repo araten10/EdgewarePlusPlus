@@ -53,7 +53,7 @@ class Popup(Toplevel):
 
         self.denial = roll(self.settings.denial_chance)
 
-        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, legacy_key=event.keysym))
+        self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, condition=(event.keysym == self.settings.panic_key)))
         self.attributes("-topmost", True)
         os_utils.set_borderless(self)
 
