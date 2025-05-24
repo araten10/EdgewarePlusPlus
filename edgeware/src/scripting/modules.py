@@ -16,7 +16,9 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+from pathlib import Path
 from tkinter import Tk
+from typing import Callable
 
 from config.settings import Settings
 from features.image_popup import ImagePopup
@@ -31,18 +33,28 @@ from features.video_popup import VideoPopup
 from pack import Pack
 from state import State
 
+from scripting.environment import Environment
+
+
+def media(dir: Path, file: str | None) -> Path | None:
+    return dir / file if file else None
+
+
+def wrap(env: Environment, function: Callable | None) -> Callable | None:
+    return (lambda: function(env)) if function else None
+
 
 def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     return {
-        "standard": {"print": lambda env, *args: print(*args), "take_main": lambda env: setattr(state, "main_taken", True), "exit": lambda env: sys.exit()},
+        "standard": {"print": lambda env, *args: print(*args)},
         "edgeware": {
+            "take_main": lambda env: setattr(state, "main_taken", True),
+            "exit": lambda env: sys.exit(),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
-            "image": lambda env, image: ImagePopup(root, settings, pack, state, pack.paths.image / image if image else None),
-            "video": lambda env, video: VideoPopup(root, settings, pack, state, pack.paths.video / video if video else None),
-            "audio": lambda env, audio, on_stop: play_audio(
-                root, settings, pack, pack.paths.audio / audio if audio else None, (lambda: on_stop(env)) if on_stop else None
-            ),
-            "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, (lambda: on_close(env)) if on_close else None),
+            "image": lambda env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
+            "video": lambda env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
+            "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, media(pack.paths.audio, audio), wrap(env, on_stop)),
+            "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
             "web": lambda env, web: open_web(pack, web),
             "subliminal": lambda env, subliminal: SubliminalMessagePopup(settings, pack, subliminal),
             "notification": lambda env, notification: display_notification(settings, pack, notification),
