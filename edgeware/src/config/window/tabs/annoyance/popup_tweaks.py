@@ -117,7 +117,7 @@ class PopupTweaksTab(ScrollFrame):
         denial_row = ConfigRow(overlays_section)
         denial_row.pack()
 
-        ConfigScale(denial_row, label="Denial Chance", from_=1, to=100, variable=vars.denial_chance).pack()
+        ConfigScale(denial_row, label="Denial Chance (%)", from_=0, to=100, variable=vars.denial_chance).pack()
 
         # Monitors
         Label(self.viewPort, text="Enabled Monitors", font=title_font, relief=GROOVE).pack(pady=2)
