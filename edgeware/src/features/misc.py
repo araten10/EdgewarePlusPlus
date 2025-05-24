@@ -78,7 +78,7 @@ def display_notification(settings: Settings, pack: Pack, notification: str | Non
 
 
 def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hibernate_activity: Callable[[], None]) -> None:
-    menu = [] if settings.panic_disabled else [pystray.MenuItem("Panic", lambda: panic(root, settings, state))]
+    menu = [pystray.MenuItem("Panic", lambda: panic(root, settings, state))]
     if settings.hibernate_mode:
 
         def skip_hibernate() -> None:
@@ -181,6 +181,7 @@ def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
     def on_release(key: keyboard.Key) -> None:
         if key in alt:
             state.alt_held = False
-        panic(root, settings, state, global_key=str(key))
+        # Make Tkinter call panic from the main thread
+        root.after(0, lambda: panic(root, settings, state, condition=(str(key) == settings.global_panic_key)))
 
     keyboard.Listener(on_press=on_press, on_release=on_release).start()

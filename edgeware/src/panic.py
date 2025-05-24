@@ -36,8 +36,8 @@ from multiprocessing.connection import Client, Listener
 from threading import Thread
 from tkinter import Tk, simpledialog
 
-import os_utils
 from config.settings import Settings
+from os_utils import set_wallpaper
 from paths import CustomAssets
 from state import State
 
@@ -46,11 +46,8 @@ AUTHKEY = b"Edgeware++"
 PANIC_MESSAGE = "panic"
 
 
-def panic(root: Tk, settings: Settings, state: State, legacy_key: str | None = None, global_key: str | None = None) -> None:
-    if legacy_key and (settings.panic_disabled or legacy_key != settings.panic_key):
-        return
-
-    if global_key and (settings.panic_disabled or global_key != settings.global_panic_key):
+def panic(root: Tk, settings: Settings, state: State, condition: bool = True, disable: bool = True) -> None:
+    if (disable and settings.panic_disabled) or not condition:
         return
 
     if settings.timer_mode and state.timer_active:
@@ -58,7 +55,7 @@ def panic(root: Tk, settings: Settings, state: State, legacy_key: str | None = N
         if password != settings.timer_password:
             return
 
-    os_utils.set_wallpaper(CustomAssets.panic_wallpaper())
+    set_wallpaper(CustomAssets.panic_wallpaper())
     root.destroy()
 
 
@@ -66,10 +63,12 @@ def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
     def listen() -> None:
         try:
             with Listener(address=ADDRESS, authkey=AUTHKEY) as listener:
-                with listener.accept() as connection:
-                    message = connection.recv()
-                    if message == PANIC_MESSAGE:
-                        panic(root, settings, state)
+                while True:
+                    with listener.accept() as connection:
+                        message = connection.recv()
+                        if message == PANIC_MESSAGE:
+                            # Make Tkinter call panic from the main thread
+                            root.after(0, lambda: panic(root, settings, state, disable=False))
         except OSError as e:
             logging.warning(f"Failed to start panic listener, some panic sources may not be functional. Reason: {e}")
 

@@ -15,16 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import Message, CENTER
+from tkinter import CENTER, Message
 from tkinter.font import Font
 
 from config.vars import Vars
-from config.window.widgets.layout import (
-    ConfigRow,
-    ConfigScale,
-    ConfigSection,
-    ConfigToggle
-)
+from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 
@@ -33,10 +28,11 @@ SINGLE_TEXT = 'When a new popup is spawned, it uses the percentage chance of eac
 IMAGE_TEXT = "Image popups are the most common type of popup. Every single pack will have these, and most of your time using Edgeware++ will be spent staring at these lovely things~\n\nThe reason a percentage slider exists for this is to create a more inconsistent experience. If no probability slider is set to 100% on this tab, there's a chance that nothing will spawn. If you want Edgeware++ to surprise you, consider turning this down to 60% or so!"
 AUDIO_TEXT = "Audio popups have no visuals attached, focusing only on sound. Because of this, there's no way to disable them once they stop (besides panic), but maybe that's something you want...~\n\nGenerally, you probably want a low maximum count on this, as well as a low frequency. Packs sometimes use long files for audio (hypno, binural, ASMR, etc), so you might have to set the maximum to \"1\" in this case, assuming the pack doesn't have suggested settings to do it for you."
 VIDEO_TEXT = 'Video popups are functionally exactly the same as image popups, just animated and with sound support. Edgeware++ uses MPV to play videos, and if you run into any trouble displaying these you may want to check out the "Troubleshooting" tab for a few video debugging options.'
-WEBSITE_TEXT = 'Opens up a website in your default browser whenever a roll is passed. Please be aware that you could potentially be linked to a website with malicious intent or aggressive popups/ads.\n\nIts recommended to leave this chance relatively low so having new websites open is more of a nice suprise instead of an annoyance.'
+WEBSITE_TEXT = "Opens up a website in your default browser whenever a roll is passed. Please be aware that you could potentially be linked to a website with malicious intent or aggressive popups/ads.\n\nIts recommended to leave this chance relatively low so having new websites open is more of a nice suprise instead of an annoyance."
 PROMPT_TEXT = 'Prompt popups require you to repeat a prompt via a text box before they can be closed. The intent with this is to help drill mantras into your brain or generally make you more horny by having to repeat something degrading.\n\n"Prompt Mistakes" is the number of mistakes you can make in your reply and still have it be accepted. This is perfect for people who type with one hand, or have had porn degrade their IQ for the last few hours, or both...'
 NOTIFICATION_TEXT = 'These are a special type of caption-centric popup that uses your operating system\'s notification feature. For examples, this system is usually used for things like alerts ("You may now safely remove your USB device") or web browser notifications if you have those enabled. ("User XYZ has liked your youtube comment")'
 SUBLIMINAL_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. To help with this, they can tap into a specific "subliminal mood" if the pack creator sets it up. Otherwise default captions will be used instead. (See "Popup Tweaks" for more info on captions)'
+
 
 class PopupTypesTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
@@ -53,13 +49,16 @@ class PopupTypesTab(ScrollFrame):
 
         single_message = Message(popup_freq_section, text=SINGLE_TEXT, justify=CENTER, width=675)
         single_message.pack(fill="both")
-        #for when hiding help gets refactored?
-        #message_group.append(single_message)
+        # for when hiding help gets refactored?
+        # message_group.append(single_message)
 
         single_mode = ConfigToggle(popup_freq_section, "Single Roll Per Popup", variable=vars.single_mode, cursor="question_arrow")
         single_mode.pack()
 
-        CreateToolTip(single_mode, "In this mode, the chance of a popup appearing is used as a weight to choose a single popup type to spawn (the popup type with the highest percentage will be picked the most, etc).")
+        CreateToolTip(
+            single_mode,
+            "In this mode, the chance of a popup appearing is used as a weight to choose a single popup type to spawn (the popup type with the highest percentage will be picked the most, etc).",
+        )
 
         # Image
         popup_image_section = ConfigSection(self.viewPort, "Image Popups", IMAGE_TEXT)
