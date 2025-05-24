@@ -29,6 +29,8 @@ from tkinter import (
     Message,
     Scale,
     filedialog,
+    ttk,
+    HORIZONTAL
 )
 from tkinter.font import Font
 
@@ -86,14 +88,14 @@ class DangerousSettingsTab(ScrollFrame):
         ConfigScale(timer_section, "Timer Lockout Time (minutes)", vars.timer_time, 1, 1440, enabled=(vars.timer_mode, True)).pack()
 
         # Drive
-        Label(self.viewPort, text="Hard Drive Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
-        drive_message = Message(self.viewPort, text=DRIVE_TEXT, justify=CENTER, width=675)
-        drive_message.pack(fill="both")
-        message_group.append(drive_message)
+        drive_section = ConfigSection(self.viewPort, "Hard Drive Settings", DRIVE_TEXT)
+        drive_section.pack()
 
-        drive_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        drive_frame.pack(fill="x")
+        ttk.Separator(drive_section, orient=HORIZONTAL).pack(fill="x", pady=2)
+
+        drive_frame = Frame(drive_section)
+        drive_frame.pack(fill="x", pady=5)
 
         blacklist_frame = Frame(drive_frame)
         blacklist_frame.pack(fill="y", side="left")
@@ -168,16 +170,14 @@ class DangerousSettingsTab(ScrollFrame):
         Button(path_frame, text="Select", command=lambda: assign_path(path_entry, vars)).pack(fill="x")
 
         # Misc
-        Label(self.viewPort, text="Misc. Settings", font=title_font, relief=GROOVE).pack(pady=2)
+        misc_section = ConfigSection(self.viewPort, "Misc. Dangerous Settings", MISC_TEXT)
+        misc_section.pack()
 
-        misc_message = Message(self.viewPort, text=MISC_TEXT, justify=CENTER, width=675)
-        misc_message.pack(fill="both")
-        message_group.append(misc_message)
+        misc_row = ConfigRow(misc_section)
+        misc_row.pack()
 
-        misc_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        misc_frame.pack(fill="x")
-        panic_disable_toggle = Checkbutton(misc_frame, text="Disable Panic Hotkey", variable=vars.panic_disabled, cursor="question_arrow")
-        panic_disable_toggle.pack(fill="x", side="left", expand=1)
+        panic_disable_toggle = ConfigToggle(misc_row, "Disable Panic Hotkey", variable=vars.panic_disabled, cursor="question_arrow")
+        panic_disable_toggle.pack()
         CreateToolTip(
             panic_disable_toggle,
             "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
@@ -186,7 +186,7 @@ class DangerousSettingsTab(ScrollFrame):
             '•Keep the config window open and press "Perform Panic"\n'
             "•Use the panic desktop icon (if you kept those enabled)",
         )
-        Checkbutton(misc_frame, text="Launch on PC Startup", variable=vars.run_at_startup).pack(fill="x", side="left", expand=1)
-        discord_toggle = Checkbutton(misc_frame, text="Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
-        discord_toggle.pack(fill="x", side="left", expand=1)
+        ConfigToggle(misc_row, "Launch on PC Startup", variable=vars.run_at_startup).pack()
+        discord_toggle = ConfigToggle(misc_row, "Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
+        discord_toggle.pack()
         CreateToolTip(discord_toggle, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator.")
