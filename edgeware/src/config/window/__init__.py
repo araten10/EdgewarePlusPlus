@@ -55,9 +55,8 @@ from config.window.tabs.general.booru import BooruTab
 from config.window.tabs.general.default_file import DefaultFileTab
 from config.window.tabs.general.info import InfoTab
 from config.window.tabs.general.start import StartTab
-from config.window.tabs.modes.basic import BasicModesTab
-from config.window.tabs.modes.corruption import CorruptionModeTab
-from config.window.tabs.modes.dangerous_modes import DangerousModesTab
+from config.window.tabs.modes import BasicModesTab
+from config.window.tabs.corruption import CorruptionModeTab
 from config.window.tabs.troubleshooting import TroubleshootingTab
 from config.window.tabs.tutorial import open_tutorial
 from config.window.utils import (
@@ -133,13 +132,8 @@ class ConfigWindow(Tk):
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
         annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
 
-        modes_tab = ttk.Frame(notebook)
-        notebook.add(modes_tab, text="Modes")
-        modes_notebook = ttk.Notebook(modes_tab)
-        modes_notebook.pack(expand=1, fill="both")
-        modes_notebook.add(BasicModesTab(vars, title_font), text="Basic Modes")  # tab for basic popup modes
-        modes_notebook.add(DangerousModesTab(vars, title_font), text="Dangerous Modes")  # tab for timer mode
-        modes_notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
+        notebook.add(BasicModesTab(vars, title_font), text="Modes") # tab for general modes
+        notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
 
         notebook.add(TroubleshootingTab(vars, title_font, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 

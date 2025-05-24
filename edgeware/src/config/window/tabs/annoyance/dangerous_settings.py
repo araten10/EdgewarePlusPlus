@@ -40,12 +40,19 @@ from config.window.utils import (
     reset_list,
     set_widget_states,
 )
+from config.window.widgets.layout import (
+    ConfigRow,
+    ConfigScale,
+    ConfigSection,
+    ConfigToggle,
+    set_enabled_when,
+)
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 
 DRIVE_TEXT = 'There are two main features in this section: "Fill Drive" and "Replace Images". This explanation might be long, but these features are very dangerous, so please pay attention if you plan to use them! Unless you imported settings from a pack you downloaded or got this installation of Edgeware++ from somewhere other than the official github, these should all be off by default.\n\nFill drive will attempt to fill your computer with as much porn from the currently loaded pack as possible. It does, however, have some restrictions, which are further explained in the hover tooltip. Fill delay is a forced delay on saving, as when not properly configured it can fill your drive VERY quickly.\n\nReplace images will seek out folders with large numbers of pre-existing images (more than the threshold value) and when it finds one, it will replace ALL of the images with images from the currently loaded pack. For example, you could point it at certain steam directories to have all of your game preview/banner images replaced with porn. Please, please, please, backup any important images before using this setting... Edgeware will attempt to backup any replaced images under /data/backups, but nobody involved with any Edgeware version past, present, or future, is responsible for any lost images. Don\'t solely rely on the included backup feature... do the smart thing and make personal backups as well!\n\nI understand techdom and gooning are both fetishes about making irresponsible decisions, but at least understand the risks and take a moment to decide on how you want to use these features. Set up blacklists and make backups if you wish to proceed, but to echo the inadequate sex-ed public schools dole out: abstinence is the safest option.'
 MISC_TEXT = "These settings are less destructive on your PC, but will either cause embarrassment or give you less control over Edgeware.\n\nDisable Panic Hotkey disables both the panic hotkey and system tray panic. A full list of panic alternatives can be found in the hover tooltip.\nLaunch on PC Startup is self explanatory, but keep caution on this if you're running Edgeware with a strong payload.\nShow on Discord will give you a status on discord while you run Edgeware. There's actually a decent amount of customization for this option, and packs can have their own status. However, this setting could definitely be \"socially destructive\", or at least cause you great (unerotic) shame, so be careful with enabling it."
-
+TIMER_TEXT = 'Makes it so you cannot panic for a specified duration, essentially forcing you to endure the payload until the timer is up.\n\nA safeword can be used if you wish to still use panic during this time. It is recommended that you generate one via a password generator/keysmash and save it somewhere easily accessible; not only does this help in emergency situations where you need to turn off Edgeware++, but also makes it harder to memorize so the "fetishistic danger" remains.'
 
 def assign_path(path_entry: Entry, vars: Vars) -> None:
     path_ = str(filedialog.askdirectory(initialdir="/", title="Select Parent Folder"))
@@ -61,6 +68,22 @@ def assign_path(path_entry: Entry, vars: Vars) -> None:
 class DangerousSettingsTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
+
+        # Timer
+        timer_section = ConfigSection(self.viewPort, "Timer Mode", TIMER_TEXT)
+        timer_section.pack()
+
+        timer_row = ConfigRow(timer_section)
+        timer_row.pack()
+        ConfigToggle(timer_row, "Enable Timer Mode", variable=vars.timer_mode).pack()
+        safeword_frame = Frame(timer_row)
+        safeword_frame.pack(side="left", expand=True)
+        Label(safeword_frame, text="Emergency Safeword").pack()
+        timer_safeword = Entry(safeword_frame, show="*", textvariable=vars.timer_password)
+        timer_safeword.pack(expand=1, fill="both")
+        set_enabled_when(timer_safeword, enabled=(vars.timer_mode, True))
+
+        ConfigScale(timer_section, "Timer Lockout Time (minutes)", vars.timer_time, 1, 1440, enabled=(vars.timer_mode, True)).pack()
 
         # Drive
         Label(self.viewPort, text="Hard Drive Settings", font=title_font, relief=GROOVE).pack(pady=2)
