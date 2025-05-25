@@ -79,8 +79,6 @@ class PopupTweaksTab(ScrollFrame):
         popup_frame_3 = Frame(self.viewPort, borderwidth=5, relief=RAISED)
         popup_frame_3.pack(fill="x")
 
-        ConfigToggle(popup_frame_3, "Popup close opens web page", variable=vars.web_on_popup_close).pack()
-
         buttonless_toggle = ConfigToggle(popup_frame_3, "Buttonless Closing Popups", variable=vars.buttonless, cursor="question_arrow")
         buttonless_toggle.pack()
         CreateToolTip(
