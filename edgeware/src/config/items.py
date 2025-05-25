@@ -134,9 +134,9 @@ CONFIG_ITEMS = {
     "moving_speed": Item("movingSpeed", NONNEGATIVE, IntVar, int),
 
     # Dangerous Modes
-    "timer_mode": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "timer_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
-    "timer_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
+    "panic_lockout": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
+    "panic_lockout_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
     "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption may not work
     "mitosis_strength": Item("mitosisStrength", NONNEGATIVE, IntVar, int),
 

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import CENTER, GROOVE, RAISED, BooleanVar, Checkbutton, Frame, Label, Message, Misc, Scale
+from tkinter import CENTER, GROOVE, RAISED, BooleanVar, Frame, Label, Message, Misc, Scale
 from tkinter.font import Font
 
 from config.vars import Vars

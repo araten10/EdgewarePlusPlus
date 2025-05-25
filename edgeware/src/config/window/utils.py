@@ -131,14 +131,14 @@ def safe_check(vars: Vars) -> bool:
                 "\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
             )
     if (
-        vars.timer_mode.get()
+        vars.panic_lockout.get()
         or vars.mitosis_mode.get()
         or vars.show_on_discord.get()
         or (vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30))
     ):
         logging.info("medium dangers found.")
         dangers.append("\n\nMedium:")
-        if vars.timer_mode.get():
+        if vars.panic_lockout.get():
             dangers.append("\n•Timer mode is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!")
         if vars.mitosis_mode.get():
             dangers.append("\n•Mitosis mode is enabled! With high popup rates, this could create a chain reaction, causing lag!")

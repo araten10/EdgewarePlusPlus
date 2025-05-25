@@ -132,13 +132,13 @@ def handle_discord(root: Tk, settings: Settings, pack: Pack) -> None:
         logging.warning(f"Setting Discord presence failed. Reason: {e}")
 
 
-def handle_timer_mode(root: Tk, settings: Settings, state: State) -> None:
-    def timer_over() -> None:
-        state.timer_active = False
+def handle_panic_lockout(root: Tk, settings: Settings, state: State) -> None:
+    def panic_lockout_over() -> None:
+        state.panic_lockout_active = False
 
-    if settings.timer_mode:
-        state.timer_active = True
-        root.after(settings.timer_time, timer_over)
+    if settings.panic_lockout:
+        state.panic_lockout_active = True
+        root.after(settings.panic_lockout_time, panic_lockout_over)
 
 
 def mitosis_popup(root: Tk, settings: Settings, pack: Pack, state: State) -> None:

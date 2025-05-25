@@ -44,7 +44,7 @@ class State:
     popup_geometries: dict[int, (int, int, int, int)] = field(default_factory=dict)
     _next_popup_id = 0
 
-    timer_active = False
+    panic_lockout_active = False
 
     _hibernate_active = Subject(False)
     hibernate_id = None

@@ -47,7 +47,7 @@ from features.misc import (
     handle_discord,
     handle_keyboard,
     handle_mitosis_mode,
-    handle_timer_mode,
+    handle_panic_lockout,
     handle_wallpaper,
     make_desktop_icons,
     make_tray_icon,
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         make_desktop_icons(settings)
         handle_corruption(root, settings, pack, state)
         handle_discord(root, settings, pack)
-        handle_timer_mode(root, settings, state)
+        handle_panic_lockout(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
         handle_keyboard(root, settings, state)
         start_panic_listener(root, settings, state)
