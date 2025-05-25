@@ -29,6 +29,7 @@ IMAGE_TEXT = "Image popups are the most common type of popup. Every single pack 
 AUDIO_TEXT = "Audio popups have no visuals attached, focusing only on sound. Because of this, there's no way to disable them once they stop (besides panic), but maybe that's something you want...~\n\nGenerally, you probably want a low maximum count on this, as well as a low frequency. Packs sometimes use long files for audio (hypno, binural, ASMR, etc), so you might have to set the maximum to \"1\" in this case, assuming the pack doesn't have suggested settings to do it for you."
 VIDEO_TEXT = 'Video popups are functionally exactly the same as image popups, just animated and with sound support. Edgeware++ uses MPV to play videos, and if you run into any trouble displaying these you may want to check out the "Troubleshooting" tab for a few video debugging options.'
 WEBSITE_TEXT = "Opens up a website in your default browser whenever a roll is passed. Please be aware that you could potentially be linked to a website with malicious intent or aggressive popups/ads.\n\nIts recommended to leave this chance relatively low so having new websites open is more of a nice suprise instead of an annoyance."
+WEBSITE_CLOSE_TEXT = "This setting also gives other types of popups the chance to open up a webpage whenever you close them. The chance to open a webpage is based on your website popup chance, so increase that if you want more to open!"
 PROMPT_TEXT = 'Prompt popups require you to repeat a prompt via a text box before they can be closed. The intent with this is to help drill mantras into your brain or generally make you more horny by having to repeat something degrading.\n\n"Prompt Mistakes" is the number of mistakes you can make in your reply and still have it be accepted. This is perfect for people who type with one hand, or have had porn degrade their IQ for the last few hours, or both...'
 NOTIFICATION_TEXT = 'These are a special type of caption-centric popup that uses your operating system\'s notification feature. For examples, this system is usually used for things like alerts ("You may now safely remove your USB device") or web browser notifications if you have those enabled. ("User XYZ has liked your youtube comment")'
 SUBLIMINAL_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. To help with this, they can tap into a specific "subliminal mood" if the pack creator sets it up. Otherwise default captions will be used instead. (See "Popup Tweaks" for more info on captions)'
@@ -91,7 +92,18 @@ class PopupTypesTab(ScrollFrame):
         # Website
         web_section = ConfigSection(self.viewPort, "Website Popups", WEBSITE_TEXT)
         web_section.pack()
-        ConfigScale(web_section, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
+
+        web_row = ConfigRow(web_section)
+        web_row.pack()
+
+        ConfigScale(web_row, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
+
+        website_close_message = Message(web_section, text=WEBSITE_CLOSE_TEXT, justify=CENTER, width=675)
+        website_close_message.pack(fill="both")
+        # for when hiding help gets refactored?
+        # message_group.append(website_close_message)
+
+        ConfigToggle(web_section, "Popup close opens web page", variable=vars.web_on_popup_close).pack()
 
         # Prompts
         prompt_section = ConfigSection(self.viewPort, "Prompt Popups", PROMPT_TEXT)

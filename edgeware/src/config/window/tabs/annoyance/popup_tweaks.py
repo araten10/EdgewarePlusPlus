@@ -28,11 +28,12 @@ from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from screeninfo import Monitor, get_monitors
 
-OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it.'
+OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Hypno adds a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it.'
 CAPTION_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
-CAPTION_SETTINGS_TEXT = "These settings below will only work for compatible packs, but use captions to add new features. The first checks the caption's mood with the filename of the popup image, and links the caption if they match. The second allows for captions of a certain mood to make the popup require multiple clicks to close. More detailed info on both these settings can be found in the hover tooltip."
-
-
+MONITORS_TEXT = "Here you can choose what monitors Edgeware++ will spawn popups on! By default every monitor that is detected is turned on, but if you want porn to amass on your second screen while you're focusing on something on your main monitor, this is a good way to do it~"
+MOVEMENT_TEXT = 'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" property (see "Misc Tweaks" above for more information), so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower movement chance or higher popup delay to start!'
+MISC_TEXT = '•"Buttonless Closing Popups" removes the "close" button on every image and video popup, allowing you to click anywhere on the popup to close it. This makes closing popups much easier, but certain packs may have custom buttons that will no longer be seen.\n•"Multi Click Popups" is a setting that needs to be supported by the pack, and makes popups under certain moods take more clicks to close.\n•"Popup Opacity" affects the opacity/transparency of all popups.'
+TIMEOUT_TEXT = 'After a certain time, popups will fade out and delete themselves. This is a great setting to use with Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction.'
 class MonitorCheckbutton(ConfigToggle):
     def __init__(self, master: Misc, monitor: Monitor) -> None:
         self.monitor = monitor
@@ -50,45 +51,6 @@ class PopupTweaksTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
-        popup_frame_2 = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        popup_frame_2.pack(fill="x")
-        ConfigScale(popup_frame_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
-
-        multi_click_toggle = ConfigToggle(popup_frame_2, "Multi-Click popups", variable=vars.multi_click_popups, cursor="question_arrow")
-        multi_click_toggle.pack()
-        CreateToolTip(
-            multi_click_toggle,
-            "If the pack creator uses advanced caption settings, this will enable the feature for certain popups to take multiple clicks "
-            "to close. This feature must be set-up beforehand and won't do anything if not supported.",
-        )
-
-        timeout_frame = Frame(popup_frame_2)
-        timeout_frame.pack(fill="y", side="left", padx=3, expand=1)
-        timeout_scale = ConfigScale(timeout_frame, label="Time (sec)", from_=1, to=120, variable=vars.timeout)
-        timeout_scale.pack()
-        ConfigToggle(
-            timeout_frame,
-            "Popup Timeout",
-            variable=vars.timeout_enabled,
-            command=lambda: set_widget_states(vars.timeout_enabled.get(), timeout_group),
-        ).pack()
-
-        timeout_group = [timeout_scale]
-        set_widget_states(vars.timeout_enabled.get(), timeout_group)
-
-        popup_frame_3 = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        popup_frame_3.pack(fill="x")
-
-        ConfigToggle(popup_frame_3, "Popup close opens web page", variable=vars.web_on_popup_close).pack()
-
-        buttonless_toggle = ConfigToggle(popup_frame_3, "Buttonless Closing Popups", variable=vars.buttonless, cursor="question_arrow")
-        buttonless_toggle.pack()
-        CreateToolTip(
-            buttonless_toggle,
-            'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
-            "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
-        )
-
         # Captions
 
         captions_section = ConfigSection(self.viewPort, "Captions", CAPTION_TEXT)
@@ -98,10 +60,6 @@ class PopupTweaksTab(ScrollFrame):
         captions_row.pack()
 
         ConfigToggle(captions_row, "Enable Popup Captions", variable=vars.captions_in_popups).pack()
-
-        caption_message = Message(captions_section, text=CAPTION_SETTINGS_TEXT, justify=CENTER, width=675)
-        caption_message.pack(fill="both")
-        message_group.append(caption_message)
 
         # Overlays
         overlays_section = ConfigSection(self.viewPort, "Overlays", OVERLAY_TEXT)
@@ -119,30 +77,69 @@ class PopupTweaksTab(ScrollFrame):
 
         ConfigScale(denial_row, label="Denial Chance (%)", from_=0, to=100, variable=vars.denial_chance).pack()
 
-        # Monitors
-        Label(self.viewPort, text="Enabled Monitors", font=title_font, relief=GROOVE).pack(pady=2)
+        # Misc Tweaks
 
-        monitor_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        misc_section = ConfigSection(self.viewPort, "Misc. Tweaks", MISC_TEXT)
+        misc_section.pack()
+
+        misc_row = ConfigRow(misc_section)
+        misc_row.pack()
+
+        buttonless_toggle = ConfigToggle(misc_row, "Buttonless Closing Popups", variable=vars.buttonless, cursor="question_arrow")
+        buttonless_toggle.pack()
+        CreateToolTip(
+            buttonless_toggle,
+            "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
+        )
+
+        ConfigToggle(misc_row, "Multi-Click popups", variable=vars.multi_click_popups).pack()
+
+        misc_row_2 = ConfigRow(misc_section)
+        misc_row_2.pack()
+        ConfigScale(misc_row_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
+
+
+        # Timeout
+
+        timeout_section = ConfigSection(self.viewPort, "Popup Timeout", TIMEOUT_TEXT)
+        timeout_section.pack()
+
+        timeout_row = ConfigRow(timeout_section)
+        timeout_row.pack()
+
+        ConfigToggle(
+            timeout_row,
+            "Popup Timeout",
+            variable=vars.timeout_enabled,
+            command=lambda: set_widget_states(vars.timeout_enabled.get(), timeout_group),
+        ).pack()
+
+        timeout_row_2 = ConfigRow(timeout_section)
+        timeout_row_2.pack()
+
+        timeout_scale = ConfigScale(timeout_row_2, label="Time (sec)", from_=1, to=120, variable=vars.timeout)
+        timeout_scale.pack()
+
+        timeout_group = [timeout_scale]
+        set_widget_states(vars.timeout_enabled.get(), timeout_group)
+
+
+        # Monitors
+        monitors_section = ConfigSection(self.viewPort, "Monitors", MONITORS_TEXT)
+        monitors_section.pack()
+
+        monitor_frame = Frame(monitors_section, borderwidth=5, relief=RAISED)
         monitor_frame.pack(fill="x")
         for monitor in get_monitors():
             MonitorCheckbutton(monitor_frame, monitor).pack()
 
         # Movement
-        Label(self.viewPort, text="Movement Mode", font=title_font, relief=GROOVE).pack(pady=2)
+        movement_section = ConfigSection(self.viewPort, "Popup Movement", MOVEMENT_TEXT)
+        movement_section.pack()
 
-        movement_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        movement_frame.pack(fill="x")
+        movement_chance_row = ConfigRow(movement_section)
+        movement_chance_row.pack()
 
-        movement_chance_frame = Frame(movement_frame)
-        movement_chance_frame.pack(fill="x", side="left")
-        movement_chance = ConfigScale(movement_chance_frame, label="Moving Chance", from_=0, to=100, variable=vars.moving_chance)
-        movement_chance.pack()
-        CreateToolTip(
-            movement_chance,
-            'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
-            "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
-        )
+        ConfigScale(movement_chance_row, label="Moving Popup Chance", from_=0, to=100, variable=vars.moving_chance).pack()
 
-        movement_speed_frame = Frame(movement_frame)
-        movement_speed_frame.pack(fill="x", side="left")
-        Scale(movement_speed_frame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed).pack(fill="x")
+        ConfigScale(movement_chance_row, label="Max Movespeed", from_=1, to=15, variable=vars.moving_speed).pack()
