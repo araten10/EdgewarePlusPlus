@@ -77,7 +77,6 @@
   "corruptionFullPerm": 1,
   "movingChance": 0,
   "movingSpeed": 5,
-  "movingRandom": 1,
   "capPopChance": 0,
   "capPopOpacity": 100,
   "capPopTimer": 300,

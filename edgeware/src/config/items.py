@@ -131,7 +131,6 @@ CONFIG_ITEMS = {
     "lowkey_mode": Item("lkToggle", BOOLEAN, BooleanVar, bool),
     "lowkey_corner": Item("lkCorner", Schema(Union(int, Range(min=0, max=4))), IntVar, int),
     "moving_chance": Item("movingChance", PERCENTAGE, IntVar, int),
-    "moving_random": Item("movingRandom", BOOLEAN, BooleanVar, bool),
     "moving_speed": Item("movingSpeed", NONNEGATIVE, IntVar, int),
 
     # Dangerous Modes
