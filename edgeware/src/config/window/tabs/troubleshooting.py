@@ -120,6 +120,17 @@ class TroubleshootingTab(ScrollFrame):
             "This setting is only available on Linux.",
         )
 
+        hardware_acceleration_toggle = ConfigToggle(
+            troubleshooting_row,
+            "Enable hardware acceleration",
+            variable=vars.video_hardware_acceleration,
+            cursor="question_arrow"
+        )
+        hardware_acceleration_toggle.grid(2,0)
+        CreateToolTip(
+            hardware_acceleration_toggle, "Disabling hardware acceleration may increase CPU usage, but it can provide a more consistent and stable experience."
+        )
+
         # Directories
         Label(self.viewPort, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
 

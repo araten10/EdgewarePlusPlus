@@ -112,7 +112,7 @@ class PopupTweaksTab(ScrollFrame):
 
         ConfigScale(hypno_row, label="Hypno Chance (%)", from_=0, to=100, variable=vars.hypno_chance).pack()
 
-        ConfigScale(hypno_row, label="Hypno Opacity (%)", from_=0, to=99, variable=vars.hypno_opacity).pack()
+        ConfigScale(hypno_row, label="Hypno Opacity (%)", from_=1, to=99, variable=vars.hypno_opacity).pack()
 
         denial_row = ConfigRow(overlays_section)
         denial_row.pack()
@@ -142,21 +142,7 @@ class PopupTweaksTab(ScrollFrame):
             'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
             "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
         )
-        movement_direction = ConfigToggle(movement_chance_frame, "Random Direction", variable=vars.moving_random, cursor="question_arrow")
-        movement_direction.pack()
-        CreateToolTip(movement_direction, "Makes moving popups move in a random direction rather than the static diagonal one.")
 
         movement_speed_frame = Frame(movement_frame)
         movement_speed_frame.pack(fill="x", side="left")
         Scale(movement_speed_frame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed).pack(fill="x")
-
-        hardware_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        hardware_frame.pack(fill="x")
-
-        hardware_acceleration_toggle = Checkbutton(
-            hardware_frame, text="Enable hardware acceleration", variable=vars.video_hardware_acceleration, cursor="question_arrow"
-        )
-        hardware_acceleration_toggle.pack(fill="both", side="top", expand=1, padx=2)
-        CreateToolTip(
-            hardware_acceleration_toggle, "Disabling hardware acceleration may increase CPU usage, but it can provide a more consistent and stable experience."
-        )
