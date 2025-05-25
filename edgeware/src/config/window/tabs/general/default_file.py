@@ -153,8 +153,8 @@ class DefaultFileTab(ScrollFrame):
         row_3.pack(fill="x")
         DefaultImageFrame(
             row_3,
-            CustomAssets.subliminal_overlay(),
-            Data.SUBLIMINAL_OVERLAY,
+            CustomAssets.hypno(),
+            Data.HYPNO,
             0.08,
             ("image file", ".jpg .jpeg .png .gif"),
             "Current Default Spiral",

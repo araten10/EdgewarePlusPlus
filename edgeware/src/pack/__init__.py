@@ -51,7 +51,7 @@ class Pack:
         self.images = list_media(self.paths.image, filetype.is_image)
         self.videos = list_media(self.paths.video, filetype.is_video)
         self.audio = list_media(self.paths.audio, filetype.is_audio)
-        self.subliminal_overlays = list_media(self.paths.subliminals, filetype.is_image) or [CustomAssets.subliminal_overlay()]
+        self.hypnos = list_media(self.paths.hypno, filetype.is_image) or [CustomAssets.hypno()]
 
         # Paths
         self.icon = self.paths.icon if self.paths.icon.is_file() else CustomAssets.icon()
@@ -99,8 +99,8 @@ class Pack:
     def random_audio(self) -> Path | None:
         return self.random_media(self.audio, self.audio_ranks)
 
-    def random_subliminal_overlay(self) -> Path:
-        return random.choice(self.subliminal_overlays)  # Guaranteed to be non-empty
+    def random_hypno(self) -> Path:
+        return random.choice(self.hypnos)  # Guaranteed to be non-empty
 
     def find_list(self, attr: str) -> list:
         active_moods = self.active_moods()

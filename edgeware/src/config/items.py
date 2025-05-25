@@ -87,8 +87,8 @@ CONFIG_ITEMS = {
     "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # opens up web popup on popup close, this one could be cut from this list as it's not listed as dangerous in config but could lead to bad performance
     "buttonless": Item("buttonless", BOOLEAN, BooleanVar, bool),
     "single_mode": Item("singleMode", BOOLEAN, BooleanVar, bool),
-    "subliminal_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
-    "subliminal_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
+    "hypno_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
+    "hypno_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
     "denial_chance": Item("denialChance", PERCENTAGE, IntVar, int),
     "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
 

@@ -110,9 +110,9 @@ class PopupTweaksTab(ScrollFrame):
         hypno_row = ConfigRow(overlays_section)
         hypno_row.pack()
 
-        ConfigScale(hypno_row, label="Hypno Chance (%)", from_=0, to=100, variable=vars.subliminal_chance).pack()
+        ConfigScale(hypno_row, label="Hypno Chance (%)", from_=0, to=100, variable=vars.hypno_chance).pack()
 
-        ConfigScale(hypno_row, label="Hypno Opacity (%)", from_=0, to=99, variable=vars.subliminal_opacity).pack()
+        ConfigScale(hypno_row, label="Hypno Opacity (%)", from_=0, to=99, variable=vars.hypno_opacity).pack()
 
         denial_row = ConfigRow(overlays_section)
         denial_row.pack()
