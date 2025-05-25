@@ -81,20 +81,9 @@ class ImagePopup(Popup):
         self.init_finish()
 
     def should_init(self, settings: Settings, state: State) -> bool:
-        if not self.media:
-            return False
-
-        if not self.subliminal:
-            return True
-
-        if state.subliminal_number < settings.max_subliminals:
-            state.subliminal_number += 1
-            return True
-        return False
+        return self.media
 
     def close(self) -> None:
         if hasattr(self, "player"):
             self.player.close()
         super().close()
-        if self.subliminal:
-            self.state.subliminal_number -= 1

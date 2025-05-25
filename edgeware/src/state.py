@@ -38,7 +38,6 @@ class State:
     fill_number = 0
     _popup_number = Subject(0)
     prompt_active = False
-    subliminal_number = 0
     video_number = 0
 
     # popup_id -> (width, height, x, y)

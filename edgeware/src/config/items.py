@@ -89,7 +89,6 @@ CONFIG_ITEMS = {
     "single_mode": Item("singleMode", BOOLEAN, BooleanVar, bool),
     "subliminal_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
     "subliminal_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
-    "max_subliminals": Item("maxSubliminals", NONNEGATIVE, IntVar, int),
     "denial_chance": Item("denialChance", PERCENTAGE, IntVar, int),
     "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
 
