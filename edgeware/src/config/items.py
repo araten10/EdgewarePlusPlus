@@ -104,9 +104,9 @@ CONFIG_ITEMS = {
     # Captions
     "captions_in_popups": Item("showCaptions", BOOLEAN, BooleanVar, bool),
     "multi_click_popups": Item("multiClick", BOOLEAN, BooleanVar, bool),
-    "subliminal_message_popup_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
-    "subliminal_message_popup_opacity": Item("capPopOpacity", PERCENTAGE, IntVar, to_float),
-    "subliminal_message_popup_timeout": Item("capPopTimer", NONNEGATIVE, IntVar, int),
+    "subliminal_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
+    "subliminal_opacity": Item("capPopOpacity", PERCENTAGE, IntVar, to_float),
+    "subliminal_timeout": Item("capPopTimer", NONNEGATIVE, IntVar, int),
     "notification_chance": Item("notificationChance", PERCENTAGE, IntVar, int),
     "notification_image_chance": Item("notificationImageChance", PERCENTAGE, IntVar, int),
 

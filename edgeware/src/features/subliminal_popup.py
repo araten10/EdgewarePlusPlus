@@ -23,16 +23,16 @@ from config.settings import Settings
 from pack import Pack
 
 
-class SubliminalMessagePopup(Toplevel):
+class SubliminalPopup(Toplevel):
     def __init__(self, settings: Settings, pack: Pack) -> None:
-        self.subliminal_message = pack.random_subliminal_message()
+        self.subliminal = pack.random_subliminal()
         if not self.should_init():
             return
         super().__init__()
 
         self.attributes("-topmost", True)
         os_utils.set_borderless(self)
-        self.attributes("-alpha", settings.subliminal_message_popup_opacity)
+        self.attributes("-alpha", settings.subliminal_opacity)
         if os_utils.is_windows():
             self.wm_attributes("-transparentcolor", settings.theme.transparent_bg)
 
@@ -41,7 +41,7 @@ class SubliminalMessagePopup(Toplevel):
         font = (settings.theme.font[0], min(monitor.width, monitor.height) // 10)
         label = Label(
             self,
-            text=self.subliminal_message,
+            text=self.subliminal,
             font=font,
             wraplength=monitor.width / 1.5,
             fg=settings.theme.fg,
@@ -53,7 +53,7 @@ class SubliminalMessagePopup(Toplevel):
         y = monitor.y + (monitor.height - label.winfo_reqheight()) // 2
 
         self.geometry(f"+{x}+{y}")
-        self.after(settings.subliminal_message_popup_timeout, self.destroy)
+        self.after(settings.subliminal_timeout, self.destroy)
 
     def should_init(self) -> bool:
-        return self.subliminal_message
+        return self.subliminal

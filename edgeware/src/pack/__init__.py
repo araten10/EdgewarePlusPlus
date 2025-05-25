@@ -121,7 +121,7 @@ class Pack:
     def random_clicks_to_close(self, media: Path) -> int:
         return random.randint(1, self.find_media_mood(media).max_clicks)
 
-    def random_subliminal_message(self) -> str | None:
+    def random_subliminal(self) -> str | None:
         subliminals = self.find_list("subliminals")
         return random.choice(subliminals) if subliminals else self.random_caption()
 

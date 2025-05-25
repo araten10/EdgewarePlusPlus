@@ -110,9 +110,9 @@ class PopupTypesTab(ScrollFrame):
         subliminal_row = ConfigRow(subliminal_section)
         subliminal_row.pack()
 
-        ConfigScale(subliminal_row, label="Subliminal Popup Chance (%)", from_=0, to=100, variable=vars.subliminal_message_popup_chance).pack()
-        ConfigScale(subliminal_row, label="Subliminal Popup Length (ms)", from_=1, to=1000, variable=vars.subliminal_message_popup_timeout).pack()
-        ConfigScale(subliminal_row, label="Subliminal Popup Opacity (%)", from_=1, to=100, variable=vars.subliminal_message_popup_opacity).pack()
+        ConfigScale(subliminal_row, label="Subliminal Popup Chance (%)", from_=0, to=100, variable=vars.subliminal_chance).pack()
+        ConfigScale(subliminal_row, label="Subliminal Popup Length (ms)", from_=1, to=1000, variable=vars.subliminal_timeout).pack()
+        ConfigScale(subliminal_row, label="Subliminal Popup Opacity (%)", from_=1, to=100, variable=vars.subliminal_opacity).pack()
 
         # Notification
         notification_section = ConfigSection(self.viewPort, "Notification Popups", NOTIFICATION_TEXT)
