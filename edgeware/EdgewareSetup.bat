@@ -59,8 +59,8 @@ if not exist data\libmpv-2.dll (
   if not exist data mkdir data
   if not exist data\7z.exe powershell -Command "Invoke-WebRequest https://7-zip.org/a/7zr.exe -OutFile data\7z.exe"
   if not exist data\mpv.7z (
-    if %OS%==32BIT powershell -Command "Invoke-WebRequest https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-i686-20250420-git-3600c71.7z/download -OutFile data\mpv.7z"
-    if %OS%==64BIT powershell -Command "Invoke-WebRequest https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-x86_64-20250420-git-3600c71.7z/download -OutFile data\mpv.7z"
+    if %OS%==32BIT powershell -Command "[System.IO.File]::WriteAllBytes('data\mpv.7z', (Invoke-WebRequest https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-i686-20250420-git-3600c71.7z/download).content)"
+    if %OS%==64BIT powershell -Command "[System.IO.File]::WriteAllBytes('data\mpv.7z', (Invoke-WebRequest https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-x86_64-20250420-git-3600c71.7z/download).content)"
   )
   data\7z.exe e data\mpv.7z -odata libmpv-2.dll
 
