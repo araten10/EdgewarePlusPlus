@@ -128,10 +128,27 @@ class TroubleshootingTab(ScrollFrame):
             hardware_acceleration_toggle, "Disabling hardware acceleration may increase CPU usage, but it can provide a more consistent and stable experience."
         )
 
-        # Directories
-        Label(self.viewPort, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
+        # Legacy
+        legacy_section = ConfigSection(self.viewPort, "Legacy")
+        legacy_section.pack()
 
-        logs_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        set_legacy_panic_button = Button(
+            legacy_section,
+            text=f"Set Legacy\nPanic Key\n<{vars.panic_key.get()}>",
+            command=lambda: request_legacy_panic_key(set_legacy_panic_button, vars.panic_key),
+            cursor="question_arrow",
+        )
+        set_legacy_panic_button.pack(fill="x", side="left", expand=1)
+        CreateToolTip(
+            set_legacy_panic_button,
+            'This is the old panic key, use in case the new panic system doesn\'t work on your computer. To use this hotkey you must be "focused" on an Edgeware image or video popup. Click on a popup before using.',
+        )
+
+        # Directories
+        directories_section = ConfigSection(self.viewPort, "Directories")
+        directories_section.pack()
+
+        logs_frame = Frame(directories_section, borderwidth=2, relief=GROOVE)
         logs_frame.pack(fill="x", pady=2)
 
         logs_col_1 = Frame(logs_frame)
@@ -146,7 +163,7 @@ class TroubleshootingTab(ScrollFrame):
         delete_logs_button.pack(fill="x", expand=1)
         CreateToolTip(delete_logs_button, "This will delete every log (except the log currently being written).")
 
-        moods_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        moods_frame = Frame(directories_section, borderwidth=2, relief=GROOVE)
         moods_frame.pack(fill="x", pady=2)
 
         moods_col_1 = Frame(moods_frame)
@@ -169,4 +186,4 @@ class TroubleshootingTab(ScrollFrame):
             'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
         )
 
-        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: os_utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)
+        Button(directories_section, height=2, text="Open Pack Folder", command=lambda: os_utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)

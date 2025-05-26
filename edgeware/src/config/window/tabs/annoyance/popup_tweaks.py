@@ -128,7 +128,7 @@ class PopupTweaksTab(ScrollFrame):
         monitors_section = ConfigSection(self.viewPort, "Monitors", MONITORS_TEXT)
         monitors_section.pack()
 
-        monitor_frame = Frame(monitors_section, borderwidth=5, relief=RAISED)
+        monitor_frame = Frame(monitors_section)
         monitor_frame.pack(fill="x")
         for monitor in get_monitors():
             MonitorCheckbutton(monitor_frame, monitor).pack()

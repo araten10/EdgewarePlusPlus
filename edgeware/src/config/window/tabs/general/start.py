@@ -403,17 +403,6 @@ class StartTab(ScrollFrame):
         )
         set_global_panic_button.pack(fill="x", side="left", expand=1)
         CreateToolTip(set_global_panic_button, "This is a global key that does not require focus to activate. Press the key at any time to perform panic.")
-        set_legacy_panic_button = Button(
-            panic_frame,
-            text=f"Set Legacy\nPanic Key\n<{vars.panic_key.get()}>",
-            command=lambda: request_legacy_panic_key(set_legacy_panic_button, vars.panic_key),
-            cursor="question_arrow",
-        )
-        set_legacy_panic_button.pack(fill="x", side="left", expand=1)
-        CreateToolTip(
-            set_legacy_panic_button,
-            'This is the old panic key. To use this hotkey you must be "focused" on an Edgeware image or video popup. Click on a popup before using.',
-        )
         Button(panic_frame, text="Perform Panic", command=send_panic).pack(fill="both", side="left", expand=1)
 
         # Presets
