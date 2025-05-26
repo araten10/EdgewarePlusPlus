@@ -22,6 +22,7 @@ Major reorganization effort in the config window. This includes:
 •*Condensed "Basic Modes", "Dangerous Modes", "Hibernate", and "Corruption" tabs into "Modes" and "Corruption" tabs*
 
 •*"Timer Mode" has been moved from "Dangerous Modes" to "Dangerous Settings", as it was the only truly "dangerous" mode (and didn't even really fit our definition of a mode to begin with)*
+>It's also no longer called "Timer Mode" but instead "Panic Lockout", which is more descriptive
 
 •*Condensed "Popups", "Audio/Video" and "Captions" into "Popup Types" and "Popup Tweaks"*
 
