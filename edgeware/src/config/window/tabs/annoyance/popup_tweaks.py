@@ -19,10 +19,7 @@ from tkinter import BooleanVar, Frame, Message, Misc
 from tkinter.font import Font
 
 from config.vars import Vars
-from config.window.utils import (
-    config,
-    set_widget_states,
-)
+from config.window.utils import config
 from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
@@ -108,21 +105,13 @@ class PopupTweaksTab(ScrollFrame):
         timeout_row = ConfigRow(timeout_section)
         timeout_row.pack()
 
-        ConfigToggle(
-            timeout_row,
-            "Popup Timeout",
-            variable=vars.timeout_enabled,
-            command=lambda: set_widget_states(vars.timeout_enabled.get(), timeout_group),
-        ).pack()
+        ConfigToggle(timeout_row, "Popup Timeout", variable=vars.timeout_enabled).pack()
 
         timeout_row_2 = ConfigRow(timeout_section)
         timeout_row_2.pack()
 
-        timeout_scale = ConfigScale(timeout_row_2, label="Time (sec)", from_=1, to=120, variable=vars.timeout)
+        timeout_scale = ConfigScale(timeout_row_2, label="Time (sec)", from_=1, to=120, variable=vars.timeout, enabled=(vars.timeout_enabled, True))
         timeout_scale.pack()
-
-        timeout_group = [timeout_scale]
-        set_widget_states(vars.timeout_enabled.get(), timeout_group)
 
         # Monitors
         monitors_section = ConfigSection(self.viewPort, "Monitors", MONITORS_TEXT)
