@@ -24,11 +24,12 @@ from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 
 FREQUENCY_TEXT = 'This tab dictates the frequency of every popup type you will see during runtime, which in turn affects nearly every other tab in the config window! Each popup here will have a short description to help you decide how much you want to see of it. To check and see what types of popups your currently loaded pack supports, you can head on over to "Pack Info" (Underneath "General") and see how much media there is of each type.\n\nThe "Popup Timer Delay" setting affects the duration between each popup spawning, no matter the type. Once the timer has elapsed, a new popup will spawn, and then the type is randomly chosen from the chances set. It\'s recommended that you don\'t set this number too low to start- try 8000ms-10000ms (8-10 seconds) and adjust it from there based on how you feel!'
-SINGLE_TEXT = 'When a new popup is spawned, it uses the percentage chance of each type to determine which popup to choose. However, by default the popup does not check to see if a previous "type roll" has succeeded during the spawn process before starting the next one. Because of this, it\'s possible for multiple popups to spawn at once if the chance for multiple types is high enough.\n\n"Single Roll Per Popup" (sometimes referred to as "Single Mode") stops the "rolling process" once one type is picked. This allows for a much more consistent experience, with a maximum of only one popup spawning at a time (things like "Hibernate Mode" are an exception). Of course, sometimes having a bunch of popups spam your screen is also fun at times- this is a fake virus program after all!'
+SINGLE_TEXT = 'When a new popup is spawned, it uses the percentage chance of each type to determine which popup to choose. However, by default the popup does not check to see if a previous "type roll" has succeeded during the spawn process before starting the next one. Because of this, it\'s possible for multiple popups to spawn at once if the chance for multiple types is high enough.\n\n"Single Popup Per Roll" (sometimes referred to as "Single Mode") stops the "rolling process" once one type is picked. This allows for a much more consistent experience, with a maximum of only one popup spawning at a time (things like "Hibernate Mode" are an exception). Of course, sometimes having a bunch of popups spam your screen is also fun at times- this is a fake virus program after all!'
 IMAGE_TEXT = "Image popups are the most common type of popup. Every single pack will have these, and most of your time using Edgeware++ will be spent staring at these lovely things~\n\nThe reason a percentage slider exists for this is to create a more inconsistent experience. If no probability slider is set to 100% on this tab, there's a chance that nothing will spawn. If you want Edgeware++ to surprise you, consider turning this down to 60% or so!"
 AUDIO_TEXT = "Audio popups have no visuals attached, focusing only on sound. Because of this, there's no way to disable them once they stop (besides panic), but maybe that's something you want...~\n\nGenerally, you probably want a low maximum count on this, as well as a low frequency. Packs sometimes use long files for audio (hypno, binural, ASMR, etc), so you might have to set the maximum to \"1\" in this case, assuming the pack doesn't have suggested settings to do it for you."
 VIDEO_TEXT = 'Video popups are functionally exactly the same as image popups, just animated and with sound support. Edgeware++ uses MPV to play videos, and if you run into any trouble displaying these you may want to check out the "Troubleshooting" tab for a few video debugging options.'
 WEBSITE_TEXT = "Opens up a website in your default browser whenever a roll is passed. Please be aware that you could potentially be linked to a website with malicious intent or aggressive popups/ads.\n\nIts recommended to leave this chance relatively low so having new websites open is more of a nice suprise instead of an annoyance."
+WEBSITE_CLOSE_TEXT = "This setting also gives other types of popups the chance to open up a webpage whenever you close them. The chance to open a webpage is based on your website popup chance, so increase that if you want more to open!"
 PROMPT_TEXT = 'Prompt popups require you to repeat a prompt via a text box before they can be closed. The intent with this is to help drill mantras into your brain or generally make you more horny by having to repeat something degrading.\n\n"Prompt Mistakes" is the number of mistakes you can make in your reply and still have it be accepted. This is perfect for people who type with one hand, or have had porn degrade their IQ for the last few hours, or both...'
 NOTIFICATION_TEXT = 'These are a special type of caption-centric popup that uses your operating system\'s notification feature. For examples, this system is usually used for things like alerts ("You may now safely remove your USB device") or web browser notifications if you have those enabled. ("User XYZ has liked your youtube comment")'
 SUBLIMINAL_TEXT = 'Subliminal message popups briefly flash a caption on screen in big, bold text before disappearing.\n\nThis is largely meant to be for short, minimal captions such as "OBEY", "DROOL", and other vaguely fetishy things. To help with this, they can tap into a specific "subliminal mood" if the pack creator sets it up. Otherwise default captions will be used instead. (See "Popup Tweaks" for more info on captions)'
@@ -52,7 +53,7 @@ class PopupTypesTab(ScrollFrame):
         # for when hiding help gets refactored?
         # message_group.append(single_message)
 
-        single_mode = ConfigToggle(popup_freq_section, "Single Roll Per Popup", variable=vars.single_mode, cursor="question_arrow")
+        single_mode = ConfigToggle(popup_freq_section, "Single Popup Per Roll", variable=vars.single_mode, cursor="question_arrow")
         single_mode.pack()
 
         CreateToolTip(
@@ -91,7 +92,18 @@ class PopupTypesTab(ScrollFrame):
         # Website
         web_section = ConfigSection(self.viewPort, "Website Popups", WEBSITE_TEXT)
         web_section.pack()
-        ConfigScale(web_section, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
+
+        web_row = ConfigRow(web_section)
+        web_row.pack()
+
+        ConfigScale(web_row, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
+
+        website_close_message = Message(web_section, text=WEBSITE_CLOSE_TEXT, justify=CENTER, width=675)
+        website_close_message.pack(fill="both")
+        # for when hiding help gets refactored?
+        # message_group.append(website_close_message)
+
+        ConfigToggle(web_section, "Popup close opens web page", variable=vars.web_on_popup_close).pack()
 
         # Prompts
         prompt_section = ConfigSection(self.viewPort, "Prompt Popups", PROMPT_TEXT)
@@ -110,9 +122,9 @@ class PopupTypesTab(ScrollFrame):
         subliminal_row = ConfigRow(subliminal_section)
         subliminal_row.pack()
 
-        ConfigScale(subliminal_row, label="Subliminal Popup Chance (%)", from_=0, to=100, variable=vars.subliminal_message_popup_chance).pack()
-        ConfigScale(subliminal_row, label="Subliminal Popup Length (ms)", from_=1, to=1000, variable=vars.subliminal_message_popup_timeout).pack()
-        ConfigScale(subliminal_row, label="Subliminal Popup Opacity (%)", from_=1, to=100, variable=vars.subliminal_message_popup_opacity).pack()
+        ConfigScale(subliminal_row, label="Subliminal Popup Chance (%)", from_=0, to=100, variable=vars.subliminal_chance).pack()
+        ConfigScale(subliminal_row, label="Subliminal Popup Length (ms)", from_=1, to=1000, variable=vars.subliminal_timeout).pack()
+        ConfigScale(subliminal_row, label="Subliminal Popup Opacity (%)", from_=1, to=100, variable=vars.subliminal_opacity).pack()
 
         # Notification
         notification_section = ConfigSection(self.viewPort, "Notification Popups", NOTIFICATION_TEXT)

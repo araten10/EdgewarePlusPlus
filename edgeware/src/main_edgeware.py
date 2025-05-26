@@ -47,7 +47,7 @@ from features.misc import (
     handle_discord,
     handle_keyboard,
     handle_mitosis_mode,
-    handle_timer_mode,
+    handle_panic_lockout,
     handle_wallpaper,
     make_desktop_icons,
     make_tray_icon,
@@ -56,7 +56,7 @@ from features.misc import (
 )
 from features.prompt import Prompt
 from features.startup_splash import StartupSplash
-from features.subliminal_message_popup import SubliminalMessagePopup
+from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
 from pack import Pack
 from panic import start_panic_listener
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     targets = [
         RollTarget(lambda: ImagePopup(root, settings, pack, state), settings.image_chance if not settings.mitosis_mode else 0),
         RollTarget(lambda: VideoPopup(root, settings, pack, state), settings.video_chance if not settings.mitosis_mode else 0),
-        RollTarget(lambda: SubliminalMessagePopup(settings, pack), settings.subliminal_message_popup_chance),
+        RollTarget(lambda: SubliminalPopup(settings, pack), settings.subliminal_chance),
         RollTarget(lambda: Prompt(settings, pack, state), settings.prompt_chance),
         RollTarget(lambda: play_audio(root, settings, pack), settings.audio_chance),
         RollTarget(lambda: open_web(pack), settings.web_chance),
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
         handle_corruption(root, settings, pack, state)
         handle_discord(root, settings, pack)
-        handle_timer_mode(root, settings, state)
+        handle_panic_lockout(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
 
         if settings.hibernate_mode:

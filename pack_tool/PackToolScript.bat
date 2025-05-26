@@ -66,6 +66,8 @@ goto ptCompress
 :ptRename
 echo Would you like to rename the built media to allow for mood specific captions?
 echo This will insert the name of the mood at the start of every file, such as "mood_nameoffile.png"
+echo If moods are configured correctly, this is not needed, but including it will increase compatibility
+echo with older versions of Edgeware and Edgeware++.
 echo 1: Yes
 echo 2: No
 set /p renameSelect=Select Number:

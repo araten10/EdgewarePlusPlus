@@ -15,21 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import (
-    CENTER,
-    GROOVE,
-    RAISED,
-    SINGLE,
-    Button,
-    Checkbutton,
-    Entry,
-    Frame,
-    Label,
-    Listbox,
-    Message,
-    Scale,
-    filedialog,
-)
+from tkinter import HORIZONTAL, SINGLE, Button, Checkbutton, Entry, Frame, Label, Listbox, Message, Scale, filedialog, ttk
 from tkinter.font import Font
 
 from config.vars import Vars
@@ -40,11 +26,19 @@ from config.window.utils import (
     reset_list,
     set_widget_states,
 )
+from config.window.widgets.layout import (
+    ConfigRow,
+    ConfigScale,
+    ConfigSection,
+    ConfigToggle,
+    set_enabled_when,
+)
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 
 DRIVE_TEXT = 'There are two main features in this section: "Fill Drive" and "Replace Images". This explanation might be long, but these features are very dangerous, so please pay attention if you plan to use them! Unless you imported settings from a pack you downloaded or got this installation of Edgeware++ from somewhere other than the official github, these should all be off by default.\n\nFill drive will attempt to fill your computer with as much porn from the currently loaded pack as possible. It does, however, have some restrictions, which are further explained in the hover tooltip. Fill delay is a forced delay on saving, as when not properly configured it can fill your drive VERY quickly.\n\nReplace images will seek out folders with large numbers of pre-existing images (more than the threshold value) and when it finds one, it will replace ALL of the images with images from the currently loaded pack. For example, you could point it at certain steam directories to have all of your game preview/banner images replaced with porn. Please, please, please, backup any important images before using this setting... Edgeware will attempt to backup any replaced images under /data/backups, but nobody involved with any Edgeware version past, present, or future, is responsible for any lost images. Don\'t solely rely on the included backup feature... do the smart thing and make personal backups as well!\n\nI understand techdom and gooning are both fetishes about making irresponsible decisions, but at least understand the risks and take a moment to decide on how you want to use these features. Set up blacklists and make backups if you wish to proceed, but to echo the inadequate sex-ed public schools dole out: abstinence is the safest option.'
 MISC_TEXT = "These settings are less destructive on your PC, but will either cause embarrassment or give you less control over Edgeware.\n\nDisable Panic Hotkey disables both the panic hotkey and system tray panic. A full list of panic alternatives can be found in the hover tooltip.\nLaunch on PC Startup is self explanatory, but keep caution on this if you're running Edgeware with a strong payload.\nShow on Discord will give you a status on discord while you run Edgeware. There's actually a decent amount of customization for this option, and packs can have their own status. However, this setting could definitely be \"socially destructive\", or at least cause you great (unerotic) shame, so be careful with enabling it."
+PANIC_LOCKOUT_TEXT = 'Makes it so you cannot panic for a specified duration, essentially forcing you to endure the payload until the timer is up.\n\nA safeword can be used if you wish to still use panic during this time. It is recommended that you generate one via a password generator/keysmash and save it somewhere easily accessible; not only does this help in emergency situations where you need to turn off Edgeware++, but also makes it harder to memorize so the "fetishistic danger" remains.'
 
 
 def assign_path(path_entry: Entry, vars: Vars) -> None:
@@ -62,15 +56,30 @@ class DangerousSettingsTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
+        # Panic lockout
+        lockout_section = ConfigSection(self.viewPort, "Panic Lockout", PANIC_LOCKOUT_TEXT)
+        lockout_section.pack()
+
+        lockout_row = ConfigRow(lockout_section)
+        lockout_row.pack()
+        ConfigToggle(lockout_row, "Enable Panic Lockout", variable=vars.panic_lockout).pack()
+        safeword_frame = Frame(lockout_row)
+        safeword_frame.pack(side="left", expand=True)
+        Label(safeword_frame, text="Emergency Safeword").pack()
+        lockout_safeword = Entry(safeword_frame, show="*", textvariable=vars.panic_lockout_password)
+        lockout_safeword.pack(expand=1, fill="both")
+        set_enabled_when(lockout_safeword, enabled=(vars.panic_lockout, True))
+
+        ConfigScale(lockout_section, "Panic Lockout Time (minutes)", vars.panic_lockout_time, 1, 1440, enabled=(vars.panic_lockout, True)).pack()
+
         # Drive
-        Label(self.viewPort, text="Hard Drive Settings", font=title_font, relief=GROOVE).pack(pady=2)
+        drive_section = ConfigSection(self.viewPort, "Hard Drive Settings", DRIVE_TEXT)
+        drive_section.pack()
 
-        drive_message = Message(self.viewPort, text=DRIVE_TEXT, justify=CENTER, width=675)
-        drive_message.pack(fill="both")
-        message_group.append(drive_message)
+        ttk.Separator(drive_section, orient=HORIZONTAL).pack(fill="x", pady=2)
 
-        drive_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        drive_frame.pack(fill="x")
+        drive_frame = Frame(drive_section)
+        drive_frame.pack(fill="x", pady=5)
 
         blacklist_frame = Frame(drive_frame)
         blacklist_frame.pack(fill="y", side="left")
@@ -145,16 +154,14 @@ class DangerousSettingsTab(ScrollFrame):
         Button(path_frame, text="Select", command=lambda: assign_path(path_entry, vars)).pack(fill="x")
 
         # Misc
-        Label(self.viewPort, text="Misc. Settings", font=title_font, relief=GROOVE).pack(pady=2)
+        misc_section = ConfigSection(self.viewPort, "Misc. Dangerous Settings", MISC_TEXT)
+        misc_section.pack()
 
-        misc_message = Message(self.viewPort, text=MISC_TEXT, justify=CENTER, width=675)
-        misc_message.pack(fill="both")
-        message_group.append(misc_message)
+        misc_row = ConfigRow(misc_section)
+        misc_row.pack()
 
-        misc_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        misc_frame.pack(fill="x")
-        panic_disable_toggle = Checkbutton(misc_frame, text="Disable Panic Hotkey", variable=vars.panic_disabled, cursor="question_arrow")
-        panic_disable_toggle.pack(fill="x", side="left", expand=1)
+        panic_disable_toggle = ConfigToggle(misc_row, "Disable Panic Hotkey", variable=vars.panic_disabled, cursor="question_arrow")
+        panic_disable_toggle.pack()
         CreateToolTip(
             panic_disable_toggle,
             "This not only disables the panic hotkey, but also the panic function in the system tray as well.\n\n"
@@ -163,7 +170,7 @@ class DangerousSettingsTab(ScrollFrame):
             '•Keep the config window open and press "Perform Panic"\n'
             "•Use the panic desktop icon (if you kept those enabled)",
         )
-        Checkbutton(misc_frame, text="Launch on PC Startup", variable=vars.run_at_startup).pack(fill="x", side="left", expand=1)
-        discord_toggle = Checkbutton(misc_frame, text="Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
-        discord_toggle.pack(fill="x", side="left", expand=1)
+        ConfigToggle(misc_row, "Launch on PC Startup", variable=vars.run_at_startup).pack()
+        discord_toggle = ConfigToggle(misc_row, "Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
+        discord_toggle.pack()
         CreateToolTip(discord_toggle, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator.")

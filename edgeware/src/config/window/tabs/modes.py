@@ -27,6 +27,7 @@ from config.window.widgets.scroll_frame import ScrollFrame
 
 LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with popup timeout or high delay as popups will stack on top of eachother."
 HIBERNATE_TEXT = "Runs Edgeware++ covertly, without any popups. Instead, after a certain amount of time a barrage of popups will all spawn at once depending on the hibernate mode set.\n\nMinimum/maximum sleep durations determine the range of the payload timer- hibernate mode will activate sometime between these two values.\nAwaken activity determines the intensity of the hibernate mode payload, essentially the amount of popups spawned when it triggers.\nMax activity length is how long the payload lasts, if using a hibernate type that has a duration."
+MITOSIS_TEXT = "When a popup is closed, more popups will spawn in its place depending on the mitosis strength.\n\nWhile not dangerous by itself, this can easily cause performance issues and other problems if the popup delay is set too low and mitosis strength too high. It is generally safe to experiment with this at slower popup intervals, but make sure you know what you're doing before increasing it too high."
 
 
 class BasicModesTab(ScrollFrame):
@@ -46,6 +47,15 @@ class BasicModesTab(ScrollFrame):
         lowkey_dropdown = OptionMenu(lowkey_row, lowkey_corner_string, *lowkey_corners, command=lambda x: (vars.lowkey_corner.set(lowkey_corners.index(x))))
         lowkey_dropdown.pack(side="left", expand=True)
         set_enabled_when(lowkey_dropdown, enabled=(vars.lowkey_mode, True))
+
+        # Mitosis
+        mitosis_section = ConfigSection(self.viewPort, "Mitosis Mode", MITOSIS_TEXT)
+        mitosis_section.pack()
+
+        mitosis_row = ConfigRow(mitosis_section)
+        mitosis_row.pack()
+        ConfigToggle(mitosis_row, "Enable Mitosis Mode", variable=vars.mitosis_mode).pack()
+        ConfigScale(mitosis_section, "Mitosis Strength (number of popups)", vars.mitosis_strength, 2, 10, enabled=(vars.mitosis_mode, True)).pack()
 
         # Hibernate
         hibernate_section = ConfigSection(self.viewPort, "Hibernate Mode", HIBERNATE_TEXT)

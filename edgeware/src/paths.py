@@ -47,11 +47,11 @@ class Assets:
 
     # Changeable defaults
     DEFAULT_CONFIG_ICON = ROOT / "default_config_icon.ico"
+    DEFAULT_HYPNO = ROOT / "default_hypno.gif"
     DEFAULT_ICON = ROOT / "default_icon.ico"
     DEFAULT_PANIC_ICON = ROOT / "default_panic_icon.ico"
     DEFAULT_PANIC_WALLPAPER = ROOT / "default_panic_wallpaper.jpg"
     DEFAULT_STARTUP_SPLASH = ROOT / "default_loading_splash.png"
-    DEFAULT_SUBLIMINAL_OVERLAY = ROOT / "default_subliminal_overlay.gif"
     DEFAULT_THEME_DEMO = ROOT / "default_theme_demo.png"
 
     # Tutorial pages
@@ -82,11 +82,11 @@ class Data:
 
     # Changed defaults
     CONFIG_ICON = ROOT / "config_icon.ico"
+    HYPNO = ROOT / "hypno.png"
     ICON = ROOT / "icon.ico"
     PANIC_ICON = ROOT / "panic_icon.ico"
     PANIC_WALLPAPER = ROOT / "panic_wallpaper.png"
     STARTUP_SPLASH = ROOT / "loading_splash.png"
-    SUBLIMINAL_OVERLAY = ROOT / "subliminal_overlay.png"
     THEME_DEMO = ROOT / "theme_demo.png"
 
 
@@ -94,6 +94,9 @@ class Data:
 class CustomAssets:
     def config_icon() -> Path:
         return Data.CONFIG_ICON if Data.CONFIG_ICON.is_file() else Assets.DEFAULT_CONFIG_ICON
+
+    def hypno() -> Path:
+        return Data.HYPNO if Data.HYPNO.is_file() else Assets.DEFAULT_HYPNO
 
     def icon() -> Path:
         return Data.ICON if Data.ICON.is_file() else Assets.DEFAULT_ICON
@@ -107,9 +110,6 @@ class CustomAssets:
     def startup_splash() -> Path:
         return Data.STARTUP_SPLASH if Data.STARTUP_SPLASH.is_file() else Assets.DEFAULT_STARTUP_SPLASH
 
-    def subliminal_overlay() -> Path:
-        return Data.SUBLIMINAL_OVERLAY if Data.SUBLIMINAL_OVERLAY.is_file() else Assets.DEFAULT_SUBLIMINAL_OVERLAY
-
     def theme_demo() -> Path:
         return Data.THEME_DEMO if Data.THEME_DEMO.is_file() else Assets.DEFAULT_THEME_DEMO
 
@@ -121,8 +121,8 @@ class PackPaths:
 
         # Directories
         self.audio = self.root / "aud"
+        self.hypno = self.root / "subliminals"
         self.image = self.root / "img"
-        self.subliminals = self.root / "subliminals"
         self.video = self.root / "vid"
 
         # Files

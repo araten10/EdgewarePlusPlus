@@ -87,11 +87,8 @@ CONFIG_ITEMS = {
     "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # opens up web popup on popup close, this one could be cut from this list as it's not listed as dangerous in config but could lead to bad performance
     "buttonless": Item("buttonless", BOOLEAN, BooleanVar, bool),
     "single_mode": Item("singleMode", BOOLEAN, BooleanVar, bool),
-    "popup_subliminals": Item("popupSubliminals", BOOLEAN, BooleanVar, bool),
-    "subliminal_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
-    "subliminal_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
-    "max_subliminals": Item("maxSubliminals", NONNEGATIVE, IntVar, int),
-    "denial_mode": Item("denialMode", BOOLEAN, BooleanVar, bool),
+    "hypno_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
+    "hypno_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
     "denial_chance": Item("denialChance", PERCENTAGE, IntVar, int),
     "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
 
@@ -106,11 +103,10 @@ CONFIG_ITEMS = {
 
     # Captions
     "captions_in_popups": Item("showCaptions", BOOLEAN, BooleanVar, bool),
-    "filename_caption_moods": Item("captionFilename", BOOLEAN, BooleanVar, bool),
     "multi_click_popups": Item("multiClick", BOOLEAN, BooleanVar, bool),
-    "subliminal_message_popup_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
-    "subliminal_message_popup_opacity": Item("capPopOpacity", PERCENTAGE, IntVar, to_float),
-    "subliminal_message_popup_timeout": Item("capPopTimer", NONNEGATIVE, IntVar, int),
+    "subliminal_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
+    "subliminal_opacity": Item("capPopOpacity", PERCENTAGE, IntVar, to_float),
+    "subliminal_timeout": Item("capPopTimer", NONNEGATIVE, IntVar, int),
     "notification_chance": Item("notificationChance", PERCENTAGE, IntVar, int),
     "notification_image_chance": Item("notificationImageChance", PERCENTAGE, IntVar, int),
 
@@ -135,13 +131,12 @@ CONFIG_ITEMS = {
     "lowkey_mode": Item("lkToggle", BOOLEAN, BooleanVar, bool),
     "lowkey_corner": Item("lkCorner", Schema(Union(int, Range(min=0, max=4))), IntVar, int),
     "moving_chance": Item("movingChance", PERCENTAGE, IntVar, int),
-    "moving_random": Item("movingRandom", BOOLEAN, BooleanVar, bool),
     "moving_speed": Item("movingSpeed", NONNEGATIVE, IntVar, int),
 
     # Dangerous Modes
-    "timer_mode": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "timer_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
-    "timer_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
+    "panic_lockout": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
+    "panic_lockout_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
     "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption may not work
     "mitosis_strength": Item("mitosisStrength", NONNEGATIVE, IntVar, int),
 

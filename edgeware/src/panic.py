@@ -50,9 +50,9 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
     if (disable and settings.panic_disabled) or not condition:
         return
 
-    if settings.timer_mode and state.timer_active:
+    if settings.panic_lockout and state.panic_lockout_active:
         password = simpledialog.askstring("Panic", "Enter Panic Password")
-        if password != settings.timer_password:
+        if password != settings.panic_lockout_password:
             return
 
     set_wallpaper(CustomAssets.panic_wallpaper())

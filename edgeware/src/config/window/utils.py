@@ -23,11 +23,12 @@ import subprocess
 import sys
 import urllib
 from pathlib import Path
-from tkinter import BooleanVar, IntVar, Listbox, StringVar, TclError, Widget, messagebox, simpledialog
+from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar, TclError, Toplevel, Widget, messagebox, simpledialog
 
 import os_utils
 import utils
 from paths import Data, Process
+from pynput import keyboard
 
 from config import load_config
 from config.vars import Vars
@@ -37,6 +38,45 @@ BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"
 # TODO: Don't load these here
 config = load_config()
 log_file = utils.init_logging("config")
+
+
+class KeyListenerWindow(Toplevel):
+    def __init__(self) -> None:
+        super().__init__()
+        self.resizable(False, False)
+        self.title("Key Listener")
+        self.wm_attributes("-topmost", 1)
+        self.geometry("250x250")
+        self.focus_force()
+        Label(self, text="Press any key or exit").pack(expand=1, fill="both")
+
+
+def request_legacy_panic_key(button: Button, var: StringVar) -> None:
+    window = KeyListenerWindow()
+
+    def assign_panic_key(event: Event) -> None:
+        button.configure(text=f"Set Legacy\nPanic Key\n<{event.keysym}>")
+        var.set(str(event.keysym))
+        window.destroy()
+
+    window.bind("<KeyPress>", assign_panic_key)
+
+
+def request_global_panic_key(button: Button, var: StringVar) -> None:
+    window = KeyListenerWindow()
+
+    def close() -> None:
+        window.destroy()
+        listener.stop()
+
+    def assign_panic_key(key: keyboard.Key) -> None:
+        button.configure(text=f"Set Global\nPanic Key\n<{str(key)}>")
+        var.set(str(key))
+        close()
+
+    listener = keyboard.Listener(on_release=assign_panic_key)
+    listener.start()
+    window.protocol("WM_DELETE_WINDOW", close)
 
 
 # TODO: Review these functions
@@ -131,14 +171,14 @@ def safe_check(vars: Vars) -> bool:
                 "\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
             )
     if (
-        vars.timer_mode.get()
+        vars.panic_lockout.get()
         or vars.mitosis_mode.get()
         or vars.show_on_discord.get()
         or (vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30))
     ):
         logging.info("medium dangers found.")
         dangers.append("\n\nMedium:")
-        if vars.timer_mode.get():
+        if vars.panic_lockout.get():
             dangers.append("\n•Timer mode is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!")
         if vars.mitosis_mode.get():
             dangers.append("\n•Mitosis mode is enabled! With high popup rates, this could create a chain reaction, causing lag!")

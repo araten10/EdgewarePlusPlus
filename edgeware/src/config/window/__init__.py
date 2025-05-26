@@ -45,19 +45,17 @@ from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from config import load_default_config
 from config.vars import Vars
 from config.window.import_pack import import_pack
-from config.window.tabs.annoyance.captions import CaptionsTab
 from config.window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
 from config.window.tabs.annoyance.moods import MoodsTab
 from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
 from config.window.tabs.annoyance.popup_types import PopupTypesTab
 from config.window.tabs.annoyance.wallpaper import WallpaperTab
+from config.window.tabs.corruption import CorruptionModeTab
 from config.window.tabs.general.booru import BooruTab
 from config.window.tabs.general.default_file import DefaultFileTab
 from config.window.tabs.general.info import InfoTab
 from config.window.tabs.general.start import StartTab
-from config.window.tabs.modes.basic import BasicModesTab
-from config.window.tabs.modes.corruption import CorruptionModeTab
-from config.window.tabs.modes.dangerous_modes import DangerousModesTab
+from config.window.tabs.modes import BasicModesTab
 from config.window.tabs.troubleshooting import TroubleshootingTab
 from config.window.tabs.tutorial import open_tutorial
 from config.window.utils import (
@@ -128,18 +126,12 @@ class ConfigWindow(Tk):
         annoyance_notebook.pack(expand=1, fill="both")
         annoyance_notebook.add(PopupTypesTab(vars, title_font, message_group), text="Popup Types")  # tab for popup types
         annoyance_notebook.add(PopupTweaksTab(vars, title_font, message_group), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
-        annoyance_notebook.add(CaptionsTab(vars, title_font, message_group), text="Captions")  # tab for caption settings
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
         annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
 
-        modes_tab = ttk.Frame(notebook)
-        notebook.add(modes_tab, text="Modes")
-        modes_notebook = ttk.Notebook(modes_tab)
-        modes_notebook.pack(expand=1, fill="both")
-        modes_notebook.add(BasicModesTab(vars, title_font), text="Basic Modes")  # tab for basic popup modes
-        modes_notebook.add(DangerousModesTab(vars, title_font), text="Dangerous Modes")  # tab for timer mode
-        modes_notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
+        notebook.add(BasicModesTab(vars, title_font), text="Modes")  # tab for general modes
+        notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
 
         notebook.add(TroubleshootingTab(vars, title_font, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 

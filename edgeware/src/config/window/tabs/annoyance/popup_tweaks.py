@@ -15,23 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import CENTER, GROOVE, RAISED, BooleanVar, Checkbutton, Frame, Label, Message, Misc, Scale
+from tkinter import BooleanVar, Frame, Message, Misc
 from tkinter.font import Font
 
 from config.vars import Vars
-from config.window.utils import (
-    config,
-    set_widget_states,
-)
-from config.window.widgets.layout import (
-    ConfigScale,
-    ConfigToggle,
-)
+from config.window.utils import config
+from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from screeninfo import Monitor, get_monitors
 
-OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Subliminals add a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it, simple as.'
+OVERLAY_TEXT = 'Overlays are more or less modifiers for popups- adding onto them without changing their core behaviour.\n\n•Hypno adds a transparent gif over affected popups, defaulting to a hypnotic spiral if there are none added in the current pack. (this may cause performance issues with lots of popups, try a low max to start)\n•Denial "censors" a popup by blurring it.'
+CAPTION_TEXT = "Captions are small bits of randomly chosen text that adorn the top of each popup, and can be set by the pack creator. Many packs include captions, so don't be shy in trying them out!"
+MONITORS_TEXT = "Here you can choose what monitors Edgeware++ will spawn popups on! By default every monitor that is detected is turned on, but if you want porn to amass on your second screen while you're focusing on something on your main monitor, this is a good way to do it~"
+MOVEMENT_TEXT = 'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" property (see "Misc Tweaks" above for more information), so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower movement chance or higher popup delay to start!'
+MISC_TEXT = '•"Buttonless Closing Popups" removes the "close" button on every image and video popup, allowing you to click anywhere on the popup to close it. This makes closing popups much easier, but certain packs may have custom buttons that will no longer be seen.\n•"Multi Click Popups" is a setting that needs to be supported by the pack, and makes popups under certain moods take more clicks to close.\n•"Popup Opacity" affects the opacity/transparency of all popups.'
+TIMEOUT_TEXT = "After a certain time, popups will fade out and delete themselves. This is a great setting to use with Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction."
 
 
 class MonitorCheckbutton(ConfigToggle):
@@ -51,125 +50,85 @@ class PopupTweaksTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
         super().__init__()
 
-        popup_frame_2 = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        popup_frame_2.pack(fill="x")
-        ConfigScale(popup_frame_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
+        # Captions
 
-        timeout_frame = Frame(popup_frame_2)
-        timeout_frame.pack(fill="y", side="left", padx=3, expand=1)
-        timeout_scale = ConfigScale(timeout_frame, label="Time (sec)", from_=1, to=120, variable=vars.timeout)
-        timeout_scale.pack()
-        ConfigToggle(
-            timeout_frame,
-            "Popup Timeout",
-            variable=vars.timeout_enabled,
-            command=lambda: set_widget_states(vars.timeout_enabled.get(), timeout_group),
-        ).pack()
+        captions_section = ConfigSection(self.viewPort, "Captions", CAPTION_TEXT)
+        captions_section.pack()
 
-        timeout_group = [timeout_scale]
-        set_widget_states(vars.timeout_enabled.get(), timeout_group)
+        captions_row = ConfigRow(captions_section)
+        captions_row.pack()
 
-        popup_frame_3 = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        popup_frame_3.pack(fill="x")
+        ConfigToggle(captions_row, "Enable Popup Captions", variable=vars.captions_in_popups).pack()
 
-        ConfigToggle(popup_frame_3, "Popup close opens web page", variable=vars.web_on_popup_close).pack()
+        # Overlays
+        overlays_section = ConfigSection(self.viewPort, "Overlays", OVERLAY_TEXT)
+        overlays_section.pack()
 
-        buttonless_toggle = ConfigToggle(popup_frame_3, "Buttonless Closing Popups", variable=vars.buttonless, cursor="question_arrow")
+        hypno_row = ConfigRow(overlays_section)
+        hypno_row.pack()
+
+        ConfigScale(hypno_row, label="Hypno Chance (%)", from_=0, to=100, variable=vars.hypno_chance).pack()
+
+        ConfigScale(hypno_row, label="Hypno Opacity (%)", from_=1, to=99, variable=vars.hypno_opacity).pack()
+
+        denial_row = ConfigRow(overlays_section)
+        denial_row.pack()
+
+        ConfigScale(denial_row, label="Denial Chance (%)", from_=0, to=100, variable=vars.denial_chance).pack()
+
+        # Misc Tweaks
+
+        misc_section = ConfigSection(self.viewPort, "Misc. Tweaks", MISC_TEXT)
+        misc_section.pack()
+
+        misc_row = ConfigRow(misc_section)
+        misc_row.pack()
+
+        buttonless_toggle = ConfigToggle(misc_row, "Buttonless Closing Popups", variable=vars.buttonless, cursor="question_arrow")
         buttonless_toggle.pack()
         CreateToolTip(
             buttonless_toggle,
-            'Disables the "close button" on popups and allows you to click anywhere on the popup to close it.\n\n'
             "IMPORTANT: The panic keyboard hotkey will only work in this mode if you use it while *holding down* the mouse button over a popup!",
         )
 
-        # Overlays
-        Label(self.viewPort, text="Popup Overlays", font=title_font, relief=GROOVE).pack(pady=2)
+        ConfigToggle(misc_row, "Multi-Click popups", variable=vars.multi_click_popups).pack()
 
-        overlay_message = Message(self.viewPort, text=OVERLAY_TEXT, justify=CENTER, width=675)
-        overlay_message.pack(fill="both")
-        message_group.append(overlay_message)
+        misc_row_2 = ConfigRow(misc_section)
+        misc_row_2.pack()
+        ConfigScale(misc_row_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
 
-        overlay_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        overlay_frame.pack(fill="x")
+        # Timeout
 
-        subliminal_frame = Frame(overlay_frame)
-        subliminal_frame.pack(fill="x", side="left", padx=(3, 0))
-        ConfigToggle(
-            subliminal_frame,
-            "Subliminal Overlays",
-            variable=vars.popup_subliminals,
-            command=lambda: set_widget_states(vars.popup_subliminals.get(), subliminals_group),
-        ).pack()
+        timeout_section = ConfigSection(self.viewPort, "Popup Timeout", TIMEOUT_TEXT)
+        timeout_section.pack()
 
-        subliminal_chance_frame = Frame(subliminal_frame)
-        subliminal_chance_frame.pack(fill="x", side="left", padx=3)
-        subliminal_chance_scale = ConfigScale(subliminal_chance_frame, label="Sublim. Chance (%)", from_=1, to=100, variable=vars.subliminal_chance)
-        subliminal_chance_scale.pack()
+        timeout_row = ConfigRow(timeout_section)
+        timeout_row.pack()
 
-        subliminal_alpha_frame = Frame(subliminal_frame)
-        subliminal_alpha_frame.pack(fill="x", side="left", padx=3)
-        subliminal_alpha_scale = ConfigScale(subliminal_alpha_frame, label="Sublim. Alpha (%)", from_=1, to=99, variable=vars.subliminal_opacity)
-        subliminal_alpha_scale.pack()
+        ConfigToggle(timeout_row, "Popup Timeout", variable=vars.timeout_enabled).pack()
 
-        max_subliminal_frame = Frame(subliminal_frame)
-        max_subliminal_frame.pack(fill="x", side="left", padx=3)
-        max_subliminal_scale = ConfigScale(max_subliminal_frame, label="Max Subliminals", from_=1, to=200, variable=vars.max_subliminals)
-        max_subliminal_scale.pack()
+        timeout_row_2 = ConfigRow(timeout_section)
+        timeout_row_2.pack()
 
-        subliminals_group = [
-            subliminal_chance_scale,
-            subliminal_alpha_scale,
-            max_subliminal_scale,
-        ]
-        set_widget_states(vars.popup_subliminals.get(), subliminals_group)
-
-        denial_frame = Frame(overlay_frame)
-        denial_frame.pack(fill="x", side="left", padx=(0, 3), expand=1)
-        ConfigToggle(denial_frame, "Denial Overlays", variable=vars.denial_mode, command=lambda: set_widget_states(vars.denial_mode.get(), denial_group)).pack()
-        denial_chance_slider = ConfigScale(denial_frame, label="Denial Chance", from_=1, to=100, variable=vars.denial_chance)
-        denial_chance_slider.pack()
-
-        denial_group = [denial_chance_slider]
-        set_widget_states(vars.denial_mode.get(), denial_group)
+        timeout_scale = ConfigScale(timeout_row_2, label="Time (sec)", from_=1, to=120, variable=vars.timeout, enabled=(vars.timeout_enabled, True))
+        timeout_scale.pack()
 
         # Monitors
-        Label(self.viewPort, text="Enabled Monitors", font=title_font, relief=GROOVE).pack(pady=2)
+        monitors_section = ConfigSection(self.viewPort, "Monitors", MONITORS_TEXT)
+        monitors_section.pack()
 
-        monitor_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        monitor_frame = Frame(monitors_section)
         monitor_frame.pack(fill="x")
         for monitor in get_monitors():
             MonitorCheckbutton(monitor_frame, monitor).pack()
 
         # Movement
-        Label(self.viewPort, text="Movement Mode", font=title_font, relief=GROOVE).pack(pady=2)
+        movement_section = ConfigSection(self.viewPort, "Popup Movement", MOVEMENT_TEXT)
+        movement_section.pack()
 
-        movement_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        movement_frame.pack(fill="x")
+        movement_chance_row = ConfigRow(movement_section)
+        movement_chance_row.pack()
 
-        movement_chance_frame = Frame(movement_frame)
-        movement_chance_frame.pack(fill="x", side="left")
-        movement_chance = ConfigScale(movement_chance_frame, label="Moving Chance", from_=0, to=100, variable=vars.moving_chance)
-        movement_chance.pack()
-        CreateToolTip(
-            movement_chance,
-            'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" '
-            "property, so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower percentage chance or higher popup delay to start.",
-        )
-        movement_direction = ConfigToggle(movement_chance_frame, "Random Direction", variable=vars.moving_random, cursor="question_arrow")
-        movement_direction.pack()
-        CreateToolTip(movement_direction, "Makes moving popups move in a random direction rather than the static diagonal one.")
+        ConfigScale(movement_chance_row, label="Moving Popup Chance", from_=0, to=100, variable=vars.moving_chance).pack()
 
-        movement_speed_frame = Frame(movement_frame)
-        movement_speed_frame.pack(fill="x", side="left")
-        Scale(movement_speed_frame, label="Max Movespeed", from_=1, to=15, orient="horizontal", variable=vars.moving_speed).pack(fill="x")
-
-        hardware_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        hardware_frame.pack(fill="x")
-
-        hardware_acceleration_toggle = Checkbutton(
-            hardware_frame, text="Enable hardware acceleration", variable=vars.video_hardware_acceleration, cursor="question_arrow"
-        )
-        hardware_acceleration_toggle.pack(fill="both", side="top", expand=1, padx=2)
-        CreateToolTip(
-            hardware_acceleration_toggle, "Disabling hardware acceleration may increase CPU usage, but it can provide a more consistent and stable experience."
-        )
+        ConfigScale(movement_chance_row, label="Max Movespeed", from_=1, to=15, variable=vars.moving_speed).pack()

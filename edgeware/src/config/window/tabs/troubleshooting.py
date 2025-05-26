@@ -19,7 +19,6 @@ import logging
 import os
 from tkinter import (
     GROOVE,
-    RAISED,
     Button,
     Frame,
     Label,
@@ -30,7 +29,7 @@ from tkinter.font import Font
 import os_utils
 import utils
 from config.vars import Vars
-from config.window.utils import log_file
+from config.window.utils import log_file, request_legacy_panic_key
 from config.window.widgets.layout import (
     ConfigRow,
     ConfigSection,
@@ -120,10 +119,35 @@ class TroubleshootingTab(ScrollFrame):
             "This setting is only available on Linux.",
         )
 
-        # Directories
-        Label(self.viewPort, text="Directories", font=title_font, relief=GROOVE).pack(pady=2)
+        hardware_acceleration_toggle = ConfigToggle(
+            troubleshooting_row, "Enable hardware acceleration", variable=vars.video_hardware_acceleration, cursor="question_arrow"
+        )
+        hardware_acceleration_toggle.grid(2, 0)
+        CreateToolTip(
+            hardware_acceleration_toggle, "Disabling hardware acceleration may increase CPU usage, but it can provide a more consistent and stable experience."
+        )
 
-        logs_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        # Legacy
+        legacy_section = ConfigSection(self.viewPort, "Legacy")
+        legacy_section.pack()
+
+        set_legacy_panic_button = Button(
+            legacy_section,
+            text=f"Set Legacy\nPanic Key\n<{vars.panic_key.get()}>",
+            command=lambda: request_legacy_panic_key(set_legacy_panic_button, vars.panic_key),
+            cursor="question_arrow",
+        )
+        set_legacy_panic_button.pack(fill="x", side="left", expand=1)
+        CreateToolTip(
+            set_legacy_panic_button,
+            'This is the old panic key, use in case the new panic system doesn\'t work on your computer. To use this hotkey you must be "focused" on an Edgeware image or video popup. Click on a popup before using.',
+        )
+
+        # Directories
+        directories_section = ConfigSection(self.viewPort, "Directories")
+        directories_section.pack()
+
+        logs_frame = Frame(directories_section, borderwidth=2, relief=GROOVE)
         logs_frame.pack(fill="x", pady=2)
 
         logs_col_1 = Frame(logs_frame)
@@ -138,7 +162,7 @@ class TroubleshootingTab(ScrollFrame):
         delete_logs_button.pack(fill="x", expand=1)
         CreateToolTip(delete_logs_button, "This will delete every log (except the log currently being written).")
 
-        moods_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        moods_frame = Frame(directories_section, borderwidth=2, relief=GROOVE)
         moods_frame.pack(fill="x", pady=2)
 
         moods_col_1 = Frame(moods_frame)
@@ -161,4 +185,4 @@ class TroubleshootingTab(ScrollFrame):
             'without it. When using a Unique ID, your mood config file will be put into a subfolder called "unnamed".',
         )
 
-        Button(self.viewPort, height=2, text="Open Pack Folder", command=lambda: os_utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)
+        Button(directories_section, height=2, text="Open Pack Folder", command=lambda: os_utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)

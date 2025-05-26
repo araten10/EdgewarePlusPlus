@@ -122,7 +122,7 @@ class InfoTab(ScrollFrame):
         stats_row_2.pack(fill="x", side="top", pady=1)
         StatsItem(stats_row_2, "Prompts", list_length(pack, "prompts"))
         StatsItem(stats_row_2, "Captions", list_length(pack, "captions"))
-        StatsItem(stats_row_2, "Subliminals", len(pack.subliminal_overlays))
+        StatsItem(stats_row_2, "Hypnos", len(pack.hypnos))
 
         # Information
         Label(self.viewPort, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
