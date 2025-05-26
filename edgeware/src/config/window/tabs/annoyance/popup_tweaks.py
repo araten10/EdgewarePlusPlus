@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import CENTER, GROOVE, RAISED, BooleanVar, Frame, Label, Message, Misc, Scale
+from tkinter import BooleanVar, Frame, Message, Misc
 from tkinter.font import Font
 
 from config.vars import Vars
@@ -33,7 +33,9 @@ CAPTION_TEXT = "Captions are small bits of randomly chosen text that adorn the t
 MONITORS_TEXT = "Here you can choose what monitors Edgeware++ will spawn popups on! By default every monitor that is detected is turned on, but if you want porn to amass on your second screen while you're focusing on something on your main monitor, this is a good way to do it~"
 MOVEMENT_TEXT = 'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" property (see "Misc Tweaks" above for more information), so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower movement chance or higher popup delay to start!'
 MISC_TEXT = '•"Buttonless Closing Popups" removes the "close" button on every image and video popup, allowing you to click anywhere on the popup to close it. This makes closing popups much easier, but certain packs may have custom buttons that will no longer be seen.\n•"Multi Click Popups" is a setting that needs to be supported by the pack, and makes popups under certain moods take more clicks to close.\n•"Popup Opacity" affects the opacity/transparency of all popups.'
-TIMEOUT_TEXT = 'After a certain time, popups will fade out and delete themselves. This is a great setting to use with Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction.'
+TIMEOUT_TEXT = "After a certain time, popups will fade out and delete themselves. This is a great setting to use with Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction."
+
+
 class MonitorCheckbutton(ConfigToggle):
     def __init__(self, master: Misc, monitor: Monitor) -> None:
         self.monitor = monitor
@@ -98,7 +100,6 @@ class PopupTweaksTab(ScrollFrame):
         misc_row_2.pack()
         ConfigScale(misc_row_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
 
-
         # Timeout
 
         timeout_section = ConfigSection(self.viewPort, "Popup Timeout", TIMEOUT_TEXT)
@@ -122,7 +123,6 @@ class PopupTweaksTab(ScrollFrame):
 
         timeout_group = [timeout_scale]
         set_widget_states(vars.timeout_enabled.get(), timeout_group)
-
 
         # Monitors
         monitors_section = ConfigSection(self.viewPort, "Monitors", MONITORS_TEXT)

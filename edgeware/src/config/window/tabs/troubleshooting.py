@@ -19,7 +19,6 @@ import logging
 import os
 from tkinter import (
     GROOVE,
-    RAISED,
     Button,
     Frame,
     Label,
@@ -30,7 +29,7 @@ from tkinter.font import Font
 import os_utils
 import utils
 from config.vars import Vars
-from config.window.utils import log_file
+from config.window.utils import log_file, request_legacy_panic_key
 from config.window.widgets.layout import (
     ConfigRow,
     ConfigSection,

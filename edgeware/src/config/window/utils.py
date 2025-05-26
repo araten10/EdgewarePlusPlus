@@ -23,11 +23,12 @@ import subprocess
 import sys
 import urllib
 from pathlib import Path
-from tkinter import BooleanVar, IntVar, Listbox, StringVar, TclError, Widget, messagebox, simpledialog
+from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar, TclError, Toplevel, Widget, messagebox, simpledialog
 
 import os_utils
 import utils
 from paths import Data, Process
+from pynput import keyboard
 
 from config import load_config
 from config.vars import Vars
@@ -37,6 +38,45 @@ BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"
 # TODO: Don't load these here
 config = load_config()
 log_file = utils.init_logging("config")
+
+
+class KeyListenerWindow(Toplevel):
+    def __init__(self) -> None:
+        super().__init__()
+        self.resizable(False, False)
+        self.title("Key Listener")
+        self.wm_attributes("-topmost", 1)
+        self.geometry("250x250")
+        self.focus_force()
+        Label(self, text="Press any key or exit").pack(expand=1, fill="both")
+
+
+def request_legacy_panic_key(button: Button, var: StringVar) -> None:
+    window = KeyListenerWindow()
+
+    def assign_panic_key(event: Event) -> None:
+        button.configure(text=f"Set Legacy\nPanic Key\n<{event.keysym}>")
+        var.set(str(event.keysym))
+        window.destroy()
+
+    window.bind("<KeyPress>", assign_panic_key)
+
+
+def request_global_panic_key(button: Button, var: StringVar) -> None:
+    window = KeyListenerWindow()
+
+    def close() -> None:
+        window.destroy()
+        listener.stop()
+
+    def assign_panic_key(key: keyboard.Key) -> None:
+        button.configure(text=f"Set Global\nPanic Key\n<{str(key)}>")
+        var.set(str(key))
+        close()
+
+    listener = keyboard.Listener(on_release=assign_panic_key)
+    listener.start()
+    window.protocol("WM_DELETE_WINDOW", close)
 
 
 # TODO: Review these functions

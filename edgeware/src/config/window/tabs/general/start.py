@@ -23,7 +23,6 @@ from tkinter import (
     RAISED,
     Button,
     Checkbutton,
-    Event,
     Frame,
     Label,
     Message,
@@ -31,63 +30,22 @@ from tkinter import (
     Scale,
     StringVar,
     Text,
-    Toplevel,
 )
 from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
-from config.window.utils import BUTTON_FACE, all_children, set_widget_states
+from config.window.utils import BUTTON_FACE, all_children, request_global_panic_key, set_widget_states
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
 from panic import send_panic
 from paths import CustomAssets
 from PIL import ImageTk
-from pynput import keyboard
 
 INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
 PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
 PRESET_TEXT = "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
-
-
-class KeyListenerWindow(Toplevel):
-    def __init__(self) -> None:
-        super().__init__()
-        self.resizable(False, False)
-        self.title("Key Listener")
-        self.wm_attributes("-topmost", 1)
-        self.geometry("250x250")
-        self.focus_force()
-        Label(self, text="Press any key or exit").pack(expand=1, fill="both")
-
-
-def request_legacy_panic_key(button: Button, var: StringVar) -> None:
-    window = KeyListenerWindow()
-
-    def assign_panic_key(event: Event) -> None:
-        button.configure(text=f"Set Legacy\nPanic Key\n<{event.keysym}>")
-        var.set(str(event.keysym))
-        window.destroy()
-
-    window.bind("<KeyPress>", assign_panic_key)
-
-
-def request_global_panic_key(button: Button, var: StringVar) -> None:
-    window = KeyListenerWindow()
-
-    def close() -> None:
-        window.destroy()
-        listener.stop()
-
-    def assign_panic_key(key: keyboard.Key) -> None:
-        button.configure(text=f"Set Global\nPanic Key\n<{str(key)}>")
-        var.set(str(key))
-        close()
-
-    listener = keyboard.Listener(on_release=assign_panic_key)
-    listener.start()
-    window.protocol("WM_DELETE_WINDOW", close)
 
 
 class StartTab(ScrollFrame):
