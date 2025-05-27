@@ -18,8 +18,8 @@ if not %errorlevel%==0 (
   echo Could not find Python.
   echo Downloading installer from python.org, please wait...
 
-  if %OS%==32BIT powershell -Command "Invoke-WebRequest https://www.python.org/ftp/python/3.12.6/python-3.12.6.exe -OutFile pyinstaller.exe"
-  if %OS%==64BIT powershell -Command "Invoke-WebRequest https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe -OutFile pyinstaller.exe"
+  if %OS%==32BIT curl https://www.python.org/ftp/python/3.12.6/python-3.12.6.exe -o pyinstaller.exe
+  if %OS%==64BIT curl https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe -o pyinstaller.exe
 
   echo Done downloading executable.
   echo Please complete installation through the installer before continuing, make sure "Add Python to PATH" is checked.
@@ -60,10 +60,10 @@ if not %errorlevel%==0 (
 if not exist data\libmpv-2.dll (
   echo Installing libmpv...
   if not exist data mkdir data
-  if not exist data\7z.exe powershell -Command "Invoke-WebRequest https://7-zip.org/a/7zr.exe -OutFile data\7z.exe"
+  if not exist data\7z.exe curl https://7-zip.org/a/7zr.exe -o data\7z.exe
   if not exist data\mpv.7z (
-    if %OS%==32BIT powershell -Command "[System.IO.File]::WriteAllBytes('data\mpv.7z', (Invoke-WebRequest https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-i686-20250420-git-3600c71.7z/download).content)"
-    if %OS%==64BIT powershell -Command "[System.IO.File]::WriteAllBytes('data\mpv.7z', (Invoke-WebRequest https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-x86_64-20250420-git-3600c71.7z/download).content)"
+    if %OS%==32BIT curl -L https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-i686-20250420-git-3600c71.7z/download -o data\mpv.7z
+    if %OS%==64BIT curl -L https://sourceforge.net/projects/mpv-player-windows/files/libmpv/mpv-dev-x86_64-20250420-git-3600c71.7z/download -o data\mpv.7z
   )
   data\7z.exe e data\mpv.7z -odata libmpv-2.dll
 
