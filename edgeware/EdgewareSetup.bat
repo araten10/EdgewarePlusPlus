@@ -11,15 +11,18 @@ echo If you are on one of these versions and experience issues with Edgeware++, 
 echo and running this installer again. (or download it yourself if you know what you're doing!)
 echo:
 
+:: cd to script's directory in case Windows sets the working directory to something else
+cd /D "%~dp0"
+
 if not %errorlevel%==0 (
   echo Could not find Python.
-  echo Now downloading installer from python.org, please wait...
+  echo Downloading installer from python.org, please wait...
 
   if %OS%==32BIT powershell -Command "Invoke-WebRequest https://www.python.org/ftp/python/3.12.6/python-3.12.6.exe -OutFile pyinstaller.exe"
   if %OS%==64BIT powershell -Command "Invoke-WebRequest https://www.python.org/ftp/python/3.12.6/python-3.12.6-amd64.exe -OutFile pyinstaller.exe"
 
   echo Done downloading executable.
-  echo Please complete installation through the installer before continuing.
+  echo Please complete installation through the installer before continuing, make sure "Add Python to PATH" is checked.
   start %CD%\pyinstaller.exe
   pause
 
