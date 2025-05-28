@@ -37,6 +37,12 @@ from config.window.utils import (
     config,
     set_widget_states,
 )
+from config.window.widgets.layout import (
+    ConfigRow,
+    ConfigSection,
+    ConfigToggle,
+    ConfigScale,
+)
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
@@ -57,42 +63,48 @@ class WallpaperTab(ScrollFrame):
 
         self.pack = pack
 
-        rotate_message = Message(self.viewPort, text=ROTATE_TEXT, justify=CENTER, width=675)
-        rotate_message.pack(fill="both")
-        message_group.append(rotate_message)
+        wallpaper_section = ConfigSection(self.viewPort, "Rotating Wallpaper", ROTATE_TEXT)
+        wallpaper_section.pack()
+        #message_group.append(rotate_message)
 
-        Checkbutton(
-            self.viewPort,
+        wallpaper_row = ConfigRow(wallpaper_section)
+        wallpaper_row.pack()
+
+        ConfigToggle(
+            wallpaper_row,
             text="Rotate Wallpapers",
             variable=vars.rotate_wallpaper,
             command=lambda: set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group),
-        ).pack(fill="x")
+        ).pack()
 
-        self.wallpaper_list = Listbox(self.viewPort, selectmode=SINGLE)
+        self.wallpaper_list = Listbox(wallpaper_section, selectmode=SINGLE)
         self.wallpaper_list.pack(fill="x")
         for key in config["wallpaperDat"]:
             self.wallpaper_list.insert(1, key)
 
-        add_wallpaper_button = Button(self.viewPort, text="Add/Edit Wallpaper", command=self.add_wallpaper)
+        add_wallpaper_button = Button(wallpaper_section, text="Add/Edit Wallpaper", command=self.add_wallpaper)
         add_wallpaper_button.pack(fill="x")
-        remove_wallpaper_button = Button(self.viewPort, text="Remove Wallpaper", command=self.remove_wallpaper)
+        remove_wallpaper_button = Button(wallpaper_section, text="Remove Wallpaper", command=self.remove_wallpaper)
         remove_wallpaper_button.pack(fill="x")
-        auto_import_button = Button(self.viewPort, text="Auto Import", command=self.auto_import)
+        auto_import_button = Button(wallpaper_section, text="Auto Import", command=self.auto_import)
         auto_import_button.pack(fill="x")
-        rotate_delay = Scale(
-            self.viewPort,
-            orient="horizontal",
+
+        rotate_row = ConfigRow(wallpaper_section)
+        rotate_row.pack()
+
+        rotate_delay = ConfigScale(
+            rotate_row,
             label="Rotate Timer (sec)",
             from_=5,
             to=300,
             variable=vars.wallpaper_timer,
             command=lambda val: update_max(rotate_variance, int(val) - 1),
         )
-        rotate_delay.pack(fill="x")
-        rotate_variance = Scale(
-            self.viewPort, orient="horizontal", label="Rotate Variation (sec)", from_=0, to=(vars.wallpaper_timer.get() - 1), variable=vars.wallpaper_variance
+        rotate_delay.pack()
+        rotate_variance = ConfigScale(
+            rotate_row, label="Rotate Variation (sec)", from_=0, to=(vars.wallpaper_timer.get() - 1), variable=vars.wallpaper_variance
         )
-        rotate_variance.pack(fill="x")
+        rotate_variance.pack()
 
         wallpaper_group = [self.wallpaper_list, add_wallpaper_button, remove_wallpaper_button, auto_import_button, rotate_delay, rotate_variance]
         set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group)
