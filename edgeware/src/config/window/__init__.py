@@ -50,8 +50,8 @@ from config.window.tabs.annoyance.moods import MoodsTab
 from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
 from config.window.tabs.annoyance.popup_types import PopupTypesTab
 from config.window.tabs.annoyance.wallpaper import WallpaperTab
+from config.window.tabs.annoyance.booru import BooruTab
 from config.window.tabs.corruption import CorruptionModeTab
-from config.window.tabs.general.booru import BooruTab
 from config.window.tabs.general.default_file import DefaultFileTab
 from config.window.tabs.general.info import InfoTab
 from config.window.tabs.general.start import StartTab
@@ -117,7 +117,6 @@ class ConfigWindow(Tk):
         general_notebook.pack(expand=1, fill="both")
         general_notebook.add(StartTab(vars, title_font, message_group, local_version, live_version, pack), text="Start")  # startup screen, info and presets
         general_notebook.add(InfoTab(vars, title_font, message_group, pack), text="Pack Info")  # pack information
-        general_notebook.add(BooruTab(vars, title_font), text="Booru Downloader")  # tab for booru downloader
         general_notebook.add(DefaultFileTab(vars, message_group), text="Change Default Files")  # tab for changing default files
 
         annoyance_tab = ttk.Frame(notebook)
@@ -128,6 +127,7 @@ class ConfigWindow(Tk):
         annoyance_notebook.add(PopupTweaksTab(vars, title_font, message_group), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
+        annoyance_notebook.add(BooruTab(vars, title_font), text="Booru Downloader")  # tab for booru downloader
         annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
 
         notebook.add(BasicModesTab(vars, title_font), text="Modes")  # tab for general modes
