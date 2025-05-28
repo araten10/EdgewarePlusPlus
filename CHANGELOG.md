@@ -13,6 +13,8 @@
 
 •*Added a "Audio Volume" setting*
 
+•*Hopefully fixed an issue with the mpv video player download being blocked by antiviruses, if running the Edgeware++ setup bat no longer works for you, make sure you let us know on the issues page!*
+
 Major reorganization effort in the config window. This includes:
 
 •*Reworked several config window tabs into a less compact (but easier to understand) format. The end goal is to make each tab less overwhelming to new users, utilizing the scroll bars now implemented into Edgeware++.*
@@ -27,6 +29,8 @@ Major reorganization effort in the config window. This includes:
 •*Condensed "Popups", "Audio/Video" and "Captions" into "Popup Types" and "Popup Tweaks"*
 
 •*Moved "moving popups" settings to the "Popup" tab, since it wasn't really a mode in the first place*
+
+•*Moved "Booru Downloader" to "Annoyance/Runtime"*
 
 •*Removed several settings, most of which were redundant and only served to confuse the user or add to visual clutter.*
 >Full list is as follows:
