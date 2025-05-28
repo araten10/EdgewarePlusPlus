@@ -36,6 +36,10 @@ from config.window.utils import (
     config,
 )
 from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.layout import (
+    ConfigRow,
+    ConfigSection,
+)
 from pack import Pack
 from ttkwidgets import CheckboxTreeview
 
@@ -91,18 +95,13 @@ class MoodsTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
         super().__init__()
 
-        Label(self.viewPort, text="Moods", font=title_font, relief=GROOVE).pack(pady=2)
+        moods_section = ConfigSection(self.viewPort, "Moods", MOOD_TEXT)
+        moods_section.pack()
+        #message_group.append(moods_message)
 
-        moods_message = Message(self.viewPort, text=MOOD_TEXT, justify=CENTER, width=675)
-        moods_message.pack(fill="both")
-        message_group.append(moods_message)
-
-        moods_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        moods_frame.pack(fill="x")
-
-        moods_tree = MoodsTreeview(moods_frame, pack, height=15, show="tree", name="mediaTree")
+        moods_tree = MoodsTreeview(moods_section, pack, height=15, show="tree", name="mediaTree")
         moods_tree.pack(side="left", fill="both", expand=1)
-        moods_scrollbar = ttk.Scrollbar(moods_frame, orient=VERTICAL, command=moods_tree.yview)
+        moods_scrollbar = ttk.Scrollbar(moods_section, orient=VERTICAL, command=moods_tree.yview)
         moods_scrollbar.pack(side="left", fill="y")
         moods_tree.configure(yscroll=moods_scrollbar.set)
 
