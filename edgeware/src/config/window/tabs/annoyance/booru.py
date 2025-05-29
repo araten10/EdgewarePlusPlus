@@ -16,13 +16,10 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from tkinter import (
-    GROOVE,
-    RAISED,
     SINGLE,
     Button,
     Checkbutton,
     Frame,
-    Label,
     Listbox,
 )
 from tkinter.font import Font
@@ -35,10 +32,11 @@ from config.window.utils import (
     reset_list,
     set_widget_states_with_colors,
 )
+from config.window.widgets.layout import ConfigSection
 from config.window.widgets.scroll_frame import ScrollFrame
-from config.window.widgets.layout import ConfigRow, ConfigSection
 
 BOORU_TEXT = 'Please note that the "Booru Downloader" is not currently in a great state. We managed to patch it in Edgeware++ to function properly, however it can lead to performance issues and its not guaranteed that it will work in the future.\n\nIf you encounter bugs with the Booru settings, feel free to leave a Github issue (github.com/araten10/EdgewarePlusPlus/issues) detailing the problem, but also be aware that this feature is fairly low priority for us.'
+
 
 class BooruTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font) -> None:

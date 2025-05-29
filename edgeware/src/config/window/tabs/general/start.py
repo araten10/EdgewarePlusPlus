@@ -18,7 +18,6 @@
 import textwrap
 import webbrowser
 from tkinter import (
-    CENTER,
     GROOVE,
     RAISED,
     Button,
@@ -36,14 +35,11 @@ from tkinter.font import Font
 from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
 from config.window.utils import BUTTON_FACE, all_children, request_global_panic_key, set_widget_states
+from config.window.widgets.layout import (
+    ConfigSection,
+)
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
-from config.window.widgets.layout import (
-    ConfigRow,
-    ConfigSection,
-    ConfigToggle,
-    ConfigScale,
-)
 from pack import Pack
 from panic import send_panic
 from paths import CustomAssets

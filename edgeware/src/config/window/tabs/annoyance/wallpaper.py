@@ -18,10 +18,8 @@
 import logging
 import os
 from tkinter import (
-    CENTER,
     SINGLE,
     Button,
-    Checkbutton,
     Frame,
     Label,
     Listbox,
@@ -41,7 +39,6 @@ from config.window.widgets.layout import (
     ConfigRow,
     ConfigSection,
     ConfigToggle,
-    ConfigScale,
 )
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
@@ -66,7 +63,7 @@ class WallpaperTab(ScrollFrame):
         panic_section = ConfigSection(self.viewPort, "Panic Wallpaper", PANIC_TEXT)
         panic_section.pack()
 
-        #message_group.append(panic_message)
+        # message_group.append(panic_message)
 
         change_panic_wallpaper_frame = Frame(panic_section)
         change_panic_wallpaper_frame.pack(side="left", fill="y")
@@ -90,7 +87,7 @@ class WallpaperTab(ScrollFrame):
 
         wallpaper_section = ConfigSection(self.viewPort, "Rotating Wallpaper", ROTATE_TEXT)
         wallpaper_section.pack()
-        #message_group.append(rotate_message)
+        # message_group.append(rotate_message)
 
         wallpaper_row = ConfigRow(wallpaper_section)
         wallpaper_row.pack()

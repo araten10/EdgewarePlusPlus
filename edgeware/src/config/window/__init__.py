@@ -46,12 +46,12 @@ from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 from config import load_default_config
 from config.vars import Vars
 from config.window.import_pack import import_pack
+from config.window.tabs.annoyance.booru import BooruTab
 from config.window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
 from config.window.tabs.annoyance.moods import MoodsTab
 from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
 from config.window.tabs.annoyance.popup_types import PopupTypesTab
 from config.window.tabs.annoyance.wallpaper import WallpaperTab
-from config.window.tabs.annoyance.booru import BooruTab
 from config.window.tabs.corruption import CorruptionModeTab
 from config.window.tabs.general.default_file import DefaultFileTab
 from config.window.tabs.general.info import InfoTab
@@ -128,8 +128,8 @@ class ConfigWindow(Tk):
         annoyance_notebook.add(PopupTweaksTab(vars, title_font, message_group), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
         annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
         annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
-        annoyance_notebook.add(BooruTab(vars, title_font), text="Booru Downloader")  # tab for booru downloader
-        annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous Settings")  # tab for potentially dangerous settings
+        annoyance_notebook.add(BooruTab(vars, title_font), text="Booru")  # tab for booru downloader
+        annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous")  # tab for potentially dangerous settings
 
         notebook.add(BasicModesTab(vars, title_font), text="Modes")  # tab for general modes
         notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
