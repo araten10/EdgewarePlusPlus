@@ -36,15 +36,18 @@ from config.window.utils import (
     set_widget_states_with_colors,
 )
 from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.layout import ConfigRow, ConfigSection
 
+BOORU_TEXT = 'Please note that the "Booru Downloader" is not currently in a great state. We managed to patch it in Edgeware++ to function properly, however it can lead to performance issues and its not guaranteed that it will work in the future.\n\nIf you encounter bugs with the Booru settings, feel free to leave a Github issue (github.com/araten10/EdgewarePlusPlus/issues) detailing the problem, but also be aware that this feature is fairly low priority for us.'
 
 class BooruTab(ScrollFrame):
     def __init__(self, vars: Vars, title_font: Font) -> None:
         super().__init__()
 
-        Label(self.viewPort, text="Image Download Settings", font=title_font, relief=GROOVE).pack(pady=2)
+        download_section = ConfigSection(self.viewPort, "Booru Settings", BOORU_TEXT)
+        download_section.pack()
 
-        download_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        download_frame = Frame(download_section)
         download_frame.pack(fill="both")
 
         tag_frame = Frame(download_frame)
