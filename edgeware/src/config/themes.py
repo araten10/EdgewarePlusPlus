@@ -16,18 +16,8 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from dataclasses import dataclass
-from tkinter import (
-    Button,
-    Canvas,
-    Checkbutton,
-    Frame,
-    Label,
-    Message,
-    OptionMenu,
-    Scale,
-    TclError,
-    Text,
-)
+from tkinter import Button, Canvas, Checkbutton, Frame, Label, Message, Misc, OptionMenu, Scale, TclError, Text, ttk
+from tkinter.font import Font
 
 from tkinterweb import HtmlFrame
 
@@ -172,7 +162,7 @@ CONFIG_THEMES = {
 }
 
 
-def theme_change(theme: str, root, style, mfont, tfont) -> None:
+def theme_change(theme: str, root: Misc, style: ttk.Style, mfont: Font, tfont: Font) -> None:
     from config.window.utils import all_children, config  # Circular import
 
     t = CONFIG_THEMES["Original" if config["themeNoConfig"] is True else theme]
