@@ -21,17 +21,10 @@ import logging
 import os
 from tkinter import (
     Button,
-    Canvas,
-    Checkbutton,
     Event,
     Frame,
     Label,
     Listbox,
-    Message,
-    OptionMenu,
-    Scale,
-    TclError,
-    Text,
     Tk,
     Toplevel,
     font,
@@ -44,6 +37,7 @@ from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 
 from config import load_default_config
+from config.themes import theme_change
 from config.vars import Vars
 from config.window.import_pack import import_pack
 from config.window.tabs.annoyance.booru import BooruTab
@@ -60,7 +54,6 @@ from config.window.tabs.modes import BasicModesTab
 from config.window.tabs.troubleshooting import TroubleshootingTab
 from config.window.tabs.tutorial import open_tutorial
 from config.window.utils import (
-    all_children,
     config,
     get_live_version,
     refresh,
@@ -208,166 +201,6 @@ class ConfigWindow(Tk):
 
 
 # helper funcs for lambdas =======================================================
-THEMES = {
-    "Original": {
-        "bg": "#d9d9d9",  # Added
-        "bg-disabled": "gray35",
-        "background": "#f0f0f0",
-        "fg": "black",
-        "Button-fg": "black",  # Added
-        "Text-fg": "black",  # Added
-        "Text-bg": "white",  # Added
-        "Button-activebackground": "#ececec",  # Added
-        "OptionMenu-activebackground": "#ececec",  # Added
-        "troughcolor": "#b3b3b3",  # Added
-        "selectcolor": "#ffffff",  # Added
-        "Message-font": ("TkDefaultFont", 8),
-        "m-family": "TkDefaultFont",  # Added
-        "m-size": 10,  # Added
-        "t-family": "TkDefaultFont",  # Added
-        "Tab-background": "#d9d9d9",
-        "Tab-foreground": "black",  # Added
-    },
-    "Dark": {
-        "bg": "#282c34",
-        "bg-disabled": "gray65",
-        "background": "#282c34",
-        "fg": "ghost white",
-        "Button-fg": "ghost white",
-        "Text-fg": "ghost white",
-        "Text-bg": "#1b1d23",
-        "Button-activebackground": "#282c34",
-        "OptionMenu-activebackground": "#282c34",
-        "troughcolor": "#c8c8c8",
-        "selectcolor": "#1b1d23",
-        "Message-font": ("TkDefaultFont", 8),
-        "m-family": "TkDefaultFont",  # Added
-        "m-size": 10,  # Added
-        "t-family": "TkDefaultFont",  # Added
-        "Tab-background": "#1b1d23",
-        "Tab-foreground": "#f9faff",
-    },
-    "The One": {
-        "bg": "#282c34",
-        "bg-disabled": "#37573d",
-        "background": "#282c34",
-        "fg": "#00ff41",
-        "Button-fg": "#00ff41",
-        "Text-fg": "#00ff41",
-        "Text-bg": "#1b1d23",
-        "Button-activebackground": "#1b1d23",
-        "OptionMenu-activebackground": "#282c34",
-        "troughcolor": "#009a22",
-        "selectcolor": "#1b1d23",
-        "Message-font": ("Consolas", 8),
-        "m-family": "Consolas",
-        "m-size": 8,
-        "t-family": "Consolas",
-        "Tab-background": "#1b1d23",
-        "Tab-foreground": "#00ff41",
-    },
-    "Ransom": {
-        "bg": "#841212",
-        "bg-disabled": "573737",
-        "background": "#841212",
-        "fg": "white",
-        "Button-fg": "yellow",
-        "Text-fg": "black",
-        "Text-bg": "white",
-        "Button-activebackground": "#841212",
-        "OptionMenu-activebackground": "#841212",
-        "troughcolor": "#c8c8c8",
-        "selectcolor": "#5c0d0d",
-        "Message-font": ("Arial", 8),
-        "m-family": "Arial",
-        "m-size": 10,  # Added
-        "t-family": "Arial Bold",
-        "Tab-background": "#5c0d0d",
-        "Tab-foreground": "#ffffff",
-    },
-    "Goth": {
-        "bg": "#282c34",
-        "bg-disabled": "#4b3757",
-        "background": "#282c34",
-        "fg": "MediumPurple1",
-        "Button-fg": "MediumPurple1",
-        "Text-fg": "purple4",
-        "Text-bg": "MediumOrchid2",
-        "Button-activebackground": "#282c34",
-        "OptionMenu-activebackground": "#282c34",
-        "troughcolor": "MediumOrchid2",
-        "selectcolor": "#1b1d23",
-        "Message-font": ("Constantia", 8),
-        "m-family": "Constantia",
-        "m-size": 10,  # Added
-        "t-family": "Constantia",
-        "Tab-background": "#1b1d23",
-        "Tab-foreground": "MediumPurple1",
-    },
-    "Bimbo": {
-        "bg": "pink",
-        "bg-disabled": "#bc7abf",
-        "background": "pink",
-        "fg": "deep pink",
-        "Button-fg": "deep pink",
-        "Text-fg": "magenta2",
-        "Text-bg": "light pink",
-        "Button-activebackground": "hot pink",
-        "OptionMenu-activebackground": "hot pink",
-        "troughcolor": "hot pink",
-        "selectcolor": "light pink",
-        "Message-font": ("Constantia", 8),
-        "m-family": "Constantia",
-        "m-size": 10,  # Added
-        "t-family": "Constantia",
-        "Tab-background": "light pink",
-        "Tab-foreground": "deep pink",
-    },
-}
-
-
-def theme_change(theme: str, root, style, mfont, tfont) -> None:
-    t = THEMES["Original" if config["themeNoConfig"] is True else theme]
-
-    for widget in all_children(root):
-        if isinstance(widget, Frame) or isinstance(widget, Canvas):
-            widget.configure(bg=t["bg"])
-        if isinstance(widget, Button):
-            widget.configure(bg=t["bg"], fg=t["Button-fg"], activebackground=t["Button-activebackground"], activeforeground=t["fg"])
-        if isinstance(widget, Label):
-            widget.configure(bg=t["bg"], fg=t["fg"])
-        if isinstance(widget, OptionMenu):
-            widget.configure(bg=t["bg"], fg=t["fg"], highlightthickness=0, activebackground=t["OptionMenu-activebackground"], activeforeground=t["fg"])
-        if isinstance(widget, Text):
-            widget.configure(bg=t["Text-bg"], fg=t["Text-fg"])
-        if isinstance(widget, Scale):
-            widget.configure(bg=t["bg"], fg=t["fg"], activebackground=t["bg"], troughcolor=t["troughcolor"], highlightthickness=0)
-        if isinstance(widget, Checkbutton):
-            # activebackground was "bg" but "Button-activebackground" is true color for default theme
-            widget.configure(
-                bg=t["bg"],
-                fg=t["fg"],
-                selectcolor=t["selectcolor"],
-                activebackground=t["Button-activebackground"],
-                activeforeground=t["fg"],
-                highlightthickness=0,
-            )
-        if isinstance(widget, Message):
-            widget.configure(bg=t["bg"], fg=t["fg"], font=t["Message-font"])
-    style.configure("TFrame", background=t["background"])
-    style.configure("TNotebook", background=t["background"])
-    style.map("TNotebook.Tab", background=[("selected", t["background"])])
-    style.configure("TNotebook.Tab", background=t["Tab-background"], foreground=t["Tab-foreground"])
-    mfont.configure(family=t["m-family"], size=t["m-size"])
-    tfont.configure(family=t["t-family"])
-
-    for widget in all_children(root):
-        try:
-            widget.configure(bg=(t["bg"] if widget["state"] != "disabled" else t["bg-disabled"]))
-        except TclError:
-            pass
-
-
 def toggle_help(state: bool, messages: list) -> None:
     if state is True:
         try:
