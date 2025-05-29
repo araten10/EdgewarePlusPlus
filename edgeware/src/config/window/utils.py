@@ -33,7 +33,7 @@ from pynput import keyboard
 from config import load_config
 from config.vars import Vars
 
-BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"
+BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"  # TODO: Remove?
 
 # TODO: Don't load these here
 config = load_config()
@@ -279,7 +279,7 @@ def set_widget_states(state: bool, widgets: list[Widget], demo: bool = False) ->
 
     # TODO: Use the same Theme objects as the main program
     if theme == "Original" or (config["themeNoConfig"] and not demo):
-        set_widget_states_with_colors(state, widgets, BUTTON_FACE, "gray35")
+        set_widget_states_with_colors(state, widgets, "#d9d9d9", "gray35")
     else:
         if theme == "Dark":
             set_widget_states_with_colors(state, widgets, "#282c34", "gray65")

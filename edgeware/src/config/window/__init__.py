@@ -30,6 +30,7 @@ from tkinter import (
     Message,
     OptionMenu,
     Scale,
+    TclError,
     Text,
     Tk,
     Toplevel,
@@ -207,134 +208,164 @@ class ConfigWindow(Tk):
 
 
 # helper funcs for lambdas =======================================================
+THEMES = {
+    "Original": {
+        "bg": "#d9d9d9",  # Added
+        "bg-disabled": "gray35",
+        "background": "#f0f0f0",
+        "fg": "black",
+        "Button-fg": "black",  # Added
+        "Text-fg": "black",  # Added
+        "Text-bg": "white",  # Added
+        "Button-activebackground": "#ececec",  # Added
+        "OptionMenu-activebackground": "#ececec",  # Added
+        "troughcolor": "#b3b3b3",  # Added
+        "selectcolor": "#ffffff",  # Added
+        "Message-font": ("TkDefaultFont", 8),
+        "m-family": "TkDefaultFont",  # Added
+        "m-size": 10,  # Added
+        "t-family": "TkDefaultFont",  # Added
+        "Tab-background": "#d9d9d9",
+        "Tab-foreground": "black",  # Added
+    },
+    "Dark": {
+        "bg": "#282c34",
+        "bg-disabled": "gray65",
+        "background": "#282c34",
+        "fg": "ghost white",
+        "Button-fg": "ghost white",
+        "Text-fg": "ghost white",
+        "Text-bg": "#1b1d23",
+        "Button-activebackground": "#282c34",
+        "OptionMenu-activebackground": "#282c34",
+        "troughcolor": "#c8c8c8",
+        "selectcolor": "#1b1d23",
+        "Message-font": ("TkDefaultFont", 8),
+        "m-family": "TkDefaultFont",  # Added
+        "m-size": 10,  # Added
+        "t-family": "TkDefaultFont",  # Added
+        "Tab-background": "#1b1d23",
+        "Tab-foreground": "#f9faff",
+    },
+    "The One": {
+        "bg": "#282c34",
+        "bg-disabled": "#37573d",
+        "background": "#282c34",
+        "fg": "#00ff41",
+        "Button-fg": "#00ff41",
+        "Text-fg": "#00ff41",
+        "Text-bg": "#1b1d23",
+        "Button-activebackground": "#1b1d23",
+        "OptionMenu-activebackground": "#282c34",
+        "troughcolor": "#009a22",
+        "selectcolor": "#1b1d23",
+        "Message-font": ("Consolas", 8),
+        "m-family": "Consolas",
+        "m-size": 8,
+        "t-family": "Consolas",
+        "Tab-background": "#1b1d23",
+        "Tab-foreground": "#00ff41",
+    },
+    "Ransom": {
+        "bg": "#841212",
+        "bg-disabled": "573737",
+        "background": "#841212",
+        "fg": "white",
+        "Button-fg": "yellow",
+        "Text-fg": "black",
+        "Text-bg": "white",
+        "Button-activebackground": "#841212",
+        "OptionMenu-activebackground": "#841212",
+        "troughcolor": "#c8c8c8",
+        "selectcolor": "#5c0d0d",
+        "Message-font": ("Arial", 8),
+        "m-family": "Arial",
+        "m-size": 10,  # Added
+        "t-family": "Arial Bold",
+        "Tab-background": "#5c0d0d",
+        "Tab-foreground": "#ffffff",
+    },
+    "Goth": {
+        "bg": "#282c34",
+        "bg-disabled": "#4b3757",
+        "background": "#282c34",
+        "fg": "MediumPurple1",
+        "Button-fg": "MediumPurple1",
+        "Text-fg": "purple4",
+        "Text-bg": "MediumOrchid2",
+        "Button-activebackground": "#282c34",
+        "OptionMenu-activebackground": "#282c34",
+        "troughcolor": "MediumOrchid2",
+        "selectcolor": "#1b1d23",
+        "Message-font": ("Constantia", 8),
+        "m-family": "Constantia",
+        "m-size": 10,  # Added
+        "t-family": "Constantia",
+        "Tab-background": "#1b1d23",
+        "Tab-foreground": "MediumPurple1",
+    },
+    "Bimbo": {
+        "bg": "pink",
+        "bg-disabled": "#bc7abf",
+        "background": "pink",
+        "fg": "deep pink",
+        "Button-fg": "deep pink",
+        "Text-fg": "magenta2",
+        "Text-bg": "light pink",
+        "Button-activebackground": "hot pink",
+        "OptionMenu-activebackground": "hot pink",
+        "troughcolor": "hot pink",
+        "selectcolor": "light pink",
+        "Message-font": ("Constantia", 8),
+        "m-family": "Constantia",
+        "m-size": 10,  # Added
+        "t-family": "Constantia",
+        "Tab-background": "light pink",
+        "Tab-foreground": "deep pink",
+    },
+}
+
+
 def theme_change(theme: str, root, style, mfont, tfont) -> None:
-    if theme == "Original" or config["themeNoConfig"] is True:
-        for widget in all_children(root):
-            if isinstance(widget, Message):
-                widget.configure(font=(mfont, 8))
-        style.configure("TFrame", background="#f0f0f0")
-        style.configure("TNotebook", background="#f0f0f0")
-        style.map("TNotebook.Tab", background=[("selected", "#f0f0f0")])
-        style.configure("TNotebook.Tab", background="#d9d9d9")
-    else:
-        if theme == "Dark":
-            for widget in all_children(root):
-                if isinstance(widget, Frame) or isinstance(widget, Canvas):
-                    widget.configure(bg="#282c34")
-                if isinstance(widget, Button):
-                    widget.configure(bg="#282c34", fg="ghost white", activebackground="#282c34", activeforeground="ghost white")
-                if isinstance(widget, Label):
-                    widget.configure(bg="#282c34", fg="ghost white")
-                if isinstance(widget, OptionMenu):
-                    widget.configure(bg="#282c34", fg="ghost white", highlightthickness=0, activebackground="#282c34", activeforeground="ghost white")
-                if isinstance(widget, Text):
-                    widget.configure(bg="#1b1d23", fg="ghost white")
-                if isinstance(widget, Scale):
-                    widget.configure(bg="#282c34", fg="ghost white", activebackground="#282c34", troughcolor="#c8c8c8", highlightthickness=0)
-                if isinstance(widget, Checkbutton):
-                    widget.configure(bg="#282c34", fg="ghost white", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="ghost white")
-                if isinstance(widget, Message):
-                    widget.configure(bg="#282c34", fg="ghost white", font=(mfont, 8))
-            style.configure("TFrame", background="#282c34")
-            style.configure("TNotebook", background="#282c34")
-            style.map("TNotebook.Tab", background=[("selected", "#282c34")])
-            style.configure("TNotebook.Tab", background="#1b1d23", foreground="#f9faff")
-        if theme == "The One":
-            for widget in all_children(root):
-                if isinstance(widget, Frame) or isinstance(widget, Canvas):
-                    widget.configure(bg="#282c34")
-                if isinstance(widget, Button):
-                    widget.configure(bg="#282c34", fg="#00ff41", activebackground="#1b1d23", activeforeground="#00ff41")
-                if isinstance(widget, Label):
-                    widget.configure(bg="#282c34", fg="#00ff41")
-                if isinstance(widget, OptionMenu):
-                    widget.configure(bg="#282c34", fg="#00ff41", highlightthickness=0, activebackground="#282c34", activeforeground="#00ff41")
-                if isinstance(widget, Text):
-                    widget.configure(bg="#1b1d23", fg="#00ff41")
-                if isinstance(widget, Scale):
-                    widget.configure(bg="#282c34", fg="#00ff41", activebackground="#282c34", troughcolor="#009a22", highlightthickness=0)
-                if isinstance(widget, Checkbutton):
-                    widget.configure(bg="#282c34", fg="#00ff41", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="#00ff41")
-                if isinstance(widget, Message):
-                    widget.configure(bg="#282c34", fg="#00ff41", font=("Consolas", 8))
-            style.configure("TFrame", background="#282c34")
-            style.configure("TNotebook", background="#282c34")
-            style.map("TNotebook.Tab", background=[("selected", "#282c34")])
-            style.configure("TNotebook.Tab", background="#1b1d23", foreground="#00ff41")
-            mfont.configure(family="Consolas", size=8)
-            tfont.configure(family="Consolas")
-        if theme == "Ransom":
-            for widget in all_children(root):
-                if isinstance(widget, Frame) or isinstance(widget, Canvas):
-                    widget.configure(bg="#841212")
-                if isinstance(widget, Button):
-                    widget.configure(bg="#841212", fg="yellow", activebackground="#841212", activeforeground="yellow")
-                if isinstance(widget, Label):
-                    widget.configure(bg="#841212", fg="white")
-                if isinstance(widget, OptionMenu):
-                    widget.configure(bg="#841212", fg="white", highlightthickness=0, activebackground="#841212", activeforeground="white")
-                if isinstance(widget, Text):
-                    widget.configure(bg="white", fg="black")
-                if isinstance(widget, Scale):
-                    widget.configure(bg="#841212", fg="white", activebackground="#841212", troughcolor="#c8c8c8", highlightthickness=0)
-                if isinstance(widget, Checkbutton):
-                    widget.configure(bg="#841212", fg="white", selectcolor="#5c0d0d", activebackground="#841212", activeforeground="white")
-                if isinstance(widget, Message):
-                    widget.configure(bg="#841212", fg="white", font=("Arial", 8))
-            style.configure("TFrame", background="#841212")
-            style.configure("TNotebook", background="#841212")
-            style.map("TNotebook.Tab", background=[("selected", "#841212")])
-            style.configure("TNotebook.Tab", background="#5c0d0d", foreground="#ffffff")
-            mfont.configure(family="Arial")
-            tfont.configure(family="Arial Bold")
-        if theme == "Goth":
-            for widget in all_children(root):
-                if isinstance(widget, Frame) or isinstance(widget, Canvas):
-                    widget.configure(bg="#282c34")
-                if isinstance(widget, Button):
-                    widget.configure(bg="#282c34", fg="MediumPurple1", activebackground="#282c34", activeforeground="MediumPurple1")
-                if isinstance(widget, Label):
-                    widget.configure(bg="#282c34", fg="MediumPurple1")
-                if isinstance(widget, OptionMenu):
-                    widget.configure(bg="#282c34", fg="MediumPurple1", highlightthickness=0, activebackground="#282c34", activeforeground="MediumPurple1")
-                if isinstance(widget, Text):
-                    widget.configure(bg="MediumOrchid2", fg="purple4")
-                if isinstance(widget, Scale):
-                    widget.configure(bg="#282c34", fg="MediumPurple1", activebackground="#282c34", troughcolor="MediumOrchid2", highlightthickness=0)
-                if isinstance(widget, Checkbutton):
-                    widget.configure(bg="#282c34", fg="MediumPurple1", selectcolor="#1b1d23", activebackground="#282c34", activeforeground="MediumPurple1")
-                if isinstance(widget, Message):
-                    widget.configure(bg="#282c34", fg="MediumPurple1", font=("Constantia", 8))
-            style.configure("TFrame", background="#282c34")
-            style.configure("TNotebook", background="#282c34")
-            style.map("TNotebook.Tab", background=[("selected", "#282c34")])
-            style.configure("TNotebook.Tab", background="#1b1d23", foreground="MediumPurple1")
-            mfont.configure(family="Constantia")
-            tfont.configure(family="Constantia")
-        if theme == "Bimbo":
-            for widget in all_children(root):
-                if isinstance(widget, Frame) or isinstance(widget, Canvas):
-                    widget.configure(bg="pink")
-                if isinstance(widget, Button):
-                    widget.configure(bg="pink", fg="deep pink", activebackground="hot pink", activeforeground="deep pink")
-                if isinstance(widget, Label):
-                    widget.configure(bg="pink", fg="deep pink")
-                if isinstance(widget, OptionMenu):
-                    widget.configure(bg="pink", fg="deep pink", highlightthickness=0, activebackground="hot pink", activeforeground="deep pink")
-                if isinstance(widget, Text):
-                    widget.configure(bg="light pink", fg="magenta2")
-                if isinstance(widget, Scale):
-                    widget.configure(bg="pink", fg="deep pink", activebackground="pink", troughcolor="hot pink", highlightthickness=0)
-                if isinstance(widget, Checkbutton):
-                    widget.configure(bg="pink", fg="deep pink", selectcolor="light pink", activebackground="pink", activeforeground="deep pink")
-                if isinstance(widget, Message):
-                    widget.configure(bg="pink", fg="deep pink", font=("Constantia", 8))
-            style.configure("TFrame", background="pink")
-            style.configure("TNotebook", background="pink")
-            style.map("TNotebook.Tab", background=[("selected", "pink")])
-            style.configure("TNotebook.Tab", background="lightpink", foreground="deep pink")
-            mfont.configure(family="Constantia")
-            tfont.configure(family="Constantia")
+    t = THEMES["Original" if config["themeNoConfig"] is True else theme]
+
+    for widget in all_children(root):
+        if isinstance(widget, Frame) or isinstance(widget, Canvas):
+            widget.configure(bg=t["bg"])
+        if isinstance(widget, Button):
+            widget.configure(bg=t["bg"], fg=t["Button-fg"], activebackground=t["Button-activebackground"], activeforeground=t["fg"])
+        if isinstance(widget, Label):
+            widget.configure(bg=t["bg"], fg=t["fg"])
+        if isinstance(widget, OptionMenu):
+            widget.configure(bg=t["bg"], fg=t["fg"], highlightthickness=0, activebackground=t["OptionMenu-activebackground"], activeforeground=t["fg"])
+        if isinstance(widget, Text):
+            widget.configure(bg=t["Text-bg"], fg=t["Text-fg"])
+        if isinstance(widget, Scale):
+            widget.configure(bg=t["bg"], fg=t["fg"], activebackground=t["bg"], troughcolor=t["troughcolor"], highlightthickness=0)
+        if isinstance(widget, Checkbutton):
+            # activebackground was "bg" but "Button-activebackground" is true color for default theme
+            widget.configure(
+                bg=t["bg"],
+                fg=t["fg"],
+                selectcolor=t["selectcolor"],
+                activebackground=t["Button-activebackground"],
+                activeforeground=t["fg"],
+                highlightthickness=0,
+            )
+        if isinstance(widget, Message):
+            widget.configure(bg=t["bg"], fg=t["fg"], font=t["Message-font"])
+    style.configure("TFrame", background=t["background"])
+    style.configure("TNotebook", background=t["background"])
+    style.map("TNotebook.Tab", background=[("selected", t["background"])])
+    style.configure("TNotebook.Tab", background=t["Tab-background"], foreground=t["Tab-foreground"])
+    mfont.configure(family=t["m-family"], size=t["m-size"])
+    tfont.configure(family=t["t-family"])
+
+    for widget in all_children(root):
+        try:
+            widget.configure(bg=(t["bg"] if widget["state"] != "disabled" else t["bg-disabled"]))
+        except TclError:
+            pass
 
 
 def toggle_help(state: bool, messages: list) -> None:
