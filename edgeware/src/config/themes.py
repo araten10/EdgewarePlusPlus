@@ -26,6 +26,7 @@ from tkinterweb import HtmlFrame
 class Theme:
     fg: str
     bg: str
+    active_bg: str
     text_fg: str
     text_bg: str
     font: (str, int)
@@ -33,12 +34,24 @@ class Theme:
 
 
 THEMES = {
-    "Original": Theme("#000000", "#f0f0f0", "#000000", "#ffffff", ("TkDefaultFont", 9), "#000001"),
-    "Dark": Theme("#f9faff", "#282c34", "#f9faff", "#1b1d23", ("TkDefaultFont", 9), "#f9fafe"),
-    "The One": Theme("#00ff41", "#282c34", "#00ff41", "#1b1d23", ("Consolas", 9), "#00ff42"),
-    "Ransom": Theme("#ffffff", "#841212", "#000000", "#ffffff", ("Arial Bold", 9), "#fffffe"),
-    "Goth": Theme("#ba9aff", "#282c34", "#6a309d", "#db7cf2", ("Constantia", 9), "#ba9afe"),
-    "Bimbo": Theme("#ff3aa3", "#ffc5cd", "#f43df2", "#ffc5cd", ("Constantia", 9), "#ff3aa4"),
+    "Original": Theme(fg="black", bg="#d9d9d9", active_bg="#ececec", text_fg="black", text_bg="white", font=("TkDefaultFont", 9), transparent_bg="#000001"),
+    "Dark": Theme(
+        fg="ghost white", bg="#282c34", active_bg="#282c34", text_fg="ghost white", text_bg="#1b1d23", font=("TkDefaultFont", 9), transparent_bg="#f9fafe"
+    ),
+    "The One": Theme(fg="#00ff41", bg="#282c34", active_bg="#1b1d23", text_fg="#00ff41", text_bg="#1b1d23", font=("Consolas", 9), transparent_bg="#00ff42"),
+    "Ransom": Theme(fg="white", bg="#841212", active_bg="#841212", text_fg="black", text_bg="white", font=("Arial Bold", 9), transparent_bg="#fffffe"),
+    "Goth": Theme(
+        fg="MediumPurple1", bg="#282c34", active_bg="#282c34", text_fg="purple4", text_bg="MediumOrchid2", font=("Constantia", 9), transparent_bg="#ba9afe"
+    ),
+    "Bimbo": Theme(
+        fg="deep pink",
+        bg="pink",
+        active_bg="hot pink",
+        text_fg="magenta2",
+        text_bg="light pink",
+        font=("Constantia", 9),
+        transparent_bg="#ff3aa4",
+    ),
 }
 
 
@@ -46,15 +59,9 @@ THEMES = {
 
 CONFIG_THEMES = {
     "Original": {
-        "bg": "#d9d9d9",  # Added
         "bg-disabled": "gray35",
         "background": "#f0f0f0",
-        "fg": "black",
         "Button-fg": "black",  # Added
-        "Text-fg": "black",  # Added
-        "Text-bg": "white",  # Added
-        "Button-activebackground": "#ececec",  # Added
-        "OptionMenu-activebackground": "#ececec",  # Added
         "troughcolor": "#b3b3b3",  # Added
         "selectcolor": "#ffffff",  # Added
         "Message-font": ("TkDefaultFont", 8),
@@ -65,15 +72,9 @@ CONFIG_THEMES = {
         "Tab-foreground": "black",  # Added
     },
     "Dark": {
-        "bg": "#282c34",
         "bg-disabled": "gray65",
         "background": "#282c34",
-        "fg": "ghost white",
         "Button-fg": "ghost white",
-        "Text-fg": "ghost white",
-        "Text-bg": "#1b1d23",
-        "Button-activebackground": "#282c34",
-        "OptionMenu-activebackground": "#282c34",
         "troughcolor": "#c8c8c8",
         "selectcolor": "#1b1d23",
         "Message-font": ("TkDefaultFont", 8),
@@ -84,15 +85,9 @@ CONFIG_THEMES = {
         "Tab-foreground": "#f9faff",
     },
     "The One": {
-        "bg": "#282c34",
         "bg-disabled": "#37573d",
         "background": "#282c34",
-        "fg": "#00ff41",
         "Button-fg": "#00ff41",
-        "Text-fg": "#00ff41",
-        "Text-bg": "#1b1d23",
-        "Button-activebackground": "#1b1d23",
-        "OptionMenu-activebackground": "#282c34",
         "troughcolor": "#009a22",
         "selectcolor": "#1b1d23",
         "Message-font": ("Consolas", 8),
@@ -103,15 +98,9 @@ CONFIG_THEMES = {
         "Tab-foreground": "#00ff41",
     },
     "Ransom": {
-        "bg": "#841212",
         "bg-disabled": "573737",
         "background": "#841212",
-        "fg": "white",
         "Button-fg": "yellow",
-        "Text-fg": "black",
-        "Text-bg": "white",
-        "Button-activebackground": "#841212",
-        "OptionMenu-activebackground": "#841212",
         "troughcolor": "#c8c8c8",
         "selectcolor": "#5c0d0d",
         "Message-font": ("Arial", 8),
@@ -122,15 +111,9 @@ CONFIG_THEMES = {
         "Tab-foreground": "#ffffff",
     },
     "Goth": {
-        "bg": "#282c34",
         "bg-disabled": "#4b3757",
         "background": "#282c34",
-        "fg": "MediumPurple1",
         "Button-fg": "MediumPurple1",
-        "Text-fg": "purple4",
-        "Text-bg": "MediumOrchid2",
-        "Button-activebackground": "#282c34",
-        "OptionMenu-activebackground": "#282c34",
         "troughcolor": "MediumOrchid2",
         "selectcolor": "#1b1d23",
         "Message-font": ("Constantia", 8),
@@ -141,15 +124,9 @@ CONFIG_THEMES = {
         "Tab-foreground": "MediumPurple1",
     },
     "Bimbo": {
-        "bg": "pink",
         "bg-disabled": "#bc7abf",
         "background": "pink",
-        "fg": "deep pink",
         "Button-fg": "deep pink",
-        "Text-fg": "magenta2",
-        "Text-bg": "light pink",
-        "Button-activebackground": "hot pink",
-        "OptionMenu-activebackground": "hot pink",
         "troughcolor": "hot pink",
         "selectcolor": "light pink",
         "Message-font": ("Constantia", 8),
@@ -162,39 +139,40 @@ CONFIG_THEMES = {
 }
 
 
-def theme_change(theme: str, root: Misc, style: ttk.Style, mfont: Font, tfont: Font) -> None:
+def theme_change(name: str, root: Misc, style: ttk.Style, mfont: Font, tfont: Font) -> None:
     from config.window.utils import all_children, config  # Circular import
 
-    t = CONFIG_THEMES["Original" if config["themeNoConfig"] is True else theme]
+    t = CONFIG_THEMES["Original" if config["themeNoConfig"] is True else name]
+    theme = THEMES["Original" if config["themeNoConfig"] is True else name]
 
     for widget in all_children(root):
         if isinstance(widget, Frame) or isinstance(widget, Canvas):
-            widget.configure(bg=t["bg"])
+            widget.configure(bg=theme.bg)
         if isinstance(widget, Button):
-            widget.configure(bg=t["bg"], fg=t["Button-fg"], activebackground=t["Button-activebackground"], activeforeground=t["fg"])
+            widget.configure(bg=theme.bg, fg=t["Button-fg"], activebackground=theme.active_bg, activeforeground=theme.fg)
         if isinstance(widget, Label):
             if not hasattr(widget, "ignore_theme_fg"):
-                widget.configure(fg=t["fg"])
+                widget.configure(fg=theme.fg)
             if not hasattr(widget, "ignore_theme_bg"):
-                widget.configure(bg=t["bg"])
+                widget.configure(bg=theme.bg)
         if isinstance(widget, OptionMenu):
-            widget.configure(bg=t["bg"], fg=t["fg"], highlightthickness=0, activebackground=t["OptionMenu-activebackground"], activeforeground=t["fg"])
+            widget.configure(bg=theme.bg, fg=theme.fg, highlightthickness=0, activebackground=theme.active_bg, activeforeground=theme.fg)
         if isinstance(widget, Text):
-            widget.configure(bg=t["Text-bg"], fg=t["Text-fg"])
+            widget.configure(bg=theme.text_bg, fg=theme.text_fg)
         if isinstance(widget, Scale):
-            widget.configure(bg=t["bg"], fg=t["fg"], activebackground=t["bg"], troughcolor=t["troughcolor"], highlightthickness=0)
+            widget.configure(bg=theme.bg, fg=theme.fg, activebackground=theme.bg, troughcolor=t["troughcolor"], highlightthickness=0)
         if isinstance(widget, Checkbutton):
             # activebackground was "bg" but "Button-activebackground" is true color for default theme
             widget.configure(
-                bg=t["bg"],
-                fg=t["fg"],
+                bg=theme.bg,
+                fg=theme.fg,
                 selectcolor=t["selectcolor"],
-                activebackground=t["Button-activebackground"],
-                activeforeground=t["fg"],
+                activebackground=theme.active_bg,
+                activeforeground=theme.fg,
                 highlightthickness=0,
             )
         if isinstance(widget, Message):
-            widget.configure(bg=t["bg"], fg=t["fg"], font=t["Message-font"])
+            widget.configure(bg=theme.bg, fg=theme.fg, font=t["Message-font"])
         if isinstance(widget, HtmlFrame):
             widget.add_css(f"html{{background: {t['bg']}; color: {t['fg']}; font-family: {t['m-family']};}}")
     style.configure("TFrame", background=t["background"])
