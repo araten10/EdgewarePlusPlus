@@ -168,6 +168,9 @@ def theme_change(theme: str, root: Misc, style: ttk.Style, mfont: Font, tfont: F
     t = CONFIG_THEMES["Original" if config["themeNoConfig"] is True else theme]
 
     for widget in all_children(root):
+        if hasattr(widget, "ignore_theme"):
+            continue
+
         if isinstance(widget, Frame) or isinstance(widget, Canvas):
             widget.configure(bg=t["bg"])
         if isinstance(widget, Button):
@@ -203,6 +206,7 @@ def theme_change(theme: str, root: Misc, style: ttk.Style, mfont: Font, tfont: F
 
     for widget in all_children(root):
         try:
-            widget.configure(bg=(t["bg"] if widget["state"] != "disabled" else t["bg-disabled"]))
+            if widget["state"] == "disabled":
+                widget.configure(bg=t["bg-disabled"])
         except TclError:
             pass

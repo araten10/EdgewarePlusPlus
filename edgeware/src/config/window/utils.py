@@ -33,8 +33,6 @@ from pynput import keyboard
 from config import load_config
 from config.vars import Vars
 
-BUTTON_FACE = "SystemButtonFace" if os_utils.is_windows() else "gray90"  # TODO: Remove?
-
 # TODO: Don't load these here
 config = load_config()
 log_file = utils.init_logging("config")

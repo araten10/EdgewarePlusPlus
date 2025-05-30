@@ -53,11 +53,26 @@ def set_enabled_when(widget: Misc, enabled: EnabledSpec) -> None:
         var.trace_add("write", set_state)
 
 
-class ConfigScale(Frame):
+class StateFrame(Frame):
+    """Frame that can be enabled and disabled for help with themes"""
+
+    def __init__(self, master: Misc, **kwargs) -> None:
+        super().__init__(master, **kwargs)
+        self.state = "normal"
+
+    def __getitem__(self, key: str) -> None:
+        return self.state if key == "state" else super().__getitem__(key)
+
+    def configure(self, state: str | None = None, **kwargs) -> None:
+        self.state = state or self.state
+        super().configure(**kwargs)
+
+
+class ConfigScale(StateFrame):
     def __init__(self, master: Misc, label: str, variable: IntVar, from_: int, to: int, enabled: EnabledSpec | None = None) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
 
-        inner = Frame(self)
+        inner = StateFrame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
         Scale(inner, label=label, orient="horizontal", highlightthickness=0, variable=variable, from_=from_, to=to).pack(fill="x", expand=True)
         Button(inner, text="Manual", command=lambda: assign(variable, simpledialog.askinteger(f"{label}", prompt=f"[{from_}-{to}]: "))).pack(
@@ -95,7 +110,7 @@ class ConfigDropdown(Frame):
 
 class ConfigToggle(Checkbutton):
     def __init__(self, master: Misc, text: str, **kwargs) -> None:
-        super().__init__(master, text=text, borderwidth=1, relief="groove", **kwargs)
+        super().__init__(master, text=text, borderwidth=1, relief="groove", highlightthickness=0, **kwargs)
 
     def pack(self) -> None:
         super().pack(padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, side="left", expand=True)

@@ -34,7 +34,7 @@ from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
-from config.window.utils import BUTTON_FACE, all_children, request_global_panic_key, set_widget_states
+from config.window.utils import all_children, request_global_panic_key, set_widget_states
 from config.window.widgets.layout import (
     ConfigSection,
 )
@@ -70,7 +70,11 @@ class StartTab(ScrollFrame):
         version_frame = Frame(information_section)
         version_frame.pack(fill="both", side="left", expand=1)
         Label(version_frame, text=f"Edgeware++ Local Version:\n{local_version}").pack(fill="x")
-        Label(version_frame, text=f"Edgeware++ Github Version:\n{live_version}", bg=(BUTTON_FACE if (local_version == live_version) else "red")).pack(fill="x")
+        github_label = Label(version_frame, text=f"Edgeware++ Github Version:\n{live_version}")
+        if local_version != live_version:
+            github_label.configure(bg="red")
+            github_label.ignore_theme = True
+        github_label.pack(fill="x")
 
         # Theme
 
