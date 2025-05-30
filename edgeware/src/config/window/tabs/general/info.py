@@ -51,7 +51,7 @@ class StatusItem(Frame):
         label = Label(
             self, text=("✓" if includes else "✗"), font="Default 14", fg=("green" if includes else "red"), cursor=("question_arrow" if tooltip else "")
         )
-        label.ignore_theme = True
+        label.ignore_theme_fg = True
         label.pack(padx=2, pady=2, side="top")
         if tooltip:
             CreateToolTip(label, tooltip)

@@ -73,7 +73,8 @@ class StartTab(ScrollFrame):
         github_label = Label(version_frame, text=f"Edgeware++ Github Version:\n{live_version}")
         if local_version != live_version:
             github_label.configure(bg="red")
-            github_label.ignore_theme = True
+            github_label.ignore_theme_bg = True
+            github_label.ignore_theme_fg = True
         github_label.pack(fill="x")
 
         # Theme

@@ -168,15 +168,15 @@ def theme_change(theme: str, root: Misc, style: ttk.Style, mfont: Font, tfont: F
     t = CONFIG_THEMES["Original" if config["themeNoConfig"] is True else theme]
 
     for widget in all_children(root):
-        if hasattr(widget, "ignore_theme"):
-            continue
-
         if isinstance(widget, Frame) or isinstance(widget, Canvas):
             widget.configure(bg=t["bg"])
         if isinstance(widget, Button):
             widget.configure(bg=t["bg"], fg=t["Button-fg"], activebackground=t["Button-activebackground"], activeforeground=t["fg"])
         if isinstance(widget, Label):
-            widget.configure(bg=t["bg"], fg=t["fg"])
+            if not hasattr(widget, "ignore_theme_fg"):
+                widget.configure(fg=t["fg"])
+            if not hasattr(widget, "ignore_theme_bg"):
+                widget.configure(bg=t["bg"])
         if isinstance(widget, OptionMenu):
             widget.configure(bg=t["bg"], fg=t["fg"], highlightthickness=0, activebackground=t["OptionMenu-activebackground"], activeforeground=t["fg"])
         if isinstance(widget, Text):
