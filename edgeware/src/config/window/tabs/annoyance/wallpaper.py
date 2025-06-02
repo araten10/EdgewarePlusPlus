@@ -17,7 +17,7 @@
 
 import logging
 import os
-from tkinter import SINGLE, Button, Frame, IntVar, Label, Listbox, Message, Scale, filedialog, messagebox, simpledialog
+from tkinter import SINGLE, Button, Frame, IntVar, Label, Listbox, Scale, filedialog, messagebox, simpledialog
 
 from config.vars import Vars
 from config.window.utils import (
@@ -44,7 +44,7 @@ def update_max(obj: IntVar, value: int) -> None:
 
 
 class WallpaperTab(ScrollFrame):
-    def __init__(self, vars: Vars, message_group: list[Message], pack: Pack) -> None:
+    def __init__(self, vars: Vars, pack: Pack) -> None:
         super().__init__()
 
         self.pack = pack

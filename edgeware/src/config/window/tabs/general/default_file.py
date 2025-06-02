@@ -28,7 +28,6 @@ from tkinter import (
     filedialog,
 )
 
-from config.vars import Vars
 from config.window.widgets.scroll_frame import ScrollFrame
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
@@ -85,7 +84,7 @@ class DefaultImageFrame(Frame):
 
 
 class DefaultFileTab(ScrollFrame):
-    def __init__(self, vars: Vars, message_group: list[Message]) -> None:
+    def __init__(self, message_group: list[Message]) -> None:
         super().__init__()
 
         intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)

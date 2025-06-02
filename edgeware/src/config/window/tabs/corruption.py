@@ -24,7 +24,6 @@ from tkinter import (
     OptionMenu,
     ttk,
 )
-from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.preset import apply_preset
@@ -51,7 +50,7 @@ PATH_TEXT = "Here is a chart that shows a basic view of the path that the curren
 
 
 class CorruptionModeTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
+    def __init__(self, vars: Vars, pack: Pack) -> None:
         super().__init__()
 
         # Start

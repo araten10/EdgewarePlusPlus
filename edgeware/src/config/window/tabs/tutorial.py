@@ -16,8 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from pathlib import Path
-from tkinter import Event, Frame, Label, Tk, Toplevel, font, ttk
-from tkinter.font import Font
+from tkinter import Event, Frame, Label, Tk, Toplevel, ttk
 
 from config.themes import theme_change
 from config.window.utils import (
@@ -33,14 +32,11 @@ HIBERNATE_TYPE_TEXT = "Original: The original hibernate type that came with base
 FILE_TEXT = 'The file tab is for all your file management needs, whether it be saving things, loading things, deleting things, or looking around in config folders. The Preset window has also been moved here to make more room for general options.\n\nThere are only two things that aren\'t very self explanatory: deleting logs and unique IDs.\n\nWhile deleting logs is fairly straightforward, it should be noted that it will not delete the log currently being written during the session, so the "total logs in folder" stat will always display as "1".\n\nUnique IDs are a feature to help assist with saving moods. In short, they are a generated identifier that is used when saving to a "moods json file", which is tapped into when selecting what moods you want to see in the "Pack Info" tab. Unique IDs are only used if the pack does not have a \'info.json\' file, otherwise the pack name is just used instead. If you are rapidly editing a pack without info.json and want Edgeware++ to stop generating new mood files, there is an option to disable it in the troubleshooting tab.'
 
 
-def open_tutorial(parent: Tk, style: ttk.Style, window_font: Font, title_font: Font) -> None:
+def open_tutorial(parent: Tk) -> None:
     root = Toplevel(parent)
     root.geometry("740x900")
     root.focus_force()
     root.title("Edgeware++ Tutorial")
-
-    title_font = font.Font(font="Default")
-    title_font.configure(size=13)
 
     tutorial_frame = Frame(root)
     tutorial_frame.pack(expand=1, fill="both")
@@ -96,4 +92,4 @@ def open_tutorial(parent: Tk, style: ttk.Style, window_font: Font, title_font: F
     tutorial_notebook.bind("<Button-1>", frame_workaround)
     # End of HtmlFrame workaround
 
-    theme_change(config["themeType"].strip(), root, style, window_font, title_font)
+    theme_change(config["themeType"].strip(), root)

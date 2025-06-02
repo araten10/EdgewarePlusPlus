@@ -5,6 +5,7 @@ line-length = 160
 [lint]
 select = [
   "ANN",
+  "ARG",
   "E",
   "F",
   "I",

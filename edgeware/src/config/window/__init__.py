@@ -89,10 +89,6 @@ class ConfigWindow(Tk):
         except Exception:
             logging.warning("failed to set iconbitmap.")
 
-        window_font = font.nametofont("TkDefaultFont")
-        title_font = font.Font(font="Default")
-        title_font.configure(size=13)
-
         vars = Vars(config)
 
         # grouping for enable/disable
@@ -109,35 +105,35 @@ class ConfigWindow(Tk):
         notebook.add(general_tab, text="General")
         general_notebook = ttk.Notebook(general_tab)
         general_notebook.pack(expand=1, fill="both")
-        general_notebook.add(StartTab(vars, title_font, message_group, local_version, live_version, pack), text="Start")  # startup screen, info and presets
-        general_notebook.add(InfoTab(vars, title_font, message_group, pack), text="Pack Info")  # pack information
-        general_notebook.add(DefaultFileTab(vars, message_group), text="Change Default Files")  # tab for changing default files
+        general_notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")  # startup screen, info and presets
+        general_notebook.add(InfoTab(message_group, pack), text="Pack Info")  # pack information
+        general_notebook.add(DefaultFileTab(message_group), text="Change Default Files")  # tab for changing default files
 
         annoyance_tab = ttk.Frame(notebook)
         notebook.add(annoyance_tab, text="Annoyance/Runtime")
         annoyance_notebook = ttk.Notebook(annoyance_tab)
         annoyance_notebook.pack(expand=1, fill="both")
-        annoyance_notebook.add(PopupTypesTab(vars, title_font, message_group), text="Popup Types")  # tab for popup types
-        annoyance_notebook.add(PopupTweaksTab(vars, title_font, message_group), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
-        annoyance_notebook.add(WallpaperTab(vars, message_group, pack), text="Wallpaper")  # tab for wallpaper rotation settings
-        annoyance_notebook.add(MoodsTab(vars, title_font, message_group, pack), text="Moods")  # tab for mood settings
-        annoyance_notebook.add(BooruTab(vars, title_font), text="Booru")  # tab for booru downloader
-        annoyance_notebook.add(DangerousSettingsTab(vars, title_font, message_group), text="Dangerous")  # tab for potentially dangerous settings
+        annoyance_notebook.add(PopupTypesTab(vars), text="Popup Types")  # tab for popup types
+        annoyance_notebook.add(PopupTweaksTab(vars), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
+        annoyance_notebook.add(WallpaperTab(vars, pack), text="Wallpaper")  # tab for wallpaper rotation settings
+        annoyance_notebook.add(MoodsTab(pack), text="Moods")  # tab for mood settings
+        annoyance_notebook.add(BooruTab(vars), text="Booru")  # tab for booru downloader
+        annoyance_notebook.add(DangerousSettingsTab(vars), text="Dangerous")  # tab for potentially dangerous settings
 
-        notebook.add(BasicModesTab(vars, title_font), text="Modes")  # tab for general modes
-        notebook.add(CorruptionModeTab(vars, title_font, pack), text="Corruption")  # tab for corruption mode
+        notebook.add(BasicModesTab(vars), text="Modes")  # tab for general modes
+        notebook.add(CorruptionModeTab(vars, pack), text="Corruption")  # tab for corruption mode
 
-        notebook.add(TroubleshootingTab(vars, title_font, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
+        notebook.add(TroubleshootingTab(vars, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
         notebook.add(Frame(name="tutorial"), text="Tutorial")  # tab for tutorial, etc
         last_tab = notebook.index(notebook.select())  # get initial tab to prevent switching to tutorial
-        notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event, self))
+        notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event))
 
-        def tutorial_container(event: Event, root: Tk) -> None:
+        def tutorial_container(event: Event) -> None:
             nonlocal last_tab
             # print(event.widget.select())
             if event.widget.select() == ".tutorial":
-                open_tutorial(root, style, window_font, title_font)
+                open_tutorial(self)
                 notebook.select(last_tab)
             else:
                 last_tab = notebook.index(notebook.select())
@@ -181,7 +177,7 @@ class ConfigWindow(Tk):
         Button(pack_frame, text="Switch Pack", command=lambda: switch_window(self, vars)).pack(fill="x", side="left", expand=1)
         Button(self, text="Save & Exit", command=lambda: write_save(vars, True)).pack(fill="x")
 
-        theme_change(config["themeType"].strip(), self, style, window_font, title_font)
+        theme_change(config["themeType"].strip(), self, style)
 
         # messageOff toggle here, for turning off all help messages
         toggle_help(vars.message_off.get(), message_group)

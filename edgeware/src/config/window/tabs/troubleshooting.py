@@ -24,7 +24,6 @@ from tkinter import (
     Label,
     messagebox,
 )
-from tkinter.font import Font
 
 import os_utils
 import utils
@@ -66,7 +65,7 @@ def delete_logs(log_number_label: Label) -> None:
 
 
 class TroubleshootingTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
+    def __init__(self, vars: Vars, pack: Pack) -> None:
         super().__init__()
 
         troubleshooting_section = ConfigSection(self.viewPort, "Troubleshooting")

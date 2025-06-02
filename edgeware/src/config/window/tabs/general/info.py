@@ -24,11 +24,10 @@ from tkinter import (
     Label,
     Message,
     Misc,
+    font,
     ttk,
 )
-from tkinter.font import Font
 
-from config.vars import Vars
 from config.window.utils import set_widget_states
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
@@ -69,8 +68,11 @@ class StatsItem(Frame):
 
 
 class InfoTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
+    def __init__(self, message_group: list[Message], pack: Pack) -> None:
         super().__init__()
+
+        title_font = font.Font(font="Default")
+        title_font.configure(size=13)
 
         multi_pack_message = Message(self.viewPort, text=MULTI_PACK_TEXT, justify=CENTER, width=675)
         multi_pack_message.pack(fill="both")

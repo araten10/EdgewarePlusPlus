@@ -16,7 +16,6 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from tkinter import CENTER, Message
-from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
@@ -36,7 +35,7 @@ SUBLIMINAL_TEXT = 'Subliminal message popups briefly flash a caption on screen i
 
 
 class PopupTypesTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
+    def __init__(self, vars: Vars) -> None:
         super().__init__()
 
         # Popup Frequency

@@ -20,13 +20,10 @@ import logging
 from tkinter import (
     VERTICAL,
     Event,
-    Message,
     Misc,
     ttk,
 )
-from tkinter.font import Font
 
-from config.vars import Vars
 from config.window.utils import (
     config,
 )
@@ -86,7 +83,7 @@ class MoodsTreeview(CheckboxTreeview):
 
 
 class MoodsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
+    def __init__(self, pack: Pack) -> None:
         super().__init__()
 
         moods_section = ConfigSection(self.viewPort, "Moods", MOOD_TEXT)

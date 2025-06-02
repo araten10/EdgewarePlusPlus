@@ -19,7 +19,6 @@ from tkinter import (
     OptionMenu,
     StringVar,
 )
-from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.widgets.layout import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
@@ -31,7 +30,7 @@ MITOSIS_TEXT = "When a popup is closed, more popups will spawn in its place depe
 
 
 class BasicModesTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font) -> None:
+    def __init__(self, vars: Vars) -> None:
         super().__init__()
 
         # Lowkey

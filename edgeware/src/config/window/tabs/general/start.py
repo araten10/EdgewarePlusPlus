@@ -24,13 +24,11 @@ from tkinter import (
     Checkbutton,
     Frame,
     Label,
-    Message,
     OptionMenu,
     Scale,
     StringVar,
     Text,
 )
-from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
@@ -52,7 +50,7 @@ PRESET_TEXT = "Please be careful before importing unknown config presets! Double
 
 
 class StartTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: str, live_version: str, pack: Pack) -> None:
+    def __init__(self, vars: Vars, local_version: str, live_version: str, pack: Pack) -> None:
         super().__init__()
 
         # Information

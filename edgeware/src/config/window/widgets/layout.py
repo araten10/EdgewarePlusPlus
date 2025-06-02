@@ -45,7 +45,7 @@ def set_enabled_when(widget: Misc, enabled: EnabledSpec) -> None:
     def to_list(value: object) -> list[object]:
         return value if isinstance(value, list) else [value]
 
-    def set_state(*args) -> None:
+    def set_state(*_) -> None:
         set_widget_states(all([var.get() in to_list(value) for var, value in to_list(enabled)]), [widget])
 
     set_state()
@@ -124,10 +124,8 @@ class ConfigSection(Frame):
     def __init__(self, master: Misc, title: str, message: str | None = None) -> None:
         super().__init__(master, borderwidth=2, relief="raised")
 
-        title_font = font.Font(font="Default")
-        title_font.configure(size=15)
-
-        Label(self, text=title, font=title_font).pack()
+        heading_font = font.nametofont("TkHeadingFont")
+        Label(self, text=title, font=heading_font).pack()
 
         if message:
             Message(self, text=message, width=675).pack(fill="both")

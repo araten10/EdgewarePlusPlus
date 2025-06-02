@@ -16,8 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from dataclasses import dataclass
-from tkinter import Button, Canvas, Checkbutton, Frame, Label, Message, Misc, OptionMenu, Scale, TclError, Text, ttk
-from tkinter.font import Font
+from tkinter import Button, Canvas, Checkbutton, Frame, Label, Message, Misc, OptionMenu, Scale, TclError, Text, font, ttk
 
 from tkinterweb import HtmlFrame
 
@@ -35,8 +34,12 @@ class Theme:
     select: str
     text_fg: str
     text_bg: str
-    font: (str, int)
+    font: tuple[str, int]
     transparent_bg: str
+    message_font: tuple[str, int]
+    default_font_family: str
+    default_font_size: int
+    heading_font_family: str
 
 
 THEMES = {
@@ -54,6 +57,10 @@ THEMES = {
         text_bg="white",
         font=("TkDefaultFont", 9),
         transparent_bg="#000001",
+        message_font=("TkDefaultFont", 8),
+        default_font_family="TkDefaultFont",  # Added
+        default_font_size=10,  # Added
+        heading_font_family="TkDefaultFont",  # Added
     ),
     "Dark": Theme(
         fg="ghost white",
@@ -69,6 +76,10 @@ THEMES = {
         text_bg="#1b1d23",
         font=("TkDefaultFont", 9),
         transparent_bg="#f9fafe",
+        message_font=("TkDefaultFont", 8),
+        default_font_family="TkDefaultFont",  # Added
+        default_font_size=10,  # Added
+        heading_font_family="TkDefaultFont",  # Added
     ),
     "The One": Theme(
         fg="#00ff41",
@@ -84,6 +95,10 @@ THEMES = {
         text_bg="#1b1d23",
         font=("Consolas", 9),
         transparent_bg="#00ff42",
+        message_font=("Consolas", 8),
+        default_font_family="Consolas",
+        default_font_size=8,
+        heading_font_family="Consolas",
     ),
     "Ransom": Theme(
         fg="white",
@@ -99,6 +114,10 @@ THEMES = {
         text_bg="white",
         font=("Arial Bold", 9),
         transparent_bg="#fffffe",
+        message_font=("Arial", 8),
+        default_font_family="Arial",
+        default_font_size=10,  # Added
+        heading_font_family="Arial Bold",
     ),
     "Goth": Theme(
         fg="MediumPurple1",
@@ -114,6 +133,10 @@ THEMES = {
         text_bg="MediumOrchid2",
         font=("Constantia", 9),
         transparent_bg="#ba9afe",
+        message_font=("Constantia", 8),
+        default_font_family="Constantia",
+        default_font_size=10,  # Added
+        heading_font_family="Constantia",
     ),
     "Bimbo": Theme(
         fg="deep pink",
@@ -129,56 +152,17 @@ THEMES = {
         text_bg="light pink",
         font=("Constantia", 9),
         transparent_bg="#ff3aa4",
+        message_font=("Constantia", 8),
+        default_font_family="Constantia",
+        default_font_size=10,  # Added
+        heading_font_family="Constantia",
     ),
 }
 
 
-# To be cleaned up
-
-CONFIG_THEMES = {
-    "Original": {
-        "Message-font": ("TkDefaultFont", 8),
-        "m-family": "TkDefaultFont",  # Added
-        "m-size": 10,  # Added
-        "t-family": "TkDefaultFont",  # Added
-    },
-    "Dark": {
-        "Message-font": ("TkDefaultFont", 8),
-        "m-family": "TkDefaultFont",  # Added
-        "m-size": 10,  # Added
-        "t-family": "TkDefaultFont",  # Added
-    },
-    "The One": {
-        "Message-font": ("Consolas", 8),
-        "m-family": "Consolas",
-        "m-size": 8,
-        "t-family": "Consolas",
-    },
-    "Ransom": {
-        "Message-font": ("Arial", 8),
-        "m-family": "Arial",
-        "m-size": 10,  # Added
-        "t-family": "Arial Bold",
-    },
-    "Goth": {
-        "Message-font": ("Constantia", 8),
-        "m-family": "Constantia",
-        "m-size": 10,  # Added
-        "t-family": "Constantia",
-    },
-    "Bimbo": {
-        "Message-font": ("Constantia", 8),
-        "m-family": "Constantia",
-        "m-size": 10,  # Added
-        "t-family": "Constantia",
-    },
-}
-
-
-def theme_change(name: str, root: Misc, style: ttk.Style, mfont: Font, tfont: Font) -> None:
+def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
     from config.window.utils import all_children, config  # Circular import
 
-    t = CONFIG_THEMES["Original" if config["themeNoConfig"] is True else name]
     theme = THEMES["Original" if config["themeNoConfig"] is True else name]
 
     for widget in all_children(root):
@@ -208,15 +192,21 @@ def theme_change(name: str, root: Misc, style: ttk.Style, mfont: Font, tfont: Fo
                 highlightthickness=0,
             )
         if isinstance(widget, Message):
-            widget.configure(bg=theme.bg, fg=theme.fg, font=t["Message-font"])
+            widget.configure(bg=theme.bg, fg=theme.fg, font=theme.message_font)
         if isinstance(widget, HtmlFrame):
-            widget.add_css(f"html{{background: {theme.bg}; color: {theme.fg}; font-family: {t['m-family']};}}")
-    style.configure("TFrame", background=theme.tab_frame_bg)
-    style.configure("TNotebook", background=theme.tab_frame_bg)
-    style.map("TNotebook.Tab", background=[("selected", theme.tab_frame_bg)])
-    style.configure("TNotebook.Tab", background=theme.tab_bg, foreground=theme.fg)
-    mfont.configure(family=t["m-family"], size=t["m-size"])
-    tfont.configure(family=t["t-family"])
+            widget.add_css(f"html{{background: {theme.bg}; color: {theme.fg}; font-family: {theme.default_font_family};}}")
+
+    if style:
+        style.configure("TFrame", background=theme.tab_frame_bg)
+        style.configure("TNotebook", background=theme.tab_frame_bg)
+        style.map("TNotebook.Tab", background=[("selected", theme.tab_frame_bg)])
+        style.configure("TNotebook.Tab", background=theme.tab_bg, foreground=theme.fg)
+
+    default_font = font.nametofont("TkDefaultFont")
+    default_font.configure(family=theme.default_font_family, size=theme.default_font_size)
+
+    heading_font = font.nametofont("TkHeadingFont")
+    heading_font.configure(family=theme.heading_font_family, size=15, weight="normal")
 
     for widget in all_children(root):
         try:

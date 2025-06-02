@@ -22,7 +22,6 @@ from tkinter import (
     Frame,
     Listbox,
 )
-from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.utils import (
@@ -39,7 +38,7 @@ BOORU_TEXT = 'Please note that the "Booru Downloader" is not currently in a grea
 
 
 class BooruTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font) -> None:
+    def __init__(self, vars: Vars) -> None:
         super().__init__()
 
         download_section = ConfigSection(self.viewPort, "Booru Settings", BOORU_TEXT)
