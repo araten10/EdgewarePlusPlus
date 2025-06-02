@@ -23,19 +23,24 @@ from tkinterweb import HtmlFrame
 
 @dataclass
 class Theme:
+    # Generic
     fg: str
     bg: str
     active_bg: str
     disabled_bg: str
-    button_fg: str
+
+    # Specific elements
+    transparent_bg: str  # Subliminal background color on Windows
     tab_bg: str
     tab_frame_bg: str
-    trough: str
-    select: str
+    button_fg: str
     text_fg: str
     text_bg: str
+    scale_trough: str
+    check_select: str
+
+    # Fonts
     font: tuple[str, int]
-    transparent_bg: str
     message_font: tuple[str, int]
     default_font_family: str
     default_font_size: int
@@ -48,15 +53,17 @@ THEMES = {
         bg="#d9d9d9",
         active_bg="#ececec",
         disabled_bg="gray35",
-        button_fg="black",
+        #
+        transparent_bg="#000001",
         tab_bg="#d9d9d9",
         tab_frame_bg="#f0f0f0",
-        trough="#b3b3b3",
-        select="#ffffff",
+        button_fg="black",
         text_fg="black",
         text_bg="white",
+        scale_trough="#b3b3b3",
+        check_select="#ffffff",
+        #
         font=("TkDefaultFont", 9),
-        transparent_bg="#000001",
         message_font=("TkDefaultFont", 8),
         default_font_family="TkDefaultFont",  # Added
         default_font_size=10,  # Added
@@ -67,15 +74,17 @@ THEMES = {
         bg="#282c34",
         active_bg="#282c34",
         disabled_bg="gray65",
-        button_fg="ghost white",
+        #
+        transparent_bg="#f9fafe",
         tab_bg="#1b1d23",
         tab_frame_bg="#282c34",
-        trough="#c8c8c8",
-        select="#1b1d23",
+        button_fg="ghost white",
         text_fg="ghost white",
         text_bg="#1b1d23",
+        scale_trough="#c8c8c8",
+        check_select="#1b1d23",
+        #
         font=("TkDefaultFont", 9),
-        transparent_bg="#f9fafe",
         message_font=("TkDefaultFont", 8),
         default_font_family="TkDefaultFont",  # Added
         default_font_size=10,  # Added
@@ -86,15 +95,17 @@ THEMES = {
         bg="#282c34",
         active_bg="#1b1d23",
         disabled_bg="#37573d",
-        button_fg="#00ff41",
+        #
+        transparent_bg="#00ff42",
         tab_bg="#1b1d23",
         tab_frame_bg="#282c34",
-        trough="#009a22",
-        select="#1b1d23",
+        button_fg="#00ff41",
         text_fg="#00ff41",
         text_bg="#1b1d23",
+        scale_trough="#009a22",
+        check_select="#1b1d23",
+        #
         font=("Consolas", 9),
-        transparent_bg="#00ff42",
         message_font=("Consolas", 8),
         default_font_family="Consolas",
         default_font_size=8,
@@ -105,15 +116,17 @@ THEMES = {
         bg="#841212",
         active_bg="#841212",
         disabled_bg="573737",
-        button_fg="yellow",
+        #
+        transparent_bg="#fffffe",
         tab_bg="#5c0d0d",
         tab_frame_bg="#841212",
-        trough="#c8c8c8",
-        select="#5c0d0d",
+        button_fg="yellow",
         text_fg="black",
         text_bg="white",
+        scale_trough="#c8c8c8",
+        check_select="#5c0d0d",
+        #
         font=("Arial Bold", 9),
-        transparent_bg="#fffffe",
         message_font=("Arial", 8),
         default_font_family="Arial",
         default_font_size=10,  # Added
@@ -124,15 +137,17 @@ THEMES = {
         bg="#282c34",
         active_bg="#282c34",
         disabled_bg="#4b3757",
-        button_fg="MediumPurple1",
+        #
+        transparent_bg="#ba9afe",
         tab_bg="#1b1d23",
         tab_frame_bg="#282c34",
-        trough="MediumOrchid2",
-        select="#1b1d23",
+        button_fg="MediumPurple1",
         text_fg="purple4",
         text_bg="MediumOrchid2",
+        scale_trough="MediumOrchid2",
+        check_select="#1b1d23",
+        #
         font=("Constantia", 9),
-        transparent_bg="#ba9afe",
         message_font=("Constantia", 8),
         default_font_family="Constantia",
         default_font_size=10,  # Added
@@ -143,15 +158,17 @@ THEMES = {
         bg="pink",
         active_bg="hot pink",
         disabled_bg="#bc7abf",
-        button_fg="deep pink",
+        #
+        transparent_bg="#ff3aa4",
         tab_bg="light pink",
         tab_frame_bg="pink",
-        trough="hot pink",
-        select="light pink",
+        button_fg="deep pink",
         text_fg="magenta2",
         text_bg="light pink",
+        scale_trough="hot pink",
+        check_select="light pink",
+        #
         font=("Constantia", 9),
-        transparent_bg="#ff3aa4",
         message_font=("Constantia", 8),
         default_font_family="Constantia",
         default_font_size=10,  # Added
@@ -166,35 +183,35 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
     theme = THEMES["Original" if config["themeNoConfig"] is True else name]
 
     for widget in all_children(root):
-        if isinstance(widget, Frame) or isinstance(widget, Canvas):
-            widget.configure(bg=theme.bg)
-        if isinstance(widget, Button):
-            widget.configure(bg=theme.bg, fg=theme.button_fg, activebackground=theme.active_bg, activeforeground=theme.fg)
-        if isinstance(widget, Label):
-            if not hasattr(widget, "ignore_theme_fg"):
-                widget.configure(fg=theme.fg)
-            if not hasattr(widget, "ignore_theme_bg"):
+        match widget:
+            case Frame() | Canvas():
                 widget.configure(bg=theme.bg)
-        if isinstance(widget, OptionMenu):
-            widget.configure(bg=theme.bg, fg=theme.fg, highlightthickness=0, activebackground=theme.active_bg, activeforeground=theme.fg)
-        if isinstance(widget, Text):
-            widget.configure(bg=theme.text_bg, fg=theme.text_fg)
-        if isinstance(widget, Scale):
-            widget.configure(bg=theme.bg, fg=theme.fg, activebackground=theme.bg, troughcolor=theme.trough, highlightthickness=0)
-        if isinstance(widget, Checkbutton):
-            # activebackground was "bg" but "Button-activebackground" is true color for default theme
-            widget.configure(
-                bg=theme.bg,
-                fg=theme.fg,
-                selectcolor=theme.select,
-                activebackground=theme.active_bg,
-                activeforeground=theme.fg,
-                highlightthickness=0,
-            )
-        if isinstance(widget, Message):
-            widget.configure(bg=theme.bg, fg=theme.fg, font=theme.message_font)
-        if isinstance(widget, HtmlFrame):
-            widget.add_css(f"html{{background: {theme.bg}; color: {theme.fg}; font-family: {theme.default_font_family};}}")
+            case Button():
+                widget.configure(bg=theme.bg, fg=theme.button_fg, activebackground=theme.active_bg, activeforeground=theme.fg)
+            case Label():
+                if not hasattr(widget, "ignore_theme_fg"):
+                    widget.configure(fg=theme.fg)
+                if not hasattr(widget, "ignore_theme_bg"):
+                    widget.configure(bg=theme.bg)
+            case OptionMenu():
+                widget.configure(bg=theme.bg, fg=theme.fg, highlightthickness=0, activebackground=theme.active_bg, activeforeground=theme.fg)
+            case Text():
+                widget.configure(bg=theme.text_bg, fg=theme.text_fg)
+            case Scale():
+                widget.configure(bg=theme.bg, fg=theme.fg, activebackground=theme.bg, troughcolor=theme.scale_trough, highlightthickness=0)
+            case Checkbutton():
+                widget.configure(
+                    bg=theme.bg,
+                    fg=theme.fg,
+                    selectcolor=theme.check_select,
+                    activebackground=theme.active_bg,
+                    activeforeground=theme.fg,
+                    highlightthickness=0,
+                )
+            case Message():
+                widget.configure(bg=theme.bg, fg=theme.fg, font=theme.message_font)
+            case HtmlFrame():
+                widget.add_css(f"html{{background: {theme.bg}; color: {theme.fg}; font-family: {theme.default_font_family};}}")
 
     if style:
         style.configure("TFrame", background=theme.tab_frame_bg)
