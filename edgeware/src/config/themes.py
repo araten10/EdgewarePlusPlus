@@ -40,11 +40,9 @@ class Theme:
     check_select: str
 
     # Fonts
-    font: tuple[str, int]
-    message_font: tuple[str, int]
-    default_font_family: str
-    default_font_size: int
-    heading_font_family: str
+    font: str = "TkDefaultFont"
+    font_size: int = 9
+    heading_font: str = "TkDefaultFont"
 
 
 THEMES = {
@@ -62,12 +60,6 @@ THEMES = {
         text_bg="white",
         scale_trough="#b3b3b3",
         check_select="#ffffff",
-        #
-        font=("TkDefaultFont", 9),
-        message_font=("TkDefaultFont", 8),
-        default_font_family="TkDefaultFont",  # Added
-        default_font_size=10,  # Added
-        heading_font_family="TkDefaultFont",  # Added
     ),
     "Dark": Theme(
         fg="ghost white",
@@ -83,12 +75,6 @@ THEMES = {
         text_bg="#1b1d23",
         scale_trough="#c8c8c8",
         check_select="#1b1d23",
-        #
-        font=("TkDefaultFont", 9),
-        message_font=("TkDefaultFont", 8),
-        default_font_family="TkDefaultFont",  # Added
-        default_font_size=10,  # Added
-        heading_font_family="TkDefaultFont",  # Added
     ),
     "The One": Theme(
         fg="#00ff41",
@@ -105,11 +91,9 @@ THEMES = {
         scale_trough="#009a22",
         check_select="#1b1d23",
         #
-        font=("Consolas", 9),
-        message_font=("Consolas", 8),
-        default_font_family="Consolas",
-        default_font_size=8,
-        heading_font_family="Consolas",
+        font="Consolas",
+        font_size=8,
+        heading_font="Consolas",
     ),
     "Ransom": Theme(
         fg="white",
@@ -126,11 +110,8 @@ THEMES = {
         scale_trough="#c8c8c8",
         check_select="#5c0d0d",
         #
-        font=("Arial Bold", 9),
-        message_font=("Arial", 8),
-        default_font_family="Arial",
-        default_font_size=10,  # Added
-        heading_font_family="Arial Bold",
+        font="Arial",
+        heading_font="Arial Bold",
     ),
     "Goth": Theme(
         fg="MediumPurple1",
@@ -147,11 +128,8 @@ THEMES = {
         scale_trough="MediumOrchid2",
         check_select="#1b1d23",
         #
-        font=("Constantia", 9),
-        message_font=("Constantia", 8),
-        default_font_family="Constantia",
-        default_font_size=10,  # Added
-        heading_font_family="Constantia",
+        font="Constantia",
+        heading_font="Constantia",
     ),
     "Bimbo": Theme(
         fg="deep pink",
@@ -168,11 +146,8 @@ THEMES = {
         scale_trough="hot pink",
         check_select="light pink",
         #
-        font=("Constantia", 9),
-        message_font=("Constantia", 8),
-        default_font_family="Constantia",
-        default_font_size=10,  # Added
-        heading_font_family="Constantia",
+        font="Constantia",
+        heading_font="Constantia",
     ),
 }
 
@@ -209,9 +184,9 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
                     highlightthickness=0,
                 )
             case Message():
-                widget.configure(bg=theme.bg, fg=theme.fg, font=theme.message_font)
+                widget.configure(bg=theme.bg, fg=theme.fg, font=(theme.font, 8))
             case HtmlFrame():
-                widget.add_css(f"html{{background: {theme.bg}; color: {theme.fg}; font-family: {theme.default_font_family};}}")
+                widget.add_css(f"html{{background: {theme.bg}; color: {theme.fg}; font-family: {theme.font};}}")
 
     if style:
         style.configure("TFrame", background=theme.tab_frame_bg)
@@ -220,10 +195,10 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
         style.configure("TNotebook.Tab", background=theme.tab_bg, foreground=theme.fg)
 
     default_font = font.nametofont("TkDefaultFont")
-    default_font.configure(family=theme.default_font_family, size=theme.default_font_size)
+    default_font.configure(family=theme.font, size=theme.font_size)
 
     heading_font = font.nametofont("TkHeadingFont")
-    heading_font.configure(family=theme.heading_font_family, size=15, weight="normal")
+    heading_font.configure(family=theme.heading_font, size=15, weight="normal")
 
     for widget in all_children(root):
         try:

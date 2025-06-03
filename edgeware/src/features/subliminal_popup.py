@@ -38,11 +38,10 @@ class SubliminalPopup(Toplevel):
 
         monitor = utils.random_monitor(settings)
 
-        font = (settings.theme.font[0], min(monitor.width, monitor.height) // 10)
         label = Label(
             self,
             text=self.subliminal,
-            font=font,
+            font=(settings.theme.font, min(monitor.width, monitor.height) // 10),
             wraplength=monitor.width / 1.5,
             fg=settings.theme.fg,
             bg=(settings.theme.transparent_bg if os_utils.is_windows() else settings.theme.bg),
