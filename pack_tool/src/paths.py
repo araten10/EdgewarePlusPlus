@@ -20,7 +20,7 @@ DEFAULT_PACK = PATH / "default_pack.yml"
 
 
 class Source:
-    def __init__(self, root: str):
+    def __init__(self, root: str) -> None:
         self.root = PATH / root
 
         # Directories
@@ -35,7 +35,7 @@ class Source:
 
 
 class Build:
-    def __init__(self, root: str):
+    def __init__(self, root: str) -> None:
         self.root = PATH / root
 
         # Directories
