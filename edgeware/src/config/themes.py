@@ -16,7 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from dataclasses import dataclass
-from tkinter import Button, Canvas, Checkbutton, Frame, Label, Message, Misc, OptionMenu, Scale, TclError, Text, font, ttk
+from tkinter import Button, Canvas, Checkbutton, Frame, Label, Message, Misc, OptionMenu, Scale, Scrollbar, TclError, Text, font, ttk
 
 from tkinterweb import HtmlFrame
 
@@ -28,6 +28,7 @@ class Theme:
     bg: str
     active_bg: str
     disabled_bg: str
+    trough: str
 
     # Specific elements
     transparent_bg: str  # Subliminal background color on Windows
@@ -36,7 +37,6 @@ class Theme:
     button_fg: str
     text_fg: str
     text_bg: str
-    scale_trough: str
     check_select: str
 
     # Fonts
@@ -51,6 +51,7 @@ THEMES = {
         bg="#d9d9d9",
         active_bg="#ececec",
         disabled_bg="gray35",
+        trough="#b3b3b3",
         #
         transparent_bg="#000001",
         tab_bg="#d9d9d9",
@@ -58,7 +59,6 @@ THEMES = {
         button_fg="black",
         text_fg="black",
         text_bg="white",
-        scale_trough="#b3b3b3",
         check_select="#ffffff",
     ),
     "Dark": Theme(
@@ -66,6 +66,7 @@ THEMES = {
         bg="#282c34",
         active_bg="#282c34",
         disabled_bg="gray65",
+        trough="#c8c8c8",
         #
         transparent_bg="#f9fafe",
         tab_bg="#1b1d23",
@@ -73,7 +74,6 @@ THEMES = {
         button_fg="ghost white",
         text_fg="ghost white",
         text_bg="#1b1d23",
-        scale_trough="#c8c8c8",
         check_select="#1b1d23",
     ),
     "The One": Theme(
@@ -81,6 +81,7 @@ THEMES = {
         bg="#282c34",
         active_bg="#1b1d23",
         disabled_bg="#37573d",
+        trough="#009a22",
         #
         transparent_bg="#00ff42",
         tab_bg="#1b1d23",
@@ -88,7 +89,6 @@ THEMES = {
         button_fg="#00ff41",
         text_fg="#00ff41",
         text_bg="#1b1d23",
-        scale_trough="#009a22",
         check_select="#1b1d23",
         #
         font="Consolas",
@@ -100,6 +100,7 @@ THEMES = {
         bg="#841212",
         active_bg="#841212",
         disabled_bg="573737",
+        trough="#c8c8c8",
         #
         transparent_bg="#fffffe",
         tab_bg="#5c0d0d",
@@ -107,7 +108,6 @@ THEMES = {
         button_fg="yellow",
         text_fg="black",
         text_bg="white",
-        scale_trough="#c8c8c8",
         check_select="#5c0d0d",
         #
         font="Arial",
@@ -118,6 +118,7 @@ THEMES = {
         bg="#282c34",
         active_bg="#282c34",
         disabled_bg="#4b3757",
+        trough="MediumOrchid2",
         #
         transparent_bg="#ba9afe",
         tab_bg="#1b1d23",
@@ -125,7 +126,6 @@ THEMES = {
         button_fg="MediumPurple1",
         text_fg="purple4",
         text_bg="MediumOrchid2",
-        scale_trough="MediumOrchid2",
         check_select="#1b1d23",
         #
         font="Constantia",
@@ -136,6 +136,7 @@ THEMES = {
         bg="pink",
         active_bg="hot pink",
         disabled_bg="#bc7abf",
+        trough="hot pink",
         #
         transparent_bg="#ff3aa4",
         tab_bg="light pink",
@@ -143,7 +144,6 @@ THEMES = {
         button_fg="deep pink",
         text_fg="magenta2",
         text_bg="light pink",
-        scale_trough="hot pink",
         check_select="light pink",
         #
         font="Constantia",
@@ -173,7 +173,7 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
             case Text():
                 widget.configure(bg=theme.text_bg, fg=theme.text_fg)
             case Scale():
-                widget.configure(bg=theme.bg, fg=theme.fg, activebackground=theme.bg, troughcolor=theme.scale_trough, highlightthickness=0)
+                widget.configure(bg=theme.bg, fg=theme.fg, activebackground=theme.active_bg, troughcolor=theme.trough, highlightthickness=0)
             case Checkbutton():
                 widget.configure(
                     bg=theme.bg,
@@ -187,6 +187,11 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
                 widget.configure(bg=theme.bg, fg=theme.fg, font=(theme.font, 8))
             case HtmlFrame():
                 widget.add_css(f"html{{background: {theme.bg}; color: {theme.fg}; font-family: {theme.font};}}")
+            case Scrollbar():
+                try:
+                    widget.configure(bg=theme.bg, activebackground=theme.active_bg, troughcolor=theme.trough)
+                except TclError:
+                    pass  # ttk.Scrollbar can't be handled this way?
 
     if style:
         style.configure("TFrame", background=theme.tab_frame_bg)
