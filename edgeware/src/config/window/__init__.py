@@ -27,7 +27,6 @@ from tkinter import (
     Listbox,
     Tk,
     Toplevel,
-    font,
     messagebox,
     ttk,
 )
@@ -59,6 +58,7 @@ from config.window.utils import (
     refresh,
     write_save,
 )
+from config.window.widgets.layout import ConfigMessage
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()
@@ -90,9 +90,9 @@ class ConfigWindow(Tk):
             logging.warning("failed to set iconbitmap.")
 
         vars = Vars(config)
+        ConfigMessage.message_off_var = vars.message_off
 
-        # grouping for enable/disable
-        message_group = []
+        message_group = []  # TODO: Delete
 
         local_version = default_config["versionplusplus"]
         live_version = get_live_version()
@@ -179,9 +179,6 @@ class ConfigWindow(Tk):
 
         theme_change(config["themeType"].strip(), self, style)
 
-        # messageOff toggle here, for turning off all help messages
-        toggle_help(vars.message_off.get(), message_group)
-
         # first time alert popup
         # if not settings['is_configed'] == 1:
         #    messagebox.showinfo('First Config', 'Config has not been run before. All settings are defaulted to frequency of 0 except for popups.\n[This alert will only appear on the first run of config]')
@@ -197,15 +194,6 @@ class ConfigWindow(Tk):
 
 
 # helper funcs for lambdas =======================================================
-def toggle_help(state: bool, messages: list) -> None:
-    if state is True:
-        try:
-            for widget in messages:
-                widget.destroy()
-        except Exception as e:
-            logging.warning(f"could not properly turn help off. {e}")
-
-
 def switch_pack(vars: Vars, pack: str) -> None:
     vars.pack_path.set(pack)
     write_save(vars)
