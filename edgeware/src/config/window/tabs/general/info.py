@@ -32,9 +32,13 @@ from config.window.utils import set_widget_states
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
+from config.window.widgets.layout import (
+    ConfigSection,
+)
 
 MULTI_PACK_TEXT = 'NOTE: If you have multiple packs loaded, make sure to apply the pack you want using the "Switch Pack" button at the bottom of the window! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
-
+INFO_TEXT = 'This section requires an optional "information file" that pack creators can choose to add. If the section is greyed out but other sections on this page are working fine, chances are the pack just doesn\'t have one!'
+DISCORD_TEXT = 'These will only display on your discord if you turn the associated "Show on Discord" setting on (found in the Dangerous Settings tab).'
 
 def list_length(pack: Pack, attr: str) -> list:
     return len(getattr(pack.index.default, attr)) + sum([len(getattr(mood, attr)) for mood in pack.index.moods])
@@ -74,15 +78,12 @@ class InfoTab(ScrollFrame):
         title_font = font.Font(font="Default")
         title_font.configure(size=13)
 
-        multi_pack_message = Message(self.viewPort, text=MULTI_PACK_TEXT, justify=CENTER, width=675)
-        multi_pack_message.pack(fill="both")
-        message_group.append(multi_pack_message)
-
         # Stats
-        Label(self.viewPort, text="Stats", font=title_font, relief=GROOVE).pack(pady=2)
+        stats_section = ConfigSection(self.viewPort, "Stats", MULTI_PACK_TEXT)
+        stats_section.pack()
 
-        status_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        status_frame.pack(fill="x", padx=3)
+        status_frame = Frame(stats_section, borderwidth=3, relief=GROOVE)
+        status_frame.pack(fill="x")
         StatusItem(status_frame, "Pack Loaded", pack.paths.root.exists())
         StatusItem(status_frame, "Info File", pack.paths.info.is_file())
         StatusItem(status_frame, "Pack has Wallpaper", pack.paths.wallpaper.is_file())
@@ -111,7 +112,7 @@ class InfoTab(ScrollFrame):
             'For more information, check the "About" tab for a detailed writeup.',
         )
 
-        stats_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        stats_frame = Frame(stats_section, borderwidth=3, relief=GROOVE)
         stats_frame.pack(fill="x", pady=1)
 
         stats_row_1 = Frame(stats_frame)
@@ -128,12 +129,10 @@ class InfoTab(ScrollFrame):
         StatsItem(stats_row_2, "Hypnos", len(pack.hypnos))
 
         # Information
-        Label(self.viewPort, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
+        info_section = ConfigSection(self.viewPort, "Information", INFO_TEXT)
+        info_section.pack()
 
-        info_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        info_frame.pack(fill="x", pady=2)
-
-        description_frame = Frame(info_frame, borderwidth=2, relief=GROOVE)
+        description_frame = Frame(info_section, borderwidth=2, relief=GROOVE)
         description_frame.pack(fill="both", side="right")
         description_title = Label(description_frame, text="Description", font="Default 10")
         description_title.pack(padx=2, pady=2, side="top")
@@ -142,7 +141,7 @@ class InfoTab(ScrollFrame):
         description_label = Label(description_frame, text=description_wrap.fill(text=pack.info.description))
         description_label.pack(padx=2, pady=2, side="top")
 
-        basic_info_frame = Frame(info_frame, borderwidth=2, relief=GROOVE)
+        basic_info_frame = Frame(info_section, borderwidth=2, relief=GROOVE)
         basic_info_frame.pack(fill="x", side="left", expand=1)
 
         name_frame = Frame(basic_info_frame)
@@ -176,7 +175,6 @@ class InfoTab(ScrollFrame):
         set_widget_states(
             pack.paths.info.is_file(),
             [
-                info_frame,
                 description_frame,
                 description_title,
                 description_label,
@@ -191,8 +189,9 @@ class InfoTab(ScrollFrame):
                 version_label,
             ],
         )
-
-        discord_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
+        discord_section = ConfigSection(self.viewPort, "Discord Information", DISCORD_TEXT)
+        discord_section.pack()
+        discord_frame = Frame(discord_section, borderwidth=2, relief=GROOVE)
         discord_frame.pack(fill="x", pady=2)
         discord_status_title = Label(discord_frame, text="Custom Discord Status:", font="Default 10")
         discord_status_title.pack(padx=2, pady=2, side="left")
