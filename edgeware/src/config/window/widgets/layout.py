@@ -30,7 +30,6 @@ from tkinter import (
     font,
     simpledialog,
 )
-from typing import Tuple
 
 from config.vars import ConfigVar
 from config.window.utils import assign, set_widget_states
@@ -38,7 +37,7 @@ from config.window.utils import assign, set_widget_states
 PAD = 4
 
 Value = int | bool | str
-EnabledTuple = Tuple[ConfigVar, Value | list[Value]]
+EnabledTuple = tuple[ConfigVar, Value | list[Value]]
 EnabledSpec = EnabledTuple | list[EnabledTuple]
 
 
@@ -87,12 +86,14 @@ class ConfigScale(StateFrame):
         super().pack(padx=PAD, pady=PAD, side="left", expand=True, fill="x")
 
 
-class ConfigDropdown(Frame):
-    def __init__(self, master: Misc, variable: StringVar, items: dict[str, str], height: int = 3, width: int = 22, wrap: int = 150) -> None:
+class ConfigDropdown(StateFrame):
+    def __init__(
+        self, master: Misc, variable: StringVar, items: dict[str, str], height: int = 3, width: int = 22, wrap: int = 150, enabled: EnabledSpec | None = None
+    ) -> None:
         super().__init__(master, borderwidth=1, relief="groove")
         self.items = items
 
-        inner = Frame(self)
+        inner = StateFrame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
         menu = OptionMenu(inner, variable, *items.keys(), command=self.on_change)
         menu.configure(width=9, highlightthickness=0)
@@ -102,11 +103,14 @@ class ConfigDropdown(Frame):
 
         self.on_change(variable.get())
 
+        if enabled:
+            set_enabled_when(self, enabled)
+
     def on_change(self, key: str) -> None:
         self.label.configure(text=self.items[key])
 
     def pack(self) -> None:
-        super().pack(padx=PAD, pady=PAD, side="left", expand=True)
+        super().pack(padx=PAD, pady=PAD, side="left", expand=True, fill="x")
 
 
 class ConfigToggle(Checkbutton):
@@ -114,7 +118,7 @@ class ConfigToggle(Checkbutton):
         super().__init__(master, text=text, borderwidth=1, relief="groove", highlightthickness=0, **kwargs)
 
     def pack(self) -> None:
-        super().pack(padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, side="left", expand=True)
+        super().pack(padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, side="left", fill="x", expand=True)
 
     def grid(self, row: int, column: int) -> None:
         super().grid(row=row, column=column, padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, sticky="ew")

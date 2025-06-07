@@ -51,10 +51,12 @@ class BasicModesTab(ScrollFrame):
         mitosis_section = ConfigSection(self.viewPort, "Mitosis Mode", MITOSIS_TEXT)
         mitosis_section.pack()
 
-        mitosis_row = ConfigRow(mitosis_section)
-        mitosis_row.pack()
-        ConfigToggle(mitosis_row, "Enable Mitosis Mode", variable=vars.mitosis_mode).pack()
-        ConfigScale(mitosis_section, "Mitosis Strength (number of popups)", vars.mitosis_strength, 2, 10, enabled=(vars.mitosis_mode, True)).pack()
+        mitosis_row_1 = ConfigRow(mitosis_section)
+        mitosis_row_1.pack()
+        ConfigToggle(mitosis_row_1, "Enable Mitosis Mode", variable=vars.mitosis_mode).pack()
+        mitosis_row_2 = ConfigRow(mitosis_section)
+        mitosis_row_2.pack()
+        ConfigScale(mitosis_row_2, "Mitosis Strength (number of popups)", vars.mitosis_strength, 2, 10, enabled=(vars.mitosis_mode, True)).pack()
 
         # Hibernate
         hibernate_section = ConfigSection(self.viewPort, "Hibernate Mode", HIBERNATE_TEXT)
@@ -63,8 +65,11 @@ class BasicModesTab(ScrollFrame):
         hibernate_row_1 = ConfigRow(hibernate_section)
         hibernate_row_1.pack()
         ConfigToggle(hibernate_row_1, "Enable Hibernate Mode", variable=vars.hibernate_mode).pack()
+
+        hibernate_row_2 = ConfigRow(hibernate_section)
+        hibernate_row_2.pack()
         ConfigDropdown(
-            hibernate_row_1,
+            hibernate_row_2,
             vars.hibernate_type,
             {
                 "Original": "Creates an immediate quantity of popups on wakeup based on the awaken activity.",
@@ -76,17 +81,18 @@ class BasicModesTab(ScrollFrame):
             },
             width=42,
             wrap=295,
+            enabled=(vars.hibernate_mode, True),
         ).pack()
-
-        hibernate_row_2 = ConfigRow(hibernate_section)
-        hibernate_row_2.pack()
-        ConfigScale(hibernate_row_2, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200, enabled=(vars.hibernate_mode, True)).pack()
-        ConfigScale(hibernate_row_2, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400, enabled=(vars.hibernate_mode, True)).pack()
 
         hibernate_row_3 = ConfigRow(hibernate_section)
         hibernate_row_3.pack()
+        ConfigScale(hibernate_row_3, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200, enabled=(vars.hibernate_mode, True)).pack()
+        ConfigScale(hibernate_row_3, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400, enabled=(vars.hibernate_mode, True)).pack()
+
+        hibernate_row_4 = ConfigRow(hibernate_section)
+        hibernate_row_4.pack()
         ConfigScale(
-            hibernate_row_3,
+            hibernate_row_4,
             "Awaken Activity",
             vars.hibernate_activity,
             1,
@@ -94,7 +100,7 @@ class BasicModesTab(ScrollFrame):
             enabled=[(vars.hibernate_mode, True), (vars.hibernate_type, ["Original", "Glitch", "Ramp", "Chaos"])],
         ).pack()
         ConfigScale(
-            hibernate_row_3,
+            hibernate_row_4,
             "Max Activity Length (seconds)",
             vars.hibernate_activity_length,
             5,

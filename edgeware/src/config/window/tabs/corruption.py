@@ -68,7 +68,7 @@ class CorruptionModeTab(ScrollFrame):
             ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
             ' Edgeware. For more information, check out the "Tutorial" tab.',
         )
-        start_group = [corruption_toggle]
+        set_widget_states(os.path.isfile(pack.paths.corruption), [corruption_toggle])
         full_permission_toggle = ConfigToggle(corruption_start_row, "Full Permissions Mode", variable=vars.corruption_full, cursor="question_arrow")
         full_permission_toggle.pack()
         CreateToolTip(
@@ -215,4 +215,3 @@ class CorruptionModeTab(ScrollFrame):
                 fade_image.configure(image=fade_abrupt_image)
 
         fade_helper(vars.corruption_fade.get())
-        set_widget_states(os.path.isfile(pack.paths.corruption), start_group)
