@@ -15,10 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import CENTER, Message
 
 from config.vars import Vars
-from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
+from config.window.widgets.layout import ConfigMessage, ConfigRow, ConfigScale, ConfigSection, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 
@@ -46,11 +45,7 @@ class PopupTypesTab(ScrollFrame):
         popup_freq_row.pack()
 
         ConfigScale(popup_freq_row, label="Popup Timer Delay (ms)", from_=10, to=60000, variable=vars.delay).pack()
-
-        single_message = Message(popup_freq_section, text=SINGLE_TEXT, justify=CENTER, width=675)
-        single_message.pack(fill="both")
-        # for when hiding help gets refactored?
-        # message_group.append(single_message)
+        ConfigMessage(popup_freq_section, SINGLE_TEXT).pack()
 
         single_mode = ConfigToggle(popup_freq_section, "Single Popup Per Roll", variable=vars.single_mode, cursor="question_arrow")
         single_mode.pack()
@@ -96,11 +91,7 @@ class PopupTypesTab(ScrollFrame):
         web_row.pack()
 
         ConfigScale(web_row, label="Website Freq (%)", from_=0, to=100, variable=vars.web_chance).pack()
-
-        website_close_message = Message(web_section, text=WEBSITE_CLOSE_TEXT, justify=CENTER, width=675)
-        website_close_message.pack(fill="both")
-        # for when hiding help gets refactored?
-        # message_group.append(website_close_message)
+        ConfigMessage(web_section, WEBSITE_CLOSE_TEXT).pack()
 
         ConfigToggle(web_section, "Popup close opens web page", variable=vars.web_on_popup_close).pack()
 

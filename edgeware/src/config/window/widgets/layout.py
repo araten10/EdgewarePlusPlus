@@ -16,6 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 from tkinter import (
+    BooleanVar,
     Button,
     Checkbutton,
     Frame,
@@ -75,7 +76,7 @@ class ConfigScale(StateFrame):
         inner = StateFrame(self)
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
         Scale(inner, label=label, orient="horizontal", highlightthickness=0, variable=variable, from_=from_, to=to).pack(fill="x", expand=True)
-        Button(inner, text="Manual", command=lambda: assign(variable, simpledialog.askinteger(f"{label}", prompt=f"[{from_}-{to}]: "))).pack(
+        Button(inner, text="Manual", command=lambda: assign(variable, simpledialog.askinteger(label, prompt=f"[{from_}-{to}]: "))).pack(
             fill="x", expand=True, pady=[4, 0]
         )
 
@@ -120,6 +121,24 @@ class ConfigToggle(Checkbutton):
         self.master.columnconfigure(column, weight=1)
 
 
+class ConfigMessage(Message):
+    message_off_var: BooleanVar | None = None
+
+    def __init__(self, master: Misc, text: str) -> None:
+        super().__init__(master, text=text, width=675)
+
+    def manage_pack(self, *_) -> None:
+        if self.message_off_var.get():
+            self.pack_forget()
+        else:
+            super().pack(after=self.previous, fill="both")
+
+    def pack(self) -> None:
+        self.previous = self.master.pack_slaves()[-1]
+        self.manage_pack()
+        self.message_off_var.trace_add("write", self.manage_pack)
+
+
 class ConfigSection(Frame):
     def __init__(self, master: Misc, title: str, message: str | None = None) -> None:
         super().__init__(master, borderwidth=2, relief="raised")
@@ -128,7 +147,7 @@ class ConfigSection(Frame):
         Label(self, text=title, font=heading_font).pack()
 
         if message:
-            Message(self, text=message, width=675).pack(fill="both")
+            ConfigMessage(self, text=message).pack()
 
     def pack(self) -> None:
         super().pack(padx=8, pady=8, fill="x")

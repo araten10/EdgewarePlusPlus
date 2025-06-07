@@ -340,7 +340,7 @@ class StartTab(ScrollFrame):
             "Disable Panic Hotkey, Run on Save & Exit",
         )
 
-        Checkbutton(other_section, text="Disable Config Help Messages\n(requires save & restart)", variable=vars.message_off).pack(fill="both", expand=1)
+        Checkbutton(other_section, text="Disable Config Help Messages", variable=vars.message_off).pack(fill="both", expand=1)
 
         # Panic
 
