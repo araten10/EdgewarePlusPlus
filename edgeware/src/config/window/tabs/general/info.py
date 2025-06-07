@@ -129,7 +129,7 @@ class InfoTab(ScrollFrame):
         StatsItem(stats_row_2, "Hypnos", len(pack.hypnos))
 
         # Information
-        info_section = ConfigSection(self.viewPort, "Information")
+        info_section = ConfigSection(self.viewPort, "Information", INFO_TEXT)
         info_section.pack()
 
         description_frame = Frame(info_section, borderwidth=2, relief=GROOVE)
@@ -172,6 +172,23 @@ class InfoTab(ScrollFrame):
         version_label = Label(version_frame, text=pack.info.version)
         version_label.pack(padx=2, pady=2, side="left")
 
+        set_widget_states(
+            pack.paths.info.is_file(),
+            [
+                description_frame,
+                description_title,
+                description_label,
+                name_frame,
+                name_title,
+                name_label,
+                creator_frame,
+                creator_title,
+                creator_label,
+                version_frame,
+                version_title,
+                version_label,
+            ],
+        )
         discord_section = ConfigSection(self.viewPort, "Discord Information", DISCORD_TEXT)
         discord_section.pack()
         discord_frame = Frame(discord_section, borderwidth=2, relief=GROOVE)
