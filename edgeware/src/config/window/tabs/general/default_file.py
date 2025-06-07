@@ -28,7 +28,7 @@ from tkinter import (
     filedialog,
 )
 
-from config.window.widgets.layout import ConfigSection
+from config.window.widgets.layout import PAD, ConfigSection
 from config.window.widgets.scroll_frame import ScrollFrame
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
@@ -37,34 +37,24 @@ INTRO_TEXT = 'Changing these will change the default file Edgeware++ falls back 
 
 
 class DefaultImageFrame(Frame):
-    def __init__(
-        self,
-        master: Misc,
-        image_file: Path,
-        custom_file: Path,
-        scale: float | None,
-        filetypes: tuple[str, str],
-        current_text: str,
-        change_text: str,
-        message: str,
-    ) -> None:
-        super().__init__(master, borderwidth=5, relief=RAISED)
+    def __init__(self, master: Misc, image_file: Path, custom_file: Path, size: tuple[int, int], filetypes: tuple[str, str], title: str, message: str) -> None:
+        super().__init__(master, borderwidth=2, relief=RAISED)
 
         self.custom_file = custom_file
-        self.scale = scale
+        self.size = size
         self.filetypes = filetypes
 
-        self.pack(side="left", fill="both", padx=2, expand=1)
+        self.pack(side="left", fill="both", padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, expand=1)
 
         col_1 = Frame(self)
         col_1.pack(side="left", fill="both")
-        button = Button(col_1, text=change_text, command=self.change)
+        button = Button(col_1, text=f"Change {title}", command=self.change)
         button.pack(side="top", fill="both", padx=1)
         Message(col_1, text=message, justify=CENTER, borderwidth=5, relief=GROOVE).pack(side="top", fill="both", expand=1)
 
         col_2 = Frame(self, width=150)
         col_2.pack(side="left", fill="x", padx=(5, 0))
-        Label(col_2, text=current_text).pack(fill="both")
+        Label(col_2, text=title).pack(fill="both")
         self.photo_image = ImageTk.PhotoImage(self.resize(Image.open(image_file)))
         self.label = Label(col_2, image=self.photo_image)
         self.label.pack()
@@ -81,7 +71,7 @@ class DefaultImageFrame(Frame):
         self.label.update_idletasks()
 
     def resize(self, image: Image.Image) -> Image.Image:
-        return image.resize((int(self.winfo_screenwidth() * self.scale), int(self.winfo_screenwidth() * self.scale)), Image.NEAREST) if self.scale else image
+        return image.resize(self.size, Image.NEAREST)
 
 
 class DefaultFileTab(ScrollFrame):
@@ -97,10 +87,9 @@ class DefaultFileTab(ScrollFrame):
             row_1,
             CustomAssets.startup_splash(),
             Data.STARTUP_SPLASH,
-            0.09,
+            (200, 200),
             ("image file", ".jpg .jpeg .png .gif"),
-            "Current Default Loading Splash",
-            "Change Default Loading Splash",
+            "Default Loading Splash",
             'LOADING SPLASH:\n\nUsed in "Show Loading Flair" setting (found in "Start" tab). Packs can have custom '
             "splashes, which will appear instead of this. Accepts .jpg or .png and will be shrunk to a slightly smaller size.",
         )
@@ -108,10 +97,9 @@ class DefaultFileTab(ScrollFrame):
             row_1,
             CustomAssets.theme_demo(),
             Data.THEME_DEMO,
-            None,
+            (150, 75),
             ("image file", ".jpg .jpeg .png"),
-            "Current Theme Demo",
-            "Change Default Theme Demo",
+            "Theme Demo",
             "THEME DEMO:\n\nUsed in the \"Start\" tab, supports .jpg or .png. Must be 150x75! If you don't crop your image to that, you'll have a bad time!!",
         )
 
@@ -121,30 +109,27 @@ class DefaultFileTab(ScrollFrame):
             row_2,
             CustomAssets.icon(),
             Data.ICON,
-            0.04,
+            (100, 100),
             ("icon file", ".ico"),
             "Icon",
-            "Change Default Icon",
             "ICON:\n\nUsed in desktop shortcuts and tray icon. Only supports .ico files.",
         )
         DefaultImageFrame(
             row_2,
             CustomAssets.config_icon(),
             Data.CONFIG_ICON,
-            0.04,
+            (100, 100),
             ("icon file", ".ico"),
             "Config Icon",
-            "Change Config Icon",
             "CONFIG ICON:\n\nUsed in desktop shortcuts and the config window. Only supports .ico files.",
         )
         DefaultImageFrame(
             row_2,
             CustomAssets.panic_icon(),
             Data.PANIC_ICON,
-            0.04,
+            (100, 100),
             ("icon file", ".ico"),
             "Panic Icon",
-            "Change Panic Icon",
             "PANIC ICON:\n\nUsed in desktop shortcuts. Only supports .ico files.",
         )
 
@@ -154,11 +139,10 @@ class DefaultFileTab(ScrollFrame):
             row_3,
             CustomAssets.hypno(),
             Data.HYPNO,
-            0.08,
+            (200, 200),
             ("image file", ".jpg .jpeg .png .gif"),
-            "Current Default Spiral",
-            "Change Default Spiral",
-            'SPIRAL:\n\nUsed in "Subliminal Overlays" setting (found in "Popups" tab). Packs can have custom '
+            "Default Hypno",
+            'HYPNO:\n\nUsed in "Hypno Overlays" setting (found in "Popup Tweaks" tab). Packs can have custom '
             "Subliminals, which will appear instead of this. Accepts .jpg, .png, or .gif, but should be animated. "
             "(doesn't animate on this page to save on resources- try and aim for a small filesize on this image!)",
         )
