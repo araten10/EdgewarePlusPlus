@@ -28,6 +28,7 @@ from tkinter import (
     filedialog,
 )
 
+from config.window.widgets.layout import ConfigSection
 from config.window.widgets.scroll_frame import ScrollFrame
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
@@ -84,14 +85,13 @@ class DefaultImageFrame(Frame):
 
 
 class DefaultFileTab(ScrollFrame):
-    def __init__(self, message_group: list[Message]) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
-        intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)
-        intro_message.pack(fill="both")
-        message_group.append(intro_message)
+        default_file_section = ConfigSection(self.viewPort, "Default Files", INTRO_TEXT)
+        default_file_section.pack()
 
-        row_1 = Frame(self.viewPort)
+        row_1 = Frame(default_file_section)
         row_1.pack(fill="x")
         DefaultImageFrame(
             row_1,
@@ -115,7 +115,7 @@ class DefaultFileTab(ScrollFrame):
             "THEME DEMO:\n\nUsed in the \"Start\" tab, supports .jpg or .png. Must be 150x75! If you don't crop your image to that, you'll have a bad time!!",
         )
 
-        row_2 = Frame(self.viewPort)
+        row_2 = Frame(default_file_section)
         row_2.pack(fill="x")
         DefaultImageFrame(
             row_2,
@@ -148,7 +148,7 @@ class DefaultFileTab(ScrollFrame):
             "PANIC ICON:\n\nUsed in desktop shortcuts. Only supports .ico files.",
         )
 
-        row_3 = Frame(self.viewPort)
+        row_3 = Frame(default_file_section)
         row_3.pack(fill="x")
         DefaultImageFrame(
             row_3,

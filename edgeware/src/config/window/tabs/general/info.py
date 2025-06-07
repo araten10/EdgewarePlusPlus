@@ -20,7 +20,6 @@ from tkinter import (
     GROOVE,
     Frame,
     Label,
-    Message,
     Misc,
     font,
     ttk,
@@ -72,7 +71,7 @@ class StatsItem(Frame):
 
 
 class InfoTab(ScrollFrame):
-    def __init__(self, message_group: list[Message], pack: Pack) -> None:
+    def __init__(self, pack: Pack) -> None:
         super().__init__()
 
         title_font = font.Font(font="Default")
