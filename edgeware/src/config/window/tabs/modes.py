@@ -85,9 +85,9 @@ class BasicModesTab(ScrollFrame):
             enabled=(vars.hibernate_mode, True),
         ).pack()
 
-        hibernate_row_2 = ConfigRow(hibernate_section)
-        hibernate_row_2.pack()
-        hibernate_fix_wallpaper = ConfigToggle(hibernate_row_2, "Fix Wallpaper", variable=vars.hibernate_fix_wallpaper)
+        hibernate_row_3 = ConfigRow(hibernate_section)
+        hibernate_row_3.pack()
+        hibernate_fix_wallpaper = ConfigToggle(hibernate_row_3, "Fix Wallpaper", variable=vars.hibernate_fix_wallpaper, enabled=(vars.hibernate_mode, True))
         hibernate_fix_wallpaper.pack()
         CreateToolTip(
             hibernate_fix_wallpaper,
@@ -96,15 +96,15 @@ class BasicModesTab(ScrollFrame):
             "not currently spawning popups.",
         )
 
-        hibernate_row_3 = ConfigRow(hibernate_section)
-        hibernate_row_3.pack()
-        ConfigScale(hibernate_row_3, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200, enabled=(vars.hibernate_mode, True)).pack()
-        ConfigScale(hibernate_row_3, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400, enabled=(vars.hibernate_mode, True)).pack()
-
         hibernate_row_4 = ConfigRow(hibernate_section)
         hibernate_row_4.pack()
+        ConfigScale(hibernate_row_4, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200, enabled=(vars.hibernate_mode, True)).pack()
+        ConfigScale(hibernate_row_4, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400, enabled=(vars.hibernate_mode, True)).pack()
+
+        hibernate_row_5 = ConfigRow(hibernate_section)
+        hibernate_row_5.pack()
         ConfigScale(
-            hibernate_row_4,
+            hibernate_row_5,
             "Awaken Activity",
             vars.hibernate_activity,
             1,
@@ -112,7 +112,7 @@ class BasicModesTab(ScrollFrame):
             enabled=[(vars.hibernate_mode, True), (vars.hibernate_type, ["Original", "Glitch", "Ramp", "Chaos"])],
         ).pack()
         ConfigScale(
-            hibernate_row_4,
+            hibernate_row_5,
             "Max Activity Length (seconds)",
             vars.hibernate_activity_length,
             5,

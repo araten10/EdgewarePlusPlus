@@ -113,8 +113,10 @@ class ConfigDropdown(StateFrame):
 
 
 class ConfigToggle(Checkbutton):
-    def __init__(self, master: Misc, text: str, **kwargs) -> None:
+    def __init__(self, master: Misc, text: str, enabled: EnabledSpec | None = None, **kwargs) -> None:
         super().__init__(master, text=text, borderwidth=1, relief="groove", highlightthickness=0, **kwargs)
+        if enabled:
+            set_enabled_when(self, enabled)
 
     def pack(self) -> None:
         super().pack(padx=PAD, pady=PAD, ipadx=PAD, ipady=PAD, side="left", fill="x", expand=True)
