@@ -92,8 +92,6 @@ class ConfigWindow(Tk):
         vars = Vars(config)
         ConfigMessage.message_off_var = vars.message_off
 
-        message_group = []  # TODO: Delete
-
         local_version = default_config["versionplusplus"]
         live_version = get_live_version()
 
@@ -106,8 +104,8 @@ class ConfigWindow(Tk):
         general_notebook = ttk.Notebook(general_tab)
         general_notebook.pack(expand=1, fill="both")
         general_notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")  # startup screen, info and presets
-        general_notebook.add(InfoTab(message_group, pack), text="Pack Info")  # pack information
-        general_notebook.add(DefaultFileTab(message_group), text="Change Default Files")  # tab for changing default files
+        general_notebook.add(InfoTab(pack), text="Pack Info")  # pack information
+        general_notebook.add(DefaultFileTab(), text="Change Default Files")  # tab for changing default files
 
         annoyance_tab = ttk.Frame(notebook)
         notebook.add(annoyance_tab, text="Annoyance/Runtime")

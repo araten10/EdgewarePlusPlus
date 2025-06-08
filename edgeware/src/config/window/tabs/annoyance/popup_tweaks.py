@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import BooleanVar, Frame, Misc
+from tkinter import BooleanVar, Misc
 
 from config.vars import Vars
 from config.window.utils import config
@@ -32,7 +32,7 @@ MISC_TEXT = '•"Buttonless Closing Popups" removes the "close" button on every 
 TIMEOUT_TEXT = "After a certain time, popups will fade out and delete themselves. This is a great setting to use with Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction."
 
 
-class MonitorCheckbutton(ConfigToggle):
+class MonitorToggle(ConfigToggle):
     def __init__(self, master: Misc, monitor: Monitor) -> None:
         self.monitor = monitor
         self.var = BooleanVar(master, self.monitor.name not in config["disabledMonitors"])
@@ -50,7 +50,6 @@ class PopupTweaksTab(ScrollFrame):
         super().__init__()
 
         # Captions
-
         captions_section = ConfigSection(self.viewPort, "Captions", CAPTION_TEXT)
         captions_section.pack()
 
@@ -67,7 +66,6 @@ class PopupTweaksTab(ScrollFrame):
         hypno_row.pack()
 
         ConfigScale(hypno_row, label="Hypno Chance (%)", from_=0, to=100, variable=vars.hypno_chance).pack()
-
         ConfigScale(hypno_row, label="Hypno Opacity (%)", from_=1, to=99, variable=vars.hypno_opacity).pack()
 
         denial_row = ConfigRow(overlays_section)
@@ -76,7 +74,6 @@ class PopupTweaksTab(ScrollFrame):
         ConfigScale(denial_row, label="Denial Chance (%)", from_=0, to=100, variable=vars.denial_chance).pack()
 
         # Misc Tweaks
-
         misc_section = ConfigSection(self.viewPort, "Misc. Tweaks", MISC_TEXT)
         misc_section.pack()
 
@@ -97,7 +94,6 @@ class PopupTweaksTab(ScrollFrame):
         ConfigScale(misc_row_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
 
         # Timeout
-
         timeout_section = ConfigSection(self.viewPort, "Popup Timeout", TIMEOUT_TEXT)
         timeout_section.pack()
 
@@ -116,10 +112,10 @@ class PopupTweaksTab(ScrollFrame):
         monitors_section = ConfigSection(self.viewPort, "Monitors", MONITORS_TEXT)
         monitors_section.pack()
 
-        monitor_frame = Frame(monitors_section)
-        monitor_frame.pack(fill="x")
         for monitor in get_monitors():
-            MonitorCheckbutton(monitor_frame, monitor).pack()
+            monitor_row = ConfigRow(monitors_section)
+            monitor_row.pack()
+            MonitorToggle(monitor_row, monitor).pack()
 
         # Movement
         movement_section = ConfigSection(self.viewPort, "Popup Movement", MOVEMENT_TEXT)
@@ -129,5 +125,4 @@ class PopupTweaksTab(ScrollFrame):
         movement_chance_row.pack()
 
         ConfigScale(movement_chance_row, label="Moving Popup Chance", from_=0, to=100, variable=vars.moving_chance).pack()
-
         ConfigScale(movement_chance_row, label="Max Movespeed", from_=1, to=15, variable=vars.moving_speed).pack()

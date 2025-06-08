@@ -20,16 +20,13 @@ import logging
 from tkinter import (
     VERTICAL,
     Event,
+    Frame,
     Misc,
     ttk,
 )
 
-from config.window.utils import (
-    config,
-)
-from config.window.widgets.layout import (
-    ConfigSection,
-)
+from config.window.utils import config
+from config.window.widgets.layout import PAD, ConfigSection
 from config.window.widgets.scroll_frame import ScrollFrame
 from pack import Pack
 from ttkwidgets import CheckboxTreeview
@@ -88,11 +85,12 @@ class MoodsTab(ScrollFrame):
 
         moods_section = ConfigSection(self.viewPort, "Moods", MOOD_TEXT)
         moods_section.pack()
-        # message_group.append(moods_message)
 
-        moods_tree = MoodsTreeview(moods_section, pack, height=15, show="tree", name="mediaTree")
+        moods_frame = Frame(moods_section)
+        moods_frame.pack(padx=PAD, pady=PAD, fill="x")
+        moods_tree = MoodsTreeview(moods_frame, pack, height=15, show="tree", name="mediaTree")
         moods_tree.pack(side="left", fill="both", expand=1)
-        moods_scrollbar = ttk.Scrollbar(moods_section, orient=VERTICAL, command=moods_tree.yview)
+        moods_scrollbar = ttk.Scrollbar(moods_frame, orient=VERTICAL, command=moods_tree.yview)
         moods_scrollbar.pack(side="left", fill="y")
         moods_tree.configure(yscroll=moods_scrollbar.set)
 

@@ -34,7 +34,10 @@ from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
 from config.window.utils import all_children, request_global_panic_key, set_widget_states
 from config.window.widgets.layout import (
+    PAD,
+    ConfigRow,
     ConfigSection,
+    ConfigToggle,
 )
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
@@ -314,18 +317,17 @@ class StartTab(ScrollFrame):
         other_section = ConfigSection(self.viewPort, "General Settings")
         other_section.pack()
 
-        other_col_1 = Frame(other_section)
-        other_col_1.pack(fill="both", side="left", expand=1)
-        toggle_flair_button = Checkbutton(other_col_1, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
-        toggle_flair_button.pack(fill="x")
-        CreateToolTip(toggle_flair_button, 'Displays a brief "loading" image before Edgeware startup, which can be set per-pack by the pack creator.')
-        Checkbutton(other_col_1, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit).pack(fill="x")
+        other_row = ConfigRow(other_section)
+        other_row.pack()
 
-        other_col_2 = Frame(other_section)
-        other_col_2.pack(fill="both", side="left", expand=1)
-        Checkbutton(other_col_2, text="Create Desktop Icons", variable=vars.desktop_icons).pack(fill="x")
-        toggle_safe_mode_button = Checkbutton(other_col_2, text='Warn if "Dangerous" Settings Active', variable=vars.safe_mode, cursor="question_arrow")
-        toggle_safe_mode_button.pack(fill="x")
+        toggle_flair_button = ConfigToggle(other_row, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
+        toggle_flair_button.grid(0, 0)
+        CreateToolTip(toggle_flair_button, 'Displays a brief "loading" image before Edgeware startup, which can be set per-pack by the pack creator.')
+        ConfigToggle(other_row, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit).grid(0, 1)
+
+        ConfigToggle(other_row, text="Create Desktop Icons", variable=vars.desktop_icons).grid(1, 0)
+        toggle_safe_mode_button = ConfigToggle(other_row, text='Warn if "Dangerous" Settings Active', variable=vars.safe_mode, cursor="question_arrow")
+        toggle_safe_mode_button.grid(1, 1)
         CreateToolTip(
             toggle_safe_mode_button,
             "Asks you to confirm before saving if certain settings are enabled.\n"
@@ -340,7 +342,7 @@ class StartTab(ScrollFrame):
             "Disable Panic Hotkey, Run on Save & Exit",
         )
 
-        Checkbutton(other_section, text="Disable Config Help Messages", variable=vars.message_off).pack(fill="both", expand=1)
+        ConfigToggle(other_row, text="Disable Config Help Messages", variable=vars.message_off).grid(2, 0)
 
         # Panic
 
@@ -353,9 +355,9 @@ class StartTab(ScrollFrame):
             command=lambda: request_global_panic_key(set_global_panic_button, vars.global_panic_key),
             cursor="question_arrow",
         )
-        set_global_panic_button.pack(fill="x", side="left", expand=1)
+        set_global_panic_button.pack(padx=PAD, pady=PAD, fill="x", side="left", expand=1)
         CreateToolTip(set_global_panic_button, "This is a global key that does not require focus to activate. Press the key at any time to perform panic.")
-        Button(panic_section, text="Perform Panic", command=send_panic).pack(fill="both", side="left", expand=1)
+        Button(panic_section, text="Perform Panic", command=send_panic).pack(padx=PAD, pady=PAD, fill="both", side="left", expand=1)
 
         # Presets
 
@@ -383,8 +385,8 @@ class StartTab(ScrollFrame):
         self.preset_description_label.pack(fill="both", expand=1)
         self.set_preset_description(self.preset_var.get())
 
-        pack_preset_section = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        pack_preset_section.pack(fill="x", pady=2)
+        pack_preset_section = Frame(self.viewPort, borderwidth=2, relief=RAISED)
+        pack_preset_section.pack(padx=8, pady=8, fill="x")
 
         pack_preset_col_1 = Frame(pack_preset_section)
         pack_preset_col_1.pack(fill="both", side="left", expand=1)

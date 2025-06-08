@@ -17,28 +17,27 @@
 
 import textwrap
 from tkinter import (
-    CENTER,
     GROOVE,
-    RAISED,
     Frame,
     Label,
-    Message,
     Misc,
     font,
     ttk,
 )
 
 from config.window.utils import set_widget_states
+from config.window.widgets.layout import (
+    ConfigSection,
+    StateFrame,
+)
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
-from config.window.widgets.layout import (
-    ConfigSection,
-)
 
 MULTI_PACK_TEXT = 'NOTE: If you have multiple packs loaded, make sure to apply the pack you want using the "Switch Pack" button at the bottom of the window! This tab shows information on the currently loaded pack, so if info here isn\'t updating, you may have forgot to hit that button!'
 INFO_TEXT = 'This section requires an optional "information file" that pack creators can choose to add. If the section is greyed out but other sections on this page are working fine, chances are the pack just doesn\'t have one!'
 DISCORD_TEXT = 'These will only display on your discord if you turn the associated "Show on Discord" setting on (found in the Dangerous Settings tab).'
+
 
 def list_length(pack: Pack, attr: str) -> list:
     return len(getattr(pack.index.default, attr)) + sum([len(getattr(mood, attr)) for mood in pack.index.moods])
@@ -72,7 +71,7 @@ class StatsItem(Frame):
 
 
 class InfoTab(ScrollFrame):
-    def __init__(self, message_group: list[Message], pack: Pack) -> None:
+    def __init__(self, pack: Pack) -> None:
         super().__init__()
 
         title_font = font.Font(font="Default")
@@ -129,10 +128,10 @@ class InfoTab(ScrollFrame):
         StatsItem(stats_row_2, "Hypnos", len(pack.hypnos))
 
         # Information
-        info_section = ConfigSection(self.viewPort, "Information")
+        info_section = ConfigSection(self.viewPort, "Information", INFO_TEXT)
         info_section.pack()
 
-        description_frame = Frame(info_section, borderwidth=2, relief=GROOVE)
+        description_frame = StateFrame(info_section, borderwidth=2, relief=GROOVE)
         description_frame.pack(fill="both", side="right")
         description_title = Label(description_frame, text="Description", font="Default 10")
         description_title.pack(padx=2, pady=2, side="top")
@@ -141,10 +140,10 @@ class InfoTab(ScrollFrame):
         description_label = Label(description_frame, text=description_wrap.fill(text=pack.info.description))
         description_label.pack(padx=2, pady=2, side="top")
 
-        basic_info_frame = Frame(info_section, borderwidth=2, relief=GROOVE)
+        basic_info_frame = StateFrame(info_section, borderwidth=2, relief=GROOVE)
         basic_info_frame.pack(fill="x", side="left", expand=1)
 
-        name_frame = Frame(basic_info_frame)
+        name_frame = StateFrame(basic_info_frame)
         name_frame.pack(fill="x")
         name_title = Label(name_frame, text="Pack Name:", font="Default 10")
         name_title.pack(padx=6, pady=2, side="left")
@@ -154,7 +153,7 @@ class InfoTab(ScrollFrame):
 
         ttk.Separator(basic_info_frame, orient="horizontal").pack(fill="x")
 
-        creator_frame = Frame(basic_info_frame)
+        creator_frame = StateFrame(basic_info_frame)
         creator_frame.pack(fill="x")
         creator_title = Label(creator_frame, text="Author Name:", font="Default 10")
         creator_title.pack(padx=2, pady=2, side="left")
@@ -164,13 +163,15 @@ class InfoTab(ScrollFrame):
 
         ttk.Separator(basic_info_frame, orient="horizontal").pack(fill="x")
 
-        version_frame = Frame(basic_info_frame)
+        version_frame = StateFrame(basic_info_frame)
         version_frame.pack(fill="x")
         version_title = Label(version_frame, text="Version:", font="Default 10")
         version_title.pack(padx=18, pady=2, side="left")
         ttk.Separator(version_frame, orient="vertical").pack(fill="y", side="left")
         version_label = Label(version_frame, text=pack.info.version)
         version_label.pack(padx=2, pady=2, side="left")
+
+        set_widget_states(pack.paths.info.is_file(), [description_frame, name_frame, creator_frame, version_frame])
 
         discord_section = ConfigSection(self.viewPort, "Discord Information", DISCORD_TEXT)
         discord_section.pack()

@@ -21,7 +21,7 @@ from tkinter import (
 )
 
 from config.vars import Vars
-from config.window.widgets.layout import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
+from config.window.widgets.layout import PAD, ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 
@@ -45,17 +45,19 @@ class BasicModesTab(ScrollFrame):
         lowkey_corners = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
         lowkey_corner_string = StringVar(self, lowkey_corners[vars.lowkey_corner.get()])
         lowkey_dropdown = OptionMenu(lowkey_row, lowkey_corner_string, *lowkey_corners, command=lambda x: (vars.lowkey_corner.set(lowkey_corners.index(x))))
-        lowkey_dropdown.pack(side="left", expand=True)
+        lowkey_dropdown.pack(padx=PAD, pady=PAD, side="left", fill="x", expand=True)
         set_enabled_when(lowkey_dropdown, enabled=(vars.lowkey_mode, True))
 
         # Mitosis
         mitosis_section = ConfigSection(self.viewPort, "Mitosis Mode", MITOSIS_TEXT)
         mitosis_section.pack()
 
-        mitosis_row = ConfigRow(mitosis_section)
-        mitosis_row.pack()
-        ConfigToggle(mitosis_row, "Enable Mitosis Mode", variable=vars.mitosis_mode).pack()
-        ConfigScale(mitosis_section, "Mitosis Strength (number of popups)", vars.mitosis_strength, 2, 10, enabled=(vars.mitosis_mode, True)).pack()
+        mitosis_row_1 = ConfigRow(mitosis_section)
+        mitosis_row_1.pack()
+        ConfigToggle(mitosis_row_1, "Enable Mitosis Mode", variable=vars.mitosis_mode).pack()
+        mitosis_row_2 = ConfigRow(mitosis_section)
+        mitosis_row_2.pack()
+        ConfigScale(mitosis_row_2, "Mitosis Strength (number of popups)", vars.mitosis_strength, 2, 10, enabled=(vars.mitosis_mode, True)).pack()
 
         # Hibernate
         hibernate_section = ConfigSection(self.viewPort, "Hibernate Mode", HIBERNATE_TEXT)
@@ -64,8 +66,11 @@ class BasicModesTab(ScrollFrame):
         hibernate_row_1 = ConfigRow(hibernate_section)
         hibernate_row_1.pack()
         ConfigToggle(hibernate_row_1, "Enable Hibernate Mode", variable=vars.hibernate_mode).pack()
+
+        hibernate_row_2 = ConfigRow(hibernate_section)
+        hibernate_row_2.pack()
         ConfigDropdown(
-            hibernate_row_1,
+            hibernate_row_2,
             vars.hibernate_type,
             {
                 "Original": "Creates an immediate quantity of popups on wakeup based on the awaken activity.",
@@ -77,6 +82,7 @@ class BasicModesTab(ScrollFrame):
             },
             width=42,
             wrap=295,
+            enabled=(vars.hibernate_mode, True),
         ).pack()
 
         hibernate_row_2 = ConfigRow(hibernate_section)
