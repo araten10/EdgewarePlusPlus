@@ -23,6 +23,7 @@ from tkinter import (
 from config.vars import Vars
 from config.window.widgets.layout import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
 from config.window.widgets.scroll_frame import ScrollFrame
+from config.window.widgets.tooltip import CreateToolTip
 
 LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with popup timeout or high delay as popups will stack on top of eachother."
 HIBERNATE_TEXT = "Runs Edgeware++ covertly, without any popups. Instead, after a certain amount of time a barrage of popups will all spawn at once depending on the hibernate mode set.\n\nMinimum/maximum sleep durations determine the range of the payload timer- hibernate mode will activate sometime between these two values.\nAwaken activity determines the intensity of the hibernate mode payload, essentially the amount of popups spawned when it triggers.\nMax activity length is how long the payload lasts, if using a hibernate type that has a duration."
@@ -80,13 +81,24 @@ class BasicModesTab(ScrollFrame):
 
         hibernate_row_2 = ConfigRow(hibernate_section)
         hibernate_row_2.pack()
-        ConfigScale(hibernate_row_2, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200, enabled=(vars.hibernate_mode, True)).pack()
-        ConfigScale(hibernate_row_2, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400, enabled=(vars.hibernate_mode, True)).pack()
+        hibernate_fix_wallpaper = ConfigToggle(hibernate_row_2, "Fix Wallpaper", variable=vars.hibernate_fix_wallpaper)
+        hibernate_fix_wallpaper.pack()
+        CreateToolTip(
+            hibernate_fix_wallpaper,
+            "When enabled, this setting reverts your wallpaper back to your panic wallpaper automatically once the hibernate payload has "
+            "finished running and you've closed every popup. This ensures your computer looks as 'normal' as possible when hibernate mode is "
+            "not currently spawning popups.",
+        )
 
         hibernate_row_3 = ConfigRow(hibernate_section)
         hibernate_row_3.pack()
+        ConfigScale(hibernate_row_3, "Minimum Sleep Duration (seconds)", vars.hibernate_delay_min, 1, 7200, enabled=(vars.hibernate_mode, True)).pack()
+        ConfigScale(hibernate_row_3, "Maximum Sleep Duration (seconds)", vars.hibernate_delay_max, 2, 14400, enabled=(vars.hibernate_mode, True)).pack()
+
+        hibernate_row_4 = ConfigRow(hibernate_section)
+        hibernate_row_4.pack()
         ConfigScale(
-            hibernate_row_3,
+            hibernate_row_4,
             "Awaken Activity",
             vars.hibernate_activity,
             1,
@@ -94,7 +106,7 @@ class BasicModesTab(ScrollFrame):
             enabled=[(vars.hibernate_mode, True), (vars.hibernate_type, ["Original", "Glitch", "Ramp", "Chaos"])],
         ).pack()
         ConfigScale(
-            hibernate_row_3,
+            hibernate_row_4,
             "Max Activity Length (seconds)",
             vars.hibernate_activity_length,
             5,
