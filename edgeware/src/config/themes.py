@@ -42,7 +42,7 @@ class Theme:
     # Fonts
     font: str = "TkDefaultFont"
     font_size: int = 9
-    heading_font: str = "TkDefaultFont"
+    title_font: str = "TkDefaultFont"
 
 
 THEMES = {
@@ -93,7 +93,7 @@ THEMES = {
         #
         font="Consolas",
         font_size=8,
-        heading_font="Consolas",
+        title_font="Consolas",
     ),
     "Ransom": Theme(
         fg="white",
@@ -111,7 +111,7 @@ THEMES = {
         check_select="#5c0d0d",
         #
         font="Arial",
-        heading_font="Arial Bold",
+        title_font="Arial Bold",
     ),
     "Goth": Theme(
         fg="MediumPurple1",
@@ -129,7 +129,7 @@ THEMES = {
         check_select="#1b1d23",
         #
         font="Constantia",
-        heading_font="Constantia",
+        title_font="Constantia",
     ),
     "Bimbo": Theme(
         fg="deep pink",
@@ -147,13 +147,15 @@ THEMES = {
         check_select="light pink",
         #
         font="Constantia",
-        heading_font="Constantia",
+        title_font="Constantia",
     ),
 }
 
 
 def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
-    from config.window.utils import all_children, config  # Circular import
+    # Circular imports
+    from config.window.utils import all_children, config
+    from config.window.widgets.layout import ConfigTitle
 
     theme = THEMES["Original" if config["themeNoConfig"] is True else name]
 
@@ -163,6 +165,8 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
                 widget.configure(bg=theme.bg)
             case Button():
                 widget.configure(bg=theme.bg, fg=theme.button_fg, activebackground=theme.active_bg, activeforeground=theme.fg)
+            case ConfigTitle():
+                widget.configure(fg=theme.fg, bg=theme.bg, font=(theme.title_font, 15))
             case Label():
                 if not hasattr(widget, "ignore_theme_fg"):
                     widget.configure(fg=theme.fg)
@@ -201,9 +205,6 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
 
     default_font = font.nametofont("TkDefaultFont")
     default_font.configure(family=theme.font, size=theme.font_size)
-
-    heading_font = font.nametofont("TkHeadingFont")
-    heading_font.configure(family=theme.heading_font, size=15, weight="normal")
 
     for widget in all_children(root):
         try:

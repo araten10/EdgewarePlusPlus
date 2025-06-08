@@ -27,7 +27,6 @@ from tkinter import (
     OptionMenu,
     Scale,
     StringVar,
-    font,
     simpledialog,
 )
 
@@ -143,13 +142,15 @@ class ConfigMessage(Message):
         self.message_off_var.trace_add("write", self.manage_pack)
 
 
+class ConfigTitle(Label):
+    def __init__(self, master: Misc, text: str) -> None:
+        super().__init__(master, text=text, font=("TkDefaultFont", 15))
+
+
 class ConfigSection(Frame):
     def __init__(self, master: Misc, title: str, message: str | None = None) -> None:
         super().__init__(master, borderwidth=2, relief="raised")
-
-        heading_font = font.nametofont("TkHeadingFont")
-        Label(self, text=title, font=heading_font).pack()
-
+        ConfigTitle(self, title).pack()
         if message:
             ConfigMessage(self, text=message).pack()
 
