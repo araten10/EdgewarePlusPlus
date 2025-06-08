@@ -21,7 +21,7 @@ from tkinter import (
 )
 
 from config.vars import Vars
-from config.window.widgets.layout import ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
+from config.window.widgets.layout import PAD, ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle, set_enabled_when
 from config.window.widgets.scroll_frame import ScrollFrame
 
 LOWKEY_TEXT = "Forces popups to spawn in the corner of your screen, rather than randomly all over. Best used with popup timeout or high delay as popups will stack on top of eachother."
@@ -44,7 +44,7 @@ class BasicModesTab(ScrollFrame):
         lowkey_corners = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
         lowkey_corner_string = StringVar(self, lowkey_corners[vars.lowkey_corner.get()])
         lowkey_dropdown = OptionMenu(lowkey_row, lowkey_corner_string, *lowkey_corners, command=lambda x: (vars.lowkey_corner.set(lowkey_corners.index(x))))
-        lowkey_dropdown.pack(side="left", expand=True)
+        lowkey_dropdown.pack(padx=PAD, pady=PAD, side="left", fill="x", expand=True)
         set_enabled_when(lowkey_dropdown, enabled=(vars.lowkey_mode, True))
 
         # Mitosis
