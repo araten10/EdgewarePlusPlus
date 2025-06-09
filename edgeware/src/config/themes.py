@@ -40,9 +40,9 @@ class Theme:
     check_select: str
 
     # Fonts
-    font: str = "TkDefaultFont"
+    font: str = "Segoe UI"
     font_size: int = 9
-    title_font: str = "TkDefaultFont"
+    title_font: str = "Segoe UI"
 
 
 THEMES = {
