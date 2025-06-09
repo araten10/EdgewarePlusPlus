@@ -175,7 +175,7 @@ class InfoTab(ScrollFrame):
 
         discord_section = ConfigSection(self.viewPort, "Discord Information", DISCORD_TEXT)
         discord_section.pack()
-        discord_frame = Frame(discord_section, borderwidth=2, relief=GROOVE)
+        discord_frame = StateFrame(discord_section, borderwidth=2, relief=GROOVE)
         discord_frame.pack(fill="x", pady=2)
         discord_status_title = Label(discord_frame, text="Custom Discord Status:", font="Default 10")
         discord_status_title.pack(padx=2, pady=2, side="left")
@@ -197,4 +197,4 @@ class InfoTab(ScrollFrame):
             "packs that tap in to the same image IDs.",
         )
 
-        set_widget_states(pack.paths.discord.is_file(), [discord_frame, discord_status_title, discord_status_label, discord_image_title, discord_image_label])
+        set_widget_states(pack.paths.discord.is_file(), [discord_frame])
