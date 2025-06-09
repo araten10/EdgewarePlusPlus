@@ -157,7 +157,7 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
     from config.window.utils import all_children, config
     from config.window.widgets.layout import ConfigTitle
 
-    theme = THEMES["Original" if config["themeNoConfig"] is True else name]
+    theme = THEMES["Original" if config["themeNoConfig"] else name]
 
     for widget in all_children(root):
         match widget:
