@@ -208,7 +208,8 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
 
     for widget in all_children(root):
         try:
-            if widget["state"] == "disabled":
+            from tkinterweb import TkinterWeb
+            if not isinstance(widget, TkinterWeb) and widget["state"] == "disabled":
                 widget.configure(bg=theme.disabled_bg)
         except TclError:
             pass
