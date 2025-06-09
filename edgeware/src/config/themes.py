@@ -18,7 +18,7 @@
 from dataclasses import dataclass
 from tkinter import Button, Canvas, Checkbutton, Frame, Label, Message, Misc, OptionMenu, Scale, Scrollbar, TclError, Text, font, ttk
 
-from tkinterweb import HtmlFrame
+from tkinterweb import HtmlFrame, TkinterWeb
 
 
 @dataclass
@@ -208,7 +208,7 @@ def theme_change(name: str, root: Misc, style: ttk.Style | None = None) -> None:
 
     for widget in all_children(root):
         try:
-            from tkinterweb import TkinterWeb
+            # Without this isinstance check, opening the tutorial window silently crashes the config on Windows
             if not isinstance(widget, TkinterWeb) and widget["state"] == "disabled":
                 widget.configure(bg=theme.disabled_bg)
         except TclError:
