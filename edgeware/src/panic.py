@@ -47,16 +47,21 @@ PANIC_MESSAGE = "panic"
 
 
 def panic(root: Tk, settings: Settings, state: State, condition: bool = True, disable: bool = True) -> None:
-    if (disable and settings.panic_disabled) or not condition:
-        return
-
-    if settings.panic_lockout and state.panic_lockout_active:
-        password = simpledialog.askstring("Panic", "Enter Panic Password")
-        if password != settings.panic_lockout_password:
+    def do_panic() -> None:
+        if (disable and settings.panic_disabled) or not condition:
             return
 
-    set_wallpaper(CustomAssets.panic_wallpaper())
-    root.destroy()
+        if settings.panic_lockout and state.panic_lockout_active:
+            password = simpledialog.askstring("Panic", "Enter Panic Password")
+            if password != settings.panic_lockout_password:
+                return
+
+        set_wallpaper(CustomAssets.panic_wallpaper())
+        root.destroy()
+
+    # Make sure panic code is executed in the main thread, otherwise
+    # simpledialog will not work from most panic sources
+    root.after(0, do_panic)
 
 
 def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
@@ -67,8 +72,7 @@ def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
                     with listener.accept() as connection:
                         message = connection.recv()
                         if message == PANIC_MESSAGE:
-                            # Make Tkinter call panic from the main thread
-                            root.after(0, lambda: panic(root, settings, state, disable=False))
+                            panic(root, settings, state, disable=False)
         except OSError as e:
             logging.warning(f"Failed to start panic listener, some panic sources may not be functional. Reason: {e}")
 
