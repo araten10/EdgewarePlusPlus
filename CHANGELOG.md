@@ -65,6 +65,8 @@ Major reorganization effort in the config window. This includes:
 >
 >-Use Filename for Captions Toggle, Moods have largely overwritten this. Technically this could be useful with compatibility in old packs that used it, but upon implementing the new index pack json the feature was unimplemented. Even if this is re-added later to help out older packs display their captions, it likely wouldn't be a toggle and instead just be automatic.
 
+•*KNOWN ISSUE: When you're using a non-default theme and have "ignore config" turned on, the "theme preview" window won't display the currently selected theme*
+
 **Version 16.1**
 
 Deployed this version ASAP to ping everybody so they can patch Edgeware++ to remove some critical bugs. Some other behind-the-scenes work is in progress, but only some of it is visible right now.
