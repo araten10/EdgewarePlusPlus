@@ -277,7 +277,7 @@ def set_widget_states(state: bool, widgets: list[Widget], demo: bool = False) ->
 
     # TODO: Use the same Theme objects as the main program
     if theme == "Original" or (config["themeNoConfig"] and not demo):
-        set_widget_states_with_colors(state, widgets, "#d9d9d9", "gray35")
+        set_widget_states_with_colors(state, widgets, "#f0f0f0", "gray35")
     else:
         if theme == "Dark":
             set_widget_states_with_colors(state, widgets, "#282c34", "gray65")
