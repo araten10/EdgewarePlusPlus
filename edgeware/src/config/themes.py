@@ -42,16 +42,16 @@ class Theme:
     # Fonts
     font: str = "Segoe UI"
     font_size: int = 9
-    title_font: str = "Segoe UI"
+    title_font: str = "Arial"
 
 
 THEMES = {
     "Original": Theme(
         fg="black",
-        bg="#d9d9d9",
-        active_bg="#ececec",
+        bg="#f0f0f0",
+        active_bg="#f0f0f0",
         disabled_bg="gray35",
-        trough="#b3b3b3",
+        trough="#c8c8c8",
         #
         transparent_bg="#000001",
         tab_bg="#d9d9d9",
@@ -59,7 +59,7 @@ THEMES = {
         button_fg="black",
         text_fg="black",
         text_bg="white",
-        check_select="#ffffff",
+        check_select="white",
     ),
     "Dark": Theme(
         fg="ghost white",
