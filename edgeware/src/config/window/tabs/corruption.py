@@ -24,7 +24,6 @@ from tkinter import (
     OptionMenu,
     ttk,
 )
-from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.preset import apply_preset
@@ -32,13 +31,7 @@ from config.window.utils import (
     clear_launches,
     set_widget_states,
 )
-from config.window.widgets.layout import (
-    ConfigDropdown,
-    ConfigRow,
-    ConfigScale,
-    ConfigSection,
-    ConfigToggle,
-)
+from config.window.widgets.layout import PAD, ConfigDropdown, ConfigRow, ConfigScale, ConfigSection, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
@@ -51,7 +44,7 @@ PATH_TEXT = "Here is a chart that shows a basic view of the path that the curren
 
 
 class CorruptionModeTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, pack: Pack) -> None:
+    def __init__(self, vars: Vars, pack: Pack) -> None:
         super().__init__()
 
         # Start
@@ -69,7 +62,7 @@ class CorruptionModeTab(ScrollFrame):
             ' folder. Over time moods will "unlock", leading to new things you haven\'t seen before the longer you use'
             ' Edgeware. For more information, check out the "Tutorial" tab.',
         )
-        start_group = [corruption_toggle]
+        set_widget_states(os.path.isfile(pack.paths.corruption), [corruption_toggle])
         full_permission_toggle = ConfigToggle(corruption_start_row, "Full Permissions Mode", variable=vars.corruption_full, cursor="question_arrow")
         full_permission_toggle.pack()
         CreateToolTip(
@@ -110,10 +103,10 @@ class CorruptionModeTab(ScrollFrame):
         ).pack()
 
         transition_frame = Frame(select_trigger_row, borderwidth=1, relief="groove")
-        transition_frame.pack(pady=4, ipady=4, side="left", expand=True)
+        transition_frame.pack(padx=PAD, pady=PAD, side="left", expand=True, fill="x")
 
         fade_frame = Frame(transition_frame)
-        fade_frame.pack(side="top", fill="both", pady=1)
+        fade_frame.pack(padx=PAD, pady=PAD, side="top", fill="both")
 
         fade_selection_frame = Frame(fade_frame)
         fade_selection_frame.pack(side="left", fill="x")
@@ -216,4 +209,3 @@ class CorruptionModeTab(ScrollFrame):
                 fade_image.configure(image=fade_abrupt_image)
 
         fade_helper(vars.corruption_fade.get())
-        set_widget_states(os.path.isfile(pack.paths.corruption), start_group)

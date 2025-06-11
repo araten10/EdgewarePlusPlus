@@ -18,23 +18,15 @@
 import json
 import logging
 from tkinter import (
-    CENTER,
-    GROOVE,
-    RAISED,
     VERTICAL,
     Event,
     Frame,
-    Label,
-    Message,
     Misc,
     ttk,
 )
-from tkinter.font import Font
 
-from config.vars import Vars
-from config.window.utils import (
-    config,
-)
+from config.window.utils import config
+from config.window.widgets.layout import PAD, ConfigSection
 from config.window.widgets.scroll_frame import ScrollFrame
 from pack import Pack
 from ttkwidgets import CheckboxTreeview
@@ -88,18 +80,14 @@ class MoodsTreeview(CheckboxTreeview):
 
 
 class MoodsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], pack: Pack) -> None:
+    def __init__(self, pack: Pack) -> None:
         super().__init__()
 
-        Label(self.viewPort, text="Moods", font=title_font, relief=GROOVE).pack(pady=2)
+        moods_section = ConfigSection(self.viewPort, "Moods", MOOD_TEXT)
+        moods_section.pack()
 
-        moods_message = Message(self.viewPort, text=MOOD_TEXT, justify=CENTER, width=675)
-        moods_message.pack(fill="both")
-        message_group.append(moods_message)
-
-        moods_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        moods_frame.pack(fill="x")
-
+        moods_frame = Frame(moods_section)
+        moods_frame.pack(padx=PAD, pady=PAD, fill="x")
         moods_tree = MoodsTreeview(moods_frame, pack, height=15, show="tree", name="mediaTree")
         moods_tree.pack(side="left", fill="both", expand=1)
         moods_scrollbar = ttk.Scrollbar(moods_frame, orient=VERTICAL, command=moods_tree.yview)

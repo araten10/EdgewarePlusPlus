@@ -142,13 +142,15 @@ class Popup(Toplevel):
 
     def try_denial_text(self) -> None:
         if self.denial:
-            label = Label(self, text=self.pack.random_denial(), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
+            label = Label(
+                self, text=self.pack.random_denial(), wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg, font=(self.theme.font, self.theme.font_size)
+            )
             label.place(relx=0.5, rely=0.5, anchor="c")
 
     def try_caption(self) -> None:
         caption = self.pack.random_caption(self.media)
         if self.settings.captions_in_popups and caption:
-            label = Label(self, text=caption, wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
+            label = Label(self, text=caption, wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg, font=(self.theme.font, self.theme.font_size))
             label.place(x=5, y=5)
 
     def try_corruption_dev(self) -> None:
@@ -159,9 +161,11 @@ class Popup(Toplevel):
                 if mood in level.moods:
                     levels.append(self.pack.corruption_levels.index(level) + 1)
 
-            label_mood = Label(self, text=f"Popup mood: {mood}", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
-            label_level = Label(self, text=f"Valid Levels: {levels}", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
-            label_current_level = Label(self, text=f"Current Level: {self.state.corruption_level}", fg=self.theme.fg, bg=self.theme.bg, font=self.theme.font)
+            label_mood = Label(self, text=f"Popup mood: {mood}", fg=self.theme.fg, bg=self.theme.bg, font=(self.theme.font, self.theme.font_size))
+            label_level = Label(self, text=f"Valid Levels: {levels}", fg=self.theme.fg, bg=self.theme.bg, font=(self.theme.font, self.theme.font_size))
+            label_current_level = Label(
+                self, text=f"Current Level: {self.state.corruption_level}", fg=self.theme.fg, bg=self.theme.bg, font=(self.theme.font, self.theme.font_size)
+            )
 
             label_mood.place(x=5, y=(self.height // 2))
             label_level.place(x=5, y=(self.height // 2 + label_mood.winfo_reqheight() + 2))
@@ -179,7 +183,7 @@ class Popup(Toplevel):
                 bg=self.theme.bg,
                 activeforeground=self.theme.fg,
                 activebackground=self.theme.bg,
-                font=self.theme.font,
+                font=(self.theme.font, self.theme.font_size),
             )
             button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 

@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-from tkinter import HORIZONTAL, SINGLE, Button, Checkbutton, Entry, Frame, Label, Listbox, Message, Scale, filedialog, ttk
-from tkinter.font import Font
+from tkinter import HORIZONTAL, SINGLE, Button, Checkbutton, Entry, Frame, Label, Listbox, Scale, filedialog, ttk
 
 from config.vars import Vars
 from config.window.utils import (
@@ -53,7 +52,7 @@ def assign_path(path_entry: Entry, vars: Vars) -> None:
 
 
 class DangerousSettingsTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message]) -> None:
+    def __init__(self, vars: Vars) -> None:
         super().__init__()
 
         # Panic lockout

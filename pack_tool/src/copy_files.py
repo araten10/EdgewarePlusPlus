@@ -25,7 +25,7 @@ from PIL import Image
 from pyffmpeg import FFmpeg
 
 
-def copy_media(source: Source, build: Build, compimg: bool, compvid: bool, rename: bool) -> dict[str, [str]]:
+def copy_media(source: Source, build: Build, compress_images: bool, compress_videos: bool, rename: bool) -> dict[str, [str]]:
     media = {}
 
     if not source.media.is_dir():
@@ -59,12 +59,12 @@ def copy_media(source: Source, build: Build, compimg: bool, compvid: bool, renam
                 if filetype.is_image(file_path):
                     location = build.image
                     # animated gifs compress down to a single frame, so they are skipped until we find a sane solution
-                    if compimg and not filetype.image_match(file_path).mime == "image/gif":
+                    if compress_images and not filetype.image_match(file_path).mime == "image/gif":
                         copy = compress_image
                 elif filetype.is_video(file_path):
                     location = build.video
                     # Can remove video type check once we support more filetypes for compression
-                    if compvid and filetype.video_match(file_path).mime == "video/mp4":
+                    if compress_videos and filetype.video_match(file_path).mime == "video/mp4":
                         copy = compress_video
                 elif filetype.is_audio(file_path):
                     location = build.audio

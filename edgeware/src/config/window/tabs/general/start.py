@@ -18,24 +18,27 @@
 import textwrap
 import webbrowser
 from tkinter import (
-    CENTER,
     GROOVE,
     RAISED,
     Button,
     Checkbutton,
     Frame,
     Label,
-    Message,
     OptionMenu,
     Scale,
     StringVar,
     Text,
 )
-from tkinter.font import Font
 
 from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
-from config.window.utils import BUTTON_FACE, all_children, request_global_panic_key, set_widget_states
+from config.window.utils import all_children, request_global_panic_key, set_widget_states
+from config.window.widgets.layout import (
+    PAD,
+    ConfigRow,
+    ConfigSection,
+    ConfigToggle,
+)
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from pack import Pack
@@ -44,38 +47,38 @@ from paths import CustomAssets
 from PIL import ImageTk
 
 INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
+THEME_TEXT = "You'll have to save and refresh the config window to get the theme to show up properly, but this tab will change to the currently selected theme so you can see what it looks like! None of the sliders or buttons in this section do anything, so feel free to play around with them to test it out!"
 PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program and revert your desktop background back to the "panic background" set in the wallpaper sub-tab. (found in the annoyance tab)\n\nThere are a few ways to initiate panic, but one of the easiest to access is setting a hotkey here. You should also make sure to change your panic wallpaper to your currently used wallpaper before using Edgeware!'
 PRESET_TEXT = "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
 
 
 class StartTab(ScrollFrame):
-    def __init__(self, vars: Vars, title_font: Font, message_group: list[Message], local_version: str, live_version: str, pack: Pack) -> None:
+    def __init__(self, vars: Vars, local_version: str, live_version: str, pack: Pack) -> None:
         super().__init__()
 
-        intro_message = Message(self.viewPort, text=INTRO_TEXT, justify=CENTER, width=675)
-        intro_message.pack(fill="both")
-        message_group.append(intro_message)
-
         # Information
-        Label(self.viewPort, text="Information", font=title_font, relief=GROOVE).pack(pady=2)
 
-        information_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        information_frame.pack(fill="x")
+        information_section = ConfigSection(self.viewPort, "Information", INTRO_TEXT)
+        information_section.pack()
 
-        github_frame = Frame(information_frame)
+        github_frame = Frame(information_section)
         github_frame.pack(fill="both", side="left", expand=1)
         github_url = "https://github.com/araten10/EdgewarePlusPlus"
         download_url = "https://github.com/araten10/EdgewarePlusPlus/archive/refs/heads/main.zip"
         Button(github_frame, text="Open Edgeware++ Github", command=lambda: webbrowser.open(github_url)).pack(fill="both", expand=1)
         Button(github_frame, text="Download Newest Update", command=lambda: webbrowser.open(download_url)).pack(fill="both", expand=1)
 
-        version_frame = Frame(information_frame)
+        version_frame = Frame(information_section)
         version_frame.pack(fill="both", side="left", expand=1)
         Label(version_frame, text=f"Edgeware++ Local Version:\n{local_version}").pack(fill="x")
-        Label(version_frame, text=f"Edgeware++ Github Version:\n{live_version}", bg=(BUTTON_FACE if (local_version == live_version) else "red")).pack(fill="x")
+        github_label = Label(version_frame, text=f"Edgeware++ Github Version:\n{live_version}")
+        if local_version != live_version:
+            github_label.configure(bg="red")
+            github_label.ignore_theme_bg = True
+            github_label.ignore_theme_fg = True
+        github_label.pack(fill="x")
 
         # Theme
-        Label(self.viewPort, text="Theme", font=title_font, relief=GROOVE).pack(pady=2)
 
         # TODO: Use Theme object
         def theme_helper(theme: str) -> None:
@@ -240,10 +243,10 @@ class StartTab(ScrollFrame):
 
         theme_types = ["Original", "Dark", "The One", "Ransom", "Goth", "Bimbo"]
 
-        theme_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        theme_frame.pack(fill="x")
+        theme_section = ConfigSection(self.viewPort, "Theme", THEME_TEXT)
+        theme_section.pack()
 
-        theme_selection_frame = Frame(theme_frame)
+        theme_selection_frame = Frame(theme_section)
         theme_selection_frame.pack(fill="both", side="left")
         theme_dropdown = OptionMenu(theme_selection_frame, vars.theme, *theme_types, command=lambda key: theme_helper(key))
         theme_dropdown.configure(width=12)
@@ -252,7 +255,7 @@ class StartTab(ScrollFrame):
         ignore_config_toggle.pack(fill="both", side="top")
         CreateToolTip(ignore_config_toggle, "When enabled, the selected theme does not apply to the config window.")
 
-        theme_demo_frame = Frame(theme_frame)
+        theme_demo_frame = Frame(theme_section)
         theme_demo_frame.pack(fill="both", side="left", expand=1)
 
         theme_demo_popup_frame = Frame(theme_demo_frame)
@@ -275,10 +278,10 @@ class StartTab(ScrollFrame):
         theme_demo_prompt_frame.pack(fill="both", side="left", padx=1)
         theme_demo_prompt_title = Label(theme_demo_prompt_frame, text="Prompt")
         theme_demo_prompt_title.pack()
-        theme_demo_prompt_body = Frame(theme_demo_prompt_frame, borderwidth=2, relief=GROOVE, width=150, height=75)
+        theme_demo_prompt_body = Frame(theme_demo_prompt_frame, borderwidth=2, relief=GROOVE, width=100, height=75)
         theme_demo_prompt_body.pack(fill="both", expand=1)
         Label(theme_demo_prompt_body, text="Do as I say~").pack(fill="both", expand=1)
-        Text(theme_demo_prompt_body, width=18, height=1).pack(fill="both")
+        Text(theme_demo_prompt_body, width=16, height=1).pack(fill="both")
         Button(theme_demo_prompt_body, text="Sure!").pack(expand=1)
 
         theme_demo_config_frame = Frame(theme_demo_frame)
@@ -310,23 +313,21 @@ class StartTab(ScrollFrame):
         theme_helper(vars.theme.get())
 
         # Other
-        Label(self.viewPort, text="Other", font=title_font, relief=GROOVE).pack(pady=2)
 
-        other_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        other_frame.pack(fill="x")
+        other_section = ConfigSection(self.viewPort, "General Settings")
+        other_section.pack()
 
-        other_col_1 = Frame(other_frame)
-        other_col_1.pack(fill="both", side="left", expand=1)
-        toggle_flair_button = Checkbutton(other_col_1, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
-        toggle_flair_button.pack(fill="x")
+        other_row = ConfigRow(other_section)
+        other_row.pack()
+
+        toggle_flair_button = ConfigToggle(other_row, text="Show Loading Flair", variable=vars.startup_splash, cursor="question_arrow")
+        toggle_flair_button.grid(0, 0)
         CreateToolTip(toggle_flair_button, 'Displays a brief "loading" image before Edgeware startup, which can be set per-pack by the pack creator.')
-        Checkbutton(other_col_1, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit).pack(fill="x")
+        ConfigToggle(other_row, text="Run Edgeware on Save & Exit", variable=vars.run_on_save_quit).grid(0, 1)
 
-        other_col_2 = Frame(other_frame)
-        other_col_2.pack(fill="both", side="left", expand=1)
-        Checkbutton(other_col_2, text="Create Desktop Icons", variable=vars.desktop_icons).pack(fill="x")
-        toggle_safe_mode_button = Checkbutton(other_col_2, text='Warn if "Dangerous" Settings Active', variable=vars.safe_mode, cursor="question_arrow")
-        toggle_safe_mode_button.pack(fill="x")
+        ConfigToggle(other_row, text="Create Desktop Icons", variable=vars.desktop_icons).grid(1, 0)
+        toggle_safe_mode_button = ConfigToggle(other_row, text='Warn if "Dangerous" Settings Active', variable=vars.safe_mode, cursor="question_arrow")
+        toggle_safe_mode_button.grid(1, 1)
         CreateToolTip(
             toggle_safe_mode_button,
             "Asks you to confirm before saving if certain settings are enabled.\n"
@@ -341,42 +342,32 @@ class StartTab(ScrollFrame):
             "Disable Panic Hotkey, Run on Save & Exit",
         )
 
-        Checkbutton(other_frame, text="Disable Config Help Messages\n(requires save & restart)", variable=vars.message_off).pack(fill="both", expand=1)
+        ConfigToggle(other_row, text="Disable Config Help Messages", variable=vars.message_off).grid(2, 0)
 
         # Panic
-        Label(self.viewPort, text="Panic Settings", font=title_font, relief=GROOVE).pack(pady=2)
 
-        panic_message = Message(self.viewPort, text=PANIC_TEXT, justify=CENTER, width=675)
-        panic_message.pack(fill="both")
-        message_group.append(panic_message)
-
-        panic_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        panic_frame.pack(fill="x")
+        panic_section = ConfigSection(self.viewPort, "Panic Settings", PANIC_TEXT)
+        panic_section.pack()
 
         set_global_panic_button = Button(
-            panic_frame,
+            panic_section,
             text=f"Set Global\nPanic Key\n<{vars.global_panic_key.get()}>",
             command=lambda: request_global_panic_key(set_global_panic_button, vars.global_panic_key),
             cursor="question_arrow",
         )
-        set_global_panic_button.pack(fill="x", side="left", expand=1)
+        set_global_panic_button.pack(padx=PAD, pady=PAD, fill="x", side="left", expand=1)
         CreateToolTip(set_global_panic_button, "This is a global key that does not require focus to activate. Press the key at any time to perform panic.")
-        Button(panic_frame, text="Perform Panic", command=send_panic).pack(fill="both", side="left", expand=1)
+        Button(panic_section, text="Perform Panic", command=send_panic).pack(padx=PAD, pady=PAD, fill="both", side="left", expand=1)
 
         # Presets
-        Label(self.viewPort, text="Config Presets", font=title_font, relief=GROOVE).pack(pady=2)
 
-        preset_message = Message(self.viewPort, text=PRESET_TEXT, justify=CENTER, width=675)
-        preset_message.pack(fill="both")
-        message_group.append(preset_message)
-
-        preset_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        preset_frame.pack(fill="both", pady=2)
+        preset_section = ConfigSection(self.viewPort, "Config Presets", PRESET_TEXT)
+        preset_section.pack()
 
         preset_list = list_presets()
         self.preset_var = StringVar(self.viewPort, preset_list.pop(0))  # Without pop the first item appears twice in the list
 
-        preset_selection_frame = Frame(preset_frame)
+        preset_selection_frame = Frame(preset_section)
         preset_selection_frame.pack(side="left", fill="x", padx=6)
         self.preset_dropdown = OptionMenu(preset_selection_frame, self.preset_var, self.preset_var.get(), *preset_list, command=self.set_preset_description)
         self.preset_dropdown.pack(fill="x", expand=1)
@@ -385,7 +376,7 @@ class StartTab(ScrollFrame):
         Label(preset_selection_frame).pack(fill="both", expand=1)
         Button(preset_selection_frame, text="Save Preset", command=self.save_preset_and_update).pack(fill="both", expand=1)
 
-        preset_description_frame = Frame(preset_frame, borderwidth=2, relief=GROOVE)
+        preset_description_frame = Frame(preset_section, borderwidth=2, relief=GROOVE)
         preset_description_frame.pack(side="right", fill="both", expand=1)
         self.preset_name_label = Label(preset_description_frame, text="Default Description", font="Default 15")
         self.preset_name_label.pack(fill="y", pady=4)
@@ -394,10 +385,10 @@ class StartTab(ScrollFrame):
         self.preset_description_label.pack(fill="both", expand=1)
         self.set_preset_description(self.preset_var.get())
 
-        pack_preset_frame = Frame(self.viewPort, borderwidth=5, relief=RAISED)
-        pack_preset_frame.pack(fill="x", pady=2)
+        pack_preset_section = Frame(self.viewPort, borderwidth=2, relief=RAISED)
+        pack_preset_section.pack(padx=8, pady=8, fill="x")
 
-        pack_preset_col_1 = Frame(pack_preset_frame)
+        pack_preset_col_1 = Frame(pack_preset_section)
         pack_preset_col_1.pack(fill="both", side="left", expand=1)
         Label(pack_preset_col_1, text=f"Number of suggested config settings: {len(pack.config)}").pack(fill="both", side="top")
         pack_preset_danger_toggle = Checkbutton(pack_preset_col_1, text="Toggle on warning failsafes", variable=vars.preset_danger, cursor="question_arrow")
@@ -411,7 +402,7 @@ class StartTab(ScrollFrame):
             'setting tooltip in the "General" tab.',
         )
 
-        pack_preset_col_2 = Frame(pack_preset_frame)
+        pack_preset_col_2 = Frame(pack_preset_section)
         pack_preset_col_2.pack(fill="both", side="left", expand=1)
         load_pack_preset_button = Button(
             pack_preset_col_2,

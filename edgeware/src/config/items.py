@@ -67,56 +67,57 @@ CONFIG_ITEMS = {
     "safe_mode": Item("safeMode", BOOLEAN, BooleanVar, None, block=True),
     "message_off": Item("messageOff", BOOLEAN, BooleanVar, None, block=True),
     "global_panic_key": Item("globalPanicButton", STRING, StringVar, str, block=True),  # while disabling panic could be used for danger-chasing fetishists, changing the hotkey serves little purpose
-    "panic_key": Item("panicButton", STRING, StringVar, str, block=True),
     "preset_danger": Item("presetsDanger", BOOLEAN, BooleanVar, None, block=True),
 
-    # Booru Downloader
-    "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),
-    "booru_tags": Item("tagList", STRING, None, lambda value: value.replace(">", " ")),
-    "min_score": Item("booruMinScore", Schema(int), IntVar, int),
-
-    # Popups
+    # Popup Types
     "delay": Item("delay", NONNEGATIVE, IntVar, int, safe_range=(2000, None)),
-    "image_chance": Item("popupMod", PERCENTAGE, IntVar, int),
-    "web_chance": Item("webMod", PERCENTAGE, IntVar, int),
-    "prompt_chance": Item("promptMod", PERCENTAGE, IntVar, int),
-    "prompt_max_mistakes": Item("promptMistakes", NONNEGATIVE, IntVar, int),
-    "opacity": Item("lkScaling", PERCENTAGE, IntVar, to_float),
-    "timeout_enabled": Item("timeoutPopups", BOOLEAN, BooleanVar, bool),
-    "timeout": Item("popupTimeout", NONNEGATIVE, IntVar, s_to_ms),
-    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # opens up web popup on popup close, this one could be cut from this list as it's not listed as dangerous in config but could lead to bad performance
-    "buttonless": Item("buttonless", BOOLEAN, BooleanVar, bool),
     "single_mode": Item("singleMode", BOOLEAN, BooleanVar, bool),
-    "hypno_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
-    "hypno_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
-    "denial_chance": Item("denialChance", PERCENTAGE, IntVar, int),
-    "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
-
-    # Audio/Video
+    "image_chance": Item("popupMod", PERCENTAGE, IntVar, int),
     "audio_chance": Item("audioMod", PERCENTAGE, IntVar, int),
     "max_audio": Item("maxAudio", NONNEGATIVE, IntVar, int),
     "audio_volume": Item("audioVolume", PERCENTAGE, IntVar, to_float),
     "video_chance": Item("vidMod", PERCENTAGE, IntVar, int),
-    "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),
     "max_video": Item("maxVideos", NONNEGATIVE, IntVar, int),
-    "video_hardware_acceleration": Item("videoHardwareAcceleration", BOOLEAN, BooleanVar, bool),
-
-    # Captions
-    "captions_in_popups": Item("showCaptions", BOOLEAN, BooleanVar, bool),
-    "multi_click_popups": Item("multiClick", BOOLEAN, BooleanVar, bool),
+    "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),
+    "web_chance": Item("webMod", PERCENTAGE, IntVar, int),
+    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # could be cut from dangers as it's not listed as dangerous in config but could lead to bad performance
+    "prompt_chance": Item("promptMod", PERCENTAGE, IntVar, int),
+    "prompt_max_mistakes": Item("promptMistakes", NONNEGATIVE, IntVar, int),
     "subliminal_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
-    "subliminal_opacity": Item("capPopOpacity", PERCENTAGE, IntVar, to_float),
     "subliminal_timeout": Item("capPopTimer", NONNEGATIVE, IntVar, int),
+    "subliminal_opacity": Item("capPopOpacity", PERCENTAGE, IntVar, to_float),
     "notification_chance": Item("notificationChance", PERCENTAGE, IntVar, int),
     "notification_image_chance": Item("notificationImageChance", PERCENTAGE, IntVar, int),
 
+    # Popup Tweaks
+    "captions_in_popups": Item("showCaptions", BOOLEAN, BooleanVar, bool),
+    "hypno_chance": Item("subliminalsChance", PERCENTAGE, IntVar, int),
+    "hypno_opacity": Item("subliminalsAlpha", PERCENTAGE, IntVar, to_float),
+    "denial_chance": Item("denialChance", PERCENTAGE, IntVar, int),
+    "buttonless": Item("buttonless", BOOLEAN, BooleanVar, bool),
+    "multi_click_popups": Item("multiClick", BOOLEAN, BooleanVar, bool),
+    "opacity": Item("lkScaling", PERCENTAGE, IntVar, to_float),
+    "timeout_enabled": Item("timeoutPopups", BOOLEAN, BooleanVar, bool),
+    "timeout": Item("popupTimeout", NONNEGATIVE, IntVar, s_to_ms),
+    "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
+    "moving_chance": Item("movingChance", PERCENTAGE, IntVar, int),
+    "moving_speed": Item("movingSpeed", NONNEGATIVE, IntVar, int),
+
     # Wallpaper
-    "wallpapers": Item("wallpaperDat", STRING, None, lambda value: list(ast.literal_eval(value).values())),
     "rotate_wallpaper": Item("rotateWallpaper", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "wallpapers": Item("wallpaperDat", STRING, None, lambda value: list(ast.literal_eval(value).values())),
     "wallpaper_timer": Item("wallpaperTimer", NONNEGATIVE, IntVar, s_to_ms),
     "wallpaper_variance": Item("wallpaperVariance", NONNEGATIVE, IntVar, s_to_ms),
 
-    # Dangerous Settings
+    # Booru
+    "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),
+    "booru_tags": Item("tagList", STRING, None, lambda value: value.replace(">", " ")),
+    # "min_score": Item("booruMinScore", Schema(int), IntVar, int),  # TODO: Unimplemented
+
+    # Dangerous
+    "panic_lockout": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "panic_lockout_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
+    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
     "drive_avoid_list": Item("avoidList", STRING, None, lambda value: value.split(">"), block=True),
     "fill_drive": Item("fill", BOOLEAN, BooleanVar, bool, danger=True),
     "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: value * 10, danger=True),
@@ -127,27 +128,18 @@ CONFIG_ITEMS = {
     "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None, block=True),
     "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
 
-    # Basic Modes
+    # Modes
     "lowkey_mode": Item("lkToggle", BOOLEAN, BooleanVar, bool),
     "lowkey_corner": Item("lkCorner", Schema(Union(int, Range(min=0, max=4))), IntVar, int),
-    "moving_chance": Item("movingChance", PERCENTAGE, IntVar, int),
-    "moving_speed": Item("movingSpeed", NONNEGATIVE, IntVar, int),
-
-    # Dangerous Modes
-    "panic_lockout": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
-    "panic_lockout_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
     "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption may not work
     "mitosis_strength": Item("mitosisStrength", NONNEGATIVE, IntVar, int),
-
-    # Hibernate
     "hibernate_mode": Item("hibernateMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "hibernate_fix_wallpaper": Item("fixWallpaper", BOOLEAN, BooleanVar, bool),
     "hibernate_type": Item("hibernateType", Schema(Union("Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos")), StringVar, str),
     "hibernate_delay_min": Item("hibernateMin", NONNEGATIVE, IntVar, s_to_ms),
     "hibernate_delay_max": Item("hibernateMax", NONNEGATIVE, IntVar, s_to_ms, safe_range=(10, None)),
     "hibernate_activity": Item("wakeupActivity", NONNEGATIVE, IntVar, int, safe_range=(0, 35)),
     "hibernate_activity_length": Item("hibernateLength", NONNEGATIVE, IntVar, s_to_ms),
+    "hibernate_fix_wallpaper": Item("fixWallpaper", BOOLEAN, BooleanVar, bool),
 
     # Corruption
     "corruption_mode": Item("corruptionMode", BOOLEAN, BooleanVar, bool, block=True),  # if you're turning off corruption mode with corruption just make it the final level lmao
@@ -164,8 +156,10 @@ CONFIG_ITEMS = {
 
     # Troubleshooting
     "toggle_hibernate_skip": Item("toggleHibSkip", BOOLEAN, BooleanVar, bool, block=True),
-    "toggle_internet": Item("toggleInternet", BOOLEAN, BooleanVar, None, block=True),
     "toggle_mood_set": Item("toggleMoodSet", BOOLEAN, BooleanVar, None, block=True),
+    "toggle_internet": Item("toggleInternet", BOOLEAN, BooleanVar, None, block=True),
     "mpv_subprocess": Item("mpvSubprocess", BOOLEAN, BooleanVar, bool, block=True),
+    "video_hardware_acceleration": Item("videoHardwareAcceleration", BOOLEAN, BooleanVar, bool),
+    "panic_key": Item("panicButton", STRING, StringVar, str, block=True),
 }
 # fmt: on

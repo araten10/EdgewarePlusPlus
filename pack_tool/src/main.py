@@ -17,12 +17,12 @@ import argparse
 import logging
 import shutil
 import sys
-from copy import copy_icon, copy_loading_splash, copy_media, copy_subliminals, copy_wallpapers
 
 import yaml
-from legacy.write import write_captions, write_media, write_prompt, write_web
+from copy_files import copy_icon, copy_loading_splash, copy_media, copy_subliminals, copy_wallpapers
+from legacy.write_files import write_captions, write_media, write_prompt, write_web
 from paths import DEFAULT_PACK, Build, Source
-from write import write_corruption, write_discord, write_index, write_info, write_legacy
+from write_files import write_corruption, write_discord, write_index, write_info, write_legacy
 
 
 def new_pack(source: Source) -> None:
@@ -40,7 +40,7 @@ def new_pack(source: Source) -> None:
 def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
     build.root.mkdir(parents=True, exist_ok=True)
 
-    media = copy_media(source, build, args.compimg, args.compvid, args.rename)
+    media = copy_media(source, build, args.compress_images, args.compress_videos, args.rename)
     copy_subliminals(source, build)
     copy_wallpapers(source, build)
     copy_icon(source, build)
@@ -72,9 +72,9 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", default="build", help="output directory name")
     parser.add_argument("-n", "--new", action="store_true", help="create a new pack template and exit")
     parser.add_argument("-s", "--skip-legacy", action="store_true", help="don't generate fallback legacy JSON files")
-    parser.add_argument("-v", "--compvid", action="store_true", help="compresses video files using FFmpeg")
-    parser.add_argument("-i", "--compimg", action="store_true", help="compresses image files using Pillow")
-    parser.add_argument("-r", "--rename", action="store_true", help="appends mood name to files")
+    parser.add_argument("-v", "--compress-videos", action="store_true", help="compresses video files using FFmpeg")
+    parser.add_argument("-i", "--compress-images", action="store_true", help="compresses image files using Pillow")
+    parser.add_argument("-r", "--rename", action="store_true", help="appends mood name to files for caption compatibility with the original Edgeware")
     args = parser.parse_args()
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)

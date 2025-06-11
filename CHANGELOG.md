@@ -9,15 +9,39 @@
 
 **Since last version...**
 
-•*Removed the toggle setting for max audio and max videos, as it was pretty much pointless (you can just set the maximum to 50 etc if you want these uncapped)*
+**Version 17**
 
-•*Added a "Audio Volume" setting*
+The long awaited Config Redesign is here! This is another huge update, marked by the fact that it's taken forever to go through and do... but we're pretty happy with it so far! There might be some controversial changes here and there, you might have to update your setting presets as some settings were removed due to redundancy. Hopefully everyone is decently happy with it, and at the end of the day our end goal was making it a lot easier to understand for new users and not as immediately overwhelming.
+
+•*Relicensed Edgeware++ to GPLv3, for most users this won't mean anything, but it's meant to ensure that all future and modified versions of Edgeware++ must remain free/libre and open source*
+
+•*Due to gallery-dl licensing incompatibilities (it was technically never compatible even before this relicense) the booru downloader has once again been reworked*
+>Technically it should work, but right now it exclusively downloads from Gelbooru and is also very slow/jank. We may fix it again in the future, but it's also something that is lower priority
+
+•*Added an "Audio Volume" setting*
+
+•*Fixed changing wallpapers on the Cinnamon desktop environment on Linux*
+
+•*Config values are now validated to try to catch any invalid values from manual editing*
+
+•*Videos should be fixed on Linux setups where the "x11" gpu-context is not available in mpv*
+
+•*Fixed tray panic not getting disabled in corruption full permission mode when the config value is changed*
+
+•*Panic lockout (formerly timer mode) panic should work consistently again*
+
+•*Minor updates/bugfixes to themes*
+
+•*Enabling and disabling config help messages no longer requires save & quit*
+
+•*Hopefully fixed an issue with the mpv video player download being blocked by antiviruses, if running the Edgeware++ setup bat no longer works for you, make sure you let us know on the issues page!*
 
 Major reorganization effort in the config window. This includes:
 
-•*Reworked several config window tabs into a less compact (but easier to understand) format. The end goal is to make each tab less overwhelming to new users, utilizing the scroll bars now implemented into Edgeware++.*
+•*Reworked almost every config window tab into a less compact (but easier to understand) format. The end goal is to make each tab less overwhelming to new users, utilizing the scroll bars now implemented into Edgeware++.*
 
-•*Renamed "Subliminals" (the gif overlay) to "Hypno". Because lets be real, what else are you using it for... and with the new subliminal popup type, the naming was confusing. I still encourage people to make a gif that subliminally flashes horny text at you, but I also haven't seen that in a pack yet*
+•*Renamed "Subliminals" (the gif overlay) to "Hypno".*
+>Because let's be real, what else are you using it for... and with the new subliminal popup type, the naming was confusing. I still encourage people to make a gif that subliminally flashes horny text at you, but I also haven't seen that in a pack yet*
 
 •*Condensed "Basic Modes", "Dangerous Modes", "Hibernate", and "Corruption" tabs into "Modes" and "Corruption" tabs*
 
@@ -28,10 +52,17 @@ Major reorganization effort in the config window. This includes:
 
 •*Moved "moving popups" settings to the "Popup" tab, since it wasn't really a mode in the first place*
 
+•*Moved "Booru Downloader" to "Annoyance/Runtime"*
+
 •*Removed several settings, most of which were redundant and only served to confuse the user or add to visual clutter.*
 >Full list is as follows:
+>
 >-Toggles for Hypno (renamed from Subliminals) and Denial, as these were entirely pointless as we can just set the minimum chance to 0% instead of 1%
+>
+>-Toggles for Max Audio/Max Videos, if you want these to be uncapped you can set the cap to absurdly high anyways
+>
 >-Random Direction Toggle for Moving Popups, not only do we believe that these moving popups choosing a random direction upon spawning should be the default setting, but also the feature wasn't even implemented properly and toggling it did nothing (oops?)
+>
 >-Use Filename for Captions Toggle, Moods have largely overwritten this. Technically this could be useful with compatibility in old packs that used it, but upon implementing the new index pack json the feature was unimplemented. Even if this is re-added later to help out older packs display their captions, it likely wouldn't be a toggle and instead just be automatic.
 
 **Version 16.1**
