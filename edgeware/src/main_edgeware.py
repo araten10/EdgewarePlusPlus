@@ -93,13 +93,13 @@ if __name__ == "__main__":
 
     # TODO: Use a dict?
     targets = [
-        RollTarget(lambda: ImagePopup(root, settings, pack, state), settings.image_chance if not settings.mitosis_mode else 0),
-        RollTarget(lambda: VideoPopup(root, settings, pack, state), settings.video_chance if not settings.mitosis_mode else 0),
-        RollTarget(lambda: SubliminalPopup(settings, pack), settings.subliminal_chance),
-        RollTarget(lambda: Prompt(settings, pack, state), settings.prompt_chance),
-        RollTarget(lambda: play_audio(settings, pack), settings.audio_chance),
-        RollTarget(lambda: open_web(pack), settings.web_chance),
-        RollTarget(lambda: display_notification(settings, pack), settings.notification_chance),
+        RollTarget(lambda: ImagePopup(root, settings, pack, state), lambda: settings.image_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: VideoPopup(root, settings, pack, state), lambda: settings.video_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: SubliminalPopup(settings, pack), lambda: settings.subliminal_chance),
+        RollTarget(lambda: Prompt(settings, pack, state), lambda: settings.prompt_chance),
+        RollTarget(lambda: play_audio(settings, pack), lambda: settings.audio_chance),
+        RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
+        RollTarget(lambda: display_notification(settings, pack), lambda: settings.notification_chance),
     ]
 
     def start_main() -> None:
