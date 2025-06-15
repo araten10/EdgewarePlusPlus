@@ -80,11 +80,15 @@ class VideoPlayer(Label):
             )
 
             if overlay:
-
                 def send_overlay() -> None:
-                    bytes_io = io.BytesIO()
-                    overlay.save(bytes_io, format="PNG")
-                    self.process.communicate(input=bytes_io.getvalue())
+                    try: 
+                        if self.process.stdin:
+                            bytes_io = io.BytesIO()
+                            overlay.save(bytes_io, format="PNG")
+                            self.process.stdin.write(bytes_io.getvalue())
+                            self.process.stdin.flush()
+                    except Exception as e:
+                        logging.warning(f"Failed to send overlay: {e}")
 
                 Thread(target=send_overlay).start()
 
