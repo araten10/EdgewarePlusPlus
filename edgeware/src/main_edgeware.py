@@ -36,6 +36,7 @@ from tkinter import Tk
 
 import pygame
 import utils
+import pyglet
 from config import first_launch_configure
 from config.settings import Settings
 from features.corruption import corruption_danger_check, handle_corruption

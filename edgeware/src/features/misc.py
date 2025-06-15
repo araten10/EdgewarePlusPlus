@@ -25,6 +25,7 @@ from tkinter import Tk
 
 import os_utils
 import pystray
+import pyglet
 from config.settings import Settings
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
@@ -32,23 +33,114 @@ from pack import Pack
 from panic import panic
 from paths import CustomAssets, Process
 from PIL import Image
-from pygame import mixer
 from pynput import keyboard
 from pypresence import Presence
 from roll import roll
 from state import State
 
+# Global list to keep active players alive
+_active_players: list[pyglet.media.Player] = []
+
+# Ticker control
+_ticker_thread: Thread | None = None
+_ticker_running = False
+
+def _start_ticker():
+    """Spawn a background thread to drive pyglet.clock.tick() while there's audio."""
+    global _ticker_thread, _ticker_running
+    if _ticker_running:
+        return
+
+    _ticker_running = True
+
+    def run():
+        global _ticker_running
+        while _active_players:
+            pyglet.clock.tick()
+            time.sleep(0.016)  # ~60 FPS for clock updates
+        _ticker_running = False
+
+    _ticker_thread = Thread(target=run, daemon=True)
+    _ticker_thread.start()
 
 def play_audio(settings: Settings, pack: Pack) -> None:
-    # Pygame will not stop additional sounds from being played when the max is
-    # reached, so we need to check if there are empty channels
+    # Clean up finished players
+    _active_players[:] = [p for p in _active_players if p.playing]
+    # Enforce max_audio limit
+    if len(_active_players) >= settings.max_audio:
+        return
+
     audio = pack.random_audio()
-    if audio and mixer.find_channel():
-        # TODO POTENTIAL SETTINGS: Fade in and out, separating music from sounds
-        # https://www.pygame.org/docs/ref/mixer.html#pygame.mixer.Sound
-        sound = mixer.Sound(str(audio))
-        sound.set_volume(settings.audio_volume)
-        sound.play()
+    
+    if not audio:
+        return
+
+    path = str(audio)
+    # Load in streaming mode to avoid loading entire file into RAM
+    src = pyglet.media.load(path, streaming=True)
+    player = pyglet.media.Player()
+    player.volume = settings.audio_volume
+    player.queue(src)
+    player.play()
+
+    # Remember this player
+    _active_players.append(player)
+
+    # Start fade-in and schedule fade-out
+    fade_in(player, duration=1.0)
+    schedule_fade_out(player, duration=1.0)
+
+    # Kick off the pyglet ticker if it's not running yet
+    _start_ticker()
+
+def fade_in(player: pyglet.media.Player, duration: float):
+    """Gradually raise volume from 0 to the original level over `duration` seconds."""
+    target = getattr(player, "_volume_target", player.volume)
+    player._volume_target = target
+    player.volume = 0.0
+    steps = int(duration * 60)
+    delta = target / steps
+
+    def step(dt):
+        new_v = player.volume + delta
+        if new_v >= target:
+            player.volume = target
+            pyglet.clock.unschedule(step)
+        else:
+            player.volume = new_v
+
+    pyglet.clock.schedule_interval(step, 1/60)
+
+def schedule_fade_out(player: pyglet.media.Player, duration: float):
+    """Arrange for fade-out to start `duration` seconds before playback ends."""
+    def setup(dt):
+        length = player.source.duration or 0
+        delay = max(0.0, length - duration)
+        pyglet.clock.schedule_once(lambda dt: fade_out(player, duration), delay)
+        pyglet.clock.unschedule(setup)
+
+    pyglet.clock.schedule_once(setup, 0.1)
+
+def fade_out(player: pyglet.media.Player, duration: float):
+    """Smoothly lower volume to 0 over `duration` seconds, then pause the player."""
+    start_v = player.volume
+    steps = int(duration * 60)
+    delta = start_v / steps
+
+    def step(dt):
+        new_v = player.volume - delta
+        if new_v <= 0:
+            player.volume = 0
+            player.pause()
+            pyglet.clock.unschedule(step)
+            try:
+                _active_players.remove(player)
+            except ValueError:
+                pass
+        else:
+            player.volume = new_v
+
+    pyglet.clock.schedule_interval(step, 1/60)
 
 
 def open_web(pack: Pack) -> None:
