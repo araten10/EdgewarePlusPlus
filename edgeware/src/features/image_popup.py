@@ -45,7 +45,7 @@ class ImagePopup(Popup):
                 result = booru.resolve(asyncio.run(gel.search_image(query=self.settings.booru_tags, limit=1)))
                 data = requests.get(result[0], stream=True)
                 image = Image.open(data.raw)
-            except KeyError:
+            except Exception:
                 logging.error(f'No results for tags "{self.settings.booru_tags}" on Gelbooru')
                 image = Image.open(self.media)
         else:
