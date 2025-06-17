@@ -74,8 +74,6 @@ def play_audio(root: Tk, settings: Settings, pack: Pack) -> None:
     fade_in(root, player, fade_in_duration)
     schedule_fade_out(root, player, fade_out_duration)
 
-    # Kick off the pyglet ticker if it's not running yet
-
 def fade_in(root: Tk, player: pyglet.media.Player, fade_duration: float):
     """Gradually raise volume from 0 to the original level over `fade_duration` seconds."""
     target = getattr(player, '_volume_target', player.volume)
