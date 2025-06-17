@@ -40,8 +40,8 @@ from state import State
 
 # Global list to keep active players alive
 _active_players: list[pyglet.media.Player] = []
-# Run our update ticks once in the `tickrate` milliseconds
-# This number is also responsible for the smoothness of our fade_in and fade_out functions
+# Run our update ticks(fades) once in the `tickrate` milliseconds
+# This number is responsible for the smoothness of our fade_in and fade_out functions
 tickrate = 16
 tickrate_in_seconds = tickrate / 1000
 
