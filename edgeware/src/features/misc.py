@@ -46,22 +46,22 @@ _ticker_running = False
 tickrate = 16
 tickrate_in_seconds = 16 / 1000
 
-def _start_ticker(root: Tk):
-    """Spawn a background thread to drive pyglet.clock.tick() while there's audio."""
-    global _ticker_running
-    if _ticker_running:
-        return
-    _ticker_running = True
+# def _start_ticker(root: Tk):
+#     """Spawn a background thread to drive pyglet.clock.tick() while there's audio."""
+#     global _ticker_running
+#     if _ticker_running:
+#         return
+#     _ticker_running = True
 
-    def tick():
-        global _ticker_running
-        if _active_players:
-            pyglet.clock.tick()
-            root.after(tickrate, tick)  # ~60 FPS for clock updates
-        else:
-            _ticker_running = False
+#     def tick():
+#         global _ticker_running
+#         if _active_players:
+#             pyglet.clock.tick()
+#             root.after(tickrate, tick)  # ~60 FPS for clock updates
+#         else:
+#             _ticker_running = False
 
-    root.after(0, tick)
+#     root.after(0, tick)
 
 def play_audio(root: Tk, settings: Settings, pack: Pack) -> None:
     # Clean up finished players
@@ -93,7 +93,7 @@ def play_audio(root: Tk, settings: Settings, pack: Pack) -> None:
     schedule_fade_out(root, player, fade_out_duration)
 
     # Kick off the pyglet ticker if it's not running yet
-    _start_ticker(root)
+    # _start_ticker(root)
 
 def fade_in(root: Tk, player: pyglet.media.Player, fade_duration: float):
     """Gradually raise volume from 0 to the original level over `fade_duration` seconds."""
