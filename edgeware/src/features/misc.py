@@ -43,7 +43,7 @@ _active_players: list[pyglet.media.Player] = []
 # Run our update ticks once in the `tickrate` milliseconds
 # This number is also responsible for the smoothness of our fade_in and fade_out functions
 tickrate = 16
-tickrate_in_seconds = 16 / 1000
+tickrate_in_seconds = tickrate / 1000
 
 def play_audio(root: Tk, settings: Settings, pack: Pack) -> None:
     # Clean up finished players
@@ -97,7 +97,7 @@ def schedule_fade_out(root: Tk, player: pyglet.media.Player, fade_duration: floa
     """Arrange for fade-out to start `duration` seconds before playback ends."""
     def setup():
         length_ms = int((player.source.duration or 0) * 1000)
-        delay = max(0, length_ms - fade_duration * 1000)
+        delay = length_ms - fade_duration * 1000
         root.after(delay, lambda: fade_out(root, player, fade_duration))
 
     root.after(100, setup)
@@ -119,7 +119,7 @@ def fade_out(root: Tk, player: pyglet.media.Player, fade_duration: float):
                 pass
         else:
             player.volume = new_v
-            root.after(16, lambda: step(count+1))
+            root.after(tickrate, lambda: step(count+1))
 
     root.after(0, step)
 
