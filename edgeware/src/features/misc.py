@@ -40,28 +40,10 @@ from state import State
 
 # Global list to keep active players alive
 _active_players: list[pyglet.media.Player] = []
-_ticker_running = False
 # Run our update ticks once in the `tickrate` milliseconds
 # This number is also responsible for the smoothness of our fade_in and fade_out functions
 tickrate = 16
 tickrate_in_seconds = 16 / 1000
-
-# def _start_ticker(root: Tk):
-#     """Spawn a background thread to drive pyglet.clock.tick() while there's audio."""
-#     global _ticker_running
-#     if _ticker_running:
-#         return
-#     _ticker_running = True
-
-#     def tick():
-#         global _ticker_running
-#         if _active_players:
-#             pyglet.clock.tick()
-#             root.after(tickrate, tick)  # ~60 FPS for clock updates
-#         else:
-#             _ticker_running = False
-
-#     root.after(0, tick)
 
 def play_audio(root: Tk, settings: Settings, pack: Pack) -> None:
     # Clean up finished players
@@ -93,7 +75,6 @@ def play_audio(root: Tk, settings: Settings, pack: Pack) -> None:
     schedule_fade_out(root, player, fade_out_duration)
 
     # Kick off the pyglet ticker if it's not running yet
-    # _start_ticker(root)
 
 def fade_in(root: Tk, player: pyglet.media.Player, fade_duration: float):
     """Gradually raise volume from 0 to the original level over `fade_duration` seconds."""
