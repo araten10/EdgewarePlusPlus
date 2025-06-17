@@ -97,7 +97,7 @@ if __name__ == "__main__":
         RollTarget(lambda: VideoPopup(root, settings, pack, state), lambda: settings.video_chance if not settings.mitosis_mode else 0),
         RollTarget(lambda: SubliminalPopup(settings, pack), lambda: settings.subliminal_chance),
         RollTarget(lambda: Prompt(settings, pack, state), lambda: settings.prompt_chance),
-        RollTarget(lambda: play_audio(settings, pack), lambda: settings.audio_chance),
+        RollTarget(lambda: play_audio(root, settings, pack), lambda: settings.audio_chance),
         RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
         RollTarget(lambda: display_notification(settings, pack), lambda: settings.notification_chance),
     ]
