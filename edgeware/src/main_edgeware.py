@@ -34,7 +34,6 @@ if __name__ == "__main__":
 from threading import Thread
 from tkinter import Tk
 
-import pygame
 import utils
 from config import first_launch_configure
 from config.settings import Settings
@@ -80,15 +79,8 @@ if __name__ == "__main__":
     settings = Settings()
     pack = Pack(settings.pack_path)
     state = State()
-    pygame.init()
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
-
-    # if sound is laggy or strange try changing buffer size (doc: https://www.pygame.org/docs/ref/mixer.html)
-    # TODO: check if pygame.mixer.quit() is preferable to use in panic? seems fine without it
-    pygame.mixer.init()
-    pygame.mixer.set_num_channels(settings.max_audio)
-
     corruption_danger_check(settings, pack)
 
     # TODO: Use a dict?
@@ -103,11 +95,11 @@ if __name__ == "__main__":
     ]
 
     def start_main() -> None:
-        Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
+        Thread(target=lambda: replace_images(settings, pack), daemon=True).start()  # Thread for performance reasons
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
         make_desktop_icons(settings)
         handle_corruption(root, settings, pack, state)
-        handle_discord(root, settings, pack)
+        handle_discord(settings, pack)
         handle_panic_lockout(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
         handle_keyboard(root, settings, state)

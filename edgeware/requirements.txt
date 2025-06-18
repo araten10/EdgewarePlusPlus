@@ -4,7 +4,7 @@ filetype
 get-video-properties
 mpv
 pillow
-pygame
+pyglet
 pynput
 pypresence
 pystray
@@ -16,4 +16,3 @@ tkinter-tooltip
 tkinterweb
 ttkwidgets
 voluptuous
-pyglet

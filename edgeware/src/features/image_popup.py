@@ -34,7 +34,7 @@ class ImagePopup(Popup):
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         self.media = pack.random_image()
         self.hypno = roll(settings.hypno_chance)
-        if not self.should_init(settings, state):
+        if not self.should_init():
             return
         super().__init__(root, settings, pack, state)
 
@@ -80,7 +80,7 @@ class ImagePopup(Popup):
 
         self.init_finish()
 
-    def should_init(self, settings: Settings, state: State) -> bool:
+    def should_init(self) -> bool:
         return self.media
 
     def close(self) -> None:
