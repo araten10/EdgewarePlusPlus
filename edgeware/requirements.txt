@@ -16,3 +16,4 @@ tkinter-tooltip
 tkinterweb
 ttkwidgets
 voluptuous
+pyglet
