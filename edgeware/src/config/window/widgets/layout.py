@@ -27,6 +27,7 @@ from tkinter import (
     OptionMenu,
     Scale,
     StringVar,
+    DoubleVar,
     simpledialog,
 )
 
@@ -75,6 +76,23 @@ class ConfigScale(StateFrame):
         inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
         Scale(inner, label=label, orient="horizontal", highlightthickness=0, variable=variable, from_=from_, to=to).pack(fill="x", expand=True)
         Button(inner, text="Manual", command=lambda: assign(variable, simpledialog.askinteger(label, prompt=f"[{from_}-{to}]: "))).pack(
+            fill="x", expand=True, pady=[4, 0]
+        )
+
+        if enabled:
+            set_enabled_when(self, enabled)
+
+    def pack(self) -> None:
+        super().pack(padx=PAD, pady=PAD, side="left", expand=True, fill="x")
+
+class ConfigFloatScale(StateFrame):
+    def __init__(self, master: Misc, label: str, variable: DoubleVar, from_: float, to: float, resolution: float, enabled: EnabledSpec | None = None) -> None:
+        super().__init__(master, borderwidth=1, relief="groove")
+
+        inner = StateFrame(self)
+        inner.pack(padx=PAD, pady=PAD, fill="both", expand=True)
+        Scale(inner, label=label, orient="horizontal", highlightthickness=0, variable=variable, from_=from_, to=to, resolution=resolution).pack(fill="x", expand=True)
+        Button(inner, text="Manual", command=lambda: assign(variable, simpledialog.askfloat(label, prompt=f"[{from_}-{to}]: "))).pack(
             fill="x", expand=True, pady=[4, 0]
         )
 

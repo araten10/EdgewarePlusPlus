@@ -89,5 +89,8 @@
   "videoHardwareAcceleration": 1,
   "disabledMonitors": [],
   "mpvSubprocess": 1,
-  "audioVolume": 100
+  "audioVolume": 100,
+  "sextoyImage": 0,
+  "initfaceAddress": "ws://localhost:12345",
+  "sextoys": {}
 }

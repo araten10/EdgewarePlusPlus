@@ -45,6 +45,7 @@ from config.window.tabs.annoyance.moods import MoodsTab
 from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
 from config.window.tabs.annoyance.popup_types import PopupTypesTab
 from config.window.tabs.annoyance.wallpaper import WallpaperTab
+from config.window.tabs.annoyance.sextoys import SexToysTab
 from config.window.tabs.corruption import CorruptionModeTab
 from config.window.tabs.general.default_file import DefaultFileTab
 from config.window.tabs.general.info import InfoTab
@@ -117,6 +118,7 @@ class ConfigWindow(Tk):
         annoyance_notebook.add(MoodsTab(pack), text="Moods")  # tab for mood settings
         annoyance_notebook.add(BooruTab(vars), text="Booru")  # tab for booru downloader
         annoyance_notebook.add(DangerousSettingsTab(vars), text="Dangerous")  # tab for potentially dangerous settings
+        annoyance_notebook.add(SexToysTab(vars), text="Sex Toys") # tab for sextoys settings(Initface connection and etc.)
 
         notebook.add(BasicModesTab(vars), text="Modes")  # tab for general modes
         notebook.add(CorruptionModeTab(vars, pack), text="Corruption")  # tab for corruption mode

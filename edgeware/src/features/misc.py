@@ -29,6 +29,8 @@ import pyglet
 from config.settings import Settings
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
+from features.vibration_mixin import VibrationMixin
+from features.sextoy import Sextoy
 from pack import Pack
 from panic import panic
 from paths import CustomAssets, Process
@@ -130,10 +132,14 @@ def open_web(pack: Pack) -> None:
         webbrowser.open(web)
 
 
-def display_notification(settings: Settings, pack: Pack) -> None:
+def display_notification(settings: Settings, pack: Pack, sextoy: Sextoy) -> None:
     notification = pack.random_notification()
     if not notification:
         return
+
+    # Создаем экземпляр VibrationMixin для вибрации
+    vibrator = VibrationMixin()
+    vibrator.trigger_vibration("display_notification", getattr(settings, 'sextoys', {}), sextoy)
 
     image = pack.random_image()
     notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(pack.icon))
