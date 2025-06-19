@@ -36,6 +36,8 @@ from PIL import ImageFilter
 from roll import roll
 from state import State
 
+import win32gui
+import win32con
 
 class Popup(Toplevel):
     media: Path  # Defined by subclasses
@@ -134,6 +136,15 @@ class Popup(Toplevel):
 
         self.state.popup_geometries[self.popup_id] = (self.width, self.height, self.x, self.y)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
+
+        try:
+            popup_styles = win32gui.GetWindowLong(win32gui.FindWindow(None, self.root.title()), win32con.GWL_EXSTYLE)
+            popup_styles = win32con.WS_EX_LAYERED | win32con.WS_EX_TRANSPARENT
+            win32gui.SetWindowLong(win32gui.FindWindow(None, self.root.title()), win32con.GWL_EXSTYLE, popup_styles)
+            win32gui.SetLayeredWindowAttributes(win32gui.FindWindow(None, self.root.title()), 0, 255, win32con.LWA_ALPHA)
+            print("asdf")
+        except Exception as e:
+            print(e)
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
         mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]

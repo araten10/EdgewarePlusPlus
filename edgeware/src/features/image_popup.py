@@ -29,6 +29,8 @@ from PIL import Image, ImageTk
 from roll import roll
 from state import State
 
+import win32gui
+import win32con
 
 class ImagePopup(Popup):
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
@@ -87,3 +89,13 @@ class ImagePopup(Popup):
         if hasattr(self, "player"):
             self.player.close()
         super().close()
+
+    def clickthrough(self, hwnd) -> None:
+        try:
+            popup_styles = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+            popup_styles = win32con.WS_EX_LAYERED | win32con.WS_EX_TRANSPARENT
+            win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, popup_styles)
+            win32gui.SetLayeredWindowAttributes(hwnd, 0, 255, win32con.LWA_ALPHA)
+            print("asdf")
+        except Exception as e:
+            print(e)
