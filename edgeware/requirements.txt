@@ -17,3 +17,4 @@ tkinterweb
 ttkwidgets
 voluptuous
 pyglet
+buttplug-py

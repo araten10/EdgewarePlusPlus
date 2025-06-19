@@ -18,17 +18,75 @@
 import ast
 from dataclasses import dataclass
 from tkinter import BooleanVar, IntVar, StringVar
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Any
 
-from voluptuous import All, Range, Schema, Union
+from voluptuous import All, Range, Schema, Union, Boolean
 
 from config.themes import THEMES
 
+
 NONNEGATIVE = Schema(All(int, Range(min=0)))
+FLOAT = Schema(All(float, Range(min=0)))
 PERCENTAGE = Schema(All(int, Range(min=0, max=100)))
 BOOLEAN = Schema(All(int, Range(min=0, max=1)))
 STRING = Schema(str)
 
+
+class DictVar:
+    """A minimal var-wrapper around a Python dict, with .get(), .set(),
+    plus dict-like methods so UI code can do .keys(), indexing, iteration, etc."""
+    def __init__(self):
+        self._value: dict[int, dict] = {}
+
+    # for write_save()
+    def get(self) -> dict[int, dict]:
+        result: dict[int, dict] = {}
+        for idx, settings in self._value.items():
+            prim_settings: dict[str, object] = {}
+            for key, val in settings.items():
+                # unwrap any Tk Var into a primitive
+                prim_settings[key] = val.get() if hasattr(val, "get") and callable(val.get) else val
+            result[idx] = prim_settings
+        return result
+
+    def set(self, new: dict[int, dict]) -> None:
+        self._value = new
+
+    # dict-like interface for UI code
+    def keys(self):
+        return self._value.keys()
+
+    def items(self):
+        return self._value.items()
+
+    def __getitem__(self, key):
+        return self._value[key]
+
+    def __setitem__(self, key, value):
+        self._value[key] = value
+
+    def __contains__(self, key):
+        return key in self._value
+
+    def __iter__(self):
+        return iter(self._value)
+
+    def __len__(self):
+        return len(self._value)
+    
+def serialize_sextoys(raw: dict[int, dict[str, object]]) -> dict[int, dict[str, object]]:
+    result = {}
+    for idx, settings in raw.items():
+        primitive_settings = {}
+        for key, val in settings.items():
+            if hasattr(val, "get") and callable(val.get):
+                # Для DoubleVar преобразуем в float
+                value = val.get()
+                primitive_settings[key] = float(value) if isinstance(value, float) else value
+            else:
+                primitive_settings[key] = val
+        result[idx] = primitive_settings
+    return result
 
 def s_to_ms(value: int) -> int:
     return value * 1000
@@ -108,6 +166,44 @@ CONFIG_ITEMS = {
     "wallpapers": Item("wallpaperDat", STRING, None, lambda value: list(ast.literal_eval(value).values())),
     "wallpaper_timer": Item("wallpaperTimer", NONNEGATIVE, IntVar, s_to_ms),
     "wallpaper_variance": Item("wallpaperVariance", NONNEGATIVE, IntVar, s_to_ms),
+
+    # Sextoys
+    "sextoys": Item(
+        "sextoys",
+        Schema({
+        str: Schema({
+            "sextoy_name": STRING,
+            "sextoy_general_vibration_force": PERCENTAGE,
+            "sextoy_image_open_chance": PERCENTAGE,
+            "sextoy_image_open_vibration_force": PERCENTAGE,
+            "sextoy_image_open_vibration_length": FLOAT,
+            "sextoy_image_close_chance": PERCENTAGE,
+            "sextoy_image_close_vibration_force": PERCENTAGE,
+            "sextoy_image_close_vibration_length": FLOAT,
+            "sextoy_video_open_chance": PERCENTAGE,
+            "sextoy_video_open_vibration_force": PERCENTAGE,
+            "sextoy_video_open_vibration_length": FLOAT,
+            "sextoy_video_close_chance": PERCENTAGE,
+            "sextoy_video_close_vibration_force": PERCENTAGE,
+            "sextoy_video_close_vibration_length": FLOAT,
+            "sextoy_caption_chance": PERCENTAGE,
+            "sextoy_caption_vibration_force": PERCENTAGE,
+            "sextoy_caption_vibration_length": FLOAT,
+            "sextoy_display_notification_chance": PERCENTAGE,
+            "sextoy_display_notification_vibration_force": PERCENTAGE,
+            "sextoy_display_notification_vibration_length": FLOAT,
+            "sextoy_prompt_enabled": BOOLEAN,
+            "sextoy_prompt_vibration_force": PERCENTAGE,
+            "auto_stop": BOOLEAN,
+            # … любые другие ключи и их схемы …
+        })
+    }),
+        # VAR: initial factory for the value in Vars; an empty dict
+        DictVar,
+        # setting factory: unwrap into pure primitives
+        serialize_sextoys
+    ),
+    "initface_address": Item("initfaceAddress", STRING, StringVar, str),
 
     # Booru
     "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),

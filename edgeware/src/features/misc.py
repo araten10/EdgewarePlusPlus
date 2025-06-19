@@ -29,6 +29,8 @@ import pyglet
 from config.settings import Settings
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
+from features.vibration_mixin import VibrationMixin
+from features.sextoy import Sextoy
 from pack import Pack
 from panic import panic
 from paths import CustomAssets, Process
@@ -40,8 +42,8 @@ from state import State
 
 # Global list to keep active players alive
 _active_players: list[pyglet.media.Player] = []
-# Run our update ticks once in the `tickrate` milliseconds
-# This number is also responsible for the smoothness of our fade_in and fade_out functions
+# Run our update ticks(fades) once in the `tickrate` milliseconds
+# This number is responsible for the smoothness of our fade_in and fade_out functions
 tickrate = 16
 tickrate_in_seconds = tickrate / 1000
 
@@ -130,10 +132,14 @@ def open_web(pack: Pack) -> None:
         webbrowser.open(web)
 
 
-def display_notification(settings: Settings, pack: Pack) -> None:
+def display_notification(settings: Settings, pack: Pack, sextoy: Sextoy) -> None:
     notification = pack.random_notification()
     if not notification:
         return
+
+    # Создаем экземпляр VibrationMixin для вибрации
+    vibrator = VibrationMixin()
+    vibrator.trigger_vibration("display_notification", getattr(settings, 'sextoys', {}), sextoy)
 
     image = pack.random_image()
     notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(pack.icon))

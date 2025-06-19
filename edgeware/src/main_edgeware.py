@@ -35,6 +35,7 @@ from threading import Thread
 from tkinter import Tk
 
 import pygame
+import asyncio
 import utils
 from config import first_launch_configure
 from config.settings import Settings
@@ -62,6 +63,8 @@ from pack import Pack
 from panic import start_panic_listener
 from roll import RollTarget, roll_targets
 from state import State
+from buttplug import Client, WebsocketConnector, ProtocolSpec
+from features.sextoy import Sextoy
 
 
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
@@ -69,6 +72,23 @@ def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) ->
     Thread(target=lambda: fill_drive(root, settings, pack, state), daemon=True).start()  # Thread for performance reasons
     root.after(settings.delay, lambda: main(root, settings, pack, targets))
 
+# Добавляем функцию для поддержания соединения
+async def keep_connection_alive(sextoy):
+    while True:
+        if not sextoy.connected:
+            print(f"Connection status: {sextoy.connection_status}")
+            success = await sextoy.connect_async()
+            if success:
+                print("Successfully connected")
+            else:
+                print("Connection attempt failed")
+                
+        await asyncio.sleep(5)
+
+def run_connection_loop(sextoy):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(keep_connection_alive(sextoy))
 
 if __name__ == "__main__":
     utils.init_logging("main")
@@ -81,6 +101,10 @@ if __name__ == "__main__":
     pack = Pack(settings.pack_path)
     state = State()
     pygame.init()
+    sextoy = Sextoy(settings)
+
+    connection_thread = Thread(target=run_connection_loop, args=(sextoy,), daemon=True)
+    connection_thread.start()
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
 
@@ -91,16 +115,24 @@ if __name__ == "__main__":
 
     corruption_danger_check(settings, pack)
 
+    # GPU_CTXS = ["x11", "x11egl", "x11vk"]
+    # mpv_pool = MpvPool(
+    #     size=50,
+    #     gpu_contexts=GPU_CTXS,
+    #     hwdec="auto" if settings.video_hardware_acceleration else "no"
+    # )
+
     # TODO: Use a dict?
     targets = [
-        RollTarget(lambda: ImagePopup(root, settings, pack, state), lambda: settings.image_chance if not settings.mitosis_mode else 0),
-        RollTarget(lambda: VideoPopup(root, settings, pack, state), lambda: settings.video_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: ImagePopup(root, settings, pack, state, sextoy), lambda: settings.image_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: VideoPopup(root, settings, pack, state, sextoy), lambda: settings.video_chance if not settings.mitosis_mode else 0),
         RollTarget(lambda: SubliminalPopup(settings, pack), lambda: settings.subliminal_chance),
-        RollTarget(lambda: Prompt(settings, pack, state), lambda: settings.prompt_chance),
+        RollTarget(lambda: Prompt(settings, pack, state, sextoy), lambda: settings.prompt_chance),
         RollTarget(lambda: play_audio(root, settings, pack), lambda: settings.audio_chance),
         RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
-        RollTarget(lambda: display_notification(settings, pack), lambda: settings.notification_chance),
+        RollTarget(lambda: display_notification(settings, pack, sextoy), lambda: settings.notification_chance),
     ]
+
 
     def start_main() -> None:
         Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
