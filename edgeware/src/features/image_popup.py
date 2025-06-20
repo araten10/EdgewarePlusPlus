@@ -55,7 +55,7 @@ class ImagePopup(Popup):
         # Static          -> image
         # Static,   hypno -> image overlay, mpv
         # Animated        -> mpv
-        # Animated, hypnp -> mpv, ?
+        # Animated, hypno -> mpv, ?
 
         if getattr(image, "n_frames", 0) > 1:
             self.player = VideoPlayer(self, self.settings, self.width, self.height)
