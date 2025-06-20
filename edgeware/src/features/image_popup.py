@@ -18,7 +18,6 @@
 import asyncio
 import logging
 from tkinter import Label, Tk
-from ctypes import windll
 
 import booru
 import requests
@@ -77,7 +76,8 @@ class ImagePopup(Popup):
                 label.pack()
                 self.photo_image = ImageTk.PhotoImage(final)
                 label.config(image=self.photo_image)
-                self.try_clickthrough(label)
+            #self.try_clickthrough(label)
+
 
         self.init_finish()
 
@@ -88,18 +88,3 @@ class ImagePopup(Popup):
         if hasattr(self, "player"):
             self.player.close()
         super().close()
-
-    def try_clickthrough(self, win) -> None:
-        # required constants
-        WS_EX_LAYERED = 0x00080000
-        WS_EX_TRANSPARENT = 0x00000020
-        GWL_EXSTYLE = -20
-
-        try:
-            print(win)
-            hwnd = windll.user32.GetParent(win.winfo_id())
-            ex_style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-            ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
-            windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style)
-        except Exception as e:
-            print(e)
