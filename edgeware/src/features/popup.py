@@ -22,6 +22,7 @@ import time
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
+from ctypes import windll
 
 import os_utils
 import utils
@@ -35,9 +36,6 @@ from paths import Data
 from PIL import ImageFilter
 from roll import roll
 from state import State
-
-import win32gui
-import win32con
 
 class Popup(Toplevel):
     media: Path  # Defined by subclasses
@@ -71,6 +69,7 @@ class Popup(Toplevel):
         self.try_multi_click()
         self.try_timeout()
         self.try_pump_scare()
+        self.try_clickthrough(self)
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
         self.monitor = utils.random_monitor(self.settings)
@@ -137,12 +136,18 @@ class Popup(Toplevel):
         self.state.popup_geometries[self.popup_id] = (self.width, self.height, self.x, self.y)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
 
+    def try_clickthrough(self, win) -> None:
+        # required constants
+        WS_EX_LAYERED = 0x00080000
+        WS_EX_TRANSPARENT = 0x00000020
+        GWL_EXSTYLE = -20
+
         try:
-            popup_styles = win32gui.GetWindowLong(win32gui.FindWindow(None, self.root.title()), win32con.GWL_EXSTYLE)
-            popup_styles = win32con.WS_EX_LAYERED | win32con.WS_EX_TRANSPARENT
-            win32gui.SetWindowLong(win32gui.FindWindow(None, self.root.title()), win32con.GWL_EXSTYLE, popup_styles)
-            win32gui.SetLayeredWindowAttributes(win32gui.FindWindow(None, self.root.title()), 0, 255, win32con.LWA_ALPHA)
-            print("asdf")
+            print(win)
+            hwnd = windll.user32.GetParent(win.winfo_id())
+            ex_style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+            ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
+            windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style)
         except Exception as e:
             print(e)
 

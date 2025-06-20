@@ -18,6 +18,7 @@
 import asyncio
 import logging
 from tkinter import Label, Tk
+from ctypes import windll
 
 import booru
 import requests
@@ -28,9 +29,6 @@ from pack import Pack
 from PIL import Image, ImageTk
 from roll import roll
 from state import State
-
-import win32gui
-import win32con
 
 class ImagePopup(Popup):
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
@@ -79,6 +77,7 @@ class ImagePopup(Popup):
                 label.pack()
                 self.photo_image = ImageTk.PhotoImage(final)
                 label.config(image=self.photo_image)
+                self.try_clickthrough(label)
 
         self.init_finish()
 
@@ -90,12 +89,17 @@ class ImagePopup(Popup):
             self.player.close()
         super().close()
 
-    def clickthrough(self, hwnd) -> None:
+    def try_clickthrough(self, win) -> None:
+        # required constants
+        WS_EX_LAYERED = 0x00080000
+        WS_EX_TRANSPARENT = 0x00000020
+        GWL_EXSTYLE = -20
+
         try:
-            popup_styles = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
-            popup_styles = win32con.WS_EX_LAYERED | win32con.WS_EX_TRANSPARENT
-            win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, popup_styles)
-            win32gui.SetLayeredWindowAttributes(hwnd, 0, 255, win32con.LWA_ALPHA)
-            print("asdf")
+            print(win)
+            hwnd = windll.user32.GetParent(win.winfo_id())
+            ex_style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+            ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
+            windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style)
         except Exception as e:
             print(e)
