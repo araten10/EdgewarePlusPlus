@@ -34,9 +34,11 @@ if __name__ == "__main__":
 from threading import Thread
 from tkinter import Tk
 
+import pyglet
 import utils
 from config import first_launch_configure
 from config.settings import Settings
+from features.audio import play_audio
 from features.corruption import corruption_danger_check, handle_corruption
 from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
@@ -51,7 +53,6 @@ from features.misc import (
     make_desktop_icons,
     make_tray_icon,
     open_web,
-    play_audio,
 )
 from features.prompt import Prompt
 from features.startup_splash import StartupSplash
@@ -89,7 +90,7 @@ if __name__ == "__main__":
         RollTarget(lambda: VideoPopup(root, settings, pack, state), lambda: settings.video_chance if not settings.mitosis_mode else 0),
         RollTarget(lambda: SubliminalPopup(settings, pack), lambda: settings.subliminal_chance),
         RollTarget(lambda: Prompt(settings, pack, state), lambda: settings.prompt_chance),
-        RollTarget(lambda: play_audio(root, settings, pack), lambda: settings.audio_chance),
+        RollTarget(lambda: play_audio(root, settings, pack, state), lambda: settings.audio_chance),
         RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
         RollTarget(lambda: display_notification(settings, pack), lambda: settings.notification_chance),
     ]
@@ -116,4 +117,5 @@ if __name__ == "__main__":
     else:
         start_main()
 
+    Thread(target=pyglet.app.run, daemon=True).start()  # Required for pyglet events
     root.mainloop()
