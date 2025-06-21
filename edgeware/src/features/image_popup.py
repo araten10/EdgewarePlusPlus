@@ -18,7 +18,6 @@
 import asyncio
 import logging
 from tkinter import Label, Tk
-from ctypes import windll
 
 import booru
 import requests
