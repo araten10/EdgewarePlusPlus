@@ -16,4 +16,3 @@ tkinter-tooltip
 tkinterweb
 ttkwidgets
 voluptuous
-pywin32
