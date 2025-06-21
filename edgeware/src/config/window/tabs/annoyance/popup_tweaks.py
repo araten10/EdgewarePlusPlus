@@ -73,6 +73,31 @@ class PopupTweaksTab(ScrollFrame):
 
         ConfigScale(denial_row, label="Denial Chance (%)", from_=0, to=100, variable=vars.denial_chance).pack()
 
+        #Opacity & Clickthrough
+        opacity_section = ConfigSection(self.viewPort, "Opacity")
+        opacity_section.pack()
+
+        opacity_row = ConfigRow(opacity_section)
+        opacity_row.pack()
+        ConfigScale(opacity_row, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
+
+        clickthrough_row = ConfigRow(opacity_section)
+        clickthrough_row.pack()
+
+        clickthrough_toggle = ConfigToggle(clickthrough_row, "Clickthrough Popups", variable=vars.clickthrough_enabled, cursor="question_arrow")
+        clickthrough_toggle.pack()
+        CreateToolTip(
+            clickthrough_toggle,
+            "Extra reminder to set opacity to less than 100% when using this! Timeout should also be set appropriately. You probably will have a very confusing experience otherwise!",
+        )
+
+        # Timeout
+        timeout_section = ConfigSection(self.viewPort, "Popup Timeout", TIMEOUT_TEXT)
+        timeout_section.pack()
+
+        timeout_row = ConfigRow(timeout_section)
+        timeout_row.pack()
+        
         # Misc Tweaks
         misc_section = ConfigSection(self.viewPort, "Misc. Tweaks", MISC_TEXT)
         misc_section.pack()
@@ -88,17 +113,6 @@ class PopupTweaksTab(ScrollFrame):
         )
 
         ConfigToggle(misc_row, "Multi-Click popups", variable=vars.multi_click_popups).pack()
-
-        misc_row_2 = ConfigRow(misc_section)
-        misc_row_2.pack()
-        ConfigScale(misc_row_2, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
-
-        # Timeout
-        timeout_section = ConfigSection(self.viewPort, "Popup Timeout", TIMEOUT_TEXT)
-        timeout_section.pack()
-
-        timeout_row = ConfigRow(timeout_section)
-        timeout_row.pack()
 
         ConfigToggle(timeout_row, "Popup Timeout", variable=vars.timeout_enabled).pack()
 

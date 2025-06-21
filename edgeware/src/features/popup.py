@@ -144,7 +144,7 @@ class Popup(Toplevel):
 
         try:
             hwnd = windll.user32.GetParent(win.winfo_id())
-            print(hwnd)
+            print(f"hwnd = {hwnd}, {win}")
             ex_style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
             ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
             windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style)
