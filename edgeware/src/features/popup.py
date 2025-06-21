@@ -69,7 +69,10 @@ class Popup(Toplevel):
         self.try_multi_click()
         self.try_timeout()
         self.try_pump_scare()
-        self.try_clickthrough(self)
+
+        if not hasattr(self, "player"):
+            self.wait_visibility()
+        self.try_clickthrough()
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
         self.monitor = utils.random_monitor(self.settings)
@@ -136,20 +139,20 @@ class Popup(Toplevel):
         self.state.popup_geometries[self.popup_id] = (self.width, self.height, self.x, self.y)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
 
-    def try_clickthrough(self, win) -> None:
-        # required constants
-        WS_EX_LAYERED = 0x00080000
-        WS_EX_TRANSPARENT = 0x00000020
-        GWL_EXSTYLE = -20
+    def try_clickthrough(self) -> None:
+        if self.settings.clickthrough_enabled:
+            WS_EX_LAYERED = 0x00080000
+            WS_EX_TRANSPARENT = 0x00000020
+            GWL_EXSTYLE = -20
 
-        try:
-            hwnd = windll.user32.GetParent(win.winfo_id())
-            print(f"hwnd = {hwnd}, {win}")
-            ex_style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-            ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
-            windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style)
-        except Exception as e:
-            print(e)
+            try:
+                hwnd = windll.user32.GetParent(self.winfo_id())
+                print(f"hwnd = {hwnd}, {self}")
+                ex_style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+                ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
+                windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style)
+            except Exception as e:
+                print(e)
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
         mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
@@ -190,7 +193,7 @@ class Popup(Toplevel):
     def try_button(self) -> None:
         if self.settings.buttonless:
             self.bind("<ButtonRelease-1>", lambda _: self.click())
-        else:
+        elif not self.settings.clickthrough_enabled:
             button = Button(
                 self,
                 text=self.pack.index.default.popup_close,

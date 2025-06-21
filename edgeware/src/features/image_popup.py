@@ -77,8 +77,6 @@ class ImagePopup(Popup):
                 label.pack()
                 self.photo_image = ImageTk.PhotoImage(final)
                 label.config(image=self.photo_image)
-            #self.try_clickthrough(label)
-
 
         self.init_finish()
 
