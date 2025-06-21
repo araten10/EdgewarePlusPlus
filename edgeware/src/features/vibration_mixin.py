@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional, Union
 import random
+import logging
 
 class VibrationMixin:
     def __init__(self):
@@ -43,6 +44,9 @@ class VibrationMixin:
                     # Проверка шанса
                     if chance <= 0 or random.randint(1, 100) > chance:
                         continue
+
+                    logging.info(f'Device id {device_idx}')
+                    logging.info(f'Must vibrate for {duration} seconds')
                         
                     # Нормализация параметров
                     force = self._normalize_force(force_pct)
@@ -98,10 +102,10 @@ class VibrationMixin:
                     force = self._normalize_force(force_pct)
                     
                     # Запускаем постоянную вибрацию (duration=0)
-                    sextoy.vibrate(device_idx, force, 0.0)
+                    sextoy.start_vibration(device_idx, force)
                     
                     # Сохраняем информацию о активной вибрации
-                    self.active_vibrations[event_type][device_idx] = force
+                    self.active_vibrations[event_type][device_idx] = True
                     
                 except Exception as e:
                     print(f"Continuous vibration start error for {event_type}, device {device_id}: {str(e)}")
@@ -122,12 +126,11 @@ class VibrationMixin:
             if not self._check_sextoy_ready(sextoy, require_devices=False):
                 return
                 
-            for device_idx, force in self.active_vibrations[event_type].items():
+            for device_idx in list(self.active_vibrations[event_type]):
                 try:
-                    # Останавливаем вибрацию
-                    sextoy.vibrate(device_idx, 0.0, 0.0)
+                    sextoy.stop_vibration(device_idx)
                 except Exception as e:
-                    print(f"Continuous vibration stop error for {event_type}, device {device_idx}: {str(e)}")
+                    logging.error(f"Error stopping continuous vib {event_type}/{device_idx}: {e}")
             
             # Удаляем запись о активных вибрациях
             self.active_vibrations.pop(event_type, None)
