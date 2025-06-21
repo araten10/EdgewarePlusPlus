@@ -18,6 +18,8 @@ class Sextoy:
         self._client = Client("EdgewarePP", ProtocolSpec.v3)
         # Флаги continuous скорости
         self._continuous_forces: dict[int, float] = {}
+        self._active_vibrations: dict[int, list[float]] = {}
+        self.vibration_index = 0
 
     def _run_loop(self):
         asyncio.set_event_loop(self._loop)
@@ -92,22 +94,24 @@ class Sextoy:
             return
         # START с ACK
         clockwise = bool(random.getrandbits(1))
+
+        t_start = time.monotonic()
+
         for idx, act in enumerate(dev.actuators):
             t0 = time.monotonic()
-            task = asyncio.create_task(act.command(speed))
-            while not task.done():
-                await asyncio.sleep(0.01)
-            logging.info(f"[ack] actuator {idx} start ACK +{time.monotonic()-t0:.3f}s")
+            await act.command(speed)
+            logging.info(f"[ack] actuator {idx} start ACK +{time.monotonic() - t0:.3f}s")
+
         for idx, rot in enumerate(dev.rotatory_actuators):
             t0 = time.monotonic()
-            task = asyncio.create_task(rot.command(speed, clockwise))
-            while not task.done():
-                await asyncio.sleep(0.01)
-            logging.info(f"[ack] rotatory {idx} start ACK +{time.monotonic()-t0:.3f}s")
-                # Ждём duration
-        if duration > 0:
-            await asyncio.sleep(duration)
-            # Если continuous активен к моменту отправки STOP, пропускаем остановку
+            await rot.command(speed, clockwise)
+            logging.info(f"[ack] rotatory {idx} start ACK +{time.monotonic() - t0:.3f}s")
+
+        elapsed_ack_time = time.monotonic() - t_start
+        adjusted_duration = max(0, duration - elapsed_ack_time)
+
+        if adjusted_duration > 0:
+            await asyncio.sleep(adjusted_duration)
             if device_index in self._continuous_forces:
                 logging.info(f"vibrate_once: continuous active at stop phase, skipping stop for {device_index}")
             else:
