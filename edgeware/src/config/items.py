@@ -200,9 +200,7 @@ CONFIG_ITEMS = {
     "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption may not work
     "mitosis_strength": Item("mitosisStrength", NONNEGATIVE, IntVar, int),
     "hibernate_mode": Item("hibernateMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "hibernate_type": Item("hibernateType",
-                           Schema(Union("Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos")), StringVar,
-                           str),
+    "hibernate_type": Item("hibernateType", Schema(Union("Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos")), StringVar, str),
     "hibernate_delay_min": Item("hibernateMin", NONNEGATIVE, IntVar, s_to_ms),
     "hibernate_delay_max": Item("hibernateMax", NONNEGATIVE, IntVar, s_to_ms, safe_range=(10, None)),
     "hibernate_activity": Item("wakeupActivity", NONNEGATIVE, IntVar, int, safe_range=(0, 35)),
