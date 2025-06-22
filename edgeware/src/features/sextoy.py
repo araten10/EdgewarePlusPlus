@@ -18,11 +18,11 @@ class Sextoy:
     def __init__(self, settings: Settings | Vars):
         self.connected = False
         self._settings = settings
-        # Запускаем отдельный asyncio-loop
+        # Start a separate asyncio event loop
         self._loop = asyncio.new_event_loop()
         Thread(target=self._run_loop, daemon=True).start()
         self._client = Client("EdgewarePP", ProtocolSpec.v3)
-        # Флаги continuous скорости
+        # Flags for continuous speeds
         self._continuous_forces: dict[int, float] = {}
         self._active_vibrations: dict[int, dict[int, StoredActuator]] = {}
         self._active_rotations:  dict[int, dict[int, StoredActuator]] = {}
@@ -62,7 +62,7 @@ class Sextoy:
         addr = raw_addr.get() if hasattr(raw_addr, "get") else raw_addr
         self._connector = WebsocketConnector(addr, logger=self._client.logger)
         
-        # Возвращаем Future для отслеживания завершения
+        # Return a Future to track completion
         return asyncio.run_coroutine_threadsafe(self._connect_and_scan(), self._loop)
 
     async def _connect_and_scan(self):
@@ -74,7 +74,7 @@ class Sextoy:
         except Exception as e:
             logging.error(f"Connection error: {e}")
             self.connected = False
-            raise  # Пробрасываем исключение для обработки в Future
+            raise  # Propagate exception for Future handling
 
     async def _scan_loop(self, scan_duration=3.0, interval=2.0):
         while self.connected:
@@ -109,7 +109,7 @@ class Sextoy:
     ):
         idx = act.index
 
-        # 1) Выбираем store и session_index в зависимости от типа
+        # 1) Select storage and session index based on type
         if clockwise is None:
             store       = self._active_vibrations
             session_idx = self.vibration_index
@@ -117,7 +117,7 @@ class Sextoy:
             store       = self._active_rotations
             session_idx = self.rotation_index
 
-        # 2) Инициализация вложенных словарей
+        # 2) Initialize nested dictionaries
         store.setdefault(device_index, {})
         store[device_index].setdefault(session_idx, {})
         store[device_index][session_idx][idx] = {
@@ -126,17 +126,17 @@ class Sextoy:
             "clockwise": clockwise
         }
 
-        # 3) Стартуем мотор
+        # 3) Start the motor
         cmd = act.command if clockwise is None else (lambda sp: act.command(sp, clockwise))
         t0 = time.monotonic()
         asyncio.run_coroutine_threadsafe(cmd(speed), self._loop)
 
-        # 4) Ждём, пока duration не пройдёт
+        # 4) Wait until duration has passed
         remaining = duration - (time.monotonic() - t0)
         if remaining > 0:
             await asyncio.sleep(remaining)
 
-        # 5) Удаляем себя из своего store
+        # 5) Remove this actuator from its store
         session = store[device_index].get(session_idx, {})
         session.pop(idx, None)
         if not session:
@@ -144,12 +144,12 @@ class Sextoy:
         if not store[device_index]:
             store.pop(device_index, None)
 
-        # 6) Ищем последнюю команду для данного актуатора в других сессиях
+        # 6) Find last command for this actuator in other sessions
         candidate_info = None
         candidate_session_id = None
         sessions = store.get(device_index, {})
         for session_id, session_dict in sessions.items():
-            if session_id == session_idx:  # пропускаем текущую сессию
+            if session_id == session_idx:  # skip current session
                 continue
             if idx in session_dict:
                 info = session_dict[idx]
@@ -162,7 +162,7 @@ class Sextoy:
             return
 
         if candidate_info is not None:
-            # Восстанавливаем команду из candidate_info
+            # Restore command from candidate_info
             real_act = candidate_info["act"]
             spd = candidate_info["speed"]
             cw  = candidate_info["clockwise"]
@@ -170,14 +170,13 @@ class Sextoy:
             logging.debug(f"Restoring actuator {idx} on device {device_index} from session {candidate_session_id} with speed {spd}")
             asyncio.run_coroutine_threadsafe(cmd_func(spd), self._loop)
         else:
-            # Не нашли команд для этого актуатора - останавливаем
+            # No commands found for this actuator - stop it
             logging.debug(f"Stopping actuator {idx} on device {device_index} (no active sessions)")
             if clockwise is None:
                 asyncio.run_coroutine_threadsafe(act.command(0), self._loop)
             else:
-                # Для ротатора направление при 0 не важно, но нужно указать
+                # For rotator, direction on stop doesn't matter but must be specified
                 asyncio.run_coroutine_threadsafe(act.command(0, clockwise), self._loop)
-
 
     def get_last_actuator_by_type(
         self,
@@ -185,8 +184,8 @@ class Sextoy:
         want_type: type
     ) -> dict[int, StoredActuator] | None:
         """
-        Ищем в sessions для device_index в обратном insertion-order
-        первую сессию, где есть actuator с типом info["clockwise"] == want_type.
+        Search in sessions for device_index in reverse insertion-order
+        for the first session containing an actuator where info["clockwise"] == want_type.
         """
         sessions = self._active_vibrations.get(device_index)
         if not sessions:
@@ -204,7 +203,7 @@ class Sextoy:
         return None
             
     # -----------------------------------------------------------
-    # Одноразовая вибрация (игнорируется при active continuous)
+    # One-shot vibration (ignored if continuous active)
     async def _vibrate_once(self, device_index: int, speed: float, duration: float):
         if device_index in self._continuous_forces:
             logging.info(f"vibrate_once: continuous active, skipping one-shot for {device_index}")
@@ -213,19 +212,19 @@ class Sextoy:
         if not dev:
             logging.warning(f"vibrate_once: device {device_index} not found")
             return
-        # START с ACK
+        # START with ACK
         clockwise = bool(random.getrandbits(1))
 
         if device_index in self._continuous_forces:
             logging.info(f"vibrate_once: continuous active at stop phase, skipping stop for {device_index}")
         else:
-            # STOP с ACK
+            # STOP with ACK
             logging.info("I AM HERE")
             
             if not dev.actuators:
                 logging.info(f"No actuators to vibrate on device {device_index}")
             else:
-                # START с ACK
+                # START with ACK
                 clockwise = bool(random.getrandbits(1))
                 self.vibration_index += 1
                 logging.info("I AM HERE")
@@ -235,11 +234,11 @@ class Sextoy:
                         self._loop
                     )
 
-            # проверяем, есть ли хотя бы один ротатор
+            # Check if any rotatory actuators exist
             if not dev.rotatory_actuators:
                 logging.info(f"No rotatory actuators on device {device_index}")
             else:
-                # используем тот же clockwise, что для вибрации (или новый, если нужно)
+                # Use same clockwise for rotation (or new if needed)
                 self.rotation_index += 1
                 for rot in dev.rotatory_actuators:
                     asyncio.run_coroutine_threadsafe(
@@ -247,7 +246,7 @@ class Sextoy:
                         self._loop
                     )
 
-        logging.debug(f"vibrate_once completed: dev={device_index}, speed={speed}, duration={duration}")(f"vibrate_once completed: dev={device_index}, speed={speed}, duration={duration}")
+        logging.debug(f"vibrate_once completed: dev={device_index}, speed={speed}, duration={duration}")
 
     def vibrate(self, device_index: int, speed: float, duration: float = 1.0):
         if not self.connected:
@@ -257,7 +256,7 @@ class Sextoy:
                 
 
     # -----------------------------------------------------------
-    # Continuous-режим
+    # Continuous mode
     async def _send_continuous_start(self, device_index: int, speed: float):
         dev = self._client.devices.get(device_index)
         if not dev:
@@ -281,7 +280,7 @@ class Sextoy:
             logging.info(f"start_vibration: already active on {device_index}")
             return
         self._continuous_forces[device_index] = speed
-        # Планируем корутину и ждём ACK
+        # Schedule coroutine and wait for ACK
         asyncio.run_coroutine_threadsafe(
             self._send_continuous_start(device_index, speed), self._loop
         )
@@ -305,7 +304,7 @@ class Sextoy:
             return
         if device_index not in self._continuous_forces:
             return
-        # Снимаем флаг и отправляем stop
+        # Remove flag and send stop
         self._continuous_forces.pop(device_index, None)
         asyncio.run_coroutine_threadsafe(
             self._send_continuous_stop(device_index), self._loop

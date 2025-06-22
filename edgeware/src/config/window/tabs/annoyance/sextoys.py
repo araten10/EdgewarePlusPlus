@@ -16,13 +16,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
 from config.items import PERCENTAGE, FLOAT, BOOLEAN
 from config.vars import Vars
 from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigFloatScale, ConfigToggle, ConfigTitle
 from config.window.widgets.scroll_frame import ScrollFrame
-from config.window.utils import (
-    config
-)
+from config.window.utils import config
 from tkinter import Entry, Frame, StringVar, Listbox, Button, IntVar, messagebox, BooleanVar, DoubleVar, Checkbutton
 from features.sextoy import Sextoy
 
@@ -39,6 +38,7 @@ class SexToysTab(ScrollFrame):
         self.known_devices = []
         self.device_indices = []
 
+        # Groups of settings and their corresponding config keys
         self.setting_groups = {
             "General Vibration": ["sextoy_general_vibration_force"],
             "Sextoy Image Open Popup Settings": [
@@ -77,6 +77,7 @@ class SexToysTab(ScrollFrame):
             ]
         }
 
+        # Mapping of setting keys to their data types
         self.setting_types = {
             "sextoy_general_vibration_force": PERCENTAGE,
             "sextoy_image_open_chance": PERCENTAGE,
@@ -101,6 +102,7 @@ class SexToysTab(ScrollFrame):
             "sextoy_prompt_vibration_force": PERCENTAGE,
         }
 
+        # Default values for each setting
         self.default_values = {
             "sextoy_general_vibration_force": 50,
             "sextoy_image_open_chance": 0,
@@ -125,20 +127,24 @@ class SexToysTab(ScrollFrame):
             "sextoy_prompt_vibration_force": 50,
         }
 
+        # Initialize initface address variable
         self.addr_var = StringVar(value=config["initfaceAddress"])
 
+        # Section for sextoy settings UI
         sextoys_section = ConfigSection(self.viewPort, "Sextoys settings", SEXTOYS_TEXT)
         sextoys_section.pack()
 
         self.current_device_index = None
 
+        # Connect/Disconnect button
         self.connect_button = Button(sextoys_section, text="Connect", command=self.toggle_connection)
         self.connect_button.pack(pady=5)
 
-        # Listbox for all known devices
+        # Listbox showing all known devices
         self.devices_listbox = Listbox(sextoys_section, height=6)
         self.devices_listbox.pack(fill="x", padx=5, pady=5)
 
+        # Load configured devices into the list
         for key, sextoy_config in config['sextoys'].items():
             if key not in self.vars.sextoys:
                 device_vars = {
@@ -161,9 +167,10 @@ class SexToysTab(ScrollFrame):
             self.known_devices.append(name)
             self.device_indices.append({"sextoy_index": key})
             
-        # Bind selection event to display that device's settings
+        # Bind selection to load device-specific settings
         self.devices_listbox.bind("<<ListboxSelect>>", self.on_device_select)
 
+        # Section for initface settings UI
         initface_settings = ConfigSection(self.viewPort, "Initface settings", INITFACE_TEXT)
         initface_settings.pack()
 
@@ -173,6 +180,7 @@ class SexToysTab(ScrollFrame):
         initface_address = Entry(initface_settings, textvariable=vars.initface_address)
         initface_address.pack(fill="x", padx=5)
 
+        # Update vars object when the address field changes
         self.addr_var.trace_add("write", lambda *args: setattr(vars, "initface_address", self.addr_var.get()))
 
         self.settings_frame = ConfigSection(self.viewPort, "Device Settings")
@@ -180,26 +188,26 @@ class SexToysTab(ScrollFrame):
 
     def toggle_connection(self):
         if not self.sextoy.connected:
-            # Отключаем кнопку на время подключения
+            # Disable button while connecting
             self.connect_button.config(state="disabled")
             
-            # Получаем актуальный адрес из настроек
+            # Retrieve the latest initface address
             raw_addr = self.sextoy._settings.initface_address
             addr = raw_addr.get() if hasattr(raw_addr, "get") else raw_addr
             
-            # Пытаемся подключиться и обрабатываем результат
+            # Attempt to connect, handling the future result
             future = self.sextoy.connect()
             
             def connection_done(f):
                 try:
-                    f.result()  # Проверяем результат
-                    # Успешное подключение
+                    f.result()  # Check result
+                    # On successful connection
                     self.after(0, lambda: [
                         self.connect_button.config(text="Disconnect", state="normal"),
                         self.update_devices()
                     ])
                 except Exception as e:
-                    # Ошибка подключения
+                    # On connection error
                     self.after(0, lambda: [
                         self.connect_button.config(text="Connect", state="normal"),
                         messagebox.showerror(
@@ -211,18 +219,18 @@ class SexToysTab(ScrollFrame):
             if future:
                 future.add_done_callback(connection_done)
         else:
-            # Отключаемся если уже подключены
+            # Disconnect if already connected
             self.sextoy.disconnect()
             self.connect_button.config(text="Connect")
 
     def update_devices(self):
         for device in self.sextoy.devices.values():
-            idx = str(device.index)  # Всегда используем строковые индексы
+            idx = str(device.index)  # Always use string keys
             
             if idx not in self.vars.sextoys:
                 name = getattr(device, "name", f"Device {idx}")
                 
-                # Создаем все переменные с значениями по умолчанию
+                # Create default variables for new devices
                 device_vars = {
                     "sextoy_name": StringVar(value=name)
                 }
@@ -237,15 +245,17 @@ class SexToysTab(ScrollFrame):
                 
                 self.vars.sextoys[idx] = device_vars
                 
-                # Добавляем в список
+                # Add device to list
                 self.devices_listbox.insert('end', name)
                 self.known_devices.append(name)
                 self.device_indices.append({"sextoy_index": idx})
 
+        # If still connected, poll for new devices every second
         if self.sextoy.connected:
             self.after(1000, self.update_devices)
 
     def on_device_select(self, event):
+        # Clear existing settings UI
         for w in self.settings_frame.winfo_children():
             w.destroy()
 
@@ -255,18 +265,16 @@ class SexToysTab(ScrollFrame):
         
         listbox_idx = sel[0]
         
-        # Get the real device index
         try:
             device_index = self.device_indices[listbox_idx]["sextoy_index"]
         except (IndexError, KeyError):
             return
         
-        # Directly access the device settings dictionary with Tkinter variables
         device_settings = self.vars.sextoys[device_index]
 
         ConfigTitle(self.settings_frame, "Device Settings").pack()
 
-        # Create UI elements for each setting
+        # Build UI controls for each setting group
         for group_name, settings in self.setting_groups.items():
             group_frame = ConfigSection(self.settings_frame, group_name)
             group_frame.pack()
@@ -278,7 +286,6 @@ class SexToysTab(ScrollFrame):
                 setting_type = self.setting_types[setting]
                 label = setting.replace('_', ' ').title()
                 
-                # Для каждой настройки создаем отдельный ConfigRow
                 if setting_type == PERCENTAGE:
                     scale = ConfigScale(row, label=f"{label}", variable=var, from_=0, to=100)
                     scale.pack()
@@ -288,23 +295,21 @@ class SexToysTab(ScrollFrame):
                     cb.pack()
                 
                 elif setting_type == FLOAT:
-                    scale = ConfigFloatScale(row, variable=var, from_=0.0, to=3.0, label=f"{label} (sec):",
-                                 resolution=0.1)
+                    scale = ConfigFloatScale(row, variable=var, from_=0.0, to=3.0, label=f"{label} (sec):", resolution=0.1)
                     scale.pack()
         
+        # Refresh scrollbar region after UI changes
         self.after(100, self.update_scrollregion)
             
     def update_scrollregion(self):
-        """Обновляет область прокрутки после изменения контента"""
-        self.update_idletasks()  # Форсируем обновление геометрии
-        self.onFrameConfigure(None)  # Пересчитываем область прокрутки
-        self.onCanvasConfigure()  # Перепроверяем необходимость скроллбара
+        """Refreshes the scroll region after content changes"""
+        self.update_idletasks()  # Force geometry update
+        self.onFrameConfigure(None)  # Recalculate scroll region
+        self.onCanvasConfigure()  # Check scrollbar necessity
 
     def checkAndReturnValue(key, index):
-        if "sextoys" in config \
-          and index in config["sextoys"] \
-          and key in config["sextoys"][index]:
+        # Return the configured value for key/index or default
+        if "sextoys" in config and index in config["sextoys"] and key in config["sextoys"][index]:
             return config["sextoys"][index][key]
         else:
-            return 50  # default
-        
+            return 50  # default value
