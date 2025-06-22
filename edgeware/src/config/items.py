@@ -123,7 +123,7 @@ class Item:
 
 # fmt: off
 CONFIG_ITEMS = {
-    # Startup
+    # Start
     "pack_path": Item("packPath", Schema(Union(str, None)), StringVar, lambda value: value),
     "theme": Item("themeType", Schema(Union("Original", "Dark", "The One", "Ransom", "Goth", "Bimbo")), StringVar, lambda value: THEMES[value]),
     "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, None, block=True),
@@ -132,8 +132,7 @@ CONFIG_ITEMS = {
     "desktop_icons": Item("desktopIcons", BOOLEAN, BooleanVar, bool, block=True),
     "safe_mode": Item("safeMode", BOOLEAN, BooleanVar, None, block=True),
     "message_off": Item("messageOff", BOOLEAN, BooleanVar, None, block=True),
-    "global_panic_key": Item("globalPanicButton", STRING, StringVar, str, block=True),
-    # while disabling panic could be used for danger-chasing fetishists, changing the hotkey serves little purpose
+    "global_panic_key": Item("globalPanicButton", STRING, StringVar, str, block=True),  # while disabling panic could be used for danger-chasing fetishists, changing the hotkey serves little purpose
     "preset_danger": Item("presetsDanger", BOOLEAN, BooleanVar, None, block=True),
 
     # Popup Types
@@ -147,8 +146,7 @@ CONFIG_ITEMS = {
     "max_video": Item("maxVideos", NONNEGATIVE, IntVar, int),
     "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),
     "web_chance": Item("webMod", PERCENTAGE, IntVar, int),
-    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),
-    # could be cut from dangers as it's not listed as dangerous in config but could lead to bad performance
+    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # could be cut from dangers as it's not listed as dangerous in config but could lead to bad performance
     "prompt_chance": Item("promptMod", PERCENTAGE, IntVar, int),
     "prompt_max_mistakes": Item("promptMistakes", NONNEGATIVE, IntVar, int),
     "subliminal_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
@@ -184,17 +182,14 @@ CONFIG_ITEMS = {
 
     # Dangerous
     "panic_lockout": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "panic_lockout_password": Item("safeword", STRING, StringVar, str, block=True),
-    # imo, the safeword is a safeword for a reason (timer mode)
-    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),
-    # Corruption won't work
+    "panic_lockout_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
+    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
     "drive_avoid_list": Item("avoidList", STRING, None, lambda value: value.split(">"), block=True),
     "fill_drive": Item("fill", BOOLEAN, BooleanVar, bool, danger=True),
     "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: value * 10, danger=True),
     "replace_images": Item("replace", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
     "replace_threshold": Item("replaceThresh", NONNEGATIVE, IntVar, int, block=True),  # Corruption won't work
-    "drive_path": Item("drivePath", STRING, StringVar, str, block=True),
-    # We can't know what paths exist and they look different on Linux and Windows
+    "drive_path": Item("drivePath", STRING, StringVar, str, block=True),  # We can't know what paths exist and they look different on Linux and Windows
     "panic_disabled": Item("panicDisabled", BOOLEAN, BooleanVar, bool, danger=True),
     "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None, block=True),
     "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
@@ -215,8 +210,7 @@ CONFIG_ITEMS = {
     "hibernate_fix_wallpaper": Item("fixWallpaper", BOOLEAN, BooleanVar, bool),
 
     # Corruption
-    "corruption_mode": Item("corruptionMode", BOOLEAN, BooleanVar, bool, block=True),
-    # if you're turning off corruption mode with corruption just make it the final level lmao
+    "corruption_mode": Item("corruptionMode", BOOLEAN, BooleanVar, bool, block=True),  # if you're turning off corruption mode with corruption just make it the final level lmao
     "corruption_full": Item("corruptionFullPerm", BOOLEAN, BooleanVar, bool, block=True),
     "corruption_trigger": Item("corruptionTrigger", Schema(Union("Timed", "Popup", "Launch")), StringVar, str),
     "corruption_fade": Item("corruptionFadeType", Schema(Union("Normal", "Abrupt")), StringVar, str),
