@@ -173,7 +173,7 @@ class Popup(Toplevel):
 
     def try_button(self) -> None:
         if self.settings.buttonless:
-            self.bind("<ButtonRelease-1>", lambda event: self.click())
+            self.bind("<ButtonRelease-1>", lambda _: self.click())
         else:
             button = Button(
                 self,

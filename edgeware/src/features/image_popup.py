@@ -35,8 +35,9 @@ class ImagePopup(Popup, VibrationMixin):
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, sextoy: Sextoy) -> None:
         self.media = pack.random_image()
         self.hypno = roll(settings.hypno_chance)
+
         self.sextoy = sextoy
-        if not self.should_init(settings, state):
+        if not self.should_init():
             return
         
         VibrationMixin.__init__(self)
@@ -50,7 +51,7 @@ class ImagePopup(Popup, VibrationMixin):
                 result = booru.resolve(asyncio.run(gel.search_image(query=self.settings.booru_tags, limit=1)))
                 data = requests.get(result[0], stream=True)
                 image = Image.open(data.raw)
-            except KeyError:
+            except Exception:
                 logging.error(f'No results for tags "{self.settings.booru_tags}" on Gelbooru')
                 image = Image.open(self.media)
         else:
@@ -60,7 +61,7 @@ class ImagePopup(Popup, VibrationMixin):
         # Static          -> image
         # Static,   hypno -> image overlay, mpv
         # Animated        -> mpv
-        # Animated, hypnp -> mpv, ?
+        # Animated, hypno -> mpv, ?
 
         if getattr(image, "n_frames", 0) > 1:
             self.player = VideoPlayer(self, self.settings, self.width, self.height)
@@ -91,7 +92,7 @@ class ImagePopup(Popup, VibrationMixin):
 
         self.init_finish()
 
-    def should_init(self, settings: Settings, state: State) -> bool:
+    def should_init(self) -> bool:
         return self.media
 
     def close(self) -> None:
