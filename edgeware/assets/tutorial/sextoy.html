@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <style>
+    div{
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    p{
+      text-align: justify;
+      text-justify: inter-word;
+    }
+    .center{
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    img{
+      border: 3px;
+      border-style: double;
+      max-width: 95%;
+    }
+    figcaption{
+      font-style: italic;
+      padding-top: 2px;
+      padding-bottom: 2px;
+    }
+    code{
+      padding: 2px;
+      font-size: 105%;
+    }
+  </style>
+  <body>
+    <center><h1>Connecting Your Toys to Edgeware++ via Intiface Central</h1><i><h5>(Follow these steps to get started)</h5></i></center>
+    <div>
+      <p>In this section, we’ll walk you through how to connect your toys to Edgeware++ using Intiface Central. First, download Intiface Central from <a href="https://intiface.com/central/">https://intiface.com/central/</a>. If you don’t have a Bluetooth adapter or built-in Bluetooth on your computer, don’t worry—you can install Intiface Central on your phone and link it to the desktop version (which will run in Repeater mode).</p>
+    </div>
+
+    <center><h2>1. Configuring Intiface Central on a Computer with Bluetooth</h2></center>
+    <div>
+      <ol>
+        <li>Launch Intiface Central (make sure your Bluetooth adapter is plugged in or your built-in Bluetooth is enabled).</li>
+        <li>Open the Edgeware++ Config and go to <b>Annoyance/Runtime &rarr; Sex Toys</b>.
+          <img src="images/SexToy/SextoySettingsDefault.png" alt="Sextoy Default Settings" class="center">
+        </li>
+        <li>Copy the <i>Server Address</i> from Intiface Central into the <i>Intiface Settings</i> field under the Sex Toys tab.
+          <img src="images/SexToy/AddressEnter.png" alt="Entering Address" class="center">
+        </li>
+        <li>In Intiface Central, switch <i>App Mode</i> to <b>Engine</b> (found under the App Modes tab) and start the server.
+          <img src="images/SexToy/IFD_AppModeSelect.png" alt="Engine Mode" class="center">
+        </li>
+        <li>
+          Start the server in Intiface Central.
+          <img src="images/SexToy/IFD_RunServer.png" alt="Run Server" class="center">
+        </li>
+        <li>Click <b>Connect</b> in Edgeware++ on the Sex Toys tab.</li>
+        <li>Put each toy you wish to connect into pairing mode (ensure no other sextoy applications are running to avoid signal interference).</li>
+        <li>
+          Click <b>Start Scanning</b> in Intiface Central under the Devices tab.
+          <img src="images/SexToy/IFD_StartScanning.png" alt="Start Scan" class="center">
+        </li>
+        <li>Connected toys will appear in the <i>Sex Toys Settings</i> list.</li>
+        <li>Click on any listed toy to reveal its available settings below.
+          <img src="images/SexToy/SextoySettings.png" alt="Sextoy Settings" class="center">
+        </li>
+      </ol>
+    </div>
+
+    <center><h2>2. Configuring Intiface Central in Repeater Mode (Mobile &amp; Desktop)</h2></center>
+    <div>
+      <ol>
+        <li>On your mobile device, launch Intiface Central (Mobile), connect to the same Wi‑Fi network as your computer, and enable Bluetooth.</li>
+        <li>On your computer, open Intiface Central (Desktop).</li>
+        <li>In Intiface Central (Desktop), go to Settings and enable <b>Show Repeater Mode (EXPERIMENTAL)</b> if it isn’t already enabled. If it is missing - it's ok, you can skip this step
+          <img src="images/SexToy/IFD_SettingsRepeaterMode.png" alt="Start Scan" class="center">
+        </li>
+        <li>Switch the App Mode to <b>Repeater</b> (under App Modes), then paste the address from Intiface Central (Mobile) into <i>Remote Server Address</i> in the Intiface Central (Desktop) in App Modes Tab.
+          <img src="images/SexToy/RepeaterModeSwitch.png" alt="Start Scan" class="center">
+          <img src="images/SexToy/EnterAddress.png" alt="Enter Address" class="center">
+        </li>
+        <li>Start the server on both Desktop and Mobile Intiface Central.
+          <img src="images/SexToy/IFD_RunServer.png" alt="Run Server" class="center">
+          <img src="images/SexToy/IFM_MobileDevicesTab.png" alt="Run Server" class="center">
+        </li>
+        <li>In Edgeware++, enter <code>ws://127.0.0.1:12345</code> (or <code>ws://localhost:12345</code>) into the <i>Intiface Settings</i> field under Sex Toys Tab.</li>
+        <li>Click <b>Connect</b> in Edgeware++ on the Sex Toys tab.</li>
+        <li>Put your toys into pairing mode (ensure no other sextoy applications are running to avoid signal interference).</li>
+        <li>Click <b>Start Scanning</b> in Intiface Central (Mobile) under the Devices tab.
+          <img src="images/SexToy/IFM_MobileRunning.png" alt="Start Scan" class="center">
+        </li>
+        <li>Connected toys will appear in the <i>Sex Toys Settings</i> list.</li>
+        <li>Click on any listed toy to reveal its available settings below.
+          <img src="images/SexToy/SextoySettings.png" alt="Sextoy Settings" class="center">
+        </li>
+      </ol>
+    </div>
+
+    <center><h2>3. Toy Settings Explained</h2></center>
+    <div>
+      <ul>
+        <li><b>General Vibration</b> – Maximum vibration strength as a percentage of the toy’s full power.</li>
+        <li><b>Image Popup Open Settings</b> – Chance, force, and length of vibration when an image popup appears (note: force is relative to the general vibration setting).</li>
+        <li><b>Image Popup Close Settings</b> – Vibration settings for image popups closing or disappearing.</li>
+        <li><b>Video Popup Open Settings</b> – Vibration settings for video popups opening.</li>
+        <li><b>Video Popup Close Settings</b> – Vibration settings for video popups closing or disappearing.</li>
+        <li><b>Captions Settings</b> – Vibration settings for subtitle/caption popups.</li>
+        <li><b>Notifications Settings</b> – Vibration settings for notification popups.</li>
+        <li><b>Prompts Settings</b> – Vibration settings for prompt dialogs.</li>
+        <li><b>Prompt Lock</b> – When <i>Prompt Enabled</i> is on, the toy will vibrate at the specified force until the prompt is correctly entered, ignoring other events.</li>
+      </ul>
+    </div>
+  </body>
+</html>

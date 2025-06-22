@@ -219,15 +219,12 @@ class Sextoy:
             logging.info(f"vibrate_once: continuous active at stop phase, skipping stop for {device_index}")
         else:
             # STOP with ACK
-            logging.info("I AM HERE")
-            
             if not dev.actuators:
                 logging.info(f"No actuators to vibrate on device {device_index}")
             else:
                 # START with ACK
                 clockwise = bool(random.getrandbits(1))
                 self.vibration_index += 1
-                logging.info("I AM HERE")
                 for act in dev.actuators:
                     asyncio.run_coroutine_threadsafe(
                         self._run_actuator(act, speed, duration, device_index),

@@ -175,6 +175,42 @@ CONFIG_ITEMS = {
     "wallpaper_timer": Item("wallpaperTimer", NONNEGATIVE, IntVar, s_to_ms),
     "wallpaper_variance": Item("wallpaperVariance", NONNEGATIVE, IntVar, s_to_ms),
 
+    # Sextoys
+        "sextoys": Item(
+            "sextoys",
+            Schema({
+            str: Schema({
+                "sextoy_name": STRING,
+                "sextoy_general_vibration_force": PERCENTAGE,
+                "sextoy_image_open_chance": PERCENTAGE,
+                "sextoy_image_open_vibration_force": PERCENTAGE,
+                "sextoy_image_open_vibration_length": FLOAT,
+                "sextoy_image_close_chance": PERCENTAGE,
+                "sextoy_image_close_vibration_force": PERCENTAGE,
+                "sextoy_image_close_vibration_length": FLOAT,
+                "sextoy_video_open_chance": PERCENTAGE,
+                "sextoy_video_open_vibration_force": PERCENTAGE,
+                "sextoy_video_open_vibration_length": FLOAT,
+                "sextoy_video_close_chance": PERCENTAGE,
+                "sextoy_video_close_vibration_force": PERCENTAGE,
+                "sextoy_video_close_vibration_length": FLOAT,
+                "sextoy_caption_chance": PERCENTAGE,
+                "sextoy_caption_vibration_force": PERCENTAGE,
+                "sextoy_caption_vibration_length": FLOAT,
+                "sextoy_display_notification_chance": PERCENTAGE,
+                "sextoy_display_notification_vibration_force": PERCENTAGE,
+                "sextoy_display_notification_vibration_length": FLOAT,
+                "sextoy_prompt_enabled": BOOLEAN,
+                "sextoy_prompt_vibration_force": PERCENTAGE,
+            })
+        }),
+            # VAR: initial factory for the value in Vars; an empty dict
+            DictVar,
+            # setting factory: unwrap into pure primitives
+            serialize_sextoys
+        ),
+        "initface_address": Item("initfaceAddress", STRING, StringVar, str),
+
     # Booru
     "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),
     "booru_tags": Item("tagList", STRING, None, lambda value: value.replace(">", " ")),

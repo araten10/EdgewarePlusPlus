@@ -295,7 +295,7 @@ class SexToysTab(ScrollFrame):
                     cb.pack()
                 
                 elif setting_type == FLOAT:
-                    scale = ConfigFloatScale(row, variable=var, from_=0.0, to=3.0, label=f"{label} (sec):", resolution=0.1)
+                    scale = ConfigFloatScale(row, variable=var, from_=0.5, to=3.0, label=f"{label} (sec):", resolution=0.1)
                     scale.pack()
         
         # Refresh scrollbar region after UI changes

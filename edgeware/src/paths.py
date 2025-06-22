@@ -62,6 +62,7 @@ class Assets:
     TUTORIAL_INTRO = TUTORIAL / "intro.html"
     TUTORIAL_GETSTARTED = TUTORIAL / "gettingstarted.html"
     TUTORIAL_BASICSETTINGS = TUTORIAL / "basicsettings.html"
+    TUTORIAL_SEXTOY = TUTORIAL / "sextoy.html"
 
 
 @dataclass
