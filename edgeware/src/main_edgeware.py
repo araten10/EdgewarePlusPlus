@@ -34,11 +34,12 @@ if __name__ == "__main__":
 from threading import Thread
 from tkinter import Tk
 
-import pygame
+import pyglet
 import asyncio
 import utils
 from config import first_launch_configure
 from config.settings import Settings
+from features.audio import play_audio
 from features.corruption import corruption_danger_check, handle_corruption
 from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
@@ -53,7 +54,6 @@ from features.misc import (
     make_desktop_icons,
     make_tray_icon,
     open_web,
-    play_audio,
 )
 from features.prompt import Prompt
 from features.startup_splash import StartupSplash
@@ -100,19 +100,12 @@ if __name__ == "__main__":
     settings = Settings()
     pack = Pack(settings.pack_path)
     state = State()
-    pygame.init()
     sextoy = Sextoy(settings)
 
     connection_thread = Thread(target=run_connection_loop, args=(sextoy,), daemon=True)
     connection_thread.start()
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
-
-    # if sound is laggy or strange try changing buffer size (doc: https://www.pygame.org/docs/ref/mixer.html)
-    # TODO: check if pygame.mixer.quit() is preferable to use in panic? seems fine without it
-    pygame.mixer.init()
-    pygame.mixer.set_num_channels(settings.max_audio)
-
     corruption_danger_check(settings, pack)
 
     # GPU_CTXS = ["x11", "x11egl", "x11vk"]
@@ -128,18 +121,18 @@ if __name__ == "__main__":
         RollTarget(lambda: VideoPopup(root, settings, pack, state, sextoy), lambda: settings.video_chance if not settings.mitosis_mode else 0),
         RollTarget(lambda: SubliminalPopup(settings, pack), lambda: settings.subliminal_chance),
         RollTarget(lambda: Prompt(settings, pack, state, sextoy), lambda: settings.prompt_chance),
-        RollTarget(lambda: play_audio(root, settings, pack), lambda: settings.audio_chance),
+        RollTarget(lambda: play_audio(root, settings, pack, state), lambda: settings.audio_chance),
         RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
         RollTarget(lambda: display_notification(settings, pack, sextoy), lambda: settings.notification_chance),
     ]
 
 
     def start_main() -> None:
-        Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
+        Thread(target=lambda: replace_images(settings, pack), daemon=True).start()  # Thread for performance reasons
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
         make_desktop_icons(settings)
         handle_corruption(root, settings, pack, state)
-        handle_discord(root, settings, pack)
+        handle_discord(settings, pack)
         handle_panic_lockout(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
         handle_keyboard(root, settings, state)
@@ -156,4 +149,5 @@ if __name__ == "__main__":
     else:
         start_main()
 
+    Thread(target=pyglet.app.run, daemon=True).start()  # Required for pyglet events
     root.mainloop()

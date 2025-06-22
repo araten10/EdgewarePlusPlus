@@ -25,7 +25,6 @@ from tkinter import Tk
 
 import os_utils
 import pystray
-import pyglet
 from config.settings import Settings
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
@@ -39,91 +38,6 @@ from pynput import keyboard
 from pypresence import Presence
 from roll import roll
 from state import State
-
-# Global list to keep active players alive
-_active_players: list[pyglet.media.Player] = []
-# Run our update ticks(fades) once in the `tickrate` milliseconds
-# This number is responsible for the smoothness of our fade_in and fade_out functions
-tickrate = 16
-tickrate_in_seconds = tickrate / 1000
-
-def play_audio(root: Tk, settings: Settings, pack: Pack) -> None:
-    # Clean up finished players
-    _active_players[:] = [p for p in _active_players if p.playing]
-    # Enforce max_audio limit
-    if len(_active_players) >= settings.max_audio:
-        return
-
-    audio = pack.random_audio()
-    if not audio:
-        return
-
-    path = str(audio)
-    # Load in streaming mode to avoid loading entire file into RAM
-    src = pyglet.media.load(path, streaming=True)
-    player = pyglet.media.Player()
-    player.volume = settings.audio_volume
-    player.queue(src)
-    player.play()
-
-    # Remember this player
-    _active_players.append(player)
-
-    # Start fade-in and schedule fade-out
-    # TODO: take fade_durations to settings page of config window
-    fade_in_duration = 1
-    fade_out_duration = 1
-    fade_in(root, player, fade_in_duration)
-    schedule_fade_out(root, player, fade_out_duration)
-
-def fade_in(root: Tk, player: pyglet.media.Player, fade_duration: float):
-    """Gradually raise volume from 0 to the original level over `fade_duration` seconds."""
-    target = getattr(player, '_volume_target', player.volume)
-    player._volume_target = target
-    player.volume = 0.0
-
-    steps = int(fade_duration / tickrate_in_seconds)
-    delta = target / steps if steps else target
-
-    def step(count=0):
-        new_v = player.volume + delta
-        if count >= steps or new_v >= target:
-            player.volume = target
-        else:
-            player.volume = new_v
-            root.after(tickrate, lambda: step(count+1))
-
-    root.after(0, step)
-
-def schedule_fade_out(root: Tk, player: pyglet.media.Player, fade_duration: float):
-    """Arrange for fade-out to start `duration` seconds before playback ends."""
-    def setup():
-        length_ms = int((player.source.duration or 0) * 1000)
-        delay = length_ms - fade_duration * 1000
-        root.after(delay, lambda: fade_out(root, player, fade_duration))
-
-    root.after(100, setup)
-
-def fade_out(root: Tk, player: pyglet.media.Player, fade_duration: float):
-    """Smoothly lower volume to 0 over `duration` seconds, then pause the player."""
-    start_v = player.volume
-    steps = int(fade_duration / tickrate_in_seconds)
-    delta = start_v / steps if steps else start_v
-    
-    def step(count=0):
-        new_v = player.volume - delta
-        if count >= steps or new_v <= 0:
-            player.volume = 0.0
-            player.pause()
-            try:
-                _active_players.remove(player)
-            except ValueError:
-                pass
-        else:
-            player.volume = new_v
-            root.after(tickrate, lambda: step(count+1))
-
-    root.after(0, step)
 
 
 def open_web(pack: Pack) -> None:
@@ -199,7 +113,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
         os_utils.set_wallpaper(pack.wallpaper)
 
 
-def handle_discord(root: Tk, settings: Settings, pack: Pack) -> None:
+def handle_discord(settings: Settings, pack: Pack) -> None:
     if not settings.show_on_discord:
         return
 

@@ -45,6 +45,7 @@ def init_logging(filename: str) -> str:
 
     logging.basicConfig(level=logging.INFO, force=True, handlers=handlers)
 
+    logging.info(f"Python version: {sys.version}")
     return log_file
 
 

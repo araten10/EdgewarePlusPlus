@@ -19,6 +19,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+import pyglet
+
 
 @dataclass
 class Subject:
@@ -39,6 +41,8 @@ class State:
     _popup_number = Subject(0)
     prompt_active = False
     video_number = 0
+
+    audio_players: list[pyglet.media.Player] = field(default_factory=list)
 
     # popup_id -> (width, height, x, y)
     popup_geometries: dict[int, (int, int, int, int)] = field(default_factory=dict)
