@@ -42,7 +42,7 @@ class ImagePopup(Popup, VibrationMixin):
         
         VibrationMixin.__init__(self)
 
-        super().__init__(root, settings, pack, state)
+        super().__init__(root, settings, pack, state, sextoy)
 
         # TODO: Better booru integration
         if self.settings.booru_download and roll(50):
