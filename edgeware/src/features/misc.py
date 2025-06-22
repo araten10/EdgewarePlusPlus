@@ -51,7 +51,7 @@ def display_notification(settings: Settings, pack: Pack, sextoy: Sextoy) -> None
     if not notification:
         return
 
-    # Создаем экземпляр VibrationMixin для вибрации
+    # Instantiate VibrationMixin to trigger vibration alongside notification
     vibrator = VibrationMixin()
     vibrator.trigger_vibration("display_notification", getattr(settings, 'sextoys', {}), sextoy)
 
@@ -135,21 +135,19 @@ def handle_panic_lockout(root: Tk, settings: Settings, state: State) -> None:
 
 
 def mitosis_popup(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
-    # Imports done here to avoid circular imports
+    # Imports done here to avoid circular dependencies
     from features.image_popup import ImagePopup
     from features.video_popup import VideoPopup
 
     try:
         popup = random.choices([ImagePopup, VideoPopup], [settings.image_chance, settings.video_chance], k=1)[0]
     except ValueError:
-        popup = ImagePopup  # Exception thrown when both chances are 0
+        popup = ImagePopup  # Thrown when both chances are zero
     popup(root, settings, pack, state)
 
 
 def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     if settings.mitosis_mode:
-        # Import done here to avoid circular imports
-
         def observer() -> None:
             if state.popup_number == 0:
                 mitosis_popup(root, settings, pack, state)

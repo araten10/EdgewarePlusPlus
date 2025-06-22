@@ -57,10 +57,10 @@ class VibrationMixin:
                     sextoy.vibrate(device_idx, force, duration)
                     
                 except Exception as e:
-                    print(f"Device {device_id} vibration error: {str(e)}")
+                    logging.info(f"Device {device_id} vibration error: {str(e)}")
                     
         except Exception as e:
-            print(f"Vibration system error: {str(e)}")
+            logging.info(f"Vibration system error: {str(e)}")
 
     def start_continuous_vibration(self, event_type: str, settings: Dict[str, Any], sextoy: Any) -> None:
         """
@@ -109,10 +109,10 @@ class VibrationMixin:
                     self.active_vibrations[event_type][device_idx] = True
                     
                 except Exception as e:
-                    print(f"Continuous vibration start error for {event_type}, device {device_id}: {str(e)}")
+                    logging.info(f"Continuous vibration start error for {event_type}, device {device_id}: {str(e)}")
                     
         except Exception as e:
-            print(f"Continuous vibration system error for {event_type}: {str(e)}")
+            logging.info(f"Continuous vibration system error for {event_type}: {str(e)}")
 
     def stop_continuous_vibration(self, event_type: str, sextoy: Any) -> None:
         """
@@ -137,7 +137,7 @@ class VibrationMixin:
             self.active_vibrations.pop(event_type, None)
             
         except Exception as e:
-            print(f"Continuous vibration stop system error for {event_type}: {str(e)}")
+            logging.info(f"Continuous vibration stop system error for {event_type}: {str(e)}")
 
     def _check_sextoy_ready(self, sextoy: Any, require_devices: bool = True) -> bool:
         """Checks if the sextoy is ready for use"""

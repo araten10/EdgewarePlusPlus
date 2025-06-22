@@ -87,7 +87,7 @@ class ImagePopup(Popup, VibrationMixin):
         try:
             self.trigger_vibration("image_open", getattr(self.settings, 'sextoys', {}), self.sextoy)
         except Exception as e:
-            print(f"Image open vibration error: {str(e)}")
+            logging.info(f"Image open vibration error: {str(e)}")
             
 
         self.init_finish()
@@ -99,7 +99,7 @@ class ImagePopup(Popup, VibrationMixin):
         try:
             self.trigger_vibration("image_close", getattr(self.settings, 'sextoys', {}), self.sextoy)
         except Exception as e:
-            print(f"Image close vibration error: {str(e)}")
+            logging.info(f"Image close vibration error: {str(e)}")
         if hasattr(self, "player"):
             self.player.close()
         super().close()
