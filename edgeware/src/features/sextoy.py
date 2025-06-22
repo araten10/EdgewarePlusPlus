@@ -69,7 +69,7 @@ class Sextoy:
         try:
             await self._client.connect(self._connector)
             self.connected = True
-            logging.info("✅ Successfully connected to initface")
+            logging.info("Successfully connected to initface")
             self._loop.create_task(self._scan_loop())
         except Exception as e:
             logging.error(f"Connection error: {e}")
@@ -83,7 +83,7 @@ class Sextoy:
                 await asyncio.sleep(scan_duration)
                 await self._client.stop_scanning()
             except Exception as e:
-                logging.warning(f"⚠️ Scan error: {e}")
+                logging.warning(f"Scan error: {e}")
             await asyncio.sleep(interval)
 
     @property
@@ -92,7 +92,7 @@ class Sextoy:
 
     def disconnect(self):
         if not self.connected:
-            logging.info("🔌 Not connected")
+            logging.info("Not connected")
             return
         async def _do_disconnect():
             await self._client.disconnect()
@@ -219,15 +219,12 @@ class Sextoy:
             logging.info(f"vibrate_once: continuous active at stop phase, skipping stop for {device_index}")
         else:
             # STOP with ACK
-            logging.info("I AM HERE")
-            
             if not dev.actuators:
                 logging.info(f"No actuators to vibrate on device {device_index}")
             else:
                 # START with ACK
                 clockwise = bool(random.getrandbits(1))
                 self.vibration_index += 1
-                logging.info("I AM HERE")
                 for act in dev.actuators:
                     asyncio.run_coroutine_threadsafe(
                         self._run_actuator(act, speed, duration, device_index),

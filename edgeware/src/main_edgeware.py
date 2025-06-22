@@ -77,7 +77,7 @@ def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) ->
 async def keep_connection_alive(sextoy):
     while True:
         if not sextoy.connected:
-            logging.ingo(f"Connection status: {sextoy.connection_status}")
+            logging.info(f"Connection status: {sextoy.connection_status}")
             success = await sextoy.connect_async()
             if success:
                 logging.info("Successfully connected")
