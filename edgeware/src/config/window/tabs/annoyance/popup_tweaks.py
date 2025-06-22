@@ -73,7 +73,7 @@ class PopupTweaksTab(ScrollFrame):
 
         ConfigScale(denial_row, label="Denial Chance (%)", from_=0, to=100, variable=vars.denial_chance).pack()
 
-        #Opacity & Clickthrough
+        # Opacity & Clickthrough
         opacity_section = ConfigSection(self.viewPort, "Opacity")
         opacity_section.pack()
 
@@ -97,7 +97,7 @@ class PopupTweaksTab(ScrollFrame):
 
         timeout_row = ConfigRow(timeout_section)
         timeout_row.pack()
-        
+
         # Misc Tweaks
         misc_section = ConfigSection(self.viewPort, "Misc. Tweaks", MISC_TEXT)
         misc_section.pack()

@@ -22,20 +22,20 @@ import time
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
-from ctypes import windll
 
-import os_utils
 import utils
 from config.settings import Settings
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
+from os_utils import set_borderless, set_clickthrough
 from pack import Pack
 from panic import panic
 from paths import Data
 from PIL import ImageFilter
 from roll import roll
 from state import State
+
 
 class Popup(Toplevel):
     media: Path  # Defined by subclasses
@@ -55,7 +55,7 @@ class Popup(Toplevel):
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, condition=(event.keysym == self.settings.panic_key)))
         self.attributes("-topmost", True)
-        os_utils.set_borderless(self)
+        set_borderless(self)
 
         self.opacity = self.settings.opacity
         self.attributes("-alpha", self.opacity)
@@ -141,18 +141,7 @@ class Popup(Toplevel):
 
     def try_clickthrough(self) -> None:
         if self.settings.clickthrough_enabled:
-            WS_EX_LAYERED = 0x00080000
-            WS_EX_TRANSPARENT = 0x00000020
-            GWL_EXSTYLE = -20
-
-            try:
-                hwnd = windll.user32.GetParent(self.winfo_id())
-                #print(f"hwnd = {hwnd}, {self}")
-                ex_style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-                ex_style |= WS_EX_TRANSPARENT | WS_EX_LAYERED
-                windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex_style)
-            except Exception as e:
-                print(e)
+            set_clickthrough(self)
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
         mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]

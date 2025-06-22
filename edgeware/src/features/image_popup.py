@@ -29,6 +29,7 @@ from PIL import Image, ImageTk
 from roll import roll
 from state import State
 
+
 class ImagePopup(Popup):
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         self.media = pack.random_image()
