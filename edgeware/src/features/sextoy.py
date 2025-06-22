@@ -313,4 +313,4 @@ class Sextoy:
     # -----------------------------------------------------------
     def list_devices(self):
         for idx, dev in self._client.devices.items():
-            print(f"[{idx}] {dev} — channels: {len(dev.actuators)}")
+            logging.info(f"[{idx}] {dev} — channels: {len(dev.actuators)}")

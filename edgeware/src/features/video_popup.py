@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-import random
+import logging
 
 from tkinter import Tk
 from config.settings import Settings
@@ -48,7 +48,7 @@ class VideoPopup(Popup, VibrationMixin):
             try:
                 self.trigger_vibration("video_open", getattr(settings, 'sextoys', {}), sextoy)
             except Exception as e:
-                print(f"Video open vibration error: {str(e)}")
+                logging.info(f"Video open vibration error: {str(e)}")
 
         self.init_finish()
 
@@ -63,7 +63,7 @@ class VideoPopup(Popup, VibrationMixin):
             try:
                 self.trigger_vibration("video_close", getattr(self.settings, 'sextoys', {}), self.sextoy)
             except Exception as e:
-                print(f"Video close vibration error: {str(e)}")
+                logging.info(f"Video close vibration error: {str(e)}")
         self.player.close()
         super().close()
         self.state.video_number -= 1

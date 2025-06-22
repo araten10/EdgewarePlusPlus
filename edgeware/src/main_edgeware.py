@@ -37,6 +37,7 @@ from tkinter import Tk
 import pyglet
 import asyncio
 import utils
+import logging
 from config import first_launch_configure
 from config.settings import Settings
 from features.audio import play_audio
@@ -72,16 +73,16 @@ def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) ->
     Thread(target=lambda: fill_drive(root, settings, pack, state), daemon=True).start()  # Thread for performance reasons
     root.after(settings.delay, lambda: main(root, settings, pack, targets))
 
-# Добавляем функцию для поддержания соединения
+# Adding function to keep connection alive
 async def keep_connection_alive(sextoy):
     while True:
         if not sextoy.connected:
-            print(f"Connection status: {sextoy.connection_status}")
+            logging.ingo(f"Connection status: {sextoy.connection_status}")
             success = await sextoy.connect_async()
             if success:
-                print("Successfully connected")
+                logging.info("Successfully connected")
             else:
-                print("Connection attempt failed")
+                logging.info("Connection attempt failed")
                 
         await asyncio.sleep(5)
 
@@ -107,13 +108,6 @@ if __name__ == "__main__":
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
     corruption_danger_check(settings, pack)
-
-    # GPU_CTXS = ["x11", "x11egl", "x11vk"]
-    # mpv_pool = MpvPool(
-    #     size=50,
-    #     gpu_contexts=GPU_CTXS,
-    #     hwdec="auto" if settings.video_hardware_acceleration else "no"
-    # )
 
     # TODO: Use a dict?
     targets = [
