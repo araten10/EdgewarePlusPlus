@@ -49,7 +49,8 @@ class VibrationMixin:
                     logging.info(f'Must vibrate for {duration} seconds')
                         
                     # Нормализация параметров
-                    force = self._normalize_force(force_pct)
+                    force = self._normalize_force(force_pct, device_settings)
+
                     duration = max(0.1, min(10.0, float(duration)))
                     
                     # Вызов вибрации
@@ -99,7 +100,7 @@ class VibrationMixin:
                         continue
                         
                     # Нормализация параметров
-                    force = self._normalize_force(force_pct)
+                    force = self._normalize_force(force_pct, device_settings)
                     
                     # Запускаем постоянную вибрацию (duration=0)
                     sextoy.start_vibration(device_idx, force)
@@ -165,10 +166,27 @@ class VibrationMixin:
             return value if isinstance(value, valid_types) else default
         except (AttributeError, TypeError):
             return default
+        
+    def _get_general_limit(self, device_settings: Dict[str, Any]) -> float:
+        """Получает общее ограничение мощности из настроек устройства"""
+        # Значение по умолчанию 100% (без ограничения)
+        default = 100.0
+        try:
+            # Пытаемся получить значение ограничения
+            limit = device_settings.get('sextoy_general_vibration_force', default)
+            
+            # Приводим к float с проверкой
+            return float(limit) if isinstance(limit, (int, float, str)) else default
+        except (TypeError, ValueError):
+            return default
     
-    def _normalize_force(self, force_pct: Union[int, float]) -> float:
+    def _normalize_force(self, force_pct: Union[int, float], settings: Dict[str, Any]) -> float:
         """Нормализует силу вибрации (0-100% → 0.0-1.0)"""
-        return max(0.0, min(1.0, float(force_pct) / 100.0))
+        normalized = max(0.0, min(1.0, float(force_pct) / 100.0))
+
+        normalized_general_limit = max(0.0, min(1.0, float(self._get_general_limit(settings)) / 100.0))
+
+        return round(normalized_general_limit * normalized, 2)
     
     def _normalize_bool(self, value: Any) -> bool:
         """Преобразует значение в bool"""

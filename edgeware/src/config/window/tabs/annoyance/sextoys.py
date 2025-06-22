@@ -180,41 +180,38 @@ class SexToysTab(ScrollFrame):
 
     def toggle_connection(self):
         if not self.sextoy.connected:
-            # Disable the button while we're trying to connect
+            # Отключаем кнопку на время подключения
             self.connect_button.config(state="disabled")
-
-            # Read the latest address from settings
+            
+            # Получаем актуальный адрес из настроек
             raw_addr = self.sextoy._settings.initface_address
             addr = raw_addr.get() if hasattr(raw_addr, "get") else raw_addr
-
-            # Kick off the async connect and grab the Future
+            
+            # Пытаемся подключиться и обрабатываем результат
             future = self.sextoy.connect()
-
-            def on_connect_done(fut):
+            
+            def connection_done(f):
                 try:
-                    # Will raise here if connect() failed
-                    fut.result()
+                    f.result()  # Проверяем результат
+                    # Успешное подключение
+                    self.after(0, lambda: [
+                        self.connect_button.config(text="Disconnect", state="normal"),
+                        self.update_devices()
+                    ])
                 except Exception as e:
-                    # Capture `e` in default arg so it's available later
-                    self.connect_button.after(0, lambda e=e: [
+                    # Ошибка подключения
+                    self.after(0, lambda: [
                         self.connect_button.config(text="Connect", state="normal"),
                         messagebox.showerror(
                             "Connection Error",
                             f"Unable to connect to {addr}:\n{e}"
                         )
                     ])
-                else:
-                    # On success, switch button to "Disconnect" and start updating devices
-                    self.connect_button.after(0, lambda: [
-                        self.connect_button.config(text="Disconnect", state="normal"),
-                        self.update_devices()
-                    ])
-
+            
             if future:
-                future.add_done_callback(on_connect_done)
-
+                future.add_done_callback(connection_done)
         else:
-            # If already connected, just disconnect and reset the button
+            # Отключаемся если уже подключены
             self.sextoy.disconnect()
             self.connect_button.config(text="Connect")
 
