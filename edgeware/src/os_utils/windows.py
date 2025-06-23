@@ -20,6 +20,7 @@ import logging
 import os
 import subprocess
 import tempfile
+from ctypes import windll
 from pathlib import Path
 from tkinter import Toplevel
 
@@ -39,6 +40,17 @@ def close_mpv(player: mpv.MPV) -> None:
 
 def set_borderless(window: Toplevel) -> None:
     window.overrideredirect(True)
+
+
+def set_clickthrough(window: Toplevel) -> None:
+    ws_ex_layered = 0x00080000
+    ws_ex_transparent = 0x00000020
+    gwl_exstyle = -20
+
+    hwnd = windll.user32.GetParent(window.winfo_id())
+    ex_style = windll.user32.GetWindowLongW(hwnd, gwl_exstyle)
+    ex_style |= ws_ex_transparent | ws_ex_layered
+    windll.user32.SetWindowLongW(hwnd, gwl_exstyle, ex_style)
 
 
 def set_wallpaper(wallpaper: Path) -> None:
