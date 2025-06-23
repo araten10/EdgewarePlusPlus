@@ -17,6 +17,7 @@
 
 from tkinter import BooleanVar, Misc
 
+import os_utils
 from config.vars import Vars
 from config.window.utils import config
 from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
@@ -84,7 +85,13 @@ class PopupTweaksTab(ScrollFrame):
         clickthrough_row = ConfigRow(opacity_section)
         clickthrough_row.pack()
 
-        clickthrough_toggle = ConfigToggle(clickthrough_row, "Clickthrough Popups", variable=vars.clickthrough_enabled, cursor="question_arrow")
+        clickthrough_toggle = ConfigToggle(
+            clickthrough_row,
+            "Clickthrough Popups (Windows Only)",
+            variable=vars.clickthrough_enabled,
+            cursor="question_arrow",
+            state=("normal" if os_utils.is_windows() else "disabled"),
+        )
         clickthrough_toggle.pack()
         CreateToolTip(
             clickthrough_toggle,

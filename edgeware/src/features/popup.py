@@ -69,9 +69,6 @@ class Popup(Toplevel):
         self.try_multi_click()
         self.try_timeout()
         self.try_pump_scare()
-
-        if not hasattr(self, "player"):
-            self.wait_visibility()
         self.try_clickthrough()
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
@@ -141,6 +138,8 @@ class Popup(Toplevel):
 
     def try_clickthrough(self) -> None:
         if self.settings.clickthrough_enabled:
+            if not hasattr(self, "player"):
+                self.wait_visibility()
             set_clickthrough(self)
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
