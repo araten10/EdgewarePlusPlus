@@ -29,6 +29,10 @@ def set_borderless(window: Toplevel) -> None:
     pass
 
 
+def set_clickthrough(window: Toplevel) -> None:
+    pass
+
+
 def set_wallpaper(wallpaper: Path) -> None:
     pass
 
