@@ -63,4 +63,5 @@ class Settings:
 
         import os_utils  # Circular import
 
+        self.clickthrough_enabled = self.clickthrough_enabled and os_utils.is_windows()
         self.mpv_subprocess = self.mpv_subprocess and os_utils.is_linux()

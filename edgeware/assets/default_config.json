@@ -90,7 +90,7 @@
   "disabledMonitors": [],
   "mpvSubprocess": 1,
   "audioVolume": 100,
-  "sextoyImage": 0,
+  "clickthroughPopups": 0,
   "initfaceAddress": "ws://127.0.0.1:12345",
   "sextoys": {}
 }

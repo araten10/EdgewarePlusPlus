@@ -41,6 +41,10 @@ def set_borderless(window: Toplevel) -> None:
         window.attributes("-type", "splash")
 
 
+def set_clickthrough(window: Toplevel) -> None:
+    pass
+
+
 def set_wallpaper(wallpaper: Path) -> None:
     desktop = get_desktop_environment()
     commands = get_wallpaper_commands(wallpaper, desktop)

@@ -168,6 +168,7 @@ CONFIG_ITEMS = {
     "disabled_monitors": Item("disabledMonitors", Schema([str]), None, list, block=True),
     "moving_chance": Item("movingChance", PERCENTAGE, IntVar, int),
     "moving_speed": Item("movingSpeed", NONNEGATIVE, IntVar, int),
+    "clickthrough_enabled": Item("clickthroughPopups", BOOLEAN, BooleanVar, bool),
 
     # Wallpaper
     "rotate_wallpaper": Item("rotateWallpaper", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
