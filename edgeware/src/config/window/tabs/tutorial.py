@@ -55,7 +55,7 @@ def open_tutorial(parent: Tk) -> None:
 
     tab_basic_settings = HtmlFrame(tutorial_frame, messages_enabled=False)
     tutorial_notebook.add(tab_basic_settings, text="Settings 101")
-    load_html(tab_basic_settings, Assets.TUTORIAL_UNDERCONSTRUCTION)
+    load_html(tab_basic_settings, Assets.TUTORIAL_BASICSETTINGS)
 
     tab_hibernate_type = ScrollFrame(tutorial_frame)
     tutorial_notebook.add(tab_hibernate_type, text="Hibernate Types")
