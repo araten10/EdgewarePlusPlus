@@ -143,5 +143,5 @@ if __name__ == "__main__":
     else:
         start_main()
 
-    Thread(target=pyglet.app.run, daemon=True).start()  # Required for pyglet events
+    #Thread(target=pyglet.app.run, daemon=True).start()  # Required for pyglet events
     root.mainloop()
