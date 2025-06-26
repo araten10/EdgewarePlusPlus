@@ -14,6 +14,8 @@
 
 •*To adjust for the new clickthrough feature, some settings have been slightly shifted around in the popup tweaks tab*
 
+•*Removed some out of date info in the tutorial tab*
+
 **Version 17**
 
 The long awaited Config Redesign is here! This is another huge update, marked by the fact that it's taken forever to go through and do... but we're pretty happy with it so far! There might be some controversial changes here and there, you might have to update your setting presets as some settings were removed due to redundancy. Hopefully everyone is decently happy with it, and at the end of the day our end goal was making it a lot easier to understand for new users and not as immediately overwhelming.
