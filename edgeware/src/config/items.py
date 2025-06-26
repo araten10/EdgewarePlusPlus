@@ -76,6 +76,8 @@ CONFIG_ITEMS = {
     "audio_chance": Item("audioMod", PERCENTAGE, IntVar, int),
     "max_audio": Item("maxAudio", NONNEGATIVE, IntVar, int),
     "audio_volume": Item("audioVolume", PERCENTAGE, IntVar, to_float),
+    "fade_in_duration": Item("fadeInDuration", NONNEGATIVE, IntVar, int),
+    "fade_out_duration": Item("fadeOutDuration", NONNEGATIVE, IntVar, int),
     "video_chance": Item("vidMod", PERCENTAGE, IntVar, int),
     "max_video": Item("maxVideos", NONNEGATIVE, IntVar, int),
     "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),

@@ -90,5 +90,7 @@
   "disabledMonitors": [],
   "mpvSubprocess": 1,
   "audioVolume": 100,
-  "clickthroughPopups": 0
+  "clickthroughPopups": 0,
+  "fadeInDuration": 0,
+  "fadeOutDuration": 0
 }
