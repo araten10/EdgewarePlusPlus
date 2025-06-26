@@ -162,6 +162,9 @@ cython_debug/
 # VSCode
 .vs/
 
+# PyCharm
+.idea/
+
 # Ignore anything that could be considered a local file
 edgeware/config.sh
 edgeware/edgeware.sh

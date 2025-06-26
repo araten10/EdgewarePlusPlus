@@ -20,14 +20,20 @@ from tkinter import Button, Label, Text, Toplevel
 import os_utils
 import utils
 from config.settings import Settings
+from features.sextoy import Sextoy
 from pack import Pack
 from state import State
+from features.vibration_mixin import VibrationMixin
 
 
-class Prompt(Toplevel):
-    def __init__(self, settings: Settings, pack: Pack, state: State) -> None:
+class Prompt(Toplevel, VibrationMixin):
+    def __init__(self, settings: Settings, pack: Pack, state: State, sextoy: Sextoy) -> None:
+        VibrationMixin.__init__(self)
+
         self.prompt = pack.random_prompt()
         self.state = state
+        self.sextoy = sextoy
+
         if not self.should_init():
             return
         super().__init__()
@@ -67,6 +73,8 @@ class Prompt(Toplevel):
         )
         button.place(x=-10, y=-10, relx=1, rely=1, anchor="se")
 
+        self.start_continuous_vibration("prompt", getattr(settings, 'sextoys', {}), sextoy)
+
     def should_init(self) -> bool:
         if not self.state.prompt_active and self.prompt:
             self.state.prompt_active = True
@@ -91,5 +99,7 @@ class Prompt(Toplevel):
                 )  # fmt: skip
 
         if d[len(a)][len(b)] <= max_mistakes:
+            self.stop_continuous_vibration("prompt", self.sextoy)
+            self.state.prompt_active = False
             self.destroy()
             self.state.prompt_active = False

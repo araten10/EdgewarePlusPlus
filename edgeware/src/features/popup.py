@@ -19,6 +19,7 @@ import os
 import random
 import shutil
 import time
+import logging
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
@@ -28,6 +29,8 @@ from config.settings import Settings
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
+from features.sextoy import Sextoy
+from features.vibration_mixin import VibrationMixin
 from os_utils import set_borderless, set_clickthrough
 from pack import Pack
 from panic import panic
@@ -37,10 +40,10 @@ from roll import roll
 from state import State
 
 
-class Popup(Toplevel):
+class Popup(Toplevel, VibrationMixin):
     media: Path  # Defined by subclasses
 
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, sextoy: Sextoy) -> None:
         state.popup_number += 1
         super().__init__(bg="black")
 
@@ -157,6 +160,10 @@ class Popup(Toplevel):
     def try_caption(self) -> None:
         caption = self.pack.random_caption(self.media)
         if self.settings.captions_in_popups and caption:
+            try:
+                self.trigger_vibration("caption", getattr(self.settings, 'sextoys', {}), self.sextoy)
+            except Exception as e:
+                logging.info(f"Caption vibration error: {str(e)}")
             label = Label(self, text=caption, wraplength=self.width, fg=self.theme.fg, bg=self.theme.bg, font=(self.theme.font, self.theme.font_size))
             label.place(x=5, y=5)
 

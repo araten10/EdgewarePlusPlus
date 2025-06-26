@@ -35,17 +35,21 @@ class ScrollFrame(tk.Frame):
         '''Reset the scroll region to encompass the inner frame'''
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))                 #whenever the size of the frame changes, alter the scroll region respectively.
 
-    def onCanvasConfigure(self, event):
+    def onCanvasConfigure(self, event=None):
         '''Reset the canvas window to encompass inner frame when required'''
-        if event.height > self.viewPort.winfo_height():
-            self.canScroll = False
-            self.vsb.pack_forget()
-        else:
+        canvas_width = event.width if event else self.canvas.winfo_width()
+        self.canvas.itemconfig(self.canvas_window, width=canvas_width)
+        self.update_idletasks()
+        viewport_height = self.viewPort.winfo_reqheight()
+        canvas_height = event.height if event else self.canvas.winfo_height()
+        
+        if viewport_height > canvas_height:
             self.canScroll = True
             self.vsb.pack(side="right", fill="y")
-
-        self.canvas.itemconfig(self.canvas_window, width = event.width)            #whenever the size of the canvas changes alter the window region respectively.
-
+        else:
+            self.canScroll = False
+            self.vsb.pack_forget()
+            
     def onMouseWheel(self, event):                                                  # cross platform scroll wheel event
         if not self.canScroll:
             return
