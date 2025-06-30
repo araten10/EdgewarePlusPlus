@@ -34,7 +34,7 @@ if __name__ == "__main__":
 from threading import Thread
 from tkinter import Tk
 
-import pyglet
+# import pyglet
 import utils
 from config import first_launch_configure
 from config.settings import Settings
@@ -117,5 +117,5 @@ if __name__ == "__main__":
     else:
         start_main()
 
-    #Thread(target=pyglet.app.run, daemon=True).start()  # Required for pyglet events
+    # Thread(target=pyglet.app.run, daemon=True).start()  # Required for pyglet events
     root.mainloop()
