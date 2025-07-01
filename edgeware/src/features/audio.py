@@ -39,15 +39,23 @@ def play_audio(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     state.audio_players.append(player)
     player.play()
 
-    fade_in(root, settings, player)
-
     if not player.source.duration:
         logging.warning(f"Duration of {audio.name} could not be determined, fade-out will not function")
+        fade_in(root, settings, player, settings.fade_in_duration)
         player.on_eos = lambda: stop_player(state, player)
         return
 
-    delay = int(player.source.duration * 1000) - settings.fade_out_duration
-    root.after(delay, lambda: fade_out(root, settings, state, player))
+    audio_duration = int(player.source.duration * 1000)
+    fade_in_duration = settings.fade_in_duration
+    fade_out_duration = settings.fade_out_duration
+
+    fades_duration = fade_in_duration + fade_out_duration
+    if fades_duration > audio_duration:
+        fade_in_duration = int(audio_duration * fade_in_duration / fades_duration)
+        fade_out_duration = audio_duration - fade_in_duration
+
+    fade_in(root, settings, player, fade_in_duration)
+    root.after(audio_duration - fade_out_duration, lambda: fade_out(root, state, player, fade_out_duration))
 
 
 def stop_player(state: State, player: pyglet.media.Player) -> None:
@@ -55,10 +63,10 @@ def stop_player(state: State, player: pyglet.media.Player) -> None:
     state.audio_players.remove(player)
 
 
-def fade_in(root: Tk, settings: Settings, player: pyglet.media.Player) -> None:
-    """Gradually raise volume from 0 to the original level over `settings.fade_in_duration` milliseconds."""
+def fade_in(root: Tk, settings: Settings, player: pyglet.media.Player, duration: int) -> None:
+    """Gradually raise volume from 0 to the original level over `duration` milliseconds."""
     player.volume = 0
-    steps = settings.fade_in_duration // TICKRATE
+    steps = duration // TICKRATE
     delta = settings.audio_volume / steps if steps else settings.audio_volume
 
     def step() -> None:
@@ -69,9 +77,9 @@ def fade_in(root: Tk, settings: Settings, player: pyglet.media.Player) -> None:
     step()
 
 
-def fade_out(root: Tk, settings: Settings, state: State, player: pyglet.media.Player) -> None:
-    """Smoothly lower volume to 0 over `settings.fade_out_duration` milliseconds, then pause the player."""
-    steps = settings.fade_out_duration // TICKRATE
+def fade_out(root: Tk, state: State, player: pyglet.media.Player, duration: int) -> None:
+    """Smoothly lower volume to 0 over `duration` milliseconds, then pause the player."""
+    steps = duration // TICKRATE
     delta = player.volume / steps if steps else player.volume
 
     def step() -> None:
