@@ -65,12 +65,18 @@ class PopupTypesTab(ScrollFrame):
         audio_section = ConfigSection(self.viewPort, "Audio Popups", AUDIO_TEXT)
         audio_section.pack()
 
-        audio_row = ConfigRow(audio_section)
-        audio_row.pack()
+        audio_row_1 = ConfigRow(audio_section)
+        audio_row_1.pack()
 
-        ConfigScale(audio_row, label="Audio Popup Chance (%)", from_=0, to=100, variable=vars.audio_chance).pack()
-        ConfigScale(audio_row, label="Max Audio Popups", from_=1, to=50, variable=vars.max_audio).pack()
-        ConfigScale(audio_row, label="Audio Volume (%)", from_=1, to=100, variable=vars.audio_volume).pack()
+        ConfigScale(audio_row_1, label="Audio Popup Chance (%)", from_=0, to=100, variable=vars.audio_chance).pack()
+        ConfigScale(audio_row_1, label="Max Audio Popups", from_=1, to=50, variable=vars.max_audio).pack()
+        ConfigScale(audio_row_1, label="Audio Volume (%)", from_=1, to=100, variable=vars.audio_volume).pack()
+
+        audio_row_2 = ConfigRow(audio_section)
+        audio_row_2.pack()
+
+        ConfigScale(audio_row_2, label="Fade-In Duration (ms)", from_=0, to=10000, variable=vars.fade_in_duration).pack()
+        ConfigScale(audio_row_2, label="Fade-Out Duration (ms)", from_=0, to=10000, variable=vars.fade_out_duration).pack()
 
         # Video
         video_section = ConfigSection(self.viewPort, "Video Popups", VIDEO_TEXT)

@@ -17,12 +17,16 @@
 
 import ast
 from dataclasses import dataclass
+from enum import Enum
 from tkinter import BooleanVar, IntVar, StringVar
-from typing import Callable, Tuple
+from typing import Callable
 
 from voluptuous import All, Range, Schema, Union
+from voluptuous.error import Invalid
 
 from config.themes import THEMES
+
+BROKEN = True  # For config items that can't be changed by corruption
 
 NONNEGATIVE = Schema(All(int, Range(min=0)))
 PERCENTAGE = Schema(All(int, Range(min=0, max=100)))
@@ -42,17 +46,51 @@ def negation(value: bool) -> bool:
     return not value
 
 
+class DangerLevel(Enum):
+    EXTREME = "extreme"
+    MAJOR = "major"
+    MEDIUM = "medium"
+    MINOR = "minor"
+
+
+@dataclass
+class Danger:
+    level: DangerLevel
+    schema: Schema  # When validation passes, the value is dangerous
+    warning: str | None = None
+
+    def check(self, value: object) -> bool:
+        try:
+            self.schema(value)
+            return True
+        except Invalid:
+            return False
+
+
 @dataclass
 class Item:
     key: str
     schema: Callable
     var: Callable | None
     setting: Callable | None
+    danger: Danger | None = None
 
-    # TODO: Find a better solution for these corruption variables
+    # TODO: Find a better solution for this
     block: bool = False
-    danger: bool = False
-    safe_range: Tuple[int | None, int | None] | None = None  # When the setting has a value outside the given range, it is considered dangerous (min, max)
+
+
+REPLACE_IMAGES_DANGER = "Replace Images is enabled! THIS WILL DELETE FILES ON YOUR COMPUTER! Only enable this willingly and cautiously! Read the documentation in the Annoyance/Runtime Dangerous tab!"
+RUN_AT_STARTUP_DANGER = "Launch on PC Startup is enabled! This will run Edgeware when you start your computer!"
+FILL_DRIVE_DANGER = (
+    "Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
+)
+PANIC_LOCKOUT_DANGER = "Panic Lockout is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!"
+MITOSIS_MODE_DANGER = "Mitosis Mode is enabled! With high popup rates, this could create a chain reaction, causing lag!"
+HIBERNATE_DELAY_MIN_DANGER = "You are running Hibernate Mode with a short minimum cooldown! You might experience lag if a bunch of hibernate modes overlap!"
+HIBERNATE_DELAY_MAX_DANGER = "You are running Hibernate Mode with a short maximum cooldown! You might experience lag if a bunch of hibernate modes overlap!"
+SHOW_ON_DISCORD_DANGER = "Show on Discord is enabled! This could lead to potential embarassment if you're on your main account!"
+PANIC_DISABLED_DANGER = "Panic Hotkey is disabled! If you want to easily close Edgeware, read the tooltip in the Annoyance tab for other ways to panic!"
+RUN_ON_SAVE_QUIT_DANGER = "Edgeware will run on Save & Exit (AKA: when you hit Yes!)"
 
 
 # fmt: off
@@ -62,7 +100,7 @@ CONFIG_ITEMS = {
     "theme": Item("themeType", Schema(Union("Original", "Dark", "The One", "Ransom", "Goth", "Bimbo")), StringVar, lambda value: THEMES[value]),
     "theme_ignore_config": Item("themeNoConfig", BOOLEAN, BooleanVar, None, block=True),
     "startup_splash": Item("showLoadingFlair", BOOLEAN, BooleanVar, bool, block=True),
-    "run_on_save_quit": Item("runOnSaveQuit", BOOLEAN, BooleanVar, None, block=True),
+    "run_on_save_quit": Item("runOnSaveQuit", BOOLEAN, BooleanVar, None, danger=Danger(DangerLevel.MINOR, Schema(1), RUN_ON_SAVE_QUIT_DANGER), block=True),
     "desktop_icons": Item("desktopIcons", BOOLEAN, BooleanVar, bool, block=True),
     "safe_mode": Item("safeMode", BOOLEAN, BooleanVar, None, block=True),
     "message_off": Item("messageOff", BOOLEAN, BooleanVar, None, block=True),
@@ -70,17 +108,19 @@ CONFIG_ITEMS = {
     "preset_danger": Item("presetsDanger", BOOLEAN, BooleanVar, None, block=True),
 
     # Popup Types
-    "delay": Item("delay", NONNEGATIVE, IntVar, int, safe_range=(2000, None)),
+    "delay": Item("delay", NONNEGATIVE, IntVar, int, danger=Danger(DangerLevel.MEDIUM, Schema(Range(max=1999)))),
     "single_mode": Item("singleMode", BOOLEAN, BooleanVar, bool),
     "image_chance": Item("popupMod", PERCENTAGE, IntVar, int),
     "audio_chance": Item("audioMod", PERCENTAGE, IntVar, int),
     "max_audio": Item("maxAudio", NONNEGATIVE, IntVar, int),
     "audio_volume": Item("audioVolume", PERCENTAGE, IntVar, to_float),
+    "fade_in_duration": Item("fadeInDuration", NONNEGATIVE, IntVar, int),
+    "fade_out_duration": Item("fadeOutDuration", NONNEGATIVE, IntVar, int),
     "video_chance": Item("vidMod", PERCENTAGE, IntVar, int),
     "max_video": Item("maxVideos", NONNEGATIVE, IntVar, int),
     "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),
     "web_chance": Item("webMod", PERCENTAGE, IntVar, int),
-    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool, danger=True),  # could be cut from dangers as it's not listed as dangerous in config but could lead to bad performance
+    "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool),
     "prompt_chance": Item("promptMod", PERCENTAGE, IntVar, int),
     "prompt_max_mistakes": Item("promptMistakes", NONNEGATIVE, IntVar, int),
     "subliminal_chance": Item("capPopChance", PERCENTAGE, IntVar, int),
@@ -105,7 +145,7 @@ CONFIG_ITEMS = {
     "clickthrough_enabled": Item("clickthroughPopups", BOOLEAN, BooleanVar, bool),
 
     # Wallpaper
-    "rotate_wallpaper": Item("rotateWallpaper", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "rotate_wallpaper": Item("rotateWallpaper", BOOLEAN, BooleanVar, bool, block=BROKEN),
     "wallpapers": Item("wallpaperDat", STRING, None, lambda value: list(ast.literal_eval(value).values())),
     "wallpaper_timer": Item("wallpaperTimer", NONNEGATIVE, IntVar, s_to_ms),
     "wallpaper_variance": Item("wallpaperVariance", NONNEGATIVE, IntVar, s_to_ms),
@@ -116,29 +156,29 @@ CONFIG_ITEMS = {
     # "min_score": Item("booruMinScore", Schema(int), IntVar, int),  # TODO: Unimplemented
 
     # Dangerous
-    "panic_lockout": Item("timerMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "panic_lockout": Item("timerMode", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.MEDIUM, Schema(1), PANIC_LOCKOUT_DANGER), block=BROKEN),
     "panic_lockout_password": Item("safeword", STRING, StringVar, str, block=True),  # imo, the safeword is a safeword for a reason (timer mode)
-    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=True),  # Corruption won't work
+    "panic_lockout_time": Item("timerSetupTime", NONNEGATIVE, IntVar, lambda value: value * 60 * 1000, block=BROKEN),
     "drive_avoid_list": Item("avoidList", STRING, None, lambda value: value.split(">"), block=True),
-    "fill_drive": Item("fill", BOOLEAN, BooleanVar, bool, danger=True),
-    "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: value * 10, danger=True),
-    "replace_images": Item("replace", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
-    "replace_threshold": Item("replaceThresh", NONNEGATIVE, IntVar, int, block=True),  # Corruption won't work
+    "fill_drive": Item("fill", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.MAJOR, Schema(1), FILL_DRIVE_DANGER)),
+    "fill_delay": Item("fill_delay", NONNEGATIVE, IntVar, lambda value: value * 10),
+    "replace_images": Item("replace", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.EXTREME, Schema(1), REPLACE_IMAGES_DANGER), block=BROKEN),
+    "replace_threshold": Item("replaceThresh", NONNEGATIVE, IntVar, int, block=BROKEN),
     "drive_path": Item("drivePath", STRING, StringVar, str, block=True),  # We can't know what paths exist and they look different on Linux and Windows
-    "panic_disabled": Item("panicDisabled", BOOLEAN, BooleanVar, bool, danger=True),
-    "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None, block=True),
-    "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "panic_disabled": Item("panicDisabled", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.MINOR, Schema(1), PANIC_DISABLED_DANGER)),
+    "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None, danger=Danger(DangerLevel.MAJOR, Schema(1), RUN_AT_STARTUP_DANGER), block=True),
+    "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.MEDIUM, Schema(1), SHOW_ON_DISCORD_DANGER), block=BROKEN),
 
     # Modes
     "lowkey_mode": Item("lkToggle", BOOLEAN, BooleanVar, bool),
     "lowkey_corner": Item("lkCorner", Schema(Union(int, Range(min=0, max=4))), IntVar, int),
-    "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption may not work
+    "mitosis_mode": Item("mitosisMode", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.MEDIUM, Schema(1), MITOSIS_MODE_DANGER), block=BROKEN),
     "mitosis_strength": Item("mitosisStrength", NONNEGATIVE, IntVar, int),
-    "hibernate_mode": Item("hibernateMode", BOOLEAN, BooleanVar, bool, block=True),  # Corruption won't work
+    "hibernate_mode": Item("hibernateMode", BOOLEAN, BooleanVar, bool, block=BROKEN),
     "hibernate_type": Item("hibernateType", Schema(Union("Original", "Spaced", "Glitch", "Ramp", "Pump-Scare", "Chaos")), StringVar, str),
-    "hibernate_delay_min": Item("hibernateMin", NONNEGATIVE, IntVar, s_to_ms),
-    "hibernate_delay_max": Item("hibernateMax", NONNEGATIVE, IntVar, s_to_ms, safe_range=(10, None)),
-    "hibernate_activity": Item("wakeupActivity", NONNEGATIVE, IntVar, int, safe_range=(0, 35)),
+    "hibernate_delay_min": Item("hibernateMin", NONNEGATIVE, IntVar, s_to_ms, danger=Danger(DangerLevel.MEDIUM, Schema(Range(max=29)), HIBERNATE_DELAY_MIN_DANGER)),
+    "hibernate_delay_max": Item("hibernateMax", NONNEGATIVE, IntVar, s_to_ms, danger=Danger(DangerLevel.MEDIUM, Schema(Range(max=29)), HIBERNATE_DELAY_MAX_DANGER)),
+    "hibernate_activity": Item("wakeupActivity", NONNEGATIVE, IntVar, int, danger=Danger(DangerLevel.MEDIUM, Schema(Range(min=36)))),
     "hibernate_activity_length": Item("hibernateLength", NONNEGATIVE, IntVar, s_to_ms),
     "hibernate_fix_wallpaper": Item("fixWallpaper", BOOLEAN, BooleanVar, bool),
 
@@ -164,3 +204,7 @@ CONFIG_ITEMS = {
     "panic_key": Item("panicButton", STRING, StringVar, str, block=True),
 }
 # fmt: on
+
+
+CONFIG_DANGER: dict[str, Danger] = {item.key: item.danger for item in CONFIG_ITEMS.values() if item.danger}
+CORRUPTION_BLOCK: set[str] = {item.key for item in CONFIG_ITEMS.values() if item.block}

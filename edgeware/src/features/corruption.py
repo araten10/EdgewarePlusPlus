@@ -21,6 +21,7 @@ import time
 from tkinter import Tk, messagebox
 
 import os_utils
+from config.items import CONFIG_DANGER, CORRUPTION_BLOCK, DangerLevel
 from config.settings import Settings
 from pack import Pack
 from paths import Data
@@ -32,27 +33,39 @@ def corruption_danger_check(settings: Settings, pack: Pack) -> None:
     if not (settings.corruption_mode and settings.corruption_full):
         return
 
-    dangers = []
+    danger_levels = {
+        DangerLevel.EXTREME: [],
+        DangerLevel.MAJOR: [],
+        DangerLevel.MEDIUM: [],
+        DangerLevel.MINOR: [],
+    }
+
     for level in pack.corruption_levels:
-        if level.config is not None:
-            for key, value in level.config.items():
-                if key in settings.corruption_danger and key not in dangers:
-                    dangers.append(key)
+        if level.config is None:
+            continue
 
-                range = settings.corruption_safe_range.get(key)
-                if range:
-                    min, max = range
-                    if min and value < min:
-                        dangers.append(f"Low {key} ({value})")
-                    if max and value > max:
-                        dangers.append(f"High {key} ({value})")
+        for key, value in level.config.items():
+            danger = CONFIG_DANGER.get(key)
+            if not danger:
+                continue
 
-    if dangers:
+            warning = f"\n•{danger.warning or key}"
+            if danger.check(value) and warning not in danger_levels[danger.level]:
+                danger_levels[danger.level].append(warning)
+
+    danger_num = 0
+    warnings = ""
+    for level, dangers in danger_levels.items():
+        danger_num += len(dangers)
+        if dangers:
+            warnings += f"\n\n{level.value.capitalize()}{''.join(dangers)}"
+
+    if danger_num:
         proceed = messagebox.askyesno(
-            "Corruption config warning",
-            "You are using corruption in full permission mode, meaning your pack is capable of changing Edgeware's settings\n\n"
-            f"Your pack changes the following settings which may be dangerous: {dangers}\n\n"
-            "Are you sure you want to proceed?",
+            "Corruption Config Warning",
+            "You are using corruption in full permission mode, meaning your pack is capable of changing Edgeware's settings.\n\n"
+            f"Your pack changes {danger_num} setting(s) which may be dangerous. Are you sure you want to proceed? {warnings}",
+            icon="warning"
         )
         if not proceed:
             sys.exit()
@@ -73,7 +86,8 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
 
     if settings.corruption_full:
         for key, value in level.config.items():
-            if key in settings.corruption_block or (not settings.corruption_themes and key == "themeType"):
+            if key in CORRUPTION_BLOCK or (not settings.corruption_themes and key == "themeType"):
+                logging.info(f"Change of {key} blocked")
                 continue
 
             if settings.corruption_dev_mode:

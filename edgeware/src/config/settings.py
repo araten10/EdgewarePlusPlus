@@ -25,22 +25,10 @@ from config.items import CONFIG_ITEMS
 
 
 class Settings:
-    corruption_block = []
-    corruption_danger = []
-    corruption_safe_range = {}
-
     def __init__(self) -> None:
         self.config = load_config()
         self.load_settings()
         logging.info(f"Config loaded: {self.config}")
-
-        for item in CONFIG_ITEMS.values():
-            if item.block:
-                self.corruption_block.append(item.key)
-            if item.danger:
-                self.corruption_danger.append(item.key)
-            if item.safe_range:
-                self.corruption_safe_range[item.key] = item.safe_range
 
     def load_settings(self) -> None:
         default_config = load_default_config()
