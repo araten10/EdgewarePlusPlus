@@ -65,7 +65,7 @@ def corruption_danger_check(settings: Settings, pack: Pack) -> None:
             "Corruption Config Warning",
             "You are using corruption in full permission mode, meaning your pack is capable of changing Edgeware's settings.\n\n"
             f"Your pack changes {danger_num} setting(s) which may be dangerous. Are you sure you want to proceed? {warnings}",
-            icon="warning"
+            icon="warning",
         )
         if not proceed:
             sys.exit()

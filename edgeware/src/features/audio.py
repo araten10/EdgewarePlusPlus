@@ -35,6 +35,7 @@ def play_audio(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     # Load in streaming mode to avoid loading entire file into RAM
     # Player doesn't need to be stored but might be needed for planned features
     player = pyglet.media.Player()
+    player.on_eos = lambda: stop_player(state, player)
     player.queue(pyglet.media.load(str(audio), streaming=True))
     state.audio_players.append(player)
     player.play()
@@ -42,7 +43,6 @@ def play_audio(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     if not player.source.duration:
         logging.warning(f"Duration of {audio.name} could not be determined, fade-out will not function")
         fade_in(root, settings, player, settings.fade_in_duration)
-        player.on_eos = lambda: stop_player(state, player)
         return
 
     audio_duration = int(player.source.duration * 1000)
@@ -55,7 +55,7 @@ def play_audio(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         fade_out_duration = audio_duration - fade_in_duration
 
     fade_in(root, settings, player, fade_in_duration)
-    root.after(audio_duration - fade_out_duration, lambda: fade_out(root, state, player, fade_out_duration))
+    root.after(audio_duration - fade_out_duration, lambda: fade_out(root, player, fade_out_duration))
 
 
 def stop_player(state: State, player: pyglet.media.Player) -> None:
@@ -77,7 +77,7 @@ def fade_in(root: Tk, settings: Settings, player: pyglet.media.Player, duration:
     step()
 
 
-def fade_out(root: Tk, state: State, player: pyglet.media.Player, duration: int) -> None:
+def fade_out(root: Tk, player: pyglet.media.Player, duration: int) -> None:
     """Smoothly lower volume to 0 over `duration` milliseconds, then pause the player."""
     steps = duration // TICKRATE
     delta = player.volume / steps if steps else player.volume
@@ -86,7 +86,5 @@ def fade_out(root: Tk, state: State, player: pyglet.media.Player, duration: int)
         player.volume = max(0, player.volume - delta)
         if player.volume > 0:
             root.after(TICKRATE, step)
-        else:
-            stop_player(state, player)
 
     step()

@@ -36,6 +36,7 @@ from multiprocessing.connection import Client, Listener
 from threading import Thread
 from tkinter import Tk, simpledialog
 
+import pyglet
 from config.settings import Settings
 from os_utils import set_wallpaper
 from paths import CustomAssets
@@ -57,6 +58,7 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
                 return
 
         set_wallpaper(CustomAssets.panic_wallpaper())
+        pyglet.app.exit()
         root.destroy()
 
     # Make sure panic code is executed in the main thread, otherwise

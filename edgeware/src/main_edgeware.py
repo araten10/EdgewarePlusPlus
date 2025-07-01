@@ -17,6 +17,7 @@
 
 if __name__ == "__main__":
     import os
+    from threading import Thread
 
     from paths import Data
 
@@ -31,10 +32,16 @@ if __name__ == "__main__":
     # Add mpv to PATH
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
+    def pyglet_run() -> None:
+        import pyglet
+
+        pyglet.app.run()
+
+    Thread(target=pyglet_run, daemon=True).start()  # Required for pyglet events
+
 from threading import Thread
 from tkinter import Tk
 
-# import pyglet
 import utils
 from config import first_launch_configure
 from config.settings import Settings
@@ -117,5 +124,4 @@ if __name__ == "__main__":
     else:
         start_main()
 
-    # Thread(target=pyglet.app.run, daemon=True).start()  # Required for pyglet events
     root.mainloop()
