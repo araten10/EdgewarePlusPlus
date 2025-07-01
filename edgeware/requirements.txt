@@ -9,6 +9,7 @@ pynput
 pypresence
 pystray
 python-xlib; sys_platform == 'linux'
+pywin32; sys_platform == 'windows'
 requests
 screeninfo
 sounddevice
@@ -16,4 +17,3 @@ tkinter-tooltip
 tkinterweb
 ttkwidgets
 voluptuous
-pywin32
