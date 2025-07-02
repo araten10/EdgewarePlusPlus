@@ -34,27 +34,10 @@ from pack import Pack
 from panic import panic
 from paths import CustomAssets, Process
 from PIL import Image
-from pygame import mixer
 from pynput import keyboard
 from pypresence import Presence
 from roll import roll
 from state import State
-
-
-def play_audio(root: Tk, settings: Settings, pack: Pack, audio: Path | None = None, on_stop: Callable[[], None] | None = None) -> None:
-    # Pygame will not stop additional sounds from being played when the max is
-    # reached, so we need to check if there are empty channels
-    audio = audio or pack.random_audio()
-    if not (audio and mixer.find_channel()):
-        return
-
-    # TODO POTENTIAL SETTINGS: Fade in and out, separating music from sounds
-    # https://www.pygame.org/docs/ref/mixer.html#pygame.mixer.Sound
-    sound = mixer.Sound(str(audio))
-    sound.set_volume(settings.audio_volume)
-    sound.play()
-    if on_stop:
-        root.after(math.ceil(sound.get_length() * 1000), on_stop)
 
 
 def open_web(pack: Pack, web: str | None = None) -> None:
@@ -126,7 +109,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
         os_utils.set_wallpaper(pack.wallpaper)
 
 
-def handle_discord(root: Tk, settings: Settings, pack: Pack) -> None:
+def handle_discord(settings: Settings, pack: Pack) -> None:
     if not settings.show_on_discord:
         return
 

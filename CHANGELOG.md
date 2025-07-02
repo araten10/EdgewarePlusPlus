@@ -9,6 +9,13 @@
 
 **Since last version...**
 
+•*Added clickthrough popup support, found in the popup tweaks tab*
+>Clickthrough popups allow you to click "behind" popups and do other things on your computer without interacting with Edgeware++. Its important to note that in this mode there is no way for you to close popups manually, as that would entirely defeat the purpose... make sure you tweak the popup opacity and enable timeout mode if you want to use this mode sanely!
+
+•*To adjust for the new clickthrough feature, some settings have been slightly shifted around in the popup tweaks tab*
+
+•*Removed some out of date info in the tutorial tab*
+
 **Version 17**
 
 The long awaited Config Redesign is here! This is another huge update, marked by the fact that it's taken forever to go through and do... but we're pretty happy with it so far! There might be some controversial changes here and there, you might have to update your setting presets as some settings were removed due to redundancy. Hopefully everyone is decently happy with it, and at the end of the day our end goal was making it a lot easier to understand for new users and not as immediately overwhelming.
@@ -64,6 +71,8 @@ Major reorganization effort in the config window. This includes:
 >-Random Direction Toggle for Moving Popups, not only do we believe that these moving popups choosing a random direction upon spawning should be the default setting, but also the feature wasn't even implemented properly and toggling it did nothing (oops?)
 >
 >-Use Filename for Captions Toggle, Moods have largely overwritten this. Technically this could be useful with compatibility in old packs that used it, but upon implementing the new index pack json the feature was unimplemented. Even if this is re-added later to help out older packs display their captions, it likely wouldn't be a toggle and instead just be automatic.
+
+•*KNOWN ISSUE: When you're using a non-default theme and have "ignore config" turned on, the "theme preview" window won't display the currently selected theme*
 
 **Version 16.1**
 

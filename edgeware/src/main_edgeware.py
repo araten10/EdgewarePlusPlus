@@ -17,6 +17,7 @@
 
 if __name__ == "__main__":
     import os
+    from threading import Thread
 
     from paths import Data
 
@@ -31,13 +32,20 @@ if __name__ == "__main__":
     # Add mpv to PATH
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
+    def pyglet_run() -> None:
+        import pyglet
+
+        pyglet.app.run()
+
+    Thread(target=pyglet_run, daemon=True).start()  # Required for pyglet events
+
 from threading import Thread
 from tkinter import Tk
 
-import pygame
 import utils
 from config import first_launch_configure
 from config.settings import Settings
+from features.audio import play_audio
 from features.corruption import corruption_danger_check, handle_corruption
 from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
@@ -52,7 +60,6 @@ from features.misc import (
     make_desktop_icons,
     make_tray_icon,
     open_web,
-    play_audio,
 )
 from features.prompt import Prompt
 from features.startup_splash import StartupSplash
@@ -81,26 +88,19 @@ if __name__ == "__main__":
     settings = Settings()
     pack = Pack(settings.pack_path)
     state = State()
-    pygame.init()
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
-
-    # if sound is laggy or strange try changing buffer size (doc: https://www.pygame.org/docs/ref/mixer.html)
-    # TODO: check if pygame.mixer.quit() is preferable to use in panic? seems fine without it
-    pygame.mixer.init()
-    pygame.mixer.set_num_channels(settings.max_audio)
-
     corruption_danger_check(settings, pack)
 
     # TODO: Use a dict?
     targets = [
-        RollTarget(lambda: ImagePopup(root, settings, pack, state), settings.image_chance if not settings.mitosis_mode else 0),
-        RollTarget(lambda: VideoPopup(root, settings, pack, state), settings.video_chance if not settings.mitosis_mode else 0),
-        RollTarget(lambda: SubliminalPopup(settings, pack), settings.subliminal_chance),
-        RollTarget(lambda: Prompt(settings, pack, state), settings.prompt_chance),
-        RollTarget(lambda: play_audio(root, settings, pack), settings.audio_chance),
-        RollTarget(lambda: open_web(pack), settings.web_chance),
-        RollTarget(lambda: display_notification(settings, pack), settings.notification_chance),
+        RollTarget(lambda: ImagePopup(root, settings, pack, state), lambda: settings.image_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: VideoPopup(root, settings, pack, state), lambda: settings.video_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: SubliminalPopup(settings, pack), lambda: settings.subliminal_chance),
+        RollTarget(lambda: Prompt(settings, pack, state), lambda: settings.prompt_chance),
+        RollTarget(lambda: play_audio(root, settings, pack, state), lambda: settings.audio_chance),
+        RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
+        RollTarget(lambda: display_notification(settings, pack), lambda: settings.notification_chance),
     ]
 
     def start_main() -> None:
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 
         Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
         handle_corruption(root, settings, pack, state)
-        handle_discord(root, settings, pack)
+        handle_discord(settings, pack)
         handle_panic_lockout(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
 

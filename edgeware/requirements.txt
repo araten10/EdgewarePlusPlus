@@ -4,11 +4,12 @@ filetype
 get-video-properties
 mpv
 pillow
-pygame
+pyglet
 pynput
 pypresence
 pystray
-python-xlib; sys_platform == 'linux'
+python-xlib; platform_system == 'Linux'
+pywin32; platform_system == 'Windows'
 requests
 screeninfo
 sounddevice

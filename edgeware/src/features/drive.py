@@ -67,7 +67,7 @@ def fill_drive(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     fill()
 
 
-def replace_images(root: Tk, settings: Settings, pack: Pack) -> None:
+def replace_images(settings: Settings, pack: Pack) -> None:
     if not settings.replace_images:
         return
 

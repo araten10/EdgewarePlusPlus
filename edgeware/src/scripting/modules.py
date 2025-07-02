@@ -49,7 +49,7 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     popups = {
         "image": lambda env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
         "video": lambda env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
-        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, media(pack.paths.audio, audio), wrap(env, on_stop)),
+        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, media(pack.paths.audio, audio), wrap(env, on_stop)),
         "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
         "web": lambda env, web: open_web(pack, web),
         "subliminal": lambda env, subliminal: SubliminalMessagePopup(settings, pack, subliminal),

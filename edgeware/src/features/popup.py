@@ -23,12 +23,12 @@ from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 
-import os_utils
 import utils
 from config.settings import Settings
 from desktop_notifier.common import Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from features.misc import mitosis_popup, open_web
+from os_utils import set_borderless, set_clickthrough
 from pack import Pack
 from panic import panic
 from paths import Data
@@ -55,7 +55,7 @@ class Popup(Toplevel):
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, condition=(event.keysym == self.settings.panic_key)))
         self.attributes("-topmost", True)
-        os_utils.set_borderless(self)
+        set_borderless(self)
 
         self.opacity = self.settings.opacity
         self.attributes("-alpha", self.opacity)
@@ -69,6 +69,7 @@ class Popup(Toplevel):
         self.try_multi_click()
         self.try_timeout()
         self.try_pump_scare()
+        self.try_clickthrough()
 
     def compute_geometry(self, source_width: int, source_height: int) -> None:
         self.monitor = utils.random_monitor(self.settings)
@@ -135,6 +136,12 @@ class Popup(Toplevel):
         self.state.popup_geometries[self.popup_id] = (self.width, self.height, self.x, self.y)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
 
+    def try_clickthrough(self) -> None:
+        if self.settings.clickthrough_enabled:
+            if not hasattr(self, "player"):
+                self.wait_visibility()
+            set_clickthrough(self)
+
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
         mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
         image_filters = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20)]
@@ -173,8 +180,8 @@ class Popup(Toplevel):
 
     def try_button(self) -> None:
         if self.settings.buttonless:
-            self.bind("<ButtonRelease-1>", lambda event: self.click())
-        else:
+            self.bind("<ButtonRelease-1>", lambda _: self.click())
+        elif not self.settings.clickthrough_enabled:
             button = Button(
                 self,
                 text=self.pack.index.default.popup_close,

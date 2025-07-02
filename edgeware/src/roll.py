@@ -25,10 +25,10 @@ from config.settings import Settings
 @dataclass
 class RollTarget:
     function: Callable[[], None]
-    chance: int
+    chance: Callable[[], int]
 
     def roll(self) -> None:
-        if roll(self.chance):
+        if roll(self.chance()):
             self.function()
 
 
