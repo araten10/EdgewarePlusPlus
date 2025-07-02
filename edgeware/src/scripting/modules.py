@@ -20,14 +20,11 @@ from tkinter import Tk
 from typing import Callable
 
 from config.settings import Settings
+from features.audio import play_audio
 from features.image_popup import ImagePopup
-from features.misc import (
-    display_notification,
-    open_web,
-    play_audio,
-)
+from features.misc import display_notification, open_web
 from features.prompt import Prompt
-from features.subliminal_message_popup import SubliminalMessagePopup
+from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
 from os_utils import set_wallpaper
 from pack import Pack
@@ -52,7 +49,7 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, media(pack.paths.audio, audio), wrap(env, on_stop)),
         "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
         "web": lambda env, web: open_web(pack, web),
-        "subliminal": lambda env, subliminal: SubliminalMessagePopup(settings, pack, subliminal),
+        "subliminal": lambda env, subliminal: SubliminalPopup(settings, pack, subliminal),
         "notification": lambda env, notification: display_notification(settings, pack, notification),
     }
 

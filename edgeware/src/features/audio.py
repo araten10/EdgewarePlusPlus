@@ -16,7 +16,9 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from pathlib import Path
 from tkinter import Tk
+from typing import Callable
 
 import pyglet
 from config.settings import Settings
@@ -35,7 +37,7 @@ def play_audio(root: Tk, settings: Settings, pack: Pack, state: State, audio: Pa
     # Load in streaming mode to avoid loading entire file into RAM
     # Player doesn't need to be stored but might be needed for planned features
     player = pyglet.media.Player()
-    player.on_eos = lambda: stop_player(state, player)
+    player.on_eos = lambda: stop_player(state, player, on_stop)
     player.queue(pyglet.media.load(str(audio), streaming=True))
     state.audio_players.append(player)
     player.play()

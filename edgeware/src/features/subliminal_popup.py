@@ -23,7 +23,7 @@ from config.settings import Settings
 from pack import Pack
 
 
-class SubliminalMessagePopup(Toplevel):
+class SubliminalPopup(Toplevel):
     def __init__(self, settings: Settings, pack: Pack, subliminal: str | None = None) -> None:
         self.subliminal = subliminal or pack.random_subliminal()
         if not self.should_init():

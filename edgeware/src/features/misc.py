@@ -16,12 +16,10 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import math
 import random
 import time
 import webbrowser
 from collections.abc import Callable
-from pathlib import Path
 from threading import Thread
 from tkinter import Tk
 
