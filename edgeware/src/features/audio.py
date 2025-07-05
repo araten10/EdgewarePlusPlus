@@ -37,7 +37,7 @@ def play_audio(root: Tk, settings: Settings, pack: Pack, state: State, audio: Pa
     # Load in streaming mode to avoid loading entire file into RAM
     # Player doesn't need to be stored but might be needed for planned features
     player = pyglet.media.Player()
-    player.on_eos = lambda: stop_player(state, player, on_stop)
+    player.on_eos = lambda: stop_player(root, state, player, on_stop)
     player.queue(pyglet.media.load(str(audio), streaming=True))
     state.audio_players.append(player)
     player.play()
@@ -60,11 +60,11 @@ def play_audio(root: Tk, settings: Settings, pack: Pack, state: State, audio: Pa
     root.after(audio_duration - fade_out_duration, lambda: fade_out(root, player, fade_out_duration))
 
 
-def stop_player(state: State, player: pyglet.media.Player, on_stop: Callable[[], None] | None = None) -> None:
+def stop_player(root: Tk, state: State, player: pyglet.media.Player, on_stop: Callable[[], None] | None = None) -> None:
     player.pause()
     state.audio_players.remove(player)
     if on_stop:
-        on_stop()
+        root.after(0, on_stop)  # Run in main thread
 
 
 def fade_in(root: Tk, settings: Settings, player: pyglet.media.Player, duration: int) -> None:
