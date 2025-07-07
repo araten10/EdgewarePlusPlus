@@ -185,7 +185,7 @@ CONFIG_ITEMS = {
     # Corruption
     "corruption_mode": Item("corruptionMode", BOOLEAN, BooleanVar, bool, block=True),  # if you're turning off corruption mode with corruption just make it the final level lmao
     "corruption_full": Item("corruptionFullPerm", BOOLEAN, BooleanVar, bool, block=True),
-    "corruption_trigger": Item("corruptionTrigger", Schema(Union("Timed", "Popup", "Launch")), StringVar, str),
+    "corruption_trigger": Item("corruptionTrigger", Schema(Union("Timed", "Popup", "Launch", "Script")), StringVar, str),
     "corruption_fade": Item("corruptionFadeType", Schema(Union("Normal", "Abrupt")), StringVar, str),
     "corruption_time": Item("corruptionTime", NONNEGATIVE, IntVar, s_to_ms),
     "corruption_popups": Item("corruptionPopups", NONNEGATIVE, IntVar, int),

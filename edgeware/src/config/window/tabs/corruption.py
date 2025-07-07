@@ -99,6 +99,7 @@ class CorruptionModeTab(ScrollFrame):
                 "Timed": "Transitions based on time elapsed in current session.",
                 "Popup": "Transitions based on number of popups in current session.",
                 "Launch": "Transitions based on number of Edgeware launches.",
+                "Script": "Transitions handled by pack scripts. Needs to be setup by pack.",
             },
         ).pack()
 

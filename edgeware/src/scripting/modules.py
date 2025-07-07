@@ -21,6 +21,7 @@ from typing import Callable
 
 from config.settings import Settings
 from features.audio import play_audio
+from features.corruption import update_corruption_level
 from features.image_popup import ImagePopup
 from features.misc import display_notification, open_web
 from features.prompt import Prompt
@@ -55,6 +56,7 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     return {
         "standard": {"print": lambda _env, *args: print(*args)},
         "edgeware": {
+            "corrupt": lambda _env: update_corruption_level(settings, pack, state),
             "panic": lambda _env: panic(root, settings, state, disable=False),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             **popups,

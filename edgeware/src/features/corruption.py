@@ -125,6 +125,8 @@ def corruption_level_progress(settings: Settings, state: State) -> float:
             return state.corruption_popup_number / settings.corruption_popups
         case "Launch":
             return state.corruption_launches_number / (settings.corruption_launches * state.corruption_level)
+        case "Script":
+            return 0
         case _:
             logging.warning(f"Unknown corruption trigger {settings.corruption_trigger}.")
             return 0
@@ -195,5 +197,7 @@ def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) ->
             popup(settings, pack, state)
         case "Launch":
             launch(settings, pack, state)
+        case "Script":
+            apply_corruption_level(settings, pack, state)
         case _:
             logging.error(f"Unknown corruption trigger {settings.corruption_trigger}.")
