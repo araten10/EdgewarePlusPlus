@@ -27,6 +27,14 @@ from config.vars import Vars
 from buttplug import Client, WebsocketConnector, ProtocolSpec
 from buttplug.client import Actuator
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)-8s %(name)s:%(lineno)d ─ %(message)s",
+    datefmt="%H:%M:%S",
+)
+
+asyncio.get_event_loop().set_debug(True)
+
 class StoredActuator(TypedDict):
     speed: float
     clockwise: bool|None
@@ -124,76 +132,81 @@ class Sextoy:
         device_index: int,
         clockwise=None
     ):
-        idx = act.index
-
-        # 1) Select storage and session index based on type
-        if clockwise is None:
-            store       = self._active_vibrations
-            session_idx = self.vibration_index
-        else:
-            store       = self._active_rotations
-            session_idx = self.rotation_index
-
-        # 2) Initialize nested dictionaries
-        store.setdefault(device_index, {})
-        store[device_index].setdefault(session_idx, {})
-        store[device_index][session_idx][idx] = {
-            "act": act,
-            "speed": speed,
-            "clockwise": clockwise
-        }
-
-        # 3) Start the motor
-        cmd = act.command if clockwise is None else (lambda sp: act.command(sp, clockwise))
-        t0 = time.monotonic()
-        asyncio.run_coroutine_threadsafe(cmd(speed), self._loop)
-
-        # 4) Wait until duration has passed
-        remaining = duration - (time.monotonic() - t0)
-        if remaining > 0:
-            await asyncio.sleep(remaining)
-
-        # 5) Remove this actuator from its store
-        session = store[device_index].get(session_idx, {})
-        session.pop(idx, None)
-        if not session:
-            store[device_index].pop(session_idx, None)
-        if not store[device_index]:
-            store.pop(device_index, None)
-
-        # 6) Find last command for this actuator in other sessions
-        candidate_info = None
-        candidate_session_id = None
-        sessions = store.get(device_index, {})
-        for session_id, session_dict in sessions.items():
-            if session_id == session_idx:  # skip current session
-                continue
-            if idx in session_dict:
-                info = session_dict[idx]
-                if candidate_session_id is None or session_id > candidate_session_id:
-                    candidate_session_id = session_id
-                    candidate_info = info
-
-        if device_index in self._continuous_forces:
-            logging.info(f"vibrate_once: continuous active, skipping one-shot for {device_index}")
-            return
-
-        if candidate_info is not None:
-            # Restore command from candidate_info
-            real_act = candidate_info["act"]
-            spd = candidate_info["speed"]
-            cw  = candidate_info["clockwise"]
-            cmd_func = real_act.command if cw is None else (lambda s, cw=cw: real_act.command(s, cw))
-            logging.debug(f"Restoring actuator {idx} on device {device_index} from session {candidate_session_id} with speed {spd}")
-            asyncio.run_coroutine_threadsafe(cmd_func(spd), self._loop)
-        else:
-            # No commands found for this actuator - stop it
-            logging.debug(f"Stopping actuator {idx} on device {device_index} (no active sessions)")
+        try:
+            idx = act.index
+            logging.debug(f"[_run_actuator] START dev={device_index} act#{idx} speed={speed} dir={clockwise}")
+            # 1) Select storage and session index based on type
             if clockwise is None:
-                asyncio.run_coroutine_threadsafe(act.command(0), self._loop)
+                store       = self._active_vibrations
+                session_idx = self.vibration_index
             else:
-                # For rotator, direction on stop doesn't matter but must be specified
-                asyncio.run_coroutine_threadsafe(act.command(0, clockwise), self._loop)
+                store       = self._active_rotations
+                session_idx = self.rotation_index
+
+            # 2) Initialize nested dictionaries
+            store.setdefault(device_index, {})
+            store[device_index].setdefault(session_idx, {})
+            store[device_index][session_idx][idx] = {
+                "act": act,
+                "speed": speed,
+                "clockwise": clockwise
+            }
+
+            # 3) Start the motor
+            cmd = act.command if clockwise is None else (lambda sp: act.command(sp, clockwise))
+            t0 = time.monotonic()
+            asyncio.run_coroutine_threadsafe(cmd(speed), self._loop)
+
+            # 4) Wait until duration has passed
+            remaining = duration - (time.monotonic() - t0)
+            if remaining > 0:
+                await asyncio.sleep(remaining)
+
+            # 5) Remove this actuator from its store
+            session = store[device_index].get(session_idx, {})
+            session.pop(idx, None)
+            if not session:
+                store[device_index].pop(session_idx, None)
+            if not store[device_index]:
+                store.pop(device_index, None)
+
+            # 6) Find last command for this actuator in other sessions
+            candidate_info = None
+            candidate_session_id = None
+            sessions = store.get(device_index, {})
+            for session_id, session_dict in sessions.items():
+                if session_id == session_idx:  # skip current session
+                    continue
+                if idx in session_dict:
+                    info = session_dict[idx]
+                    if candidate_session_id is None or session_id > candidate_session_id:
+                        candidate_session_id = session_id
+                        candidate_info = info
+
+            if device_index in self._continuous_forces:
+                logging.info(f"vibrate_once: continuous active, skipping one-shot for {device_index}")
+                return
+
+            if candidate_info is not None:
+                # Restore command from candidate_info
+                real_act = candidate_info["act"]
+                spd = candidate_info["speed"]
+                cw  = candidate_info["clockwise"]
+                cmd_func = real_act.command if cw is None else (lambda s, cw=cw: real_act.command(s, cw))
+                logging.debug(f"Restoring actuator {idx} on device {device_index} from session {candidate_session_id} with speed {spd}")
+                asyncio.run_coroutine_threadsafe(cmd_func(spd), self._loop)
+            else:
+                # No commands found for this actuator - stop it
+                logging.debug(f"Stopping actuator {idx} on device {device_index} (no active sessions)")
+                if clockwise is None:
+                    asyncio.run_coroutine_threadsafe(act.command(0), self._loop)
+                else:
+                    # For rotator, direction on stop doesn't matter but must be specified
+                    asyncio.run_coroutine_threadsafe(act.command(0, clockwise), self._loop)
+            logging.debug(f"[_run_actuator] END dev={device_index} act#{idx}")
+        except Exception as e:
+            logging.error(f"[_run_actuator] ERROR dev={device_index} act#{idx} → {e}", exc_info=True)
+            raise
 
     def get_last_actuator_by_type(
         self,

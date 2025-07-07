@@ -43,6 +43,9 @@ class VibrationMixin:
                 try:
                     # Safely convert device ID
                     device_idx = self._safe_get_device_id(device_id)
+
+                    logging.info(f"Found device {device_idx}");
+
                     if device_idx is None or device_idx not in sextoy.devices:
                         continue
                         

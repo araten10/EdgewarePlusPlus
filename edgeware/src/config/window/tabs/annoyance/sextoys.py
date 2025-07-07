@@ -16,6 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+import logging
 
 from config.items import PERCENTAGE, FLOAT, BOOLEAN
 from config.vars import Vars
@@ -225,6 +226,9 @@ class SexToysTab(ScrollFrame):
 
     def update_devices(self):
         for device in self.sextoy.devices.values():
+
+            logging.info(f"Updating device str({device.index})")
+
             idx = str(device.index)  # Always use string keys
             
             if idx not in self.vars.sextoys:
