@@ -55,7 +55,6 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     return {
         "standard": {"print": lambda _env, *args: print(*args)},
         "edgeware": {
-            "take_main": lambda _env: setattr(state, "main_taken", True),
             "panic": lambda _env: panic(root, settings, state, disable=False),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             **popups,

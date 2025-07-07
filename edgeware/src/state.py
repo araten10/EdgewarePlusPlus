@@ -59,8 +59,6 @@ class State:
     corruption_popup_number = 0
     corruption_launches_number = 1
 
-    main_taken = False  # Has a script stopped Edgeware from entering its main loop
-
     alt_held = False
 
     @property

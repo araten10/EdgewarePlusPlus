@@ -108,10 +108,6 @@ if __name__ == "__main__":
         make_desktop_icons(settings)
         handle_keyboard(root, settings, state)
         start_panic_listener(root, settings, state)
-
-        if state.main_taken:
-            return
-
         Thread(target=lambda: replace_images(root, settings, pack), daemon=True).start()  # Thread for performance reasons
         handle_corruption(root, settings, pack, state)
         handle_discord(settings, pack)
