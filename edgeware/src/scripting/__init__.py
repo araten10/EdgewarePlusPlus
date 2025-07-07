@@ -125,21 +125,21 @@ class PrimaryExpression:
         constants = {"nil": None, "false": False, "true": True}
         if tokens.next in constants:
             value = constants[tokens.get()]
-            self.eval = lambda env: value
+            self.eval = lambda _env: value
             return
 
         for numeral in [int, float]:
             try:
                 number = numeral(tokens.next)
                 tokens.skip()
-                self.eval = lambda env: number
+                self.eval = lambda _env: number
                 return
             except ValueError:
                 pass
 
         if tokens.next[0] == '"' and tokens.next[-1] == '"':
             string = tokens.get()
-            self.eval = lambda env: string[1:-1]
+            self.eval = lambda _env: string[1:-1]
             return
 
         if tokens.skip_if("function"):
@@ -289,7 +289,7 @@ class Statement:
 
 
 class ReturnExpression:
-    def eval(self, env: Environment) -> None:
+    def eval(self, _env: Environment) -> None:
         return
 
 

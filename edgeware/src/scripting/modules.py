@@ -43,20 +43,20 @@ def wrap(env: Environment, function: Callable | None) -> Callable | None:
 
 def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     popups = {
-        "image": lambda env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
-        "video": lambda env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
+        "image": lambda _env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
+        "video": lambda _env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
         "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, media(pack.paths.audio, audio), wrap(env, on_stop)),
         "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
-        "web": lambda env, web: open_web(pack, web),
-        "subliminal": lambda env, subliminal: SubliminalPopup(settings, pack, subliminal),
-        "notification": lambda env, notification: display_notification(settings, pack, notification),
+        "web": lambda _env, web: open_web(pack, web),
+        "subliminal": lambda _env, subliminal: SubliminalPopup(settings, pack, subliminal),
+        "notification": lambda _env, notification: display_notification(settings, pack, notification),
     }
 
     return {
-        "standard": {"print": lambda env, *args: print(*args)},
+        "standard": {"print": lambda _env, *args: print(*args)},
         "edgeware": {
-            "take_main": lambda env: setattr(state, "main_taken", True),
-            "panic": lambda env: panic(root, settings, state, disable=False),
+            "take_main": lambda _env: setattr(state, "main_taken", True),
+            "panic": lambda _env: panic(root, settings, state, disable=False),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             **popups,
         },
