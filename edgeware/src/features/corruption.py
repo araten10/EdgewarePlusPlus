@@ -81,8 +81,8 @@ def next_corruption_level(settings: Settings, pack: Pack, state: State) -> int:
 def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     level = pack.corruption_levels[state.corruption_level - 1]
 
-    if settings.corruption_wallpaper:
-        os_utils.set_wallpaper(pack.paths.root / (level.wallpaper or pack.wallpaper))
+    if settings.corruption_wallpaper and level.wallpaper:
+        os_utils.set_wallpaper(pack.paths.root / level.wallpaper)
 
     if settings.corruption_full:
         for key, value in level.config.items():

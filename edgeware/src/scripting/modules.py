@@ -26,7 +26,6 @@ from features.misc import display_notification, open_web
 from features.prompt import Prompt
 from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
-from os_utils import set_wallpaper
 from pack import Pack
 from panic import panic
 from state import State
@@ -59,7 +58,6 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
             "take_main": lambda env: setattr(state, "main_taken", True),
             "panic": lambda env: panic(root, settings, state, disable=False),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
-            "set_wallpaper": lambda env, wallpaper: set_wallpaper(pack.paths.root / wallpaper),
             **popups,
         },
     }

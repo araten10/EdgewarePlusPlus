@@ -23,11 +23,11 @@ from collections.abc import Callable
 from threading import Thread
 from tkinter import Tk
 
-import os_utils
 import pystray
 from config.settings import Settings
 from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
+from os_utils import make_shortcut, set_wallpaper
 from pack import Pack
 from panic import panic
 from paths import CustomAssets, Process
@@ -77,9 +77,9 @@ def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hiber
 
 def make_desktop_icons(settings: Settings) -> None:
     if settings.desktop_icons:
-        os_utils.make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon())
-        os_utils.make_shortcut("Edgeware++ Config", Process.CONFIG, CustomAssets.config_icon())
-        os_utils.make_shortcut("Edgeware++ Panic", Process.PANIC, CustomAssets.panic_icon())
+        make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon())
+        make_shortcut("Edgeware++ Config", Process.CONFIG, CustomAssets.config_icon())
+        make_shortcut("Edgeware++ Panic", Process.PANIC, CustomAssets.panic_icon())
 
 
 def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
@@ -92,7 +92,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
             wallpapers.remove(previous)
 
         wallpaper = random.choice(wallpapers)
-        os_utils.set_wallpaper(pack.paths.root / wallpaper)
+        set_wallpaper(pack.paths.root / wallpaper)
 
         t = settings.wallpaper_timer
         v = settings.wallpaper_variance
@@ -104,7 +104,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
     if settings.rotate_wallpaper and len(settings.wallpapers) > 1:
         rotate()
     else:
-        os_utils.set_wallpaper(pack.wallpaper)
+        set_wallpaper(pack.wallpaper)
 
 
 def handle_discord(settings: Settings, pack: Pack) -> None:
