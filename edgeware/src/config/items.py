@@ -155,6 +155,7 @@ HIBERNATE_DELAY_MIN_DANGER = "You are running Hibernate Mode with a short minimu
 HIBERNATE_DELAY_MAX_DANGER = "You are running Hibernate Mode with a short maximum cooldown! You might experience lag if a bunch of hibernate modes overlap!"
 SHOW_ON_DISCORD_DANGER = "Show on Discord is enabled! This could lead to potential embarassment if you're on your main account!"
 PANIC_DISABLED_DANGER = "Panic Hotkey is disabled! If you want to easily close Edgeware, read the tooltip in the Annoyance tab for other ways to panic!"
+RUN_ON_SAVE_QUIT_DANGER = "Edgeware will run on Save & Exit (AKA: when you hit Yes!)"
 
 
 # fmt: off
