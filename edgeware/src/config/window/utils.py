@@ -31,6 +31,7 @@ from paths import Data, Process
 from pynput import keyboard
 
 from config import load_config
+from config.items import CONFIG_DANGER, DangerLevel
 from config.vars import Vars
 
 # TODO: Don't load these here
@@ -150,61 +151,34 @@ def assign(obj: StringVar | IntVar | BooleanVar, var: str | int | bool) -> None:
 
 
 def safe_check(vars: Vars) -> bool:
-    dangers = []
-    logging.info("running through danger list...")
-    if vars.replace_images.get():
-        logging.info("extreme dangers found.")
-        dangers.append("\n\nExtreme:")
-        if vars.replace_images.get():
-            dangers.append(
-                '\n•Replace Images is enabled! THIS WILL DELETE FILES ON YOUR COMPUTER! Only enable this willingly and cautiously! Read the documentation in the "About" tab!'
-            )
-    if vars.run_at_startup.get() or vars.fill_drive.get():
-        logging.info("major dangers found.")
-        dangers.append("\n\nMajor:")
-        if vars.run_at_startup.get():
-            dangers.append("\n•Launch on Startup is enabled! This will run Edgeware when you start your computer! (Note: Timer mode enables this setting!)")
-        if vars.fill_drive.get():
-            dangers.append(
-                "\n•Fill Drive is enabled! Edgeware will place images all over your computer! Even if you want this, make sure the protected directories are right!"
-            )
-    if (
-        vars.panic_lockout.get()
-        or vars.mitosis_mode.get()
-        or vars.show_on_discord.get()
-        or (vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30))
-    ):
-        logging.info("medium dangers found.")
-        dangers.append("\n\nMedium:")
-        if vars.panic_lockout.get():
-            dangers.append("\n•Timer mode is enabled! Panic cannot be used until a specific time! Make sure you know your Safeword!")
-        if vars.mitosis_mode.get():
-            dangers.append("\n•Mitosis mode is enabled! With high popup rates, this could create a chain reaction, causing lag!")
-        if vars.hibernate_mode.get() and (int(vars.hibernate_delay_min.get()) < 30 or int(vars.hibernate_delay_max.get()) < 30):
-            dangers.append("\n•You are running hibernate mode with a short cooldown! You might experience lag if a bunch of hibernate modes overlap!")
-        if vars.show_on_discord.get():
-            dangers.append("\n•Show on Discord is enabled! This could lead to potential embarassment if you're on your main account!")
-    if vars.panic_disabled.get() or vars.run_on_save_quit.get():
-        logging.info("minor dangers found.")
-        dangers.append("\n\nMinor:")
-        if vars.panic_disabled.get():
-            dangers.append("\n•Panic Hotkey is disabled! If you want to easily close Edgeware, read the tooltip in the Annoyance tab for other ways to panic!")
-        if vars.run_on_save_quit.get():
-            dangers.append("\n•Edgeware will run on Save & Exit (AKA: when you hit Yes!)")
-    dangers = " ".join(dangers)
-    if len(dangers):
-        logging.info("safe mode intercepted save! asking user...")
-        if (
-            messagebox.askyesno(
-                "Dangerous Setting Detected!",
-                f"There are {len(dangers)} potentially dangerous settings detected! Do you want to save these settings anyways? {dangers}",
-                icon="warning",
-            )
-            is False
-        ):
-            logging.info("user cancelled save.")
-            return False
-    return True
+    danger_levels = {
+        DangerLevel.EXTREME: [],
+        DangerLevel.MAJOR: [],
+        DangerLevel.MEDIUM: [],
+        DangerLevel.MINOR: [],
+    }
+
+    for key, var in vars.entries.items():
+        danger = CONFIG_DANGER.get(key)
+        if danger and danger.check(var.get()):
+            danger_levels[danger.level].append(f"\n•{danger.warning or key}")
+
+    danger_num = 0
+    warnings = ""
+    for level, dangers in danger_levels.items():
+        danger_num += len(dangers)
+        if dangers:
+            warnings += f"\n\n{level.value.capitalize()}{''.join(dangers)}"
+
+    return (
+        messagebox.askyesno(
+            "Dangerous Settings Detected!",
+            f"{danger_num} potentially dangerous setting(s) detected! Do you want to save anyway? {warnings}",
+            icon="warning",
+        )
+        if danger_num
+        else True
+    )
 
 
 def clear_launches(confirmation: bool) -> None:
