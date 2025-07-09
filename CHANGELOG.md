@@ -28,6 +28,8 @@ A pretty huge feature has been added in this update! It only works on windows, h
 
 •*Changed "warn if dangerous settings active" to default to on, users can still disable it if they wish*
 
+•*The next tutorial tab is half finished and i'm too lazy to change it back to the construction page before pushing updates shhh you didnt see anything*
+
 
 **Version 17**
 
