@@ -42,7 +42,10 @@ if __name__ == "__main__":
 from threading import Thread
 from tkinter import Tk
 
+import pyglet
+import asyncio
 import utils
+import logging
 from config import first_launch_configure
 from config.settings import Settings
 from features.audio import play_audio
@@ -69,6 +72,8 @@ from pack import Pack
 from panic import start_panic_listener
 from roll import RollTarget, roll_targets
 from state import State
+from buttplug import Client, WebsocketConnector, ProtocolSpec
+from features.sextoy import Sextoy
 
 
 def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) -> None:
@@ -76,6 +81,23 @@ def main(root: Tk, settings: Settings, pack: Pack, targets: list[RollTarget]) ->
     Thread(target=lambda: fill_drive(root, settings, pack, state), daemon=True).start()  # Thread for performance reasons
     root.after(settings.delay, lambda: main(root, settings, pack, targets))
 
+# Adding function to keep connection alive
+async def keep_connection_alive(sextoy):
+    while True:
+        if not sextoy.connected:
+            logging.info(f"Connection status: {sextoy.connection_status}")
+            success = await sextoy.connect_async()
+            if success:
+                logging.info("Successfully connected")
+            else:
+                logging.info("Connection attempt failed")
+                
+        await asyncio.sleep(5)
+
+def run_connection_loop(sextoy):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(keep_connection_alive(sextoy))
 
 if __name__ == "__main__":
     utils.init_logging("main")
@@ -87,20 +109,25 @@ if __name__ == "__main__":
     settings = Settings()
     pack = Pack(settings.pack_path)
     state = State()
+    sextoy = Sextoy(settings)
+
+    connection_thread = Thread(target=run_connection_loop, args=(sextoy,), daemon=True)
+    connection_thread.start()
 
     settings.corruption_mode = settings.corruption_mode and pack.corruption_levels
     corruption_danger_check(settings, pack)
 
     # TODO: Use a dict?
     targets = [
-        RollTarget(lambda: ImagePopup(root, settings, pack, state), lambda: settings.image_chance if not settings.mitosis_mode else 0),
-        RollTarget(lambda: VideoPopup(root, settings, pack, state), lambda: settings.video_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: ImagePopup(root, settings, pack, state, sextoy), lambda: settings.image_chance if not settings.mitosis_mode else 0),
+        RollTarget(lambda: VideoPopup(root, settings, pack, state, sextoy), lambda: settings.video_chance if not settings.mitosis_mode else 0),
         RollTarget(lambda: SubliminalPopup(settings, pack), lambda: settings.subliminal_chance),
-        RollTarget(lambda: Prompt(settings, pack, state), lambda: settings.prompt_chance),
+        RollTarget(lambda: Prompt(settings, pack, state, sextoy), lambda: settings.prompt_chance),
         RollTarget(lambda: play_audio(root, settings, pack, state), lambda: settings.audio_chance),
         RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
-        RollTarget(lambda: display_notification(settings, pack), lambda: settings.notification_chance),
+        RollTarget(lambda: display_notification(settings, pack, sextoy), lambda: settings.notification_chance),
     ]
+
 
     def start_main() -> None:
         Thread(target=lambda: replace_images(settings, pack), daemon=True).start()  # Thread for performance reasons

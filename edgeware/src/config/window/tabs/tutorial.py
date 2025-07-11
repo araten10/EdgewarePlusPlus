@@ -62,6 +62,9 @@ def open_tutorial(parent: Tk) -> None:
     tutorial_notebook.add(tab_hibernate_type, text="Hibernate Types")
     Label(tab_hibernate_type.viewPort, text=HIBERNATE_TYPE_TEXT, anchor="nw", wraplength=460).pack()
 
+    tab_sextoy = HtmlFrame(tutorial_frame, messages_enabled=False)
+    tutorial_notebook.add(tab_sextoy, text="Sextoy")
+    load_html(tab_sextoy, Assets.TUTORIAL_SEXTOY)
     # HtmlFrame Workaround:
     # HtmlFrame has a bug that makes it incompatible with Notebook on 64bit windows. This bug is known by the developers and is not being fixed due to it being an error larger than the scope of the program.
     # The bug makes it so if you swap tabs from an HtmlFrame to a second HtmlFrame, the program crashes after a few seconds.

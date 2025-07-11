@@ -19,9 +19,10 @@ import ast
 from dataclasses import dataclass
 from enum import Enum
 from tkinter import BooleanVar, IntVar, StringVar
-from typing import Callable
 
-from voluptuous import All, Range, Schema, Union
+from typing import Callable, Tuple, Any
+
+from voluptuous import All, Range, Schema, Union, Boolean
 from voluptuous.error import Invalid
 
 from config.themes import THEMES
@@ -29,20 +30,84 @@ from config.themes import THEMES
 BROKEN = True  # For config items that can't be changed by corruption
 
 NONNEGATIVE = Schema(All(int, Range(min=0)))
+FLOAT = Schema(All(float, Range(min=0)))
 PERCENTAGE = Schema(All(int, Range(min=0, max=100)))
 BOOLEAN = Schema(All(int, Range(min=0, max=1)))
 STRING = Schema(str)
 
 
+class DictVar:
+    """A minimal variable-wrapper around a Python dict, providing .get(), .set(),
+    as well as dict-like methods so that UI code can use .keys(), indexing, iteration, etc."""
+    def __init__(self):
+        self._value: dict[int, dict] = {}
+
+    def get(self) -> dict[int, dict]:
+        """Return a plain dict of primitive values, unwrapping any Tkinter Variables."""
+        result: dict[int, dict] = {}
+        for idx, settings in self._value.items():
+            prim_settings: dict[str, object] = {}
+            for key, val in settings.items():
+                # Unwrap any Tkinter Variable into its primitive value
+                prim_settings[key] = val.get() if hasattr(val, "get") and callable(val.get) else val
+            result[idx] = prim_settings
+        return result
+
+    def set(self, new: dict[int, dict]) -> None:
+        """Replace internal dict with a new one."""
+        self._value = new
+
+    # Dict-like interface for UI code
+    def keys(self):
+        return self._value.keys()
+
+    def items(self):
+        return self._value.items()
+
+    def __getitem__(self, key):
+        return self._value[key]
+
+    def __setitem__(self, key, value):
+        self._value[key] = value
+
+    def __contains__(self, key):
+        return key in self._value
+
+    def __iter__(self):
+        return iter(self._value)
+
+    def __len__(self):
+        return len(self._value)
+    
+
+def serialize_sextoys(raw: dict[int, dict[str, object]]) -> dict[int, dict[str, object]]:
+    """Convert all values in the nested dict to plain Python primitives."""
+    result = {}
+    for idx, settings in raw.items():
+        primitive_settings = {}
+        for key, val in settings.items():
+            if hasattr(val, "get") and callable(val.get):
+                # For DoubleVar, ensure value is float
+                value = val.get()
+                primitive_settings[key] = float(value) if isinstance(value, float) else value
+            else:
+                primitive_settings[key] = val
+        result[idx] = primitive_settings
+    return result
+
+
 def s_to_ms(value: int) -> int:
+    """Convert seconds to milliseconds."""
     return value * 1000
 
 
 def to_float(value: int) -> float:
+    """Convert percentage integer to float fraction."""
     return value / 100
 
 
 def negation(value: bool) -> bool:
+    """Return the logical negation of the given boolean."""
     return not value
 
 
@@ -75,9 +140,9 @@ class Item:
     setting: Callable | None
     danger: Danger | None = None
 
-    # TODO: Find a better solution for this
     block: bool = False
-
+    danger: bool = False
+    safe_range: Tuple[int | None, int | None] | None = None  # Range outside which value is considered dangerous
 
 REPLACE_IMAGES_DANGER = "Replace Images is enabled! THIS WILL DELETE FILES ON YOUR COMPUTER! Only enable this willingly and cautiously! Read the documentation in the Annoyance/Runtime Dangerous tab!"
 RUN_AT_STARTUP_DANGER = "Launch on PC Startup is enabled! This will run Edgeware when you start your computer!"
@@ -149,6 +214,42 @@ CONFIG_ITEMS = {
     "wallpapers": Item("wallpaperDat", STRING, None, lambda value: list(ast.literal_eval(value).values())),
     "wallpaper_timer": Item("wallpaperTimer", NONNEGATIVE, IntVar, s_to_ms),
     "wallpaper_variance": Item("wallpaperVariance", NONNEGATIVE, IntVar, s_to_ms),
+
+    # Sextoys
+        "sextoys": Item(
+            "sextoys",
+            Schema({
+            str: Schema({
+                "sextoy_name": STRING,
+                "sextoy_general_vibration_force": PERCENTAGE,
+                "sextoy_image_open_chance": PERCENTAGE,
+                "sextoy_image_open_vibration_force": PERCENTAGE,
+                "sextoy_image_open_vibration_length": FLOAT,
+                "sextoy_image_close_chance": PERCENTAGE,
+                "sextoy_image_close_vibration_force": PERCENTAGE,
+                "sextoy_image_close_vibration_length": FLOAT,
+                "sextoy_video_open_chance": PERCENTAGE,
+                "sextoy_video_open_vibration_force": PERCENTAGE,
+                "sextoy_video_open_vibration_length": FLOAT,
+                "sextoy_video_close_chance": PERCENTAGE,
+                "sextoy_video_close_vibration_force": PERCENTAGE,
+                "sextoy_video_close_vibration_length": FLOAT,
+                "sextoy_caption_chance": PERCENTAGE,
+                "sextoy_caption_vibration_force": PERCENTAGE,
+                "sextoy_caption_vibration_length": FLOAT,
+                "sextoy_display_notification_chance": PERCENTAGE,
+                "sextoy_display_notification_vibration_force": PERCENTAGE,
+                "sextoy_display_notification_vibration_length": FLOAT,
+                "sextoy_prompt_enabled": BOOLEAN,
+                "sextoy_prompt_vibration_force": PERCENTAGE,
+            })
+        }),
+            # VAR: initial factory for the value in Vars; an empty dict
+            DictVar,
+            # setting factory: unwrap into pure primitives
+            serialize_sextoys
+        ),
+        "initface_address": Item("initfaceAddress", STRING, StringVar, str),
 
     # Booru
     "booru_download": Item("downloadEnabled", BOOLEAN, BooleanVar, bool),

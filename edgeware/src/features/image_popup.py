@@ -24,19 +24,25 @@ import requests
 from config.settings import Settings
 from features.popup import Popup
 from features.video_player import VideoPlayer
+from features.sextoy import Sextoy
 from pack import Pack
 from PIL import Image, ImageTk
 from roll import roll
 from state import State
+from features.vibration_mixin import VibrationMixin
 
-
-class ImagePopup(Popup):
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
+class ImagePopup(Popup, VibrationMixin):
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, sextoy: Sextoy) -> None:
         self.media = pack.random_image()
         self.hypno = roll(settings.hypno_chance)
+
+        self.sextoy = sextoy
         if not self.should_init():
             return
-        super().__init__(root, settings, pack, state)
+        
+        VibrationMixin.__init__(self)
+
+        super().__init__(root, settings, pack, state, sextoy)
 
         # TODO: Better booru integration
         if self.settings.booru_download and roll(50):
@@ -78,12 +84,22 @@ class ImagePopup(Popup):
                 self.photo_image = ImageTk.PhotoImage(final)
                 label.config(image=self.photo_image)
 
+        try:
+            self.trigger_vibration("image_open", getattr(self.settings, 'sextoys', {}), self.sextoy)
+        except Exception as e:
+            logging.info(f"Image open vibration error: {str(e)}")
+            
+
         self.init_finish()
 
     def should_init(self) -> bool:
         return self.media
 
     def close(self) -> None:
+        try:
+            self.trigger_vibration("image_close", getattr(self.settings, 'sextoys', {}), self.sextoy)
+        except Exception as e:
+            logging.info(f"Image close vibration error: {str(e)}")
         if hasattr(self, "player"):
             self.player.close()
         super().close()
