@@ -9,12 +9,27 @@
 
 **Since last version...**
 
+**Version 17.5**
+
+A pretty huge feature has been added in this update! It only works on windows, however... and there's also a few major issues with it. That being said, it works "80%" as intended, so we're deciding to release this update now since fixing these problems will take considerable time and effort (if possible at all)
+
 •*Added clickthrough popup support, found in the popup tweaks tab*
 >Clickthrough popups allow you to click "behind" popups and do other things on your computer without interacting with Edgeware++. Its important to note that in this mode there is no way for you to close popups manually, as that would entirely defeat the purpose... make sure you tweak the popup opacity and enable timeout mode if you want to use this mode sanely!
 
 •*To adjust for the new clickthrough feature, some settings have been slightly shifted around in the popup tweaks tab*
 
 •*Removed some out of date info in the tutorial tab*
+
+•*Fixed corruption being unable to change popup frequencies*
+
+•*Fixed a crash when there are no booru results*
+
+•*Added audio fade-in and fade-out as togglable settings (originally contributed by Close2real on GitHub)*
+
+•*Changed "warn if dangerous settings active" to default to on, users can still disable it if they wish*
+
+•*The next tutorial tab is half finished and i'm too lazy to change it back to the construction page before pushing updates shhh you didnt see anything*
+
 
 **Version 17**
 
