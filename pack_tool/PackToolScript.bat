@@ -40,7 +40,7 @@ goto top
 echo What do you want to name your pack's directory?
 echo (use valid filename characters, with underscores instead of spaces!)
 set /p packName=Directory Name:
-src\main.py -n "%packName%"
+py src\main.py -n "%packName%"
 echo Done.
 pause
 goto top
@@ -77,7 +77,7 @@ echo Must enter selection number (1, 2)
 pause
 goto ptRename
 :finishBuild
-src\main.py %arg1% %arg2% %arg3% %compileName%
+py src\main.py %arg1% %arg2% %arg3% %compileName%
 echo Done.
 pause
 goto top
