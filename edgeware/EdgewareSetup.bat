@@ -2,6 +2,9 @@
 
 reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
 
+:: cd to script's directory in case Windows sets the working directory to something else
+cd /D "%~dp0"
+
 echo +==============[ Welcome to Edgeware++ Setup~ ]==============+
 echo Python version:
 py --version
@@ -10,9 +13,6 @@ echo NOTE: Python versions older than 3.12 might have compatability issues.
 echo If you are on one of these versions and experience issues with Edgeware++, try uninstalling them
 echo and running this installer again. (or download it yourself if you know what you're doing!)
 echo:
-
-:: cd to script's directory in case Windows sets the working directory to something else
-cd /D "%~dp0"
 
 if not %errorlevel%==0 (
   echo Could not find Python.
