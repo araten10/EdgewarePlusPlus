@@ -20,7 +20,7 @@ from tkinter import BooleanVar, Misc
 import os_utils
 from config.vars import Vars
 from config.window.utils import config
-from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigToggle
+from config.window.widgets.layout import ConfigRow, ConfigScale, ConfigSection, ConfigMessage, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
 from screeninfo import Monitor, get_monitors
@@ -30,8 +30,8 @@ CAPTION_TEXT = "Captions are small bits of randomly chosen text that adorn the t
 MONITORS_TEXT = "Here you can choose what monitors Edgeware++ will spawn popups on! By default every monitor that is detected is turned on, but if you want porn to amass on your second screen while you're focusing on something on your main monitor, this is a good way to do it~"
 MOVEMENT_TEXT = 'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" property (see "Misc Tweaks" above for more information), so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower movement chance or higher popup delay to start!'
 MISC_TEXT = '•"Buttonless Closing Popups" removes the "close" button on every image and video popup, allowing you to click anywhere on the popup to close it. This makes closing popups much easier, but certain packs may have custom buttons that will no longer be seen.\n•"Multi Click Popups" is a setting that needs to be supported by the pack, and makes popups under certain moods take more clicks to close.\n•"Popup Opacity" affects the opacity/transparency of all popups.'
-TIMEOUT_TEXT = "After a certain time, popups will fade out and delete themselves. This is a great setting to use with Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction."
-
+TIMEOUT_TEXT = "After a certain time, popups will fade out and delete themselves. This is a great setting to use with the clickthrough setting and Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction."
+CLICKTHROUGH_TEXT = "Want to run Edgeware++ while doing other things? Clickthrough popups might be what you're looking for! When this setting is turned on, all popups will have their buttons removed, and you will be unable to click on them. Instead, you can continue to interact with the programs behind them without them interrupting you! (mostly)\n\nIt is crucial that you turn down the opacity of the popups before using this setting... it would be pretty pointless otherwise! Additionally, you might want to enable timeout so they properly despawn. Without timeout, there are very few ways you can get the popups to disappear- but maybe that's what you're looking for! Lastly, if you're using legacy panic (the panic alternative found in the troubleshooting tab) you should be aware that you cannot panic with your set hotkey, as there's no way to click on the popups to focus them. The global panic hotkey should still work fine!\n\nNOTE: This feature is currently in \"beta\". Popups can still steal focus briefly when spawned, which can cause issues in high intensity games. Linux support also isn't developed yet. We hope to fix these at some point!"
 
 class MonitorToggle(ConfigToggle):
     def __init__(self, master: Misc, monitor: Monitor) -> None:
@@ -81,6 +81,8 @@ class PopupTweaksTab(ScrollFrame):
         opacity_row = ConfigRow(opacity_section)
         opacity_row.pack()
         ConfigScale(opacity_row, label="Popup Opacity (%)", from_=5, to=100, variable=vars.opacity).pack()
+
+        ConfigMessage(opacity_section, CLICKTHROUGH_TEXT).pack()
 
         clickthrough_row = ConfigRow(opacity_section)
         clickthrough_row.pack()
