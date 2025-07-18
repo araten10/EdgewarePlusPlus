@@ -43,7 +43,6 @@ class Assets:
     # Unchangeable defaults
     DEFAULT_CONFIG = ROOT / "default_config.json"
     DEFAULT_IMAGE = ROOT / "default_image.png"
-    DEFAULT_WALLPAPER = ROOT / "default_wallpaper.png"
 
     # Changeable defaults
     DEFAULT_CONFIG_ICON = ROOT / "default_config_icon.ico"
