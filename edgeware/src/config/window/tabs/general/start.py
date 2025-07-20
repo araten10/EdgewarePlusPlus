@@ -365,7 +365,11 @@ class StartTab(ScrollFrame):
         preset_section.pack()
 
         preset_list = list_presets()
-        self.preset_var = StringVar(self.viewPort, preset_list.pop(0))  # Without pop the first item appears twice in the list
+        
+        if not preset_list: # handle error if no presets are returned
+            preset_list = ['default']
+            
+        self.preset_var = StringVar(self.viewPort, preset_list.pop(0))
 
         preset_selection_frame = Frame(preset_section)
         preset_selection_frame.pack(side="left", fill="x", padx=6)
