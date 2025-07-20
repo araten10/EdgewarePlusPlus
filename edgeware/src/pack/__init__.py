@@ -55,7 +55,7 @@ class Pack:
 
         # Paths
         self.icon = self.paths.icon if self.paths.icon.is_file() else CustomAssets.icon()
-        self.wallpaper = self.paths.wallpaper if self.paths.wallpaper.is_file() else Assets.DEFAULT_WALLPAPER
+        self.wallpaper = self.paths.wallpaper if self.paths.wallpaper.is_file() else None
         self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
 
         logging.info(f"Active moods: {self.active_moods()}")
