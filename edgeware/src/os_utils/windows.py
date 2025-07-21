@@ -53,8 +53,16 @@ def set_clickthrough(window: Toplevel) -> None:
     windll.user32.SetWindowLongW(hwnd, gwl_exstyle, ex_style)
 
 
+def get_wallpaper() -> Path | None:
+    spi_getdeskwallpaper = 0x0073
+    wallpaper = ctypes.create_unicode_buffer(260)  # Max path length on Windows
+    ctypes.windll.user32.SystemParametersInfoW(spi_getdeskwallpaper, ctypes.sizeof(wallpaper), wallpaper, 0)
+    return Path(wallpaper.value)
+
+
 def set_wallpaper(wallpaper: Path) -> None:
-    ctypes.windll.user32.SystemParametersInfoW(20, 0, str(wallpaper), 0)
+    spi_setdeskwallpaper = 0x0014
+    ctypes.windll.user32.SystemParametersInfoW(spi_setdeskwallpaper, 0, str(wallpaper), 0)
 
 
 def open_directory(url: str) -> None:

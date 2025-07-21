@@ -33,6 +33,10 @@ def set_clickthrough(window: Toplevel) -> None:
     pass
 
 
+def get_wallpaper() -> Path | None:
+    pass
+
+
 def set_wallpaper(wallpaper: Path) -> None:
     pass
 
