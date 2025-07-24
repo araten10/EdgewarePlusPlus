@@ -62,9 +62,7 @@ class WallpaperTab(ScrollFrame):
 
         change_panic_wallpaper_frame = Frame(panic_section)
         change_panic_wallpaper_frame.pack(fill="x")
-        set_panic_wallpaper_button = Button(
-            change_panic_wallpaper_frame, text="Set Panic Wallpaper", command=self.set_panic_wallpaper, cursor="question_arrow"
-        )
+        set_panic_wallpaper_button = Button(change_panic_wallpaper_frame, text="Set Panic Wallpaper", command=self.set_panic_wallpaper, cursor="question_arrow")
         set_panic_wallpaper_button.pack(side="left", fill="x", padx=5, pady=5, expand=1)
         CreateToolTip(
             set_panic_wallpaper_button,
