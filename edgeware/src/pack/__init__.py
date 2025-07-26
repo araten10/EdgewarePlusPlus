@@ -147,4 +147,4 @@ class Pack:
 
     def random_web(self) -> str | None:
         web = random.choice(self.find_list("web") or [None])
-        return web.url + random.choice(web.args) if web else None
+        return web.url + random.choice(web.args or [""]) if web else None
