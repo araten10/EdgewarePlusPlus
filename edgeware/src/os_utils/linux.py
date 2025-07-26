@@ -22,12 +22,13 @@ import subprocess
 import sys
 from pathlib import Path
 from tkinter import Toplevel
+from urllib.parse import urlparse
 
 import mpv
 from config import load_default_config
 from paths import CustomAssets, Process
 
-from os_utils.linux_utils import get_desktop_environment, get_wallpaper_commands, get_wallpaper_function
+from os_utils.linux_utils import find_get_wallpaper_command, find_set_wallpaper_commands, find_set_wallpaper_function, get_desktop_environment
 
 
 def close_mpv(player: mpv.MPV) -> None:
@@ -45,10 +46,32 @@ def set_clickthrough(window: Toplevel) -> None:
     pass
 
 
-def set_wallpaper(wallpaper: Path) -> None:
+def get_wallpaper() -> Path | None:
+    # Confirmed to work on:
+    # - GNOME
     desktop = get_desktop_environment()
-    commands = get_wallpaper_commands(wallpaper, desktop)
-    function = get_wallpaper_function(wallpaper, desktop)
+    command = find_get_wallpaper_command(desktop)
+
+    if command:
+        try:
+            s = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        except Exception as e:
+            logging.warning(f"Failed to run {command}. Reason: {e}")
+
+        if s.stdout:
+            line = s.stdout.readline()
+            string = line.decode("utf-8").strip()[1:-1]
+            return Path(urlparse(string).path)
+    else:
+        logging.info(f"Can't get wallpaper for desktop environment {desktop}")
+
+
+def set_wallpaper(wallpaper: Path) -> None:
+    # Confirmed to work on:
+    # - GNOME
+    desktop = get_desktop_environment()
+    commands = find_set_wallpaper_commands(wallpaper, desktop)
+    function = find_set_wallpaper_function(wallpaper, desktop)
 
     if len(commands) > 0:
         for command in commands:

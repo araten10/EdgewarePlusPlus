@@ -31,6 +31,7 @@ from config.window.widgets.layout import (
 )
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
+from os_utils import get_wallpaper
 from pack import Pack
 from paths import CustomAssets, Data
 from PIL import Image, ImageTk
@@ -52,31 +53,31 @@ class WallpaperTab(ScrollFrame):
         panic_section = ConfigSection(self.viewPort, "Panic Wallpaper", PANIC_TEXT)
         panic_section.pack()
 
-        # message_group.append(panic_message)
-
-        change_panic_wallpaper_frame = Frame(panic_section)
-        change_panic_wallpaper_frame.pack(side="left", fill="y")
-        change_panic_wallpaper_button = Button(
-            change_panic_wallpaper_frame, text="Change Panic Wallpaper", command=self.change_panic_wallpaper, cursor="question_arrow"
-        )
-        change_panic_wallpaper_button.pack(fill="x", padx=5, pady=5, expand=1)
-        CreateToolTip(
-            change_panic_wallpaper_button,
-            "When you use panic, the wallpaper will be set to this image.\n\n"
-            "This is useful since most packs have a custom wallpaper, which is usually porn...!\n\n"
-            "It is recommended to find your preferred/original desktop wallpaper and set it to that.",
-        )
-
         panic_wallpaper_preview_frame = Frame(panic_section)
-        panic_wallpaper_preview_frame.pack(side="right", fill="x", expand=1)
+        panic_wallpaper_preview_frame.pack(fill="x", expand=1)
         Label(panic_wallpaper_preview_frame, text="Current Panic Wallpaper").pack(fill="x")
         self.panic_wallpaper_label = Label(panic_wallpaper_preview_frame, text="Current Panic Wallpaper")
         self.panic_wallpaper_label.pack()
         self.load_panic_wallpaper()
 
+        change_panic_wallpaper_frame = Frame(panic_section)
+        change_panic_wallpaper_frame.pack(fill="x")
+        set_panic_wallpaper_button = Button(change_panic_wallpaper_frame, text="Set Panic Wallpaper", command=self.set_panic_wallpaper, cursor="question_arrow")
+        set_panic_wallpaper_button.pack(side="left", fill="x", padx=5, pady=5, expand=1)
+        CreateToolTip(
+            set_panic_wallpaper_button,
+            "When you use panic, the wallpaper will be set to this image.\n\n"
+            "This is useful since most packs have a custom wallpaper, which is usually porn...!\n\n"
+            "It is recommended to find your preferred/original desktop wallpaper and set it to that.",
+        )
+        auto_import_panic_wallpaper_button = Button(
+            change_panic_wallpaper_frame, text="Auto Import", command=self.auto_import_panic_wallpaper, cursor="question_arrow"
+        )
+        auto_import_panic_wallpaper_button.pack(side="left", fill="x", padx=5, pady=5, expand=1)
+        CreateToolTip(auto_import_panic_wallpaper_button, "Automatically set your current wallpaper as the panic wallpaper.")
+
         wallpaper_section = ConfigSection(self.viewPort, "Rotating Wallpaper", ROTATE_TEXT)
         wallpaper_section.pack()
-        # message_group.append(rotate_message)
 
         wallpaper_row = ConfigRow(wallpaper_section)
         wallpaper_row.pack()
@@ -97,8 +98,8 @@ class WallpaperTab(ScrollFrame):
         add_wallpaper_button.pack(fill="x")
         remove_wallpaper_button = Button(wallpaper_section, text="Remove Wallpaper", command=self.remove_wallpaper)
         remove_wallpaper_button.pack(fill="x")
-        auto_import_button = Button(wallpaper_section, text="Auto Import", command=self.auto_import)
-        auto_import_button.pack(fill="x")
+        auto_import_wallpaper_button = Button(wallpaper_section, text="Auto Import", command=self.auto_import_wallpaper)
+        auto_import_wallpaper_button.pack(fill="x")
 
         rotate_row = ConfigRow(wallpaper_section)
         rotate_row.pack()
@@ -118,7 +119,7 @@ class WallpaperTab(ScrollFrame):
         )
         rotate_variance.pack(fill="x", side="left", expand=1)
 
-        wallpaper_group = [self.wallpaper_list, add_wallpaper_button, remove_wallpaper_button, auto_import_button, rotate_delay, rotate_variance]
+        wallpaper_group = [self.wallpaper_list, add_wallpaper_button, remove_wallpaper_button, auto_import_wallpaper_button, rotate_delay, rotate_variance]
         set_widget_states(vars.rotate_wallpaper.get(), wallpaper_group)
 
     def add_wallpaper(self) -> None:
@@ -139,7 +140,7 @@ class WallpaperTab(ScrollFrame):
         else:
             messagebox.showwarning("Remove Default", "You cannot remove the default wallpaper.")
 
-    def auto_import(self) -> None:
+    def auto_import_wallpaper(self) -> None:
         allow_ = messagebox.askyesno("Confirm", "Current list will be cleared before new list is imported from the /resource folder. Is that okay?")
         if allow_:
             # clear list
@@ -155,7 +156,7 @@ class WallpaperTab(ScrollFrame):
                     self.wallpaper_list.insert(1, name_)
                     config["wallpaperDat"][name_] = file
 
-    def change_panic_wallpaper(self) -> None:
+    def set_panic_wallpaper(self) -> None:
         file = filedialog.askopenfile("rb", filetypes=[("image file", ".jpg .jpeg .png")])
         if not file:
             return
@@ -165,7 +166,17 @@ class WallpaperTab(ScrollFrame):
             image.save(Data.PANIC_WALLPAPER)
             self.load_panic_wallpaper()
         except Exception as e:
-            logging.warning(f"failed to open/change panic wallpaper\n{e}")
+            logging.warning(f"Failed to set panic wallpaper\n{e}")
+            messagebox.showwarning("Failed", f"Failed to set panic wallpaper\n{e}")
+
+    def auto_import_panic_wallpaper(self) -> None:
+        try:
+            image = Image.open(get_wallpaper()).convert("RGB")
+            image.save(Data.PANIC_WALLPAPER)
+            self.load_panic_wallpaper()
+        except Exception as e:
+            logging.warning(f"Failed to auto import panic wallpaper\n{e}")
+            messagebox.showwarning("Failed", f"Failed to auto import panic wallpaper\n{e}")
 
     def load_panic_wallpaper(self) -> None:
         self.panic_wallpaper_image = ImageTk.PhotoImage(

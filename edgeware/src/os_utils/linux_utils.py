@@ -58,7 +58,7 @@ def get_desktop_environment() -> str:
     return "unknown"
 
 
-def get_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
+def find_set_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
     commands = {
         "xfce4": [
             f'xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "{wallpaper}"',
@@ -73,6 +73,7 @@ def get_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
         "sway": [f'swaybg -o "*" -i "{wallpaper}" -m fill'],
         "hyprland": [f'hyprctl hyprpaper preload "{wallpaper}"', f'hyprctl hyprpaper wallpaper ",{wallpaper}"'],
         "kde": [f'plasma-apply-wallpaperimage "{wallpaper}"'],
+        "trinity": [f'dcop kdesktop KBackgroundIface setWallpaper 0 "{wallpaper}" 6'],
         **dict.fromkeys(
             ["gnome", "unity", "cinnamon", "x-cinnamon"],
             [
@@ -80,14 +81,13 @@ def get_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
                 f'gsettings set org.gnome.desktop.background picture-uri-dark "file://{wallpaper}"',
             ],
         ),
-        **dict.fromkeys(["trinity"], [f'dcop kdesktop KBackgroundIface setWallpaper 0 "{wallpaper}" 6']),
         **dict.fromkeys(["fluxbox", "jwm", "openbox", "afterstep"], [f'fbsetbg "{wallpaper}"']),
     }
 
-    return commands.get(desktop) or (get_wm_wallpaper_commands() if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
+    return commands.get(desktop) or (find_get_wm_wallpaper_commands() if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
 
 
-def get_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
+def find_set_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
     session = os.environ.get("XDG_SESSION_TYPE", "").lower()  # "x11" or "wayland"
     setters = {
         "x11": [
@@ -116,7 +116,7 @@ def get_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
     return []
 
 
-def get_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], None] | None:
+def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], None] | None:
     def razor_qt() -> None:
         desktop_conf = ConfigParser()
 
@@ -147,6 +147,20 @@ def get_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], None] 
     functions = {"razor-qt": razor_qt}
 
     return functions.get(desktop)
+
+
+def find_get_wallpaper_command(desktop: str) -> str | None:
+    commands = {
+        "mate": ["gsettings get org.mate.background picture-filename"],
+        **dict.fromkeys(
+            ["gnome", "unity", "cinnamon", "x-cinnamon"],
+            [
+                "gsettings get org.gnome.desktop.background $(if [ $(gsettings get org.gnome.desktop.interface color-scheme) == \"'default'\" ]; then echo picture-uri; else echo picture-uri-dark; fi)"
+            ],
+        ),
+    }
+
+    return commands.get(desktop)
 
 
 def is_running(process: str) -> bool:

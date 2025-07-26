@@ -103,7 +103,7 @@ def handle_wallpaper(root: Tk, settings: Settings, pack: Pack, state: State) -> 
 
     if settings.rotate_wallpaper and len(settings.wallpapers) > 1:
         rotate()
-    else:
+    elif pack.wallpaper:
         set_wallpaper(pack.wallpaper)
 
 

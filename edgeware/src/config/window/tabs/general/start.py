@@ -365,23 +365,32 @@ class StartTab(ScrollFrame):
         preset_section.pack()
 
         preset_list = list_presets()
-        self.preset_var = StringVar(self.viewPort, preset_list.pop(0))  # Without pop the first item appears twice in the list
+        self.presets_found = bool(preset_list)
+        self.preset_var = StringVar(
+            self.viewPort, preset_list.pop(0) if self.presets_found else "No presets found"
+        )  # Without pop the first item appears twice in the list
 
         preset_selection_frame = Frame(preset_section)
         preset_selection_frame.pack(side="left", fill="x", padx=6)
         self.preset_dropdown = OptionMenu(preset_selection_frame, self.preset_var, self.preset_var.get(), *preset_list, command=self.set_preset_description)
         self.preset_dropdown.pack(fill="x", expand=1)
-        Button(preset_selection_frame, text="Load Preset", command=lambda: apply_preset(load_preset(self.preset_var.get()), vars)).pack(fill="both", expand=1)
+        self.load_preset_button = Button(
+            preset_selection_frame,
+            text="Load Preset",
+            command=lambda: apply_preset(load_preset(self.preset_var.get()), vars),
+            state=("normal" if self.presets_found else "disabled"),
+        )
+        self.load_preset_button.pack(fill="both", expand=1)
         Label(preset_selection_frame).pack(fill="both", expand=1)
         Label(preset_selection_frame).pack(fill="both", expand=1)
         Button(preset_selection_frame, text="Save Preset", command=self.save_preset_and_update).pack(fill="both", expand=1)
 
         preset_description_frame = Frame(preset_section, borderwidth=2, relief=GROOVE)
         preset_description_frame.pack(side="right", fill="both", expand=1)
-        self.preset_name_label = Label(preset_description_frame, text="Default Description", font="Default 15")
+        self.preset_name_label = Label(preset_description_frame, text="No presets found", font="Default 15")
         self.preset_name_label.pack(fill="y", pady=4)
         self.preset_description_wrap = textwrap.TextWrapper(width=100, max_lines=5)
-        self.preset_description_label = Label(preset_description_frame, text=self.preset_description_wrap.fill(text="Default Text Here"), relief=GROOVE)
+        self.preset_description_label = Label(preset_description_frame, text=self.preset_description_wrap.fill(text=""), relief=GROOVE)
         self.preset_description_label.pack(fill="both", expand=1)
         self.set_preset_description(self.preset_var.get())
 
@@ -419,9 +428,8 @@ class StartTab(ScrollFrame):
             "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
         )
 
-        pack_preset_group = [load_pack_preset_button]
         if len(pack.config) == 0:
-            set_widget_states(False, pack_preset_group)
+            set_widget_states(False, [load_pack_preset_button])
 
         # For now these buttons have been removed, but the settings to save/refresh without exiting may be useful- might add back in if formatting changes
         # Label(self.viewPort, text="Save", font=title_font, relief=GROOVE).pack(pady=2)
@@ -430,8 +438,9 @@ class StartTab(ScrollFrame):
         # Button(self.viewPort, text="Save & Refresh", command=lambda: save_and_refresh(vars)).pack(fill="x", pady=2)
 
     def set_preset_description(self, name: str) -> None:
-        self.preset_name_label.configure(text=f"{name} Description")
-        self.preset_description_label.configure(text=self.preset_description_wrap.fill(text=load_preset_description(name)))
+        if self.presets_found:
+            self.preset_name_label.configure(text=f"{name} Description")
+            self.preset_description_label.configure(text=self.preset_description_wrap.fill(text=load_preset_description(name)))
 
     def save_preset_and_update(self) -> None:
         name = save_preset()
@@ -451,5 +460,6 @@ class StartTab(ScrollFrame):
 
             menu.add_command(label=preset, command=select_preset)
 
+        set_widget_states(True, [self.load_preset_button])  # Set state in case there were no presets previously
         self.preset_var.set(name)
         self.set_preset_description(name)
