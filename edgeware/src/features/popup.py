@@ -42,13 +42,13 @@ class Popup(Toplevel):
 
     def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         state.popup_number += 1
+        state.popups.append(self)
         super().__init__(bg="black")
 
         self.root = root
         self.settings = settings
         self.pack = pack
         self.state = state
-        self.popup_id = state.get_popup_id()
         self.theme = settings.theme
 
         self.denial = roll(self.settings.denial_chance)
@@ -110,9 +110,12 @@ class Popup(Toplevel):
 
                     # Compute the weight for this position, preferring positions
                     # that reduce popup overlap and clustering
-                    geometries = self.state.popup_geometries.copy().values()  # Copied in case a popup is closed during iteration
-                    weight = float("inf") if geometries else 1
-                    for w, h, x, y in geometries:
+                    weight = float("inf") if self.state.popup_number > 1 else 1
+                    for popup in self.state.popups.copy():
+                        if popup is self:
+                            continue
+
+                        w, h, x, y = map(int, popup.geometry().replace("x", "+").split("+"))
                         intersection = max(0, min(sx + sw, x + w) - max(sx, x)) * max(0, min(sy + sh, y + h) - max(sy, y))
                         nonoverlap = 1 - intersection / (sw * sh)
                         distance_squared = (sx + sw / 2 - (x + w / 2)) ** 2 + (sy + sh / 2 - (y + h / 2)) ** 2
@@ -133,7 +136,6 @@ class Popup(Toplevel):
             self.x = random.randint(min_x, max_x)
             self.y = random.randint(min_y, max_y)
 
-        self.state.popup_geometries[self.popup_id] = (self.width, self.height, self.x, self.y)
         self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
 
     def try_clickthrough(self) -> None:
@@ -274,6 +276,6 @@ class Popup(Toplevel):
 
     def close(self) -> None:
         self.state.popup_number -= 1
-        self.state.popup_geometries.pop(self.popup_id)
+        self.state.popups.remove(self)
         self.try_web_open()
         self.destroy()

@@ -20,7 +20,7 @@ import random
 from pathlib import Path
 
 import filetype
-from paths import PATH, Assets, CustomAssets, PackPaths
+from paths import PATH, CustomAssets, PackPaths
 
 from pack.data import MoodBase, MoodSet
 from pack.load import list_media, load_active_moods, load_config, load_corruption, load_discord, load_index, load_info

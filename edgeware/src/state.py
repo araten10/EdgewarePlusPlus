@@ -17,9 +17,14 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from tkinter import Toplevel
 from typing import Any
 
 import pyglet
+
+
+class Popup(Toplevel):  # Circular
+    pass
 
 
 @dataclass
@@ -43,10 +48,7 @@ class State:
     video_number = 0
 
     audio_players: list[pyglet.media.Player] = field(default_factory=list)
-
-    # popup_id -> (width, height, x, y)
-    popup_geometries: dict[int, (int, int, int, int)] = field(default_factory=dict)
-    _next_popup_id = 0
+    popups: list[Popup] = field(default_factory=list)
 
     panic_lockout_active = False
 
@@ -78,8 +80,3 @@ class State:
     def hibernate_active(self, value: bool) -> None:
         self._hibernate_active.value = value
         self._hibernate_active.notify()
-
-    def get_popup_id(self) -> int:
-        id = self._next_popup_id
-        self._next_popup_id += 1
-        return id
