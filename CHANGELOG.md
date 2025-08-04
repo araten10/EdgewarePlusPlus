@@ -9,6 +9,9 @@
 
 **Since last version...**
 
+•*Removed all of the old config presets, and added new ones.*
+>I apologize if anyone still used these, they were so incredibly out of date that I think it was more confusing leaving them in!
+
 **Version 17.5**
 
 A pretty huge feature has been added in this update! It only works on windows, however... and there's also a few major issues with it. That being said, it works "80%" as intended, so we're deciding to release this update now since fixing these problems will take considerable time and effort (if possible at all)

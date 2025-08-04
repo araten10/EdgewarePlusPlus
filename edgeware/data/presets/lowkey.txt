@@ -1,1 +1,0 @@
-This mode is intended for use with the Lowkey setting, to give a general feel of the intended experience
