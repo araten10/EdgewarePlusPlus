@@ -41,7 +41,8 @@ from state import State
 def open_web(pack: Pack, web: str | None = None) -> None:
     web = web or pack.random_web()
     if web:
-        webbrowser.open(web)
+        # webbrowser.open can pause Edgeware if opening the browser takes a long time
+        Thread(target=lambda: webbrowser.open(web), daemon=True).start()
 
 
 def display_notification(settings: Settings, pack: Pack, notification: str | None = None) -> None:

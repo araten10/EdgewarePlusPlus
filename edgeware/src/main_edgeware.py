@@ -104,6 +104,7 @@ if __name__ == "__main__":
     ]
 
     def start_main() -> None:
+        run_script(root, settings, pack, state)
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
         make_desktop_icons(settings)
         handle_keyboard(root, settings, state)
@@ -120,7 +121,6 @@ if __name__ == "__main__":
             handle_wallpaper(root, settings, pack, state)
             main(root, settings, pack, targets)
 
-    run_script(root, settings, pack, state)
     if settings.startup_splash:
         StartupSplash(settings, pack, start_main)
     else:
