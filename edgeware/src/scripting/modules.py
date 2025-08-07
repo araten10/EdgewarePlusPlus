@@ -57,13 +57,17 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         for popup in state.popups.copy():
             popup.close()
 
+    def set_popup_close_text(_env: Environment, text: str) -> None:
+        pack.index.default.popup_close = text
+
     return {
         "standard": {"print": lambda _env, *args: print(*args)},
         "edgeware": {
+            "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             "corrupt": lambda _env: update_corruption_level(settings, pack, state),
             "panic": lambda _env: panic(root, settings, state, disable=False),
-            "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
             "close_popups": close_popups,
+            "set_popup_close_text": set_popup_close_text,
             **popups,
         },
     }
