@@ -110,6 +110,15 @@ index:
       captions:
         - "Kinky caption"
 
+config:
+  # Generate config.json, true or false.
+  generate: false
+
+  # Raw key-value pairs of Edgeware configs.
+  raw:
+    "delay": 5000
+    "popupMod": 100
+
 corruption:
   # Generate corruption.json, true or false.
   generate: false
@@ -120,7 +129,7 @@ corruption:
   #   add-moods    - List of moods to add at the level.
   #   remove-moods - List of moods to remove at the level.
   #   wallpaper    - The filename of the wallpaper to change to at this level.
-  #   config       - Config to use at this level.
+  #   config       - Key-value pairs of configs to use at this level.
   levels:
     # Level 1
     - add-moods:
@@ -134,7 +143,13 @@ corruption:
       remove-moods:
         - "first"
       wallpaper: "wallpaper-2.png"
+      config:
+        "vidMod": 20
 
     # Level 3
     - remove-moods:
         - "second"
+
+    # Level 4
+    - config:
+        "timeoutPopups": 1

@@ -22,7 +22,7 @@ import yaml
 from copy_files import copy_icon, copy_loading_splash, copy_media, copy_subliminals, copy_wallpapers
 from legacy.write_files import write_captions, write_media, write_prompt, write_web
 from paths import DEFAULT_PACK, Build, Source
-from write_files import write_corruption, write_discord, write_index, write_info, write_legacy
+from write_files import write_config, write_corruption, write_discord, write_index, write_info, write_legacy
 
 
 def new_pack(source: Source) -> None:
@@ -63,6 +63,7 @@ def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
             moods = moods.union(write_prompt(pack, build))
             moods = moods.union(write_web(pack, build))
 
+        write_config(pack, build)
         write_corruption(pack, build, moods)
 
 

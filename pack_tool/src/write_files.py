@@ -197,6 +197,14 @@ def write_legacy(pack: yaml.Node, build: Build, media: dict[str, [str]]) -> None
     write_json(web, build.web)
 
 
+def write_config(pack: yaml.Node, build: Build) -> None:
+    if not validate(pack, "config", schemas.CONFIG):
+        logging.info("Skipping config.json")
+        return
+
+    write_json(pack["config"]["raw"], build.config)
+
+
 def write_corruption(pack: yaml.Node, build: Build, moods: set[str]) -> None:
     if not validate(pack, "corruption", schemas.CORRUPTION):
         logging.info("Skipping corruption.json")
@@ -236,6 +244,3 @@ def write_corruption(pack: yaml.Node, build: Build, moods: set[str]) -> None:
             corruption["config"][n] = level["config"]
 
     write_json(corruption, build.corruption)
-
-
-# TODO: config.json
