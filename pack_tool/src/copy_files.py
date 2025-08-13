@@ -91,23 +91,31 @@ def compress_image(source: Path, destination: Path) -> None:
     image.save(destination, optimize=True, quality=85)
 
 
-def copy_subliminals(source: Source, build: Build) -> None:
-    if not source.subliminals.is_dir():
+def copy_hypno(source: Source, build: Build, skip_legacy: bool) -> None:
+    source_dir = source.hypno
+    if not source_dir.is_dir():
+        logging.warning(f"{source_dir} does not exist or is not a directory, attempting to read legacy directory")
+
+        source_dir = source.hypno_legacy
+        if not source_dir.is_dir():
+            logging.warning(f"{source.hypno_legacy} does not exist or is not a directory")
+            return
+
+    hypno = os.listdir(source_dir)
+    if len(hypno) == 0:
+        logging.warning("Hypno directory exists, but it is empty")
         return
 
-    subliminals = os.listdir(source.subliminals)
-    if len(subliminals) == 0:
-        logging.warning("Subliminals directory exists, but it is empty")
-        return
-
-    logging.info("Copying subliminals")
-    build.subliminals.mkdir(parents=True, exist_ok=True)
-    for filename in subliminals:
-        file_path = source.subliminals / filename
-        if filetype.is_image(file_path):
-            shutil.copyfile(file_path, build.subliminals / filename)
-        else:
-            logging.warning(f"{file_path} is not an image")
+    logging.info("Copying hypno")
+    build_dirs = [build.hypno] + ([] if skip_legacy else [build.hypno_legacy])
+    for build_dir in build_dirs:
+        build_dir.mkdir(parents=True, exist_ok=True)
+        for filename in hypno:
+            file_path = source_dir / filename
+            if filetype.is_image(file_path):
+                shutil.copyfile(file_path, build_dir / filename)
+            else:
+                logging.warning(f"{file_path} is not an image")
 
 
 def copy_wallpapers(source: Source, build: Build) -> None:
