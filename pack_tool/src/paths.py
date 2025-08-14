@@ -25,13 +25,16 @@ class Source:
 
         # Directories
         self.media = self.root / "media"
-        self.subliminals = self.root / "subliminals"
+        self.hypno = self.root / "hypno"
         self.wallpapers = self.root / "wallpapers"
 
         # Files
         self.icon = self.root / "icon.ico"
         self.pack = self.root / "pack.yml"
         self.splash = self.root / "loading_splash"
+
+        # Legacy
+        self.hypno_legacy = self.root / "subliminals"
 
 
 class Build:
@@ -40,8 +43,8 @@ class Build:
 
         # Directories
         self.audio = self.root / "aud"
+        self.hypno = self.root / "hypno"
         self.image = self.root / "img"
-        self.subliminals = self.root / "subliminals"
         self.video = self.root / "vid"
 
         # Files
@@ -55,6 +58,7 @@ class Build:
         self.wallpaper = self.root / "wallpaper.png"
 
         # Legacy
+        self.hypno_legacy = self.root / "subliminals"
         self.captions = self.root / "captions.json"
         self.media = self.root / "media.json"
         self.prompt = self.root / "prompt.json"

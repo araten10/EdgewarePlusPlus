@@ -61,6 +61,8 @@ INDEX = Schema(
     extra=ALLOW_EXTRA,
 )
 
+CONFIG = Schema({Required("generate"): bool, Required("raw"): dict}, extra=ALLOW_EXTRA)
+
 CORRUPTION = Schema(
     {
         Required("generate"): bool,

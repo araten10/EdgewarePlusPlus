@@ -19,10 +19,10 @@ import shutil
 import sys
 
 import yaml
-from copy_files import copy_icon, copy_loading_splash, copy_media, copy_subliminals, copy_wallpapers
+from copy_files import copy_hypno, copy_icon, copy_loading_splash, copy_media, copy_wallpapers
 from legacy.write_files import write_captions, write_media, write_prompt, write_web
 from paths import DEFAULT_PACK, Build, Source
-from write_files import write_corruption, write_discord, write_index, write_info, write_legacy
+from write_files import write_config, write_corruption, write_discord, write_index, write_info, write_legacy
 
 
 def new_pack(source: Source) -> None:
@@ -30,7 +30,7 @@ def new_pack(source: Source) -> None:
         logging.error(f"{source.root} already exists")
     else:
         (source.media / "default").mkdir(parents=True, exist_ok=True)
-        source.subliminals.mkdir(parents=True, exist_ok=True)
+        source.hypno.mkdir(parents=True, exist_ok=True)
         source.wallpapers.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(DEFAULT_PACK, source.pack)
 
@@ -41,7 +41,7 @@ def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
     build.root.mkdir(parents=True, exist_ok=True)
 
     media = copy_media(source, build, args.compress_images, args.compress_videos, args.rename)
-    copy_subliminals(source, build)
+    copy_hypno(source, build, args.skip_legacy)
     copy_wallpapers(source, build)
     copy_icon(source, build)
     copy_loading_splash(source, build)
@@ -63,6 +63,7 @@ def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
             moods = moods.union(write_prompt(pack, build))
             moods = moods.union(write_web(pack, build))
 
+        write_config(pack, build)
         write_corruption(pack, build, moods)
 
 
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     parser.add_argument("source", help="pack source directory")
     parser.add_argument("-o", "--output", default="build", help="output directory name")
     parser.add_argument("-n", "--new", action="store_true", help="create a new pack template and exit")
-    parser.add_argument("-s", "--skip-legacy", action="store_true", help="don't generate fallback legacy JSON files")
+    parser.add_argument("-s", "--skip-legacy", action="store_true", help="don't generate fallback legacy files")
     parser.add_argument("-v", "--compress-videos", action="store_true", help="compresses video files using FFmpeg")
     parser.add_argument("-i", "--compress-images", action="store_true", help="compresses image files using Pillow")
     parser.add_argument("-r", "--rename", action="store_true", help="appends mood name to files for caption compatibility with the original Edgeware")

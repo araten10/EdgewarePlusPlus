@@ -51,7 +51,7 @@ class Pack:
         self.images = list_media(self.paths.image, filetype.is_image)
         self.videos = list_media(self.paths.video, filetype.is_video)
         self.audio = list_media(self.paths.audio, filetype.is_audio)
-        self.hypnos = list_media(self.paths.hypno, filetype.is_image) or [CustomAssets.hypno()]
+        self.hypnos = list_media(self.paths.hypno, filetype.is_image) or list_media(self.paths.hypno_legacy, filetype.is_image) or [CustomAssets.hypno()]
 
         # Paths
         self.icon = self.paths.icon if self.paths.icon.is_file() else CustomAssets.icon()
