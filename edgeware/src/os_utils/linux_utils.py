@@ -84,7 +84,7 @@ def find_set_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
         **dict.fromkeys(["fluxbox", "jwm", "openbox", "afterstep"], [f'fbsetbg "{wallpaper}"']),
     }
 
-    return commands.get(desktop) or (find_get_wm_wallpaper_commands() if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
+    return commands.get(desktop) or (find_set_wm_wallpaper_commands() if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
 
 
 def find_set_wm_wallpaper_commands(wallpaper: Path) -> list[str]:

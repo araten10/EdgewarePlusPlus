@@ -120,7 +120,7 @@ class PackPaths:
 
         # Directories
         self.audio = self.root / "aud"
-        self.hypno = self.root / "subliminals"
+        self.hypno = self.root / "hypno"
         self.image = self.root / "img"
         self.video = self.root / "vid"
 
@@ -134,7 +134,8 @@ class PackPaths:
         self.splash = [self.root / f"loading_splash.{extension}" for extension in ["png", "gif", "jpg", "jpeg", "bmp"]]
         self.wallpaper = self.root / "wallpaper.png"
 
-        # Deprecated fallback options
+        # Legacy fallback options
+        self.hypno_legacy = self.root / "subliminals"
         self.captions = self.root / "captions.json"
         self.media = self.root / "media.json"
         self.prompt = self.root / "prompt.json"
