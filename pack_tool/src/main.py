@@ -15,13 +15,14 @@
 
 import argparse
 import logging
+import os
 import shutil
 import sys
 
 import yaml
 from copy_files import copy_hypno, copy_icon, copy_loading_splash, copy_media, copy_wallpapers
 from legacy.write_files import write_captions, write_media, write_prompt, write_web
-from paths import DEFAULT_PACK, Build, Source
+from paths import DEFAULT_PACK, TEST_BUILD_ROOT, PACK_TOOL_ROOT, Build, Source
 from write_files import write_config, write_corruption, write_discord, write_index, write_info, write_legacy
 
 
@@ -38,13 +39,16 @@ def new_pack(source: Source) -> None:
 
 
 def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
+    if args.test_pack and build.root.exists():
+        shutil.rmtree(build.root)
     build.root.mkdir(parents=True, exist_ok=True)
 
-    media = copy_media(source, build, args.compress_images, args.compress_videos, args.rename)
-    copy_hypno(source, build, args.skip_legacy)
-    copy_wallpapers(source, build)
-    copy_icon(source, build)
-    copy_loading_splash(source, build)
+    copy = os.symlink if args.test_pack else shutil.copyfile
+    media = copy_media(copy, source, build, args.compress_images and not args.test_pack, args.compress_videos and not args.test_pack, args.rename)
+    copy_hypno(copy, source, build, args.skip_legacy)
+    copy_wallpapers(copy, source, build)
+    copy_icon(copy, source, build)
+    copy_loading_splash(copy, source, build)
 
     with open(source.pack, "r") as f:
         pack = yaml.safe_load(f)
@@ -71,6 +75,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("source", help="pack source directory")
     parser.add_argument("-o", "--output", default="build", help="output directory name")
+    parser.add_argument("-t", "--test-pack", action="store_true", help="build and export a test version of the pack to Edgeware")
     parser.add_argument("-n", "--new", action="store_true", help="create a new pack template and exit")
     parser.add_argument("-s", "--skip-legacy", action="store_true", help="don't generate fallback legacy files")
     parser.add_argument("-v", "--compress-videos", action="store_true", help="compresses video files using FFmpeg")
@@ -80,8 +85,8 @@ if __name__ == "__main__":
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-    source = Source(args.source)
-    build = Build(args.output)
+    source = Source(PACK_TOOL_ROOT / args.source)
+    build = Build(TEST_BUILD_ROOT if args.test_pack else PACK_TOOL_ROOT / args.output)
 
     if args.new:
         new_pack(source)

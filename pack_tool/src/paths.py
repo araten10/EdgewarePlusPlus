@@ -15,13 +15,14 @@
 
 from pathlib import Path
 
-PATH = Path(__file__).parent.parent
-DEFAULT_PACK = PATH / "default_pack.yml"
+PACK_TOOL_ROOT = Path(__file__).parent.parent
+TEST_BUILD_ROOT = PACK_TOOL_ROOT.parent / "edgeware" / "data" / "packs" / "Pack Tool test build"
+DEFAULT_PACK = PACK_TOOL_ROOT / "default_pack.yml"
 
 
 class Source:
-    def __init__(self, root: str) -> None:
-        self.root = PATH / root
+    def __init__(self, root: Path) -> None:
+        self.root = root
 
         # Directories
         self.media = self.root / "media"
@@ -38,8 +39,8 @@ class Source:
 
 
 class Build:
-    def __init__(self, root: str) -> None:
-        self.root = PATH / root
+    def __init__(self, root: Path) -> None:
+        self.root = root
 
         # Directories
         self.audio = self.root / "aud"
