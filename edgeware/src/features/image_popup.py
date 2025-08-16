@@ -28,6 +28,7 @@ from pack import Pack
 from PIL import Image, ImageTk
 from roll import roll
 from state import State
+from random import randint
 
 
 class ImagePopup(Popup):
@@ -64,6 +65,11 @@ class ImagePopup(Popup):
         else:
             resized = image.resize((self.width, self.height), Image.LANCZOS).convert("RGBA")
             filter = self.try_denial_filter(False)
+            if filter == "resizeblur":
+                shrink_d = randint(5, 15)
+                resized = resized.resize((int(self.width/shrink_d), int(self.height/shrink_d)), Image.BILINEAR)
+                resized = resized.resize((self.width, self.height), Image.NEAREST)
+                filter = ""
             final = resized.filter(filter) if filter else resized
 
             if self.hypno:
