@@ -50,6 +50,10 @@ def open_tutorial(parent: Tk) -> None:
     tutorial_notebook.add(tab_about, text="Intro/About")
     load_html(tab_about, Assets.TUTORIAL_INTRO)
 
+    tab_about = HtmlFrame(tutorial_frame, messages_enabled=False)
+    tutorial_notebook.add(tab_about, text="Quick Start")
+    load_html(tab_about, Assets.TUTORIAL_QUICKGUIDE)
+
     tab_start = HtmlFrame(tutorial_frame, messages_enabled=False)
     tutorial_notebook.add(tab_start, text="Getting Started")
     load_html(tab_start, Assets.TUTORIAL_GETSTARTED)
