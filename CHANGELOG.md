@@ -14,6 +14,26 @@
 
 •*Added a new type of censor to denial mode, pixellating images instead of blurring them. Each has an equal chance to activate when denial mode is on.*
 
+•*Fixed the Windows Pack Tool script not always starting the Pack Tool with Python (contributed by https://github.com/DARKNOSY)*
+
+•*Fixed the Windows setup script failing to detect if Python is installed*
+
+•*The wallpaper will no longer be changed if the pack doesn't provide one*
+
+•*Added the ability to auto-import the current wallpaper as the panic wallpaper*
+
+•*Fixed a crash in single mode*
+
+•*Fixed a config window crash when no presets exist*
+
+•*Added the ability to generate config.json in the Pack Tool*
+
+•*Renamed the subliminals directory in both the Edgeware and Pack Tool structures to hypno with a fallback to subliminals if the new directory isn't present*
+>This is to catch up with version 17, no functionality of the subliminals/hypno feature has been changed! For more info, read the patch notes there.
+
+•*Added a test build feature to the Pack Tool to easily test WIP packs in Edgeware*
+>
+
 **Version 17.5**
 
 A pretty huge feature has been added in this update! It only works on windows, however... and there's also a few major issues with it. That being said, it works "80%" as intended, so we're deciding to release this update now since fixing these problems will take considerable time and effort (if possible at all)
