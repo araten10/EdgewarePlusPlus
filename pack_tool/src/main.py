@@ -16,13 +16,14 @@
 import argparse
 import logging
 import os
+import platform
 import shutil
 import sys
 
 import yaml
 from copy_files import copy_hypno, copy_icon, copy_loading_splash, copy_media, copy_wallpapers
 from legacy.write_files import write_captions, write_media, write_prompt, write_web
-from paths import DEFAULT_PACK, TEST_BUILD_ROOT, PACK_TOOL_ROOT, Build, Source
+from paths import DEFAULT_PACK, PACK_TOOL_ROOT, TEST_BUILD_ROOT, Build, Source
 from write_files import write_config, write_corruption, write_discord, write_index, write_info, write_legacy
 
 
@@ -43,7 +44,9 @@ def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
         shutil.rmtree(build.root)
     build.root.mkdir(parents=True, exist_ok=True)
 
-    copy = os.symlink if args.test_pack else shutil.copyfile
+    # You can't make symlinks on Windows with regular permissions?
+    # OSError: [WinError 1314] A required privilege is not held by the client
+    copy = os.symlink if (args.test_pack and platform.system() != "Windows") else shutil.copyfile
     media = copy_media(copy, source, build, args.compress_images and not args.test_pack, args.compress_videos and not args.test_pack, args.rename)
     copy_hypno(copy, source, build, args.skip_legacy)
     copy_wallpapers(copy, source, build)
