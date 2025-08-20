@@ -15,17 +15,19 @@
 
 import logging
 import os
-import shutil
 import subprocess
 from pathlib import Path
+from typing import Callable
 
 import filetype
 from paths import Build, Source
 from PIL import Image
 from pyffmpeg import FFmpeg
 
+CopyFunction = Callable[[Path, Path], None]
 
-def copy_media(source: Source, build: Build, compress_images: bool, compress_videos: bool, rename: bool) -> dict[str, [str]]:
+
+def copy_media(copy: CopyFunction, source: Source, build: Build, compress_images: bool, compress_videos: bool, rename: bool) -> dict[str, [str]]:
     media = {}
 
     if not source.media.is_dir():
@@ -54,7 +56,6 @@ def copy_media(source: Source, build: Build, compress_images: bool, compress_vid
             file_path = mood_path / filename
 
             location = None
-            copy = shutil.copyfile
             if file_path.is_file():
                 if filetype.is_image(file_path):
                     location = build.image
@@ -91,7 +92,7 @@ def compress_image(source: Path, destination: Path) -> None:
     image.save(destination, optimize=True, quality=85)
 
 
-def copy_hypno(source: Source, build: Build, skip_legacy: bool) -> None:
+def copy_hypno(copy: CopyFunction, source: Source, build: Build, skip_legacy: bool) -> None:
     source_dir = source.hypno
     if not source_dir.is_dir():
         logging.warning(f"{source_dir} does not exist or is not a directory, attempting to read legacy directory")
@@ -113,12 +114,12 @@ def copy_hypno(source: Source, build: Build, skip_legacy: bool) -> None:
         for filename in hypno:
             file_path = source_dir / filename
             if filetype.is_image(file_path):
-                shutil.copyfile(file_path, build_dir / filename)
+                copy(file_path, build_dir / filename)
             else:
                 logging.warning(f"{file_path} is not an image")
 
 
-def copy_wallpapers(source: Source, build: Build) -> None:
+def copy_wallpapers(copy: CopyFunction, source: Source, build: Build) -> None:
     if not source.wallpapers.is_dir():
         logging.warning(f"{source.wallpapers} does not exist or is not a directory")
         return
@@ -134,7 +135,7 @@ def copy_wallpapers(source: Source, build: Build) -> None:
         file_path = source.wallpapers / filename
         default_found = default_found or filename == "wallpaper.png"
         if filetype.is_image(file_path):
-            shutil.copyfile(file_path, build.root / filename)
+            copy(file_path, build.root / filename)
         else:
             logging.warning(f"{file_path} is not an image")
 
@@ -142,18 +143,18 @@ def copy_wallpapers(source: Source, build: Build) -> None:
         logging.warning("No default wallpaper.png found")
 
 
-def copy_icon(source: Source, build: Build) -> None:
+def copy_icon(copy: CopyFunction, source: Source, build: Build) -> None:
     if not os.path.exists(source.icon):
         return
 
     if filetype.is_image(source.icon):
         logging.info("Copying icon")
-        shutil.copyfile(source.icon, build.icon)
+        copy(source.icon, build.icon)
     else:
         logging.warning(f"{source.icon} is not an image")
 
 
-def copy_loading_splash(source: Source, build: Build) -> None:
+def copy_loading_splash(copy: CopyFunction, source: Source, build: Build) -> None:
     loading_splash_found = False
     for extension in [".png", ".gif", ".jpg", ".jpeg", ".bmp"]:
         loading_splash_path = source.splash.with_suffix(extension)
@@ -166,7 +167,7 @@ def copy_loading_splash(source: Source, build: Build) -> None:
 
         if filetype.is_image(loading_splash_path):
             logging.info("Copying loading splash")
-            shutil.copyfile(loading_splash_path, build.splash.with_suffix(extension))
+            copy(loading_splash_path, build.splash.with_suffix(extension))
             loading_splash_found = True
         else:
             logging.warning(f"{loading_splash_path} is not an image")
