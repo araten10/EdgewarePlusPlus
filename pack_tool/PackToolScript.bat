@@ -47,6 +47,18 @@ goto top
 :ptCompile
 echo What pack would you like to compile?
 set /p compileName=Directory Name:
+:ptTestBuild
+echo Do you want to quickbuild your pack for testing? 
+echo This will automatically put it into the Edgeware++ default pack directory, overwriting anything there.
+echo Use this setting for rapidly testing changes to your pack, but build your pack normally otherwise.
+echo 1: Build Pack Normally
+echo 2: Quickbuild Pack
+set /p quickSelect=Select number:
+if %quickSelect%==1 goto ptCompress
+if %quickSelect%==2 set "arg1=-t" & goto finishBuild
+echo Must enter selection number (1, 2)
+pause
+goto ptTestBuild
 :ptCompress
 echo Do you want to compress your image and video files?
 echo This will take some time, but may drastically reduce filesize.
