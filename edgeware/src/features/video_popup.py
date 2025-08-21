@@ -37,7 +37,7 @@ class VideoPopup(Popup):
 
         self.player = VideoPlayer(self, self.settings, self.width, self.height)
         self.player.properties["volume"] = self.settings.video_volume
-        self.player.properties["vf"] = self.try_denial_filter(True)
+        self.player.properties["glsl-shaders"] = self.try_denial_filter(True)
         self.player.play(self.media)
 
         self.init_finish()

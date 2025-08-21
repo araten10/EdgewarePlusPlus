@@ -17,6 +17,7 @@
 
 import asyncio
 import logging
+from random import randint
 from tkinter import Label, Tk
 
 import booru
@@ -28,7 +29,6 @@ from pack import Pack
 from PIL import Image, ImageTk
 from roll import roll
 from state import State
-from random import randint
 
 
 class ImagePopup(Popup):
@@ -60,14 +60,14 @@ class ImagePopup(Popup):
 
         if getattr(image, "n_frames", 0) > 1:
             self.player = VideoPlayer(self, self.settings, self.width, self.height)
-            self.player.properties["vf"] = self.try_denial_filter(True)
+            self.player.properties["glsl-shaders"] = self.try_denial_filter(True)
             self.player.play(str(self.media))
         else:
             resized = image.resize((self.width, self.height), Image.LANCZOS).convert("RGBA")
             filter = self.try_denial_filter(False)
             if filter == "resizeblur":
                 shrink_d = randint(5, 15)
-                resized = resized.resize((int(self.width/shrink_d), int(self.height/shrink_d)), Image.BILINEAR)
+                resized = resized.resize((int(self.width / shrink_d), int(self.height / shrink_d)), Image.BILINEAR)
                 resized = resized.resize((self.width, self.height), Image.NEAREST)
                 filter = ""
             final = resized.filter(filter) if filter else resized

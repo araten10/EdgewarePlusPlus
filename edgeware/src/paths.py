@@ -53,11 +53,13 @@ class Assets:
     DEFAULT_STARTUP_SPLASH = ROOT / "default_loading_splash.png"
     DEFAULT_THEME_DEMO = ROOT / "default_theme_demo.png"
 
+    # Denial mode mpv shaders
+    SHADERS = ROOT / "shaders"
+    SHADER_PIXELIZE = SHADERS / "pixelize.glsl"
+
     # Tutorial pages
     TUTORIAL = ROOT / "tutorial"
-
     TUTORIAL_UNDERCONSTRUCTION = TUTORIAL / "construction.html"
-
     TUTORIAL_INTRO = TUTORIAL / "intro.html"
     TUTORIAL_GETSTARTED = TUTORIAL / "gettingstarted.html"
     TUTORIAL_BASICSETTINGS = TUTORIAL / "basicsettings.html"
