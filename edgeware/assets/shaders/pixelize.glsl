@@ -19,39 +19,25 @@
 //!BIND HOOKED
 
 #define SIZE 32
-#define SAMPLE 8
 
 vec4 hook()
 {
-    float width = HOOKED_size.x;
-    float height = HOOKED_size.y;
+    int x = int(HOOKED_pos.x * HOOKED_size.x);
+    int y = int(HOOKED_pos.y * HOOKED_size.y);
 
-    int x_px = int(HOOKED_pos.x * width);
-    int y_px = int(HOOKED_pos.y * height);
-
-    int x_px_min = x_px - x_px % SIZE;
-    int x_px_max = x_px_min + SIZE;
-    int y_px_min = y_px - y_px % SIZE;
-    int y_px_max = y_px_min + SIZE;
-
-    float x_min = float(x_px_min) / width;
-    float x_max = float(x_px_max) / width;
-    float y_min = float(y_px_min) / height;
-    float y_max = float(y_px_max) / height;
-
-    float dx = (x_max - x_min) / SAMPLE;
-    float dy = (y_max - y_min) / SAMPLE;
+    int box_x = x - x % SIZE;
+    int box_y = y - y % SIZE;
 
     vec4 average = vec4(0.0, 0.0, 0.0, 1.0);
-    int n = 0;
-    for (float x = x_min; x < x_max; x += dx)
+    for (int rel_x = 0; rel_x < SIZE; rel_x++)
     {
-        for (float y = y_min; y < y_max; y += dy)
+        int x_off = box_x + rel_x - x;
+        for (int rel_y = 0; rel_y < SIZE; rel_y++)
         {
-            average.rgb += HOOKED_tex(vec2(x, y)).rgb;
-            n++;
+            int y_off = box_y + rel_y - y;
+            average.rgb += HOOKED_texOff(vec2(x_off, y_off)).rgb;
         }
     }
-    average.rgb /= n;
+    average.rgb /= SIZE * SIZE;
     return average;
 }
