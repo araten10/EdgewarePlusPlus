@@ -31,7 +31,7 @@ from features.misc import mitosis_popup, open_web
 from os_utils import set_borderless, set_clickthrough
 from pack import Pack
 from panic import panic
-from paths import Data
+from paths import Assets, Data
 from PIL import ImageFilter
 from roll import roll
 from state import State
@@ -145,7 +145,8 @@ class Popup(Toplevel):
             set_clickthrough(self)
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
-        mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
+        mpv_filters = [str(Assets.SHADER_PIXELIZE)]
+        # mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
         image_filters = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20), "resizeblur"]
         # make resize blur the same probability as choosing a gaussian blur.
         # if more censors are added, ensure the cum is the same thickness (probability) for all types by adding a new cum_filter list entry equal to (last list entry + number of ImageFilter.Filter entries)
