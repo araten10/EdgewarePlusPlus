@@ -57,8 +57,9 @@ def compute_mood_id(paths: PackPaths) -> str:
     return md5(str(sorted(data)).encode()).hexdigest()
 
 
-def primary_monitor() -> Monitor:
-    return next(m for m in get_monitors() if m.is_primary)
+def primary_monitor() -> Monitor | None:
+    monitors = get_monitors()
+    return next((m for m in monitors if m.is_primary), monitors[0] if monitors else None)
 
 
 def random_monitor(settings: Settings) -> Monitor:
