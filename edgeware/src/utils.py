@@ -59,6 +59,8 @@ def compute_mood_id(paths: PackPaths) -> str:
 
 def primary_monitor() -> Monitor | None:
     monitors = get_monitors()
+
+    # Return the first monitor if no primary monitor is found
     return next((m for m in monitors if m.is_primary), monitors[0] if monitors else None)
 
 
