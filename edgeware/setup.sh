@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 version_string=$(python3 --version)
 if [ $? -ne 0 ]; then
@@ -39,7 +39,7 @@ shortcut() {
     script=${2:-$1}
 
     if [ ! -f "$script.sh" ]; then
-        echo "#!/bin/sh" >> $script.sh
+        echo "#!/bin/bash" >> $script.sh
         echo ".venv/bin/python3 src/${source}.py" >> $script.sh
         chmod +x $script.sh
     fi
