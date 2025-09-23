@@ -2,7 +2,7 @@
 ![Edgeware++ running on Windows 11](screenshots/demo.png)
 ## What is Edgeware?
 
-Going to say immediately: **Edgeware is not a virus, nor does it install itself onto your computer**. All it installs onto your computer by default is python 3.12 and a few extra libraries (along with a portable version of 7zip to extract the video player), which is needed for it to run. Edgeware **can** potentially modify files on your computer, including deleting or replacing things, but these are all *user set* settings that are not on by default. That being said, other people can download Edgeware, modify it to be malicious, and upload it elsewhere, so exercise caution when downloading versions from other sites. This project is open source, so feel free to peruse the source code if you're unsure.
+Going to say immediately: **Edgeware is not a virus, nor does it install itself onto your computer**. All it installs onto your computer by default is python 3.12 and a few extra libraries (along with a portable version of 7zip on Windows to extract the video player), which is needed for it to run. Edgeware **can** potentially modify files on your computer, including deleting or replacing things, but these are all *user set* settings that are not on by default. That being said, other people can download Edgeware, modify it to be malicious, and upload it elsewhere, so exercise caution when downloading versions from other sites. This project is open source, so feel free to peruse the source code if you're unsure.
 
 Now, that all is pretty alarming stuff and seems a bit weird to preface the basic explanation with, but i'm fully aware the name "Edgeware" doesn't inspire the most confidence for a program to be safe.
 
@@ -16,7 +16,7 @@ PetitTournesol (Edgeware's original creator) more or less took a hiatus and hasn
 
 Save and extract it somewhere, then run `edgeware/EdgewareSetup.bat`. This will install python 3.12 for you, alongside some necessary libraries. After that it will give you instructions for further use, and open up `edgeware/config.pyw`. **Check the top of the installer window to see if you have an older version of Python installed!** Edgeware previously used python 3.10, and if you're using that version, you'll have to uninstall it to get the newest version!
 
-**If you're using Linux**, first you need to install Python 3.12, pip, and mpv yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip mpv gcc python3-dev libmpv-dev python3-tk`. Once installed, download and extract Edgeware as a ZIP or clone the repository, then run `setup.sh` in a terminal window in the `edgeware` directory. This will create a Python virtual environment for Edgeware, install the dependencies, and create scripts for running Edgeware. `config.sh` allows you to configure Edgeware and `edgeware.sh` will start Edgeware itself. **Please note that my primary OS is windows!** I have gotten endless help from LewdDevelopment, who also used some [pre-existing code from a old Edgeware pull request](https://github.com/PetitTournesol/Edgeware/pull/41) to help make it happen. So if any bugs on Linux start from my own incompetence, I will consult with them and try to fix it- but know that I will not know until people tell me or them!
+**If you're using Linux**, first you need to install Python 3.12, pip, and mpv yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip mpv gcc python3-dev libmpv-dev python3-tk`. Once installed, download and extract Edgeware as a ZIP or clone the repository, then run `setup.sh` in a terminal window in the `edgeware` directory. This will create a Python virtual environment for Edgeware, install the dependencies, and create scripts for running Edgeware. `config.sh` allows you to configure Edgeware and `edgeware.sh` will start Edgeware itself.
 
 From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original Edgeware page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and i'm hoping to make a few myself to showcase the new features this extension can do.
 
@@ -156,7 +156,7 @@ But also feel free to follow me on twitter, interact with me there, and other su
 
 >Q: Does Edgeware work on android/mac/ios?
 
-A: I only have plans to develop Edgeware for windows, and LewdDevelopment is currently only developing Edgeware for Linux.
+A: I only have plans to develop Edgeware for windows, and Marigold is currently only developing Edgeware for Linux.
 
 >Q: Are there other programs out there like Edgeware?
 
