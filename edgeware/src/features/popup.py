@@ -145,7 +145,7 @@ class Popup(Toplevel):
             set_clickthrough(self)
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
-        mpv_filters = [str(Assets.SHADER_PIXELIZE)]
+        mpv_filters = [str(Assets.SHADER_GAUSSIAN_BLUR), str(Assets.SHADER_PIXELIZE)]
         # mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
         image_filters = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20), "resizeblur"]
         # make resize blur the same probability as choosing a gaussian blur.

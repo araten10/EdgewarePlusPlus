@@ -55,6 +55,7 @@ class Assets:
 
     # Denial mode mpv shaders
     SHADERS = ROOT / "shaders"
+    SHADER_GAUSSIAN_BLUR = SHADERS / "gaussian_blur.glsl"
     SHADER_PIXELIZE = SHADERS / "pixelize.glsl"
 
     # Tutorial pages
