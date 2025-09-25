@@ -36,6 +36,7 @@ Hello again! We're still working away at a big feature that is taking a lot long
 >This is to catch up with version 17, no functionality of the subliminals/hypno feature has been changed! For more info, read the patch notes there.
 
 •*Added a test build feature to the Pack Tool to easily test WIP packs in Edgeware*
+>Hopefully this will help testing your packs without building them being a chore... This will overwrite your currently stored pack in /resource/, so be careful!
 
 •*Fixed tray icons not being removed until you moused over them*
 
