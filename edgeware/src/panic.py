@@ -58,6 +58,7 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
                 return
 
         set_wallpaper(CustomAssets.panic_wallpaper())
+        state.tray.stop()
         pyglet.app.exit()
         root.destroy()
 

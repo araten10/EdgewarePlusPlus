@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import pyglet
+import pystray
 
 
 @dataclass
@@ -58,6 +59,8 @@ class State:
     corruption_time_start = 0  # Milliseconds
     corruption_popup_number = 0
     corruption_launches_number = 1
+
+    tray: pystray.Icon | None = None
 
     alt_held = False
 
