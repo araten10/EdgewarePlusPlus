@@ -72,8 +72,8 @@ def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hiber
 
         menu.append(pystray.MenuItem("Skip to Hibernate", skip_hibernate))
 
-    icon = pystray.Icon("Edgeware++", Image.open(pack.icon), "Edgeware++", menu)
-    Thread(target=icon.run, daemon=True).start()
+    state.tray = pystray.Icon("Edgeware++", Image.open(pack.icon), "Edgeware++", menu)
+    Thread(target=state.tray.run, daemon=True).start()
 
 
 def make_desktop_icons(settings: Settings) -> None:
