@@ -41,7 +41,6 @@ from config.settings import Settings
 from os_utils import set_wallpaper
 from paths import CustomAssets
 from state import State
-import pystray
 
 ADDRESS = ("localhost", 6000)
 AUTHKEY = b"Edgeware++"
