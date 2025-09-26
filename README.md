@@ -1,12 +1,12 @@
 # Edgeware++
 ![Edgeware++ running on Windows 11](screenshots/demo.png)
-## What is Edgeware?
+## What is Edgeware++?
 
-Edgeware is a fetish-designed program (so 18+ only!!!) that essentially spawns popups over your screen in many different ways. These popups can include images, videos, audio, prompts (a sentence you have to repeat, think writing lines on a blackboard), etc. It's also highly customizable, with the ability to download "packs" people have made and use them yourself. Originally inspired by "Elsaware" (which, truthfully, I know nothing about), the original Edgeware's goal was to be a "fake virus" program that looked like your computer was being taken over by porn. It can be ended at any time and also scheduled in ways to be used more passively. Even if you're not into "gooning" (having a kink for porn addiction/edging for a long time) I feel like Edgeware is a pretty fun and interesting porn delivery system that allows you to see multiple images and videos at once without having to touch your keyboard or mouse.
+Edgeware++ is a fetish-designed program (so 18+ only!!!) that essentially spawns popups over your screen in many different ways. These popups can include images, videos, audio, prompts, etc. It's also highly customizable, with the ability to download "packs" people have made and use them yourself. It can be ended at any time and also scheduled in ways to be used more passively.
 
-**Edgeware is not a virus, nor does it install itself onto your computer**. All it installs onto your computer by default is python and a few extra libraries (along with a portable version of 7zip on Windows to extract the video player), which is needed for it to run. Edgeware **can** potentially modify files on your computer, including deleting or replacing things, but these are all *user set* settings that are not on by default.
+Originally inspired by "Elsaware" (which, truthfully, I know nothing about), the original Edgeware's goal was to be a "fake virus" program that looked like your computer was being taken over by porn. Edgeware++ is an extension of this program, and has a ton of new features and bugfixes. I used to write down a list of them in this readme, but it was starting to get way too long!
 
-Edgeware++ is an extension of the original Edgeware by PetitTournesol, and has a ton of new features and bugfixes. I used to write down a list of them in this readme, but it was starting to get way too long!
+**Edgeware++ is not a virus, nor does it install itself onto your computer**. All it installs onto your computer by default is python and a few extra libraries (along with a portable version of 7zip on Windows to extract the video player), which is needed for it to run. Edgeware **can** potentially modify files on your computer, including deleting or replacing things, but these are all *user set* settings that are not on by default.
 
 ## Usage Instructions
 
