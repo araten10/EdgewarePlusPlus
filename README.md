@@ -24,10 +24,6 @@ Any time Edgeware has a major update, it might be a good idea to run `EdgewareSe
 
 We have also added a Pack Editor included with each copy of Edgeware++. It's a bit different if you're familiar with the old one- it runs in command line and has different features.
 
-## Planned Additions
-
-Planned additions, as well as currently known issues, can now be found on the [issues page](https://github.com/araten10/EdgewarePlusPlus/issues).
-
 ## Packs
 
 For some of these packs, we will include a pack config file so you're able to easily test relevant settings. To apply these settings, you can go into the "File" tab once you've imported the pack, and press the "Load Pack Configuration" button. Once they've been loaded, you're free to take a look around and change anything you see fit, as the packs usually will only change a few settings. Make sure you save before you exit!
@@ -96,9 +92,6 @@ I've seen a few paid programs out there, but have no idea how they work or if th
 
 A: We wanted to play it safe and find a more generally SFW appropriate image for the splash screen to assist in distribution across multiple sites. While the new splash screen is still plenty horny (and also a caption by yours truly), it has less a focus on genitals and other such things that could potentially cause issues down the line. The icons were fine, but it felt fitting to match them to the new theme. I apologize in advance to PetitTournesol for semi-de-branding their program!
 
-## Changelog
-
-The changelog can be viewed [here](CHANGELOG.md).
 
 ## Content Removal Policy
 
