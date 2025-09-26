@@ -42,6 +42,14 @@ Hello again! We're still working away at a big feature that is taking a lot long
 
 •*Added a quick start guide to the tutorial*
 
+•*Fixed denial mode for videos and GIFs with hardware acceleration turned on*
+
+•*Added a fallback to the first found monitor if no primary monitor is found (contributed by https://github.com/u904muiasdlg)*
+
+•*Made Linux scripts explicitly use Bash and updated installation instructions (contributed by https://github.com/switch29-ub)*
+
+•*Removed some bloat and out of date information from the readme*
+
 **Version 17.5**
 
 A pretty huge feature has been added in this update! It only works on windows, however... and there's also a few major issues with it. That being said, it works "80%" as intended, so we're deciding to release this update now since fixing these problems will take considerable time and effort (if possible at all)

@@ -2,95 +2,27 @@
 ![Edgeware++ running on Windows 11](screenshots/demo.png)
 ## What is Edgeware?
 
-Going to say immediately: **Edgeware is not a virus, nor does it install itself onto your computer**. All it installs onto your computer by default is python 3.12 and a few extra libraries (along with a portable version of 7zip on Windows to extract the video player), which is needed for it to run. Edgeware **can** potentially modify files on your computer, including deleting or replacing things, but these are all *user set* settings that are not on by default. That being said, other people can download Edgeware, modify it to be malicious, and upload it elsewhere, so exercise caution when downloading versions from other sites. This project is open source, so feel free to peruse the source code if you're unsure.
-
-Now, that all is pretty alarming stuff and seems a bit weird to preface the basic explanation with, but i'm fully aware the name "Edgeware" doesn't inspire the most confidence for a program to be safe.
-
 Edgeware is a fetish-designed program (so 18+ only!!!) that essentially spawns popups over your screen in many different ways. These popups can include images, videos, audio, prompts (a sentence you have to repeat, think writing lines on a blackboard), etc. It's also highly customizable, with the ability to download "packs" people have made and use them yourself. Originally inspired by "Elsaware" (which, truthfully, I know nothing about), the original Edgeware's goal was to be a "fake virus" program that looked like your computer was being taken over by porn. It can be ended at any time and also scheduled in ways to be used more passively. Even if you're not into "gooning" (having a kink for porn addiction/edging for a long time) I feel like Edgeware is a pretty fun and interesting porn delivery system that allows you to see multiple images and videos at once without having to touch your keyboard or mouse.
 
-PetitTournesol (Edgeware's original creator) more or less took a hiatus and hasn't updated Edgeware since 2022, which is totally valid. That being said, I felt like there were lots of things I personally wanted to see in the program. Inspired mostly by being mildly frustrated at deleting those dang desktop icons every time, I decided to start learning python and share the changes i've made. Thus Edgeware++ was born, and as of writing this "new and improved" intro, there's over 30 new features to play around with. Some are quality of life updates, some are more fun things to tease yourself with. I'm generally trying to be as minimally intrusive to the original program as possible- my goal is complete both-ways pack compatibility with the old version of Edgeware. I also don't want to remove any features (unless they were literally defunct), but I have moved some stuff around in the config menu to try and make more space.
+**Edgeware is not a virus, nor does it install itself onto your computer**. All it installs onto your computer by default is python and a few extra libraries (along with a portable version of 7zip on Windows to extract the video player), which is needed for it to run. Edgeware **can** potentially modify files on your computer, including deleting or replacing things, but these are all *user set* settings that are not on by default.
+
+Edgeware++ is an extension of the original Edgeware by PetitTournesol, and has a ton of new features and bugfixes. I used to write down a list of them in this readme, but it was starting to get way too long!
 
 ## Usage Instructions
 
-"So how do I start using this darn thing?" Head on over to the "Releases" tab on the right (or [here](https://github.com/araten10/EdgewarePlusPlus/releases)) to get the newest "official" version, along with a brief summary of patch notes. Alternatively, if more up to date but potentially unstable builds tickle your fancy, you can click the big ol' "code" button in the top right, then "download zip".
+All stable builds can be found in the "Releases" tab on the right (or [here](https://github.com/araten10/EdgewarePlusPlus/releases)), along with a brief summary of patch notes. Alternatively, if more up to date but potentially unstable builds tickle your fancy, you can click the big ol' "code" button in the top right, then "download zip".
 
-Save and extract it somewhere, then run `edgeware/EdgewareSetup.bat`. This will install python 3.12 for you, alongside some necessary libraries. After that it will give you instructions for further use, and open up `edgeware/config.pyw`. **Check the top of the installer window to see if you have an older version of Python installed!** Edgeware previously used python 3.10, and if you're using that version, you'll have to uninstall it to get the newest version!
+Save and extract it somewhere, then run `edgeware/EdgewareSetup.bat`. This will install python for you, alongside some necessary libraries. After that it will give you instructions for further use, and open up `edgeware/config.pyw`. **Check the top of the installer window to see if you have an older version of Python installed!** Edgeware previously used python 3.10, and if you're using that version, you'll have to uninstall it to get the newest version!
 
 **If you're using Linux**, first you need to install Python 3.12, pip, and mpv yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip mpv gcc python3-dev libmpv-dev python3-tk`. Once installed, download and extract Edgeware as a ZIP or clone the repository, then run `setup.sh` in a terminal window in the `edgeware` directory. This will create a Python virtual environment for Edgeware, install the dependencies, and create scripts for running Edgeware. `config.sh` allows you to configure Edgeware and `edgeware.sh` will start Edgeware itself.
 
-From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original Edgeware page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and i'm hoping to make a few myself to showcase the new features this extension can do.
+From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original Edgeware page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and there's a few more in the "Packs" section of the readme.
 
 Any time Edgeware has a major update, it might be a good idea to run `EdgewareSetup.bat` again, as this is the file that downloads dependencies for the program.
 
 **Any damage you do to your computer with Edgeware is your own responsibility! Please read the "About" tab in the config window and make backups if you're planning on using the advanced, dangerous settings!**
 
 We have also added a Pack Editor included with each copy of Edgeware++. It's a bit different if you're familiar with the old one- it runs in command line and has different features.
-
-## New Features In Edgeware++:
-
-•*Toggle that switches from antialiasing to lanczos, if Edgeware wasn't displaying popups for you this will fix that! (probably)*
-
-•*Videos and GIFs are played with mpv, which not only loads faster but also should fix audio issues*
-
-•*Toggle to enable/disable desktop icon generation*
-
-•*Ability to cap audio/video popups if so desired, audio was previously limited to 1 and videos were uncapped*
-
-•*Subliminals now have a % chance slider, and can also be capped*
-
-•*Can now change startup graphic and icon per pack, defaults are used if not included*
-
-•*Added feature to ask you to confirm before saving if there are any settings enabled that could be "potentially dangerous", for those of you like me who initially wondered if edgeware would fuck up their computer*
-
-•*Hover tooltips everywhere to help new users get a grasp on things without having to weed through documentation*
-
-•*Edgeware installation now actually readable and gives info on first steps*
-
-•*Toggle that allows you to close a popup by clicking anywhere on it*
-
-•*Import/Export buttons are now in full view at all times at the bottom of the window*
-
-•*Brand shiny new "Pack Info" tab that gives stats and information on the currently loaded pack*
-
-•*Simplified error console in the advanced tab, which could potentially help bugfix some things*
-
-•*Packs now support an "info.json" file which gives people basic information about the pack in the config window*
-
-•*Overhaul to hibernate mode which allows you to choose between multiple different types, and have your wallpaper go back to normal after you close all the popups*
-
-•*File tab that allows you to do basic file management functions*
-
-•*Adding functionality to moods, allowing you to toggle them off/on*
-
-•*"Single Mode", allowing only one popup to spawn per popup roll, making for a more consistent experience if desired*
-
-•*Different graphical themes, including dark mode (and a few other fun ones!)*
-
-•*Allowing creation of a per-pack config setup, to help pack creators show off their "intended" settings*
-
-•*Moving Popups, which bounce around the screen [like some other infamous programs](https://www.youtube.com/watch?v=LSgk7ctw1HY)*
-
-•*Subliminal Message popups, which use the captions file to flash short mantras up randomly*
-
-•*Experimental Linux support that may or may not break in the future (read the section above!)*
-
-•*Complete overhaul to the configuration window UI to make it easier to use*
-
-•*User friendly way to change default images, such as splash screens or icons*
-
-•*Speaking of default images, the splash screen and icons have been changed to shiny new ones! (why? answer is below in the FAQ!)*
-
-•*Backend has been rewritten and simplified for easier developer editing*
-
-•*Booru downloader has been updated*
-
-•*Replace Images now saves backups of images replaced*
-
-•*A new type of popup which taps into your OS's notification feature*
-
-•*Can save multiple packs at once for fast switching between them*
-
->Note to self: this list is getting really long...! Might make a compacted image of a bunch of new features at some point...
 
 ## Planned Additions
 
@@ -120,7 +52,7 @@ Meant to demo corruption and the corruption "fade" feature, this pack is for peo
 
 A: Unfortunately, packs are kind of scattered about... Since there is no specific place to congregate Edgeware packs (to my knowledge), people usually end up posting them to their personal twitters or discord servers. Additionally, some people charge money for their own packs and/or bundle a complete copy of Edgeware with their pack, making it even harder to give a definite answer to this question.
 
-There are a few places you can start, however. PetitTournesol's original github page has multiple packs, although they don't support new ++ features. /r/edgingware on reddit is mostly focused to tech support, but there are multiple packs there, including some tech support as well. There is also an [unofficial discord](https://discord.com/invite/9rxab3BSB8) that hosts a lot of packs, just know that I don't really visit it much since I tend to use discord sparingly.
+There are a few places you can start, however. PetitTournesol's original github page has multiple packs, although they don't support new ++ features. /r/edgingware on reddit is mostly focused to tech support, but there are multiple packs there. There is also an [unofficial discord](https://discord.com/invite/9rxab3BSB8) that hosts a lot of packs, just know that I don't really visit it much since I tend to use discord sparingly.
 
 >Q: I found a bug!
 
@@ -137,12 +69,6 @@ A: No! With the only possible exception of the Python installer, no part of Edge
 A: You can go into the resource folder of the pack you got, extract everything inside of it, and zip it with a desired name. This way, you can import the pack normally. If you already have an install of Edgeware++, it is recommended you do this over using their installation unless it comes from a trusted source. While many people make packs like this to make using Edgeware simpler for people who have never heard of it before, there's also the possibility of the files being modified to be malicious.
 
 If you know that the pack creator set specific config settings for their Edgeware installation pack, you can also create a "config.json" file inside your newly created pack zip, and copy all of the contents of their "config.cfg" into it. This will allow you to import their config settings in the *Pack Info* tab, near the bottom.
-
->Q: Do you plan on making a discord for Edgeware?
-
-A: No, I don't have any plans for this. On top of not particularly liking discord both as a program and a company, I also sadly don't have the energy to manage and moderate a discord. Even if I made one just for development updates with limited public posting, it would essentially be what my twitter is but on a platform I use less often.
-
-As mentioned a few questions above, there is an unofficial discord. Me and Marigold don't really have much to do with it, but a ton of people have joined it and there's loads of packs up there. Feel free to join but please don't message me about goings on in there- i'm not a mod or anything!
 
 >Q: Can you give me more info on upcoming features?
 
@@ -163,6 +89,8 @@ A: I only have plans to develop Edgeware for windows, and Marigold is currently 
 A: The main one that comes to mind is [goonto](https://github.com/dogkisser/goonto), which is similar to Edgeware but without the need for packs or a python installation (also works on macOS for those of you with the question above this one).
 
 [Walltaker](https://walltaker.joi.how/) is also pretty popular, but is much more social and only focuses on changing your desktop wallpaper.
+
+I've seen a few paid programs out there, but have no idea how they work or if they work well. I assume they're closed source, and i'm not too interested in experimenting with gooner programs that can change my PC unless I can see how they work.
 
 >Q: Why did you change the default loading splash and icon?
 
