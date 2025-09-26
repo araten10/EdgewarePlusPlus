@@ -18,7 +18,7 @@ Hello again! We're still working away at a big feature that is taking a lot long
 
 •*Added a new type of censor to denial mode, pixellating images instead of blurring them. Each has an equal chance to activate when denial mode is on.*
 
-•*Fixed the Windows Pack Tool script not always starting the Pack Tool with Python (contributed by https://github.com/DARKNOSY)*
+•*Fixed the Windows Pack Tool script not always starting the Pack Tool with Python (contributed by @DARKNOSY)*
 
 •*Fixed the Windows setup script failing to detect if Python is installed*
 
@@ -44,9 +44,9 @@ Hello again! We're still working away at a big feature that is taking a lot long
 
 •*Fixed denial mode for videos and GIFs with hardware acceleration turned on*
 
-•*Added a fallback to the first found monitor if no primary monitor is found (contributed by https://github.com/u904muiasdlg)*
+•*Added a fallback to the first found monitor if no primary monitor is found (contributed by @u904muiasdlg)*
 
-•*Made Linux scripts explicitly use Bash and updated installation instructions (contributed by https://github.com/switch29-ub)*
+•*Made Linux scripts explicitly use Bash and updated installation instructions (contributed by @switch29-ub)*
 
 •*Removed some bloat and out of date information from the readme*
 
