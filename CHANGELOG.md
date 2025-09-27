@@ -9,12 +9,16 @@
 
 **Since last version...**
 
+**Version 18**
+
+Hello again! We're still working away at a big feature that is taking a lot longer than anticipated. It's also the end of summer in the northern hemisphere, so the good weather was definitely being a distraction! We planned to release a bombshell huge update with an Edgeware++ project we're working on, but it's taking longer than anticipated. So here's a new release with a lot of useful changes in the meantime! It's a lot of bugfixes, but there's still a few new features here and there.
+
 •*Removed all of the old config presets, and added new ones.*
 >I apologize if anyone still used these, they were so incredibly out of date that I think it was more confusing leaving them in!
 
 •*Added a new type of censor to denial mode, pixellating images instead of blurring them. Each has an equal chance to activate when denial mode is on.*
 
-•*Fixed the Windows Pack Tool script not always starting the Pack Tool with Python (contributed by https://github.com/DARKNOSY)*
+•*Fixed the Windows Pack Tool script not always starting the Pack Tool with Python (contributed by @DARKNOSY)*
 
 •*Fixed the Windows setup script failing to detect if Python is installed*
 
@@ -32,7 +36,19 @@
 >This is to catch up with version 17, no functionality of the subliminals/hypno feature has been changed! For more info, read the patch notes there.
 
 •*Added a test build feature to the Pack Tool to easily test WIP packs in Edgeware*
->
+>Hopefully this will help testing your packs without building them being a chore... This will save to data/packs/Pack Tool test build, so you can import it from there!
+
+•*Fixed tray icons not being removed until you moused over them*
+
+•*Added a quick start guide to the tutorial*
+
+•*Fixed denial mode for videos and GIFs with hardware acceleration turned on*
+
+•*Added a fallback to the first found monitor if no primary monitor is found (contributed by @u904muiasdlg)*
+
+•*Made Linux scripts explicitly use Bash and updated installation instructions (contributed by @switch29-ub)*
+
+•*Removed some bloat and out of date information from the readme*
 
 **Version 17.5**
 

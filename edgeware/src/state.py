@@ -21,6 +21,7 @@ from tkinter import Toplevel
 from typing import Any
 
 import pyglet
+import pystray
 
 
 class Popup(Toplevel):  # Circular
@@ -60,6 +61,8 @@ class State:
     corruption_time_start = 0  # Milliseconds
     corruption_popup_number = 0
     corruption_launches_number = 1
+
+    tray: pystray.Icon | None = None
 
     alt_held = False
 
