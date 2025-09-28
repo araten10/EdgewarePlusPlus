@@ -29,6 +29,7 @@ from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
 from pack import Pack
 from panic import panic
+from roll import roll
 from state import State
 
 from scripting.environment import Environment
@@ -61,9 +62,10 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         pack.index.default.popup_close = text
 
     return {
-        "standard": {"print": lambda _env, *args: print(*args)},
-        "edgeware": {
+        "edgeware_v0": {
+            "print": lambda _env, *args: print(*args),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
+            "roll": lambda _env, chance: roll(chance),
             "corrupt": lambda _env: update_corruption_level(settings, pack, state),
             "panic": lambda _env: panic(root, settings, state, disable=False),
             "close_popups": close_popups,
