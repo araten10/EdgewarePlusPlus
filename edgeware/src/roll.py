@@ -36,9 +36,9 @@ def roll_targets(settings: Settings, targets: list[RollTarget]) -> None:
     if settings.single_mode:
         try:
             function = random.choices(list(map(lambda target: target.function, targets)), list(map(lambda target: target.chance(), targets)), k=1)[0]
+            function()
         except ValueError:
-            function = targets[0].function  # Exception thrown when all chances are 0
-        function()
+            pass  # Do nothing if all chances are 0
     else:
         for target in targets:
             target.roll()
