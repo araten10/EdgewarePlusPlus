@@ -171,3 +171,11 @@ def copy_loading_splash(copy: CopyFunction, source: Source, build: Build) -> Non
             loading_splash_found = True
         else:
             logging.warning(f"{loading_splash_path} is not an image")
+
+
+def copy_script(copy: CopyFunction, source: Source, build: Build) -> None:
+    if not os.path.exists(source.script):
+        return
+
+    logging.info("Copying script")
+    copy(source.script, build.script)

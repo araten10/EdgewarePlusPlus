@@ -21,7 +21,7 @@ import shutil
 import sys
 
 import yaml
-from copy_files import copy_hypno, copy_icon, copy_loading_splash, copy_media, copy_wallpapers
+from copy_files import copy_hypno, copy_icon, copy_loading_splash, copy_media, copy_script, copy_wallpapers
 from legacy.write_files import write_captions, write_media, write_prompt, write_web
 from paths import DEFAULT_PACK, PACK_TOOL_ROOT, TEST_BUILD_ROOT, Build, Source
 from write_files import write_config, write_corruption, write_discord, write_index, write_info, write_legacy
@@ -52,6 +52,7 @@ def build_pack(args: argparse.Namespace, source: Source, build: Build) -> None:
     copy_wallpapers(copy, source, build)
     copy_icon(copy, source, build)
     copy_loading_splash(copy, source, build)
+    copy_script(copy, source, build)
 
     with open(source.pack, "r") as f:
         pack = yaml.safe_load(f)

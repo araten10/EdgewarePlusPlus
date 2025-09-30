@@ -32,6 +32,7 @@ class Source:
         # Files
         self.icon = self.root / "icon.ico"
         self.pack = self.root / "pack.yml"
+        self.script = self.root / "script.lua"
         self.splash = self.root / "loading_splash"
 
         # Legacy
@@ -55,6 +56,7 @@ class Build:
         self.icon = self.root / "icon.ico"
         self.index = self.root / "index.json"
         self.info = self.root / "info.json"
+        self.script = self.root / "script.lua"
         self.splash = self.root / "loading_splash"
         self.wallpaper = self.root / "wallpaper.png"
 
