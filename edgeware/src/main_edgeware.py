@@ -104,7 +104,6 @@ if __name__ == "__main__":
     ]
 
     def start_main() -> None:
-        run_script(root, settings, pack, state)
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
         make_desktop_icons(settings)
         handle_keyboard(root, settings, state)
@@ -114,6 +113,7 @@ if __name__ == "__main__":
         handle_discord(settings, pack)
         handle_panic_lockout(root, settings, state)
         handle_mitosis_mode(root, settings, pack, state)
+        run_script(root, settings, pack, state)
 
         if settings.hibernate_mode:
             start_main_hibernate(root, settings, pack, state, targets)

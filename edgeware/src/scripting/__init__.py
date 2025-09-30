@@ -320,6 +320,9 @@ class Block:
 
 
 def run_script(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
+    if not pack.paths.script.is_file():
+        return
+
     modules = get_modules(root, settings, pack, state)
 
     def require(env: Environment, module: str) -> None:
