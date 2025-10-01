@@ -17,6 +17,8 @@
 
 from collections.abc import Iterable
 
+from scripting.error import LuaError
+
 KEYWORDS = [
     "and",
     "break",
@@ -138,10 +140,10 @@ class Tokens(list[str]):
                     match char:
                         case "\\":
                             if not chars.starts_with_any(ESCAPE_SEQUENCES):
-                                raise Exception(f"Invalid escape sequence \\{chars[0]}")
+                                raise LuaError(f"Invalid escape sequence \\{chars[0]}")
                             token += ESCAPE_SEQUENCES[chars.get()]
                         case "\n":
-                            raise Exception("Unescaped line break in short literal string")
+                            raise LuaError("Unescaped line break in short literal string")
                         case _:
                             token += char
                 token += chars.get()
@@ -170,13 +172,13 @@ class Tokens(list[str]):
 
     def get_name(self) -> str:
         if not all([char.isalnum() or char == "_" for char in self.next]) or self.next[0].isdigit() or self.next in KEYWORDS:
-            raise Exception(f"Invalid name {self.next}")
+            raise LuaError(f"Invalid name {self.next}")
         return self.get()
 
     def skip(self, expected: str | None = None) -> None:
         token = self.get()
         if token != expected and expected:
-            raise Exception(f"Unexpected token {token}, expected {expected}")
+            raise LuaError(f"Unexpected token {token}, expected {expected}")
 
     def skip_if(self, possible: str) -> bool:
         if self.next == possible:

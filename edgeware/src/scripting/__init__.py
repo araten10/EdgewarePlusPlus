@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
 import operator
 from dataclasses import dataclass
 from tkinter import Tk
@@ -25,6 +26,7 @@ from pack import Pack
 from state import State
 
 from scripting.environment import Environment
+from scripting.error import LuaError
 from scripting.modules import get_modules
 from scripting.tokens import Tokens
 
@@ -334,6 +336,9 @@ def run_script(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     with open(pack.paths.script, "r") as f:
         script = f.read()
 
-    tokens = Tokens(script)
-    block = Block(tokens, "end")
-    block.eval(env)
+    try:
+        tokens = Tokens(script)
+        block = Block(tokens, "end")
+        block.eval(env)
+    except LuaError as e:
+        logging.error(f"Lua error: {e}")
