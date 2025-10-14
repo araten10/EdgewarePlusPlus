@@ -70,7 +70,7 @@ class VideoPlayer(Label):
             self.process = subprocess.Popen(
                 [
                     sys.executable,
-                    Process.LINUX_MPV,
+                    Process.MPV,
                     str(self.winfo_id()),
                     str(self.properties),
                     media,

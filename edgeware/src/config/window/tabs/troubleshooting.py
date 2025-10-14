@@ -104,18 +104,16 @@ class TroubleshootingTab(ScrollFrame):
         )
         mpv_subprocess_toggle = ConfigToggle(
             troubleshooting_row,
-            "Run mpv in a Subprocess (Linux Only)",
+            "Run mpv in a Subprocess",
             variable=vars.mpv_subprocess,
             cursor="question_arrow",
-            state=("normal" if os_utils.is_linux() else "disabled"),
         )
         mpv_subprocess_toggle.grid(1, 1)
         CreateToolTip(
             mpv_subprocess_toggle,
-            "By default, the video player of Edgeware++, mpv, is ran in a subprocess to fix a crash resulting from an X error when a popup"
-            " embedding mpv is closed. But this may result in slightly longer load times for videos and animated GIFs.\n\n"
-            "You can disable this setting to run mpv in the main process at the risk of an inconsistent experience and crashes.\n\n"
-            "This setting is only available on Linux.",
+            "By default, the video player of Edgeware++, mpv, is ran in a subprocess to fix a crash resulting from an X error when a popup embedding mpv"
+            " is closed on Linux and a crash when loading videos on Windows. This may result in slightly longer load times for videos and animated GIFs.\n\n"
+            "You can disable this setting to run mpv in the main process at the risk of an inconsistent experience and crashes.",
         )
 
         hardware_acceleration_toggle = ConfigToggle(
