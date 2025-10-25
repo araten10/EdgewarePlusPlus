@@ -83,13 +83,19 @@ def copy_media(copy: CopyFunction, source: Source, build: Build, compress_images
 
 
 def compress_video(source: Path, destination: Path) -> None:
-    # If H265 causes issues, change (or add setting) back down to H264
-    subprocess.run(f'"{FFmpeg()._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
+    try:
+        # If H265 causes issues, change (or add setting) back down to H264
+        subprocess.run(f'"{FFmpeg()._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
+    except Exception as e:
+        logging.error(f"Failed to compress video {source.name}. Reason: {e}")
 
 
 def compress_image(source: Path, destination: Path) -> None:
-    image = Image.open(source)
-    image.save(destination, optimize=True, quality=85)
+    try:
+        image = Image.open(source)
+        image.save(destination, optimize=True, quality=85)
+    except Exception as e:
+        logging.error(f"Failed to compress image {source.name}. Reason: {e}")
 
 
 def copy_hypno(copy: CopyFunction, source: Source, build: Build, skip_legacy: bool) -> None:
