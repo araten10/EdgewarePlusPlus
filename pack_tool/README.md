@@ -56,7 +56,7 @@ to the actual format used by Edgeware.
 │       ├── image.png
 │       ├── video.mp4
 │       └── ...
-├── subliminals
+├── hypno
 │   ├── image.gif
 │   └── ...
 ├── wallpapers
@@ -64,5 +64,6 @@ to the actual format used by Edgeware.
 │   └── ...
 ├── icon.ico
 ├── loading_splash.{png, gif, jpg, jpeg, bmp}
-└── pack.yml
+├── pack.yml
+└── script.lua
 ```
