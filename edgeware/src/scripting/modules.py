@@ -44,6 +44,8 @@ def wrap(env: Environment, function: Callable | None) -> Callable | None:
 
 
 def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
+    from scripting import ReturnValue
+
     popups = {
         "image": lambda _env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
         "video": lambda _env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
@@ -65,7 +67,7 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "edgeware_v0": {
             "print": lambda _env, *args: print(*args),
             "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
-            "roll": lambda _env, chance: roll(chance),
+            "roll": lambda _env, chance: ReturnValue(roll(chance)),
             "corrupt": lambda _env: update_corruption_level(settings, pack, state),
             "panic": lambda _env: panic(root, settings, state, disable=False),
             "close_popups": close_popups,
