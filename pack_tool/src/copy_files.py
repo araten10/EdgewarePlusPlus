@@ -56,17 +56,18 @@ def copy_media(copy: CopyFunction, source: Source, build: Build, compress_images
             file_path = mood_path / filename
 
             location = None
+            copy_file = copy
             if file_path.is_file():
                 if filetype.is_image(file_path):
                     location = build.image
                     # animated gifs compress down to a single frame, so they are skipped until we find a sane solution
                     if compress_images and not filetype.image_match(file_path).mime == "image/gif":
-                        copy = compress_image
+                        copy_file = compress_image
                 elif filetype.is_video(file_path):
                     location = build.video
                     # Can remove video type check once we support more filetypes for compression
                     if compress_videos and filetype.video_match(file_path).mime == "video/mp4":
-                        copy = compress_video
+                        copy_file = compress_video
                 elif filetype.is_audio(file_path):
                     location = build.audio
 
@@ -74,7 +75,7 @@ def copy_media(copy: CopyFunction, source: Source, build: Build, compress_images
                 location.mkdir(parents=True, exist_ok=True)
                 if rename:
                     filename = mood + "_" + filename
-                copy(file_path, location / filename)
+                copy_file(file_path, location / filename)
                 media[mood].append(filename)
             else:
                 logging.warning(f"{file_path} is not an image, video, or audio file")
@@ -83,19 +84,13 @@ def copy_media(copy: CopyFunction, source: Source, build: Build, compress_images
 
 
 def compress_video(source: Path, destination: Path) -> None:
-    try:
-        # If H265 causes issues, change (or add setting) back down to H264
-        subprocess.run(f'"{FFmpeg()._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
-    except Exception as e:
-        logging.error(f"Failed to compress video {source.name}. Reason: {e}")
+    # If H265 causes issues, change (or add setting) back down to H264
+    subprocess.run(f'"{FFmpeg()._ffmpeg_file}" -y -i "{source}" -vcodec libx265 -crf 30 "{destination}"', shell=True)
 
 
 def compress_image(source: Path, destination: Path) -> None:
-    try:
-        image = Image.open(source)
-        image.save(destination, optimize=True, quality=85)
-    except Exception as e:
-        logging.error(f"Failed to compress image {source.name}. Reason: {e}")
+    image = Image.open(source)
+    image.save(destination, optimize=True, quality=85)
 
 
 def copy_hypno(copy: CopyFunction, source: Source, build: Build, skip_legacy: bool) -> None:
