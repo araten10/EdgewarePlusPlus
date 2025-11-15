@@ -17,6 +17,7 @@
 
 from tkinter import (
     Button,
+    Frame,
 )
 
 from config.vars import Vars
@@ -36,11 +37,11 @@ PANIC_TEXT = '"Panic" is a feature that allows you to instantly halt the program
 PRESET_TEXT = "Please be careful before importing unknown config presets! Double check to make sure you're okay with the settings before launching Edgeware."
 
 
-class StartTab(ScrollFrame):
+class StartTab(Frame):
     def __init__(self, vars: Vars, local_version: str, live_version: str, pack: Pack) -> None:
         super().__init__()
 
-        panic_section = ConfigSection(self.viewPort, "Panic Settings", PANIC_TEXT)
+        panic_section = ConfigSection(self, "Panic Settings", PANIC_TEXT)
         panic_section.pack()
 
         set_global_panic_button = Button(
@@ -51,7 +52,7 @@ class StartTab(ScrollFrame):
         )
         set_global_panic_button.pack(padx=PAD, pady=PAD, fill="x", side="left", expand=1)
 
-        legacy_section = ConfigSection(self.viewPort, "Legacy")
+        legacy_section = ConfigSection(self, "Legacy")
         legacy_section.pack()
 
         set_legacy_panic_button = Button(
