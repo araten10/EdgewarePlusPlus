@@ -39,14 +39,15 @@ from config import load_default_config
 from config.themes import theme_change
 from config.vars import Vars
 from config.window.import_pack import import_pack
+from config.window.tabs.general.start import StartTab
+from config.window.tabs.troubleshooting import TroubleshootingTab
 from config.window.utils import (
     config,
     get_live_version,
     refresh,
     write_save,
 )
-from config.window.widgets.layout import ConfigMessage, PAD, ConfigSection
-from config.window.utils import request_global_panic_key, request_legacy_panic_key
+from config.window.widgets.layout import ConfigMessage
 
 config["wallpaperDat"] = ast.literal_eval(config["wallpaperDat"])
 default_config = load_default_config()
@@ -83,21 +84,50 @@ class ConfigWindow(Tk):
         local_version = default_config["versionplusplus"]
         live_version = get_live_version()
 
-        set_global_panic_button = Button(
-            text=f"Set Global\nPanic Key\n<{vars.global_panic_key.get()}>",
-            command=lambda: request_global_panic_key(set_global_panic_button, vars.global_panic_key),
-            cursor="question_arrow",
-        )
-        set_global_panic_button.pack(padx=PAD, pady=PAD, fill="x", side="left", expand=1)
+        # tab display code start
+        notebook = ttk.Notebook(self)  # tab manager
+        notebook.pack(expand=1, fill="both")
 
-        set_legacy_panic_button = Button(
-            text=f"Set Legacy\nPanic Key\n<{vars.panic_key.get()}>",
-            command=lambda: request_legacy_panic_key(set_legacy_panic_button, vars.panic_key),
-            cursor="question_arrow",
-        )
-        set_legacy_panic_button.pack(fill="x", side="left", expand=1)
+        general_tab = ttk.Frame(notebook)
+        notebook.add(general_tab, text="General")
+        general_notebook = ttk.Notebook(general_tab)
+        general_notebook.pack(expand=1, fill="both")
+        general_notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")  # startup screen, info and presets
+
+        notebook.add(TroubleshootingTab(vars, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
         style = ttk.Style(self)  # style setting for left aligned tabs
+
+        # going to vent here for a second: I have no idea why ttk doesn't use the default theme by default
+        # and I also don't know why switching to the default theme is the only way to remove ugly borders on notebook tabs
+        # apparently borderwidth, highlightthickness, and anything else just decides to not work...
+        style.theme_use("default")
+
+        style.layout(
+            "Tab",
+            [
+                (
+                    "Notebook.tab",
+                    {
+                        "sticky": "nswe",
+                        "children": [
+                            (
+                                "Notebook.padding",
+                                {
+                                    "side": "top",
+                                    "sticky": "nswe",
+                                    "children":
+                                    # [('Notebook.focus', {'side': 'top', 'sticky': 'nswe', 'children': (Removes ugly selection dots from tabs)
+                                    [("Notebook.label", {"side": "top", "sticky": ""})],
+                                    # })],
+                                },
+                            )
+                        ],
+                    },
+                )
+            ],
+        )
+        style.configure("lefttab.TNotebook", tabposition="wn")
 
         pack_frame = Frame(self)
         pack_frame.pack(fill="x")
