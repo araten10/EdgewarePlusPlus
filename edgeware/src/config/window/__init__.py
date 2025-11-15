@@ -39,19 +39,8 @@ from config import load_default_config
 from config.themes import theme_change
 from config.vars import Vars
 from config.window.import_pack import import_pack
-from config.window.tabs.annoyance.booru import BooruTab
-from config.window.tabs.annoyance.dangerous_settings import DangerousSettingsTab
-from config.window.tabs.annoyance.moods import MoodsTab
-from config.window.tabs.annoyance.popup_tweaks import PopupTweaksTab
-from config.window.tabs.annoyance.popup_types import PopupTypesTab
-from config.window.tabs.annoyance.wallpaper import WallpaperTab
-from config.window.tabs.corruption import CorruptionModeTab
-from config.window.tabs.general.default_file import DefaultFileTab
-from config.window.tabs.general.info import InfoTab
 from config.window.tabs.general.start import StartTab
-from config.window.tabs.modes import BasicModesTab
 from config.window.tabs.troubleshooting import TroubleshootingTab
-from config.window.tabs.tutorial import open_tutorial
 from config.window.utils import (
     config,
     get_live_version,
@@ -104,37 +93,8 @@ class ConfigWindow(Tk):
         general_notebook = ttk.Notebook(general_tab)
         general_notebook.pack(expand=1, fill="both")
         general_notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")  # startup screen, info and presets
-        general_notebook.add(InfoTab(pack), text="Pack Info")  # pack information
-        general_notebook.add(DefaultFileTab(), text="Change Default Files")  # tab for changing default files
-
-        annoyance_tab = ttk.Frame(notebook)
-        notebook.add(annoyance_tab, text="Annoyance/Runtime")
-        annoyance_notebook = ttk.Notebook(annoyance_tab)
-        annoyance_notebook.pack(expand=1, fill="both")
-        annoyance_notebook.add(PopupTypesTab(vars), text="Popup Types")  # tab for popup types
-        annoyance_notebook.add(PopupTweaksTab(vars), text="Popup Tweaks")  # tab for popup settings/tweaks/changes etc
-        annoyance_notebook.add(WallpaperTab(vars, pack), text="Wallpaper")  # tab for wallpaper rotation settings
-        annoyance_notebook.add(MoodsTab(pack), text="Moods")  # tab for mood settings
-        annoyance_notebook.add(BooruTab(vars), text="Booru")  # tab for booru downloader
-        annoyance_notebook.add(DangerousSettingsTab(vars), text="Dangerous")  # tab for potentially dangerous settings
-
-        notebook.add(BasicModesTab(vars), text="Modes")  # tab for general modes
-        notebook.add(CorruptionModeTab(vars, pack), text="Corruption")  # tab for corruption mode
 
         notebook.add(TroubleshootingTab(vars, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
-
-        notebook.add(Frame(name="tutorial"), text="Tutorial")  # tab for tutorial, etc
-        last_tab = notebook.index(notebook.select())  # get initial tab to prevent switching to tutorial
-        notebook.bind("<<NotebookTabChanged>>", lambda event: tutorial_container(event))
-
-        def tutorial_container(event: Event) -> None:
-            nonlocal last_tab
-            # print(event.widget.select())
-            if event.widget.select() == ".tutorial":
-                open_tutorial(self)
-                notebook.select(last_tab)
-            else:
-                last_tab = notebook.index(notebook.select())
 
         style = ttk.Style(self)  # style setting for left aligned tabs
 
