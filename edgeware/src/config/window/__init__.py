@@ -84,9 +84,7 @@ class ConfigWindow(Tk):
         live_version = get_live_version()
 
         # tab display code start
-        notebook = ttk.Notebook(self)  # tab manager
-        notebook.pack(expand=1, fill="both")
-        notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")
+        StartTab(vars, local_version, live_version, pack).pack()
 
         style = ttk.Style(self)  # style setting for left aligned tabs
 
