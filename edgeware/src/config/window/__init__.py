@@ -40,7 +40,6 @@ from config.themes import theme_change
 from config.vars import Vars
 from config.window.import_pack import import_pack
 from config.window.tabs.general.start import StartTab
-from config.window.tabs.troubleshooting import TroubleshootingTab
 from config.window.utils import (
     config,
     get_live_version,
@@ -93,8 +92,6 @@ class ConfigWindow(Tk):
         general_notebook = ttk.Notebook(general_tab)
         general_notebook.pack(expand=1, fill="both")
         general_notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")  # startup screen, info and presets
-
-        notebook.add(TroubleshootingTab(vars, pack), text="Troubleshooting")  # tab for miscellaneous settings with niche use cases
 
         style = ttk.Style(self)  # style setting for left aligned tabs
 
