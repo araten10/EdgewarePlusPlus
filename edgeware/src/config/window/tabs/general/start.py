@@ -78,6 +78,59 @@ class StartTab(ScrollFrame):
             github_label.ignore_theme_fg = True
         github_label.pack(fill="x")
 
+        pack_preset_section = Frame(self.viewPort, borderwidth=2, relief=RAISED)
+        pack_preset_section.pack(padx=8, pady=8, fill="x")
+
+        pack_preset_col_1 = Frame(pack_preset_section)
+        pack_preset_col_1.pack(fill="both", side="left", expand=1)
+        Label(pack_preset_col_1, text=f"Number of suggested config settings: {len(pack.config)}").pack(fill="both", side="top")
+        pack_preset_danger_toggle = Checkbutton(pack_preset_col_1, text="Toggle on warning failsafes", variable=vars.preset_danger, cursor="question_arrow")
+        pack_preset_danger_toggle.pack(fill="both", side="top")
+        CreateToolTip(
+            pack_preset_danger_toggle,
+            'Toggles on the "Warn if "Dangerous" Settings Active" setting after loading the '
+            "pack configuration file, regardless if it was toggled on or off in those settings.\n\nWhile downloading and loading "
+            "something that could be potentially malicious is a fetish in itself, this provides some peace of mind for those of you "
+            "who are more cautious with unknown files. More information on what these failsafe warnings entail is listed on the relevant "
+            'setting tooltip in the "General" tab.',
+        )
+
+        pack_preset_col_2 = Frame(pack_preset_section)
+        pack_preset_col_2.pack(fill="both", side="left", expand=1)
+        load_pack_preset_button = Button(
+            pack_preset_col_2,
+            text="Load Pack Configuration",
+            cursor="question_arrow",
+            command=lambda: apply_preset(pack.config, vars),
+        )
+        load_pack_preset_button.pack(fill="both", expand=1)
+        CreateToolTip(
+            load_pack_preset_button,
+            "In Edgeware++, the functionality was added for pack creators to add a config file to their pack, "
+            "allowing for quick loading of setting presets tailored to their intended pack experience. It is highly recommended you save your "
+            "personal preset beforehand, as this will overwrite all your current settings.\n\nIt should also be noted that this can potentially "
+            "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
+        )
+
+        if len(pack.config) == 0:
+            set_widget_states(False, [load_pack_preset_button])
+
+        # Panic
+
+        panic_section = ConfigSection(self.viewPort, "Panic Settings", PANIC_TEXT)
+        panic_section.pack()
+
+        set_global_panic_button = Button(
+            panic_section,
+            text=f"Set Global\nPanic Key\n<{vars.global_panic_key.get()}>",
+            command=lambda: request_global_panic_key(set_global_panic_button, vars.global_panic_key),
+            cursor="question_arrow",
+        )
+        set_global_panic_button.pack(padx=PAD, pady=PAD, fill="x", side="left", expand=1)
+        CreateToolTip(set_global_panic_button, "This is a global key that does not require focus to activate. Press the key at any time to perform panic.")
+        Button(panic_section, text="Perform Panic", command=send_panic).pack(padx=PAD, pady=PAD, fill="both", side="left", expand=1)
+
+
         # Theme
 
         # TODO: Use Theme object
@@ -344,21 +397,6 @@ class StartTab(ScrollFrame):
 
         ConfigToggle(other_row, text="Disable Config Help Messages", variable=vars.message_off).grid(2, 0)
 
-        # Panic
-
-        panic_section = ConfigSection(self.viewPort, "Panic Settings", PANIC_TEXT)
-        panic_section.pack()
-
-        set_global_panic_button = Button(
-            panic_section,
-            text=f"Set Global\nPanic Key\n<{vars.global_panic_key.get()}>",
-            command=lambda: request_global_panic_key(set_global_panic_button, vars.global_panic_key),
-            cursor="question_arrow",
-        )
-        set_global_panic_button.pack(padx=PAD, pady=PAD, fill="x", side="left", expand=1)
-        CreateToolTip(set_global_panic_button, "This is a global key that does not require focus to activate. Press the key at any time to perform panic.")
-        Button(panic_section, text="Perform Panic", command=send_panic).pack(padx=PAD, pady=PAD, fill="both", side="left", expand=1)
-
         # Presets
 
         preset_section = ConfigSection(self.viewPort, "Config Presets", PRESET_TEXT)
@@ -393,43 +431,6 @@ class StartTab(ScrollFrame):
         self.preset_description_label = Label(preset_description_frame, text=self.preset_description_wrap.fill(text=""), relief=GROOVE)
         self.preset_description_label.pack(fill="both", expand=1)
         self.set_preset_description(self.preset_var.get())
-
-        pack_preset_section = Frame(self.viewPort, borderwidth=2, relief=RAISED)
-        pack_preset_section.pack(padx=8, pady=8, fill="x")
-
-        pack_preset_col_1 = Frame(pack_preset_section)
-        pack_preset_col_1.pack(fill="both", side="left", expand=1)
-        Label(pack_preset_col_1, text=f"Number of suggested config settings: {len(pack.config)}").pack(fill="both", side="top")
-        pack_preset_danger_toggle = Checkbutton(pack_preset_col_1, text="Toggle on warning failsafes", variable=vars.preset_danger, cursor="question_arrow")
-        pack_preset_danger_toggle.pack(fill="both", side="top")
-        CreateToolTip(
-            pack_preset_danger_toggle,
-            'Toggles on the "Warn if "Dangerous" Settings Active" setting after loading the '
-            "pack configuration file, regardless if it was toggled on or off in those settings.\n\nWhile downloading and loading "
-            "something that could be potentially malicious is a fetish in itself, this provides some peace of mind for those of you "
-            "who are more cautious with unknown files. More information on what these failsafe warnings entail is listed on the relevant "
-            'setting tooltip in the "General" tab.',
-        )
-
-        pack_preset_col_2 = Frame(pack_preset_section)
-        pack_preset_col_2.pack(fill="both", side="left", expand=1)
-        load_pack_preset_button = Button(
-            pack_preset_col_2,
-            text="Load Pack Configuration",
-            cursor="question_arrow",
-            command=lambda: apply_preset(pack.config, vars),
-        )
-        load_pack_preset_button.pack(fill="both", expand=1)
-        CreateToolTip(
-            load_pack_preset_button,
-            "In Edgeware++, the functionality was added for pack creators to add a config file to their pack, "
-            "allowing for quick loading of setting presets tailored to their intended pack experience. It is highly recommended you save your "
-            "personal preset beforehand, as this will overwrite all your current settings.\n\nIt should also be noted that this can potentially "
-            "enable settings that can change or delete files on your computer, if the pack creator set them up in the config! Be careful out there!",
-        )
-
-        if len(pack.config) == 0:
-            set_widget_states(False, [load_pack_preset_button])
 
         # For now these buttons have been removed, but the settings to save/refresh without exiting may be useful- might add back in if formatting changes
         # Label(self.viewPort, text="Save", font=title_font, relief=GROOVE).pack(pady=2)
