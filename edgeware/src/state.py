@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import multiprocessing
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from tkinter import Toplevel
@@ -64,6 +65,7 @@ class State:
 
     tray: pystray.Icon | None = None
 
+    keyboard_process: multiprocessing.Process | None = None
     alt_held = False
 
     @property

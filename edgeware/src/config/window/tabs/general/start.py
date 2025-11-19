@@ -130,7 +130,6 @@ class StartTab(ScrollFrame):
         CreateToolTip(set_global_panic_button, "This is a global key that does not require focus to activate. Press the key at any time to perform panic.")
         Button(panic_section, text="Perform Panic", command=send_panic).pack(padx=PAD, pady=PAD, fill="both", side="left", expand=1)
 
-
         # Theme
 
         # TODO: Use Theme object

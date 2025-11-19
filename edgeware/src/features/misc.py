@@ -16,6 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+import multiprocessing
 import random
 import time
 import webbrowser
@@ -154,15 +155,31 @@ def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) 
 
 
 def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
-    alt = [keyboard.Key.alt, keyboard.Key.alt_gr, keyboard.Key.alt_l, keyboard.Key.alt_r]
+    alt = [str(keyboard.Key.alt), str(keyboard.Key.alt_gr), str(keyboard.Key.alt_l), str(keyboard.Key.alt_r)]
 
-    def on_press(key: keyboard.Key) -> None:
-        if key in alt:
-            state.alt_held = True
+    def run_listener(connection: multiprocessing.connection.Connection) -> None:
+        def callback(type: str) -> None:
+            return lambda key: connection.send((type, str(key)))
 
-    def on_release(key: keyboard.Key) -> None:
-        if key in alt:
-            state.alt_held = False
-        panic(root, settings, state, condition=(str(key) == settings.global_panic_key))
+        with keyboard.Listener(on_press=callback("press"), on_release=callback("release")) as listener:
+            listener.join()
 
-    keyboard.Listener(on_press=on_press, on_release=on_release).start()
+    def receive() -> None:
+        while True:
+            try:
+                type, key = parent_connection.recv()
+            except EOFError:
+                break  # Panic
+
+            if type == "press" and key in alt:
+                state.alt_held = True
+            if type == "release":
+                if key in alt:
+                    state.alt_held = False
+                panic(root, settings, state, condition=(key == settings.global_panic_key))
+
+    parent_connection, child_connection = multiprocessing.Pipe()
+    state.keyboard_process = multiprocessing.Process(target=run_listener, args=(child_connection,))
+    state.keyboard_process.start()
+
+    Thread(target=receive).start()

@@ -17,12 +17,14 @@
 
 import json
 import logging
+import multiprocessing
 import os
 import shutil
 import subprocess
 import sys
 import urllib
 from pathlib import Path
+from threading import Thread
 from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar, TclError, Toplevel, Widget, messagebox, simpledialog
 
 import os_utils
@@ -66,15 +68,30 @@ def request_global_panic_key(button: Button, var: StringVar) -> None:
 
     def close() -> None:
         window.destroy()
-        listener.stop()
+        process.terminate()
 
-    def assign_panic_key(key: keyboard.Key) -> None:
-        button.configure(text=f"Set Global\nPanic Key\n<{str(key)}>")
-        var.set(str(key))
+    def assign_panic_key(key: str) -> None:
+        button.configure(text=f"Set Global\nPanic Key\n<{key}>")
+        var.set(key)
         close()
 
-    listener = keyboard.Listener(on_release=assign_panic_key)
-    listener.start()
+    def run_listener(connection: multiprocessing.connection.Connection) -> None:
+        with keyboard.Listener(on_release=lambda key: connection.send(str(key))) as listener:
+            listener.join()
+
+    def receive_panic_key() -> None:
+        try:
+            key = parent_connection.recv()
+            window.after(0, lambda: assign_panic_key(key))
+        except EOFError:
+            pass  # The window was closed before a key was pressed
+
+    parent_connection, child_connection = multiprocessing.Pipe()
+    process = multiprocessing.Process(target=run_listener, args=(child_connection,))
+    process.start()
+
+    Thread(target=receive_panic_key).start()
+
     window.protocol("WM_DELETE_WINDOW", close)
 
 
