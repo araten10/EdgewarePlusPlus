@@ -21,6 +21,7 @@ import random
 import time
 import webbrowser
 from collections.abc import Callable
+from multiprocessing.connection import Connection
 from threading import Thread
 from tkinter import Tk
 
@@ -154,7 +155,7 @@ def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) 
         mitosis_popup(root, settings, pack, state)
 
 
-def keyboard_listener(connection: multiprocessing.connection.Connection) -> None:
+def keyboard_listener(connection: Connection) -> None:
     def callback(type: str) -> None:
         return lambda key: connection.send((type, str(key)))
 

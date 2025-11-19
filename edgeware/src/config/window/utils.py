@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import sys
 import urllib
+from multiprocessing.connection import Connection
 from pathlib import Path
 from threading import Thread
 from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar, TclError, Toplevel, Widget, messagebox, simpledialog
@@ -63,7 +64,7 @@ def request_legacy_panic_key(button: Button, var: StringVar) -> None:
     window.bind("<KeyPress>", assign_panic_key)
 
 
-def keyboard_listener(connection: multiprocessing.connection.Connection) -> None:
+def keyboard_listener(connection: Connection) -> None:
     with keyboard.Listener(on_release=lambda key: connection.send(str(key))) as listener:
         listener.join()
 
