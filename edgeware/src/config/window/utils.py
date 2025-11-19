@@ -63,6 +63,11 @@ def request_legacy_panic_key(button: Button, var: StringVar) -> None:
     window.bind("<KeyPress>", assign_panic_key)
 
 
+def keyboard_listener(connection: multiprocessing.connection.Connection) -> None:
+    with keyboard.Listener(on_release=lambda key: connection.send(str(key))) as listener:
+        listener.join()
+
+
 def request_global_panic_key(button: Button, var: StringVar) -> None:
     window = KeyListenerWindow()
 
@@ -75,10 +80,6 @@ def request_global_panic_key(button: Button, var: StringVar) -> None:
         var.set(key)
         close()
 
-    def run_listener(connection: multiprocessing.connection.Connection) -> None:
-        with keyboard.Listener(on_release=lambda key: connection.send(str(key))) as listener:
-            listener.join()
-
     def receive_panic_key() -> None:
         try:
             key = parent_connection.recv()
@@ -87,7 +88,7 @@ def request_global_panic_key(button: Button, var: StringVar) -> None:
             pass  # The window was closed before a key was pressed
 
     parent_connection, child_connection = multiprocessing.Pipe()
-    process = multiprocessing.Process(target=run_listener, args=(child_connection,))
+    process = multiprocessing.Process(target=keyboard_listener, args=(child_connection,))
     process.start()
 
     Thread(target=receive_panic_key).start()

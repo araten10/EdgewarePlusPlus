@@ -154,15 +154,16 @@ def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) 
         mitosis_popup(root, settings, pack, state)
 
 
+def keyboard_listener(connection: multiprocessing.connection.Connection) -> None:
+    def callback(type: str) -> None:
+        return lambda key: connection.send((type, str(key)))
+
+    with keyboard.Listener(on_press=callback("press"), on_release=callback("release")) as listener:
+        listener.join()
+
+
 def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
     alt = [str(keyboard.Key.alt), str(keyboard.Key.alt_gr), str(keyboard.Key.alt_l), str(keyboard.Key.alt_r)]
-
-    def run_listener(connection: multiprocessing.connection.Connection) -> None:
-        def callback(type: str) -> None:
-            return lambda key: connection.send((type, str(key)))
-
-        with keyboard.Listener(on_press=callback("press"), on_release=callback("release")) as listener:
-            listener.join()
 
     def receive() -> None:
         while True:
@@ -179,7 +180,7 @@ def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
                 panic(root, settings, state, condition=(key == settings.global_panic_key))
 
     parent_connection, child_connection = multiprocessing.Pipe()
-    state.keyboard_process = multiprocessing.Process(target=run_listener, args=(child_connection,))
+    state.keyboard_process = multiprocessing.Process(target=keyboard_listener, args=(child_connection,))
     state.keyboard_process.start()
 
     Thread(target=receive).start()
