@@ -85,7 +85,7 @@ def request_global_panic_key(button: Button, var: StringVar) -> None:
     def receive_panic_key() -> None:
         try:
             assert parent_connection.recv() == "focus"
-            window.after(0, window.focus_force)  # Required on Windows, otherwise keyboard inputs don't work
+            window.after(0, window.focus_force)  # Required on Windows, otherwise keyboard inputs don't work until something is focused
 
             key = parent_connection.recv()
             window.after(0, lambda: assign_panic_key(key))
