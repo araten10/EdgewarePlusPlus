@@ -145,7 +145,6 @@ def mitosis_popup(root: Tk, settings: Settings, pack: Pack, state: State) -> Non
 
 def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
     if settings.mitosis_mode:
-        # Import done here to avoid circular imports
 
         def observer() -> None:
             if state.popup_number == 0:
