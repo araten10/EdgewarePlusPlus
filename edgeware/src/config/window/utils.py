@@ -66,6 +66,7 @@ def request_legacy_panic_key(button: Button, var: StringVar) -> None:
 
 def keyboard_listener(connection: Connection) -> None:
     with keyboard.Listener(on_release=lambda key: connection.send(str(key))) as listener:
+        connection.send("focus")
         listener.join()
 
 
@@ -83,10 +84,15 @@ def request_global_panic_key(button: Button, var: StringVar) -> None:
 
     def receive_panic_key() -> None:
         try:
+            assert parent_connection.recv() == "focus"
+            window.after(0, window.focus_force)  # Required on Windows, otherwise keyboard inputs don't work
+
             key = parent_connection.recv()
             window.after(0, lambda: assign_panic_key(key))
         except EOFError:
             pass  # The window was closed before a key was pressed
+        except AssertionError:
+            logging.error("Did not receive focus message from keyboard listener process")
 
     parent_connection, child_connection = multiprocessing.Pipe()
     process = multiprocessing.Process(target=keyboard_listener, args=(child_connection,))
