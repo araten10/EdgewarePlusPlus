@@ -76,7 +76,7 @@ class BasicModesTab(ScrollFrame):
                 "Original": "Creates an immediate quantity of popups on wakeup based on the awaken activity.",
                 "Spaced": "Creates popups consistently over the hibernate length, based on popup delay.",
                 "Glitch": "Creates popups at random times over the hibernate length, with the max amount spawned based on awaken activity.",
-                "Ramp": "Creates a ramping amount of popups over the hibernate length, popups at fastest speed based on awaken activity, fastest speed based on popup delay.",
+                "Ramp": "Creates a ramping amount of popups over the hibernate length based on awaken activity, fastest speed based on popup delay.",
                 "Pump-Scare": "Spawns a popup, usually accompanied by audio, then quickly deletes it. Best used on packs with short audio files. Like a horror game, but horny?",
                 "Chaos": "Every time hibernate activates, a random type (other than chaos) is selected.",
             },
