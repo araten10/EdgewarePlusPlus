@@ -9,6 +9,35 @@
 
 **Since last version...**
 
+**Version 19**
+
+Smaller update this time... just kidding!!! While there might not be a wide variety of new features from version 18 to 19, there's one huge one: Pack Scripting.
+
+Pack Scripting allows packs to carry out a list of various commands using a custom scripting language based off of lua. If you're not entirely sure what that means and just are interested in running packs rather than creating them, it basically allows pack creators to create highly customized experiences that do a lot of fun things with Edgeware. For example, somebody could create a pack that has three branches, and rolls a die at the start to see which one to go down. Another simple implementation would be triggering events such as popups when certain audio finishes! You can enable this mode in the corruption tab, as "Scripting" type corruption.
+
+We understand that this could potentially raise security concerns, which is one of the reasons why it is limited to certain commands we have added rather than a full programming language. Documentation for a list of those commands can be found [here](). Nevertheless, always be careful when running script mode- even though the range of commands is limited, the pack can still change Edgeware settings via corruption, which could potentially include unwanted things.
+
+Now, you might be reading all this and going "That's great, but its going to take a while to have packs made that support this... where's my dopamine *now*?" Well, intrepid reader, we didn't want to release this feature without something to show for it! Now to reveal a brand new demo pack in collaboration with [Mistress Yumiko](https://hypnotube.com/user/mistressyumiko-159116/), the [Addict Acceptance Program]()! It's a brand new type of pack that has never been made before (to our knowledge)- a direct **JOI style pack** with full voice acting! And it features heavy use of the scripting feature, of course! If you want to check out what scripting is all about, or maybe reverse engineer a pack to make your own, there's no better place to start!
+
+OK, now to finally list the patch notes...
+
+•*Added scripting functionality to packs*
+
+•*Fixed bugs with compression in the Pack Tool*
+
+•*mpv is ran in a subprocess and should not crash Edgeware on Windows anymore*
+>I don't have a ton of money so my laptop is pretty crap- turns out this was a good way to have bugs like this show up. Video popups might still show up as black screens while they load, but they'll no longer make the program self destruct
+
+•*Fixed global panic key not registering when an Edgeware window is focused on Windows*
+>I know it doesn't matter to anyone but us, but this bug was a major pain in the ass to fix and we're super glad its resolved!
+
+•*Fixed corruption being unable to change wallpapers*
+
+•*Moved panic and pack config settings up in the config window*
+>I am looking into other ways to get pack config settings easier to load for inexperienced users, but for now this is a good way to make it seem more important
+
+•*Corrected "Ramp" hibernate tooltip (contributed by @Ragged-Hellion)*
+
 **Version 18**
 
 Hello again! We're still working away at a big feature that is taking a lot longer than anticipated. It's also the end of summer in the northern hemisphere, so the good weather was definitely being a distraction! We planned to release a bombshell huge update with an Edgeware++ project we're working on, but it's taking longer than anticipated. So here's a new release with a lot of useful changes in the meantime! It's a lot of bugfixes, but there's still a few new features here and there.

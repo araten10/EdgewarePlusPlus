@@ -30,6 +30,10 @@ For some of these packs, we will include a pack config file so you're able to ea
 
 Reminder: Check out the "Pack Info" tab for more information on these packs once you download them~
 
+### Basic Packs
+
+These packs are the basic bread and butter of Edgeware++! No need to run them any special way, just load in and enjoy!
+
 [**Edgeware++ Test Pack**](https://mega.nz/file/VbsEmbLD#gCLx6Ftv161oT7u3yiU8altS07QSElTz-Xo9kRmcugM)
 **Version: 2** *[17MB]* *[No pack configuration!]*
 The original test pack for Edgeware++! It's fairly old, and i'm not sure how much i'll be updating it in the future. However, it's completely SFW, has examples for most features up to version ~13, and is extremely small in the filesize department. This is a good place to start if you just want to test running Edgeware, or learn how to make a basic pack!
@@ -38,9 +42,19 @@ The original test pack for Edgeware++! It's fairly old, and i'm not sure how muc
 **Version: 1** *[103MB]* *[No pack configuration!]*
 Want to test out Edgeware++ with something a little more suitable for that *addict* brain of yours? Here's a small-sized pack perfect for testing the program's basic features! Comes with captions, a custom splash screen/wallpaper, some basic moods, and plenty of heretical demonic women~ This pack was also made with the new `index.json` method of pack creation, so its an example of how the new backend works, as well! Enjoy submitting to hedonism for us, we'll make sure to drag you aaaaalll the way down <3
 
+### Corruption/Scripting Packs
+
+These packs rely either on Corruption or Scripting to function as intended, and are designed as "repeatable experiences" that do things over time. Make sure to load the pack configuration if they have one, without it they'll likely do weird things or act incorrectly!
+
 [**Furry Therapy**](https://mega.nz/file/dakhzYqS#kHO61V6pEwaXqtTXE7SGVHVdHjUkxtXE6Vyg2uw-FPA)
 **Version: 1.5** *[398MB]* *[Has pack configuration!]*
 Meant to demo corruption and the corruption "fade" feature, this pack is for people who love hentai. That's it! There's no tricks or traps in here, nope, definitely not at all... The pack configuration will only change the corruption and corruption fade settings, so feel free to edit the rest of the payload to what you personally enjoy. And try not to stare for too long, it might have adverse effects~
+
+[**Addict Acceptance Program**](https://mega.nz/file/dSd3HJpA#6hNJyg9IgiBqGAqIsnvKcGV1Bq7oeK1f5I9g6nueh6I)
+**Version: 1** *[1.71GB]* *[Has pack configuration!]*
+An absolutely massive and ambitious JOI pack fully voiced by [Mistress Yumiko!](https://hypnotube.com/user/mistressyumiko-159116/) Designed to show off the new pack scripting features added in version 19, this pack will tease and degrade you while going through all of the current major features of Edgeware++! It took a long time for us to make this, but it was totally worth it! Best to wear headphones and turn the volume way up, and let those commands wiggle their way into your ears~ *Note: the dialogue in this pack uses male-leaning pronouns and commands, and also features several "beta-safe" degrading fetishes. These can be disabled via the "moods" tab, but it will not change the voice acting of the pack. Also this pack* **absolutely requires version 19 of Edgeware++ to run properly!**
+
+Yumiko did us a huge solid in helping us out with this pack, so if you like her work here, consider supporting her on her [patreon](https://www.patreon.com/cw/MistressYumiko/)!
 
 ## Frequently Asked Questions
 
