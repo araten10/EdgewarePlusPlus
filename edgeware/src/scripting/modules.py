@@ -1,0 +1,77 @@
+# Copyright (C) 2025 Araten & Marigold
+#
+# This file is part of Edgeware++.
+#
+# Edgeware++ is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Edgeware++ is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
+
+from pathlib import Path
+from tkinter import Tk
+from typing import Callable
+
+from config.settings import Settings
+from features.audio import play_audio
+from features.corruption import update_corruption_level
+from features.image_popup import ImagePopup
+from features.misc import display_notification, open_web
+from features.prompt import Prompt
+from features.subliminal_popup import SubliminalPopup
+from features.video_popup import VideoPopup
+from pack import Pack
+from panic import panic
+from roll import roll
+from state import State
+
+from scripting.environment import Environment
+
+
+def media(dir: Path, file: str | None) -> Path | None:
+    return dir / file if file else None
+
+
+def wrap(env: Environment, function: Callable | None) -> Callable | None:
+    return (lambda: function(env)) if function else None
+
+
+def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
+    from scripting import ReturnValue
+
+    popups = {
+        "image": lambda _env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
+        "video": lambda _env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
+        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, media(pack.paths.audio, audio), wrap(env, on_stop)),
+        "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
+        "web": lambda _env, web: open_web(pack, web),
+        "subliminal": lambda _env, subliminal: SubliminalPopup(settings, pack, subliminal),
+        "notification": lambda _env, notification: display_notification(settings, pack, notification),
+    }
+
+    def close_popups(_env: Environment) -> None:
+        for popup in state.popups.copy():
+            popup.close()
+
+    def set_popup_close_text(_env: Environment, text: str) -> None:
+        pack.index.default.popup_close = text
+
+    return {
+        "edgeware_v0": {
+            "print": lambda _env, *args: print(*args),
+            "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
+            "roll": lambda _env, chance: ReturnValue(roll(chance)),
+            "corrupt": lambda _env: update_corruption_level(settings, pack, state),
+            "panic": lambda _env: panic(root, settings, state, disable=False),
+            "close_popups": close_popups,
+            "set_popup_close_text": set_popup_close_text,
+            **popups,
+        },
+    }

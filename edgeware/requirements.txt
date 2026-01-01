@@ -1,0 +1,19 @@
+booru
+desktop-notifier
+filetype
+get-video-properties
+mpv
+pillow
+pyglet
+pynput
+pypresence
+pystray
+python-xlib; platform_system == 'Linux'
+pywin32; platform_system == 'Windows'
+requests
+screeninfo
+sounddevice
+tkinter-tooltip
+tkinterweb
+ttkwidgets
+voluptuous
