@@ -1,1 +1,0 @@
-A slightly modified default config, with every type of popup enabled. Intended to help test out all features of a pack!
