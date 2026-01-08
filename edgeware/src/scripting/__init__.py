@@ -77,21 +77,6 @@ class FunctionBody:
         return lambda env, *args: self.block.eval(Environment(dict(zip(self.params, args)), env, closure))
 
 
-class FunctionCall:
-    def __init__(self, tokens: Tokens) -> None:
-        self.name = tokens.get_name()
-        tokens.skip("(")
-        self.args = []
-        if not tokens.skip_if(")"):
-            self.args = ExpressionList(tokens)
-            tokens.skip(")")
-
-    def eval(self, env: Environment) -> object | None:
-        value = env.get(self.name)(env, *[arg.eval(env) for arg in self.args])
-        if isinstance(value, ReturnValue):
-            return value.value
-
-
 class TableConstructor:
     def __init__(self, tokens: Tokens) -> None:
         index = 1
