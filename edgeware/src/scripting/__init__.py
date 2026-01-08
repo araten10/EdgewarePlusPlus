@@ -86,7 +86,7 @@ class FunctionCall:
             self.args = ExpressionList(tokens)
             tokens.skip(")")
 
-    def eval(self, env: Environment) -> ReturnValue | None:
+    def eval(self, env: Environment) -> object | None:
         value = env.get(self.name)(env, *[arg.eval(env) for arg in self.args])
         if isinstance(value, ReturnValue):
             return value.value
@@ -130,6 +130,49 @@ class TableConstructor:
         return table
 
 
+class Prefix:
+    def __init__(self, tokens: Tokens) -> None:
+        if tokens.skip_if("("):
+            exp = Expression(tokens)
+            tokens.skip(")")
+            eval = exp.eval
+        else:
+            name = tokens.get_name()
+            eval = lambda env, name=name: env.get(name)  # noqa: E731
+
+        while True:
+            if tokens.skip_if("."):
+                name = tokens.get_name()
+                eval = lambda env, eval=eval, name=name: eval(env)[name]  # noqa: E731
+            elif tokens.skip_if("["):
+                exp = Expression(tokens)
+                tokens.skip("]")
+                eval = lambda env, eval=eval, exp=exp: eval(env)[exp.eval(env)]  # noqa: E731
+            elif tokens.skip_if("("):
+                args = []
+                if not tokens.skip_if(")"):
+                    args = ExpressionList(tokens)
+                    tokens.skip(")")
+                eval = lambda env, eval=eval: self.return_value(eval(env)(env, *[arg.eval(env) for arg in args]))  # noqa: E731
+                break
+            elif tokens.next == "{":
+                table = TableConstructor(tokens)
+                eval = lambda env, eval=eval: self.return_value(eval(env)(env, table.eval(env)))  # noqa: E731
+                break
+            elif tokens.next[0] == '"':
+                string = PrimaryExpression(tokens)
+                eval = lambda env, eval=eval: self.return_value(eval(env)(env, string.eval(env)))  # noqa: E731
+                break
+            else:
+                break
+
+        self.eval = eval
+
+    def return_value(self, value: ReturnValue | None) -> object | None:
+        if isinstance(value, ReturnValue):
+            return value.value
+
+
 class PrimaryExpression:
     """Expression that does not contain operators"""
 
@@ -152,15 +195,6 @@ class PrimaryExpression:
             body = FunctionBody(tokens)
             self.eval = body.eval
 
-        elif tokens.skip_if("("):
-            exp = Expression(tokens)
-            tokens.skip(")")
-            self.eval = exp.eval
-
-        elif tokens.ahead == "(":
-            call = FunctionCall(tokens)
-            self.eval = call.eval
-
         else:
             for numeral in [int, float]:
                 try:
@@ -171,8 +205,8 @@ class PrimaryExpression:
                 except ValueError:
                     pass
 
-            name = tokens.get_name()
-            self.eval = lambda env: env.get(name)
+            prefix = Prefix(tokens)
+            self.eval = prefix.eval
 
 
 class Expression:
@@ -264,15 +298,14 @@ class Statement:
                     self.eval = lambda env: env.define(name, value.eval(env))
 
             case _:
-                if tokens.ahead == "(":
-                    call = FunctionCall(tokens)
-                    self.eval = lambda env: call.eval(env)
-                    return
-
-                name = tokens.get_name()
-                tokens.skip("=")
-                value = Expression(tokens)
-                self.eval = lambda env: env.assign(name, value.eval(env))
+                if tokens.ahead == "=":
+                    name = tokens.get_name()
+                    tokens.skip("=")
+                    value = Expression(tokens)
+                    self.eval = lambda env: env.assign(name, value.eval(env))
+                else:
+                    prefix = Prefix(tokens)
+                    self.eval = prefix.eval
 
 
 class ReturnExpression:
