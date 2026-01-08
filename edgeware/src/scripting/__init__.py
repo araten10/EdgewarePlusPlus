@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+# Lua 5.4 syntax: https://www.lua.org/manual/5.4/manual.html#9
+
 import logging
-import operator
 from dataclasses import dataclass
 from tkinter import Tk
 from typing import Callable
@@ -29,36 +30,6 @@ from scripting.environment import Environment
 from scripting.error import LuaError
 from scripting.modules import get_modules
 from scripting.tokens import Tokens
-
-UN_OPS = {"-": operator.neg, "#": len, "not": operator.not_}
-UN_PREC = 10
-
-BINARY = {
-    "+": (operator.add, 8, False),
-    "-": (operator.sub, 8, False),
-    "*": (operator.mul, 9, False),
-    "/": (operator.truediv, 9, False),
-    "//": (operator.floordiv, 9, False),
-    "^": (operator.pow, 11, True),
-    "%": (operator.mod, 9, False),
-    "..": (operator.concat, 7, True),
-    "<": (operator.lt, 2, False),
-    "<=": (operator.le, 2, False),
-    ">": (operator.gt, 2, False),
-    ">=": (operator.ge, 2, False),
-    "==": (operator.eq, 2, False),
-    "~=": (operator.ne, 2, False),
-    "and": (operator.and_, 1, False),
-    "or": (operator.or_, 0, False),
-}
-
-BIN_OPS = {token: data[0] for token, data in BINARY.items()}
-BIN_PREC = {token: data[1] for token, data in BINARY.items()}
-RIGHT_ASSOC = {token: data[2] for token, data in BINARY.items()}
-
-
-def identity(value: object) -> object:
-    return value
 
 
 class NameList(list[str]):
@@ -166,48 +137,23 @@ class PrimaryExpression:
 
 class Expression:
     def __init__(self, tokens: Tokens) -> None:
-        l_un = self.unary(tokens)
-        left = PrimaryExpression(tokens)
-        self.eval = self.binary(tokens, l_un, left.eval)
+        from scripting.operator import operator_eval
 
-    # Modified version of the precedence climbing algorithm from Wikipedia
-    # https://en.wikipedia.org/wiki/Operator-precedence_parser#Pseudocode
-    def binary(self, tokens: Tokens, l_un: Callable, l_eval: Callable, min_precedence: int = 0) -> Callable:
-        while tokens.next in BIN_OPS and (BIN_PREC[tokens.next] >= min_precedence):
-            token = tokens.get()
-            op = BIN_OPS[token]
-            prec = BIN_PREC[token]
-
-            r_un = self.unary(tokens)
-            right = PrimaryExpression(tokens)
-            r_eval = right.eval
-            while tokens.next in BIN_OPS and ((BIN_PREC[tokens.next] > prec) or ((BIN_PREC[tokens.next] == prec) and RIGHT_ASSOC[tokens.next])):
-                r_eval = self.binary(tokens, r_un, right.eval, prec + (1 if BIN_PREC[tokens.next] > prec else 0))
-                r_un = identity
-
-            l_eval = lambda env, lu=l_un, le=l_eval, op=op, prec=prec, ru=r_un, re=r_eval: (  # noqa: E731
-                lu(op(le(env), ru(re(env)))) if prec > UN_PREC else op(lu(le(env)), ru(re(env)))
-            )
-            l_un = identity
-
-        return lambda env: l_un(l_eval(env))
-
-    def unary(self, tokens: Tokens) -> Callable:
-        chain = identity
-        while tokens.next in UN_OPS:
-            op = UN_OPS[tokens.get()]
-            chain = lambda value, chain=chain, op=op: chain(op(value))  # noqa: E731
-        return chain
+        self.eval = operator_eval(tokens)
 
 
 class Statement:
     def __init__(self, tokens: Tokens) -> None:
         match tokens.next:
+            case ";":
+                tokens.skip(";")
+                self.eval = lambda _env: None
+
             case "do":
                 tokens.skip("do")
                 block = Block(tokens, "end")
                 self.eval = lambda env: block.eval(env)
-                return
+
             case "while":
                 tokens.skip("while")
                 while_exp = Expression(tokens)
@@ -221,7 +167,7 @@ class Statement:
                             return value
 
                 self.eval = while_eval
-                return
+
             case "if":
                 tokens.skip("if")
                 if_exp = Expression(tokens)
@@ -253,13 +199,13 @@ class Statement:
                             return block.eval(env)
 
                 self.eval = if_eval
-                return
+
             case "function":
                 tokens.skip("function")
                 name = tokens.get_name()
                 body = FunctionBody(tokens)
                 self.eval = lambda env: env.assign(name, body.eval(env))
-                return
+
             case "local":
                 tokens.skip("local")
                 if tokens.skip_if("function"):
@@ -271,42 +217,52 @@ class Statement:
                         env.assign(name, body.eval(env))
 
                     self.eval = local_function_eval
-                    return
                 else:
                     name = tokens.get_name()
                     tokens.skip("=")
                     value = Expression(tokens)
                     self.eval = lambda env: env.define(name, value.eval(env))
+
+            case _:
+                if tokens.ahead == "(":
+                    call = FunctionCall(tokens)
+                    self.eval = lambda env: call.eval(env)
                     return
 
-        if tokens.ahead == "(":
-            call = FunctionCall(tokens)
-            self.eval = lambda env: call.eval(env)
-            return
-
-        name = tokens.get_name()
-        tokens.skip("=")
-        value = Expression(tokens)
-        self.eval = lambda env: env.assign(name, value.eval(env))
+                name = tokens.get_name()
+                tokens.skip("=")
+                value = Expression(tokens)
+                self.eval = lambda env: env.assign(name, value.eval(env))
 
 
 class ReturnExpression:
+    """Dummy class to represent a return statement with no return value"""
+
     def eval(self, _env: Environment) -> None:
         return
 
 
 class Block:
+    """List of statements executed sequentially with an optional final return statement"""
+
     def __init__(self, tokens: Tokens, terminate: str | list[str]) -> None:
         self.statements = []
         self.return_exp = None
+
+        # Possible tokens that may terminate the block, transform to a list if
+        # only one possibility is provided
         terminate_list = terminate if isinstance(terminate, list) else [terminate]
 
+        # Consume statements until a terminating token or a return statement is encountered
         while tokens.next not in terminate_list + ["return"]:
             self.statements.append(Statement(tokens))
 
         if tokens.skip_if("return"):
             self.return_exp = Expression(tokens) if tokens.next not in terminate_list else ReturnExpression()
 
+        # Don't skip the terminating token if multiple possibilities are
+        # provided. The caller needs to know which token terminated the block
+        # and will handle it accordingly.
         if not isinstance(terminate, list):
             tokens.skip(terminate)
 
