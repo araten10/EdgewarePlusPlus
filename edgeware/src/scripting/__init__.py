@@ -115,6 +115,45 @@ class PrimaryExpression:
             self.eval = lambda _env: string[1:-1]
             return
 
+        if tokens.skip_if("{"):
+            index = 1
+            entries = []
+
+            while tokens.next != "}":
+                if tokens.skip_if("["):
+                    key_exp = Expression(tokens)
+                    tokens.skip("]")
+                    tokens.skip("=")
+                    value_exp = Expression(tokens)
+                    entries.append((key_exp, value_exp))
+                elif tokens.ahead == "=":
+                    name = tokens.get_name()
+                    tokens.skip("=")
+                    value_exp = Expression(tokens)
+                    entries.append((name, value_exp))
+                else:
+                    value_exp = Expression(tokens)
+                    entries.append((index, value_exp))
+                    index += 1
+
+                if tokens.next != "}" and not tokens.skip_if(","):
+                    tokens.skip(";")
+
+            tokens.skip("}")
+
+            def table_constructor_eval(env: Environment) -> dict:
+                table = {}
+                for key, value in entries:
+                    print(type(value), value)
+                    if isinstance(key, Expression):
+                        key = key.eval(env)
+                    table[key] = value.eval(env)
+
+                return table
+
+            self.eval = table_constructor_eval
+            return
+
         if tokens.skip_if("function"):
             body = FunctionBody(tokens)
             self.eval = lambda env: body.eval(env)
