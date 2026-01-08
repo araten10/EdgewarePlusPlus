@@ -21,9 +21,13 @@ from typing import Callable
 from scripting import PrimaryExpression
 from scripting.tokens import Tokens
 
-UN_OPS = {"-": operator.neg, "#": len, "not": operator.not_}
+UN_OPS = {"-": operator.neg, "not": operator.not_, "#": len, "~": operator.inv}
 UN_PREC = 10
 
+# Define for each binary operator:
+#  0: Implementation function
+#  1: Precedence
+#  2: Right associativity
 BINARY = {
     "+": (operator.add, 8, False),
     "-": (operator.sub, 8, False),
@@ -32,6 +36,11 @@ BINARY = {
     "//": (operator.floordiv, 9, False),
     "^": (operator.pow, 11, True),
     "%": (operator.mod, 9, False),
+    "&": (operator.and_, 5, False),
+    "~": (operator.xor, 4, False),
+    "|": (operator.or_, 3, False),
+    ">>": (operator.rshift, 6, False),
+    "<<": (operator.lshift, 6, False),
     "..": (operator.concat, 7, True),
     "<": (operator.lt, 2, False),
     "<=": (operator.le, 2, False),
