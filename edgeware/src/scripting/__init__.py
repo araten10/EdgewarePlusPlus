@@ -86,92 +86,93 @@ class FunctionCall:
             self.args = ExpressionList(tokens)
             tokens.skip(")")
 
-    def eval(self, env: Environment) -> object:
-        # TODO: Adjustment https://www.lua.org/manual/5.4/manual.html#3.4.12
+    def eval(self, env: Environment) -> ReturnValue | None:
         value = env.get(self.name)(env, *[arg.eval(env) for arg in self.args])
         if isinstance(value, ReturnValue):
             return value.value
 
 
+class TableConstructor:
+    def __init__(self, tokens: Tokens) -> None:
+        index = 1
+        self.entries = []
+
+        tokens.skip("{")
+        while tokens.next != "}":
+            if tokens.skip_if("["):
+                key_exp = Expression(tokens)
+                tokens.skip("]")
+                tokens.skip("=")
+                value_exp = Expression(tokens)
+                self.entries.append((key_exp, value_exp))
+            elif tokens.ahead == "=":
+                name = tokens.get_name()
+                tokens.skip("=")
+                value_exp = Expression(tokens)
+                self.entries.append((name, value_exp))
+            else:
+                value_exp = Expression(tokens)
+                self.entries.append((index, value_exp))
+                index += 1
+
+            if tokens.next != "}" and not tokens.skip_if(","):
+                tokens.skip(";")
+
+        tokens.skip("}")
+
+    def eval(self, env: Environment) -> dict:
+        table = {}
+        for key, value in self.entries:
+            if isinstance(key, Expression):
+                key = key.eval(env)
+            table[key] = value.eval(env)
+
+        return table
+
+
 class PrimaryExpression:
+    """Expression that does not contain operators"""
+
     def __init__(self, tokens: Tokens) -> None:
         constants = {"nil": None, "false": False, "true": True}
+
         if tokens.next in constants:
             value = constants[tokens.get()]
             self.eval = lambda _env: value
-            return
 
-        for numeral in [int, float]:
-            try:
-                number = numeral(tokens.next)
-                tokens.skip()
-                self.eval = lambda _env: number
-                return
-            except ValueError:
-                pass
-
-        if tokens.next[0] == '"' and tokens.next[-1] == '"':
+        elif tokens.next[0] == '"' and tokens.next[-1] == '"':
             string = tokens.get()
             self.eval = lambda _env: string[1:-1]
-            return
 
-        if tokens.skip_if("{"):
-            index = 1
-            entries = []
+        elif tokens.next == "{":
+            table = TableConstructor(tokens)
+            self.eval = table.eval
 
-            while tokens.next != "}":
-                if tokens.skip_if("["):
-                    key_exp = Expression(tokens)
-                    tokens.skip("]")
-                    tokens.skip("=")
-                    value_exp = Expression(tokens)
-                    entries.append((key_exp, value_exp))
-                elif tokens.ahead == "=":
-                    name = tokens.get_name()
-                    tokens.skip("=")
-                    value_exp = Expression(tokens)
-                    entries.append((name, value_exp))
-                else:
-                    value_exp = Expression(tokens)
-                    entries.append((index, value_exp))
-                    index += 1
-
-                if tokens.next != "}" and not tokens.skip_if(","):
-                    tokens.skip(";")
-
-            tokens.skip("}")
-
-            def table_constructor_eval(env: Environment) -> dict:
-                table = {}
-                for key, value in entries:
-                    print(type(value), value)
-                    if isinstance(key, Expression):
-                        key = key.eval(env)
-                    table[key] = value.eval(env)
-
-                return table
-
-            self.eval = table_constructor_eval
-            return
-
-        if tokens.skip_if("function"):
+        elif tokens.skip_if("function"):
             body = FunctionBody(tokens)
-            self.eval = lambda env: body.eval(env)
-            return
+            self.eval = body.eval
 
-        if tokens.skip_if("("):
+        elif tokens.skip_if("("):
             exp = Expression(tokens)
             tokens.skip(")")
             self.eval = exp.eval
-            return
 
-        if tokens.ahead == "(":
+        elif tokens.ahead == "(":
             call = FunctionCall(tokens)
-            self.eval = lambda env: call.eval(env)
-            return
+            self.eval = call.eval
 
-        name = tokens.get_name()
-        self.eval = lambda env: env.get(name)
+        else:
+            for numeral in [int, float]:
+                try:
+                    number = numeral(tokens.next)
+                    tokens.skip()
+                    self.eval = lambda _env: number
+                    return
+                except ValueError:
+                    pass
+
+            name = tokens.get_name()
+            self.eval = lambda env: env.get(name)
 
 
 class Expression:
