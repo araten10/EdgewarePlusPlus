@@ -40,18 +40,6 @@ class NameList(list[str]):
             self.append(tokens.get_name())
 
 
-class Expression:
-    pass
-
-
-class ExpressionList(list[Expression]):
-    def __init__(self, tokens: Tokens) -> None:
-        super().__init__()
-        self.append(Expression(tokens))
-        while tokens.skip_if(","):
-            self.append(Expression(tokens))
-
-
 @dataclass
 class ReturnValue:
     value: object
@@ -120,38 +108,44 @@ class Prefix:
         if tokens.skip_if("("):
             exp = Expression(tokens)
             tokens.skip(")")
-            eval = exp.eval
+            self.assign = None
+            self.eval = exp.eval
         else:
             name = tokens.get_name()
-            eval = lambda env, name=name: env.get(name)  # noqa: E731
+            self.assign = lambda env, value_exp, name=name: env.assign(name, value_exp.eval(env))
+            self.eval = lambda env, name=name: env.get(name)  # noqa: E731
 
         while True:
+            # Assign must be set before eval since it relies on the previous eval in the chain
             if tokens.skip_if("."):
                 name = tokens.get_name()
-                eval = lambda env, eval=eval, name=name: eval(env)[name]  # noqa: E731
+                self.assign = lambda env, value_exp, eval=self.eval, name=name: eval(env).update({name: value_exp.eval(env)})
+                self.eval = lambda env, eval=self.eval, name=name: eval(env)[name]  # noqa: E731
             elif tokens.skip_if("["):
                 exp = Expression(tokens)
                 tokens.skip("]")
-                eval = lambda env, eval=eval, exp=exp: eval(env)[exp.eval(env)]  # noqa: E731
+                self.assign = lambda env, value_exp, eval=self.eval, exp=exp: eval(env).update({exp.eval(env): value_exp.eval(env)})
+                self.eval = lambda env, eval=self.eval, exp=exp: eval(env)[exp.eval(env)]  # noqa: E731
             elif tokens.skip_if("("):
                 args = []
                 if not tokens.skip_if(")"):
                     args = ExpressionList(tokens)
                     tokens.skip(")")
-                eval = lambda env, eval=eval: self.return_value(eval(env)(env, *[arg.eval(env) for arg in args]))  # noqa: E731
-                break
+                self.assign = None
+                self.eval = lambda env, eval=self.eval: self.return_value(eval(env)(env, *[arg.eval(env) for arg in args]))  # noqa: E731
             elif tokens.next == "{":
                 table = TableConstructor(tokens)
-                eval = lambda env, eval=eval: self.return_value(eval(env)(env, table.eval(env)))  # noqa: E731
-                break
+                self.assign = None
+                self.eval = lambda env, eval=self.eval: self.return_value(eval(env)(env, table.eval(env)))  # noqa: E731
             elif tokens.next[0] == '"':
                 string = PrimaryExpression(tokens)
-                eval = lambda env, eval=eval: self.return_value(eval(env)(env, string.eval(env)))  # noqa: E731
-                break
+                self.assign = None
+                self.eval = lambda env, eval=self.eval: self.return_value(eval(env)(env, string.eval(env)))  # noqa: E731
             else:
                 break
 
-        self.eval = eval
+    def is_var(self) -> bool:
+        return bool(self.assign)
 
     def return_value(self, value: ReturnValue | None) -> object | None:
         if isinstance(value, ReturnValue):
@@ -199,6 +193,14 @@ class Expression:
         from scripting.operator import operator_eval
 
         self.eval = operator_eval(tokens)
+
+
+class ExpressionList(list[Expression]):
+    def __init__(self, tokens: Tokens) -> None:
+        super().__init__()
+        self.append(Expression(tokens))
+        while tokens.skip_if(","):
+            self.append(Expression(tokens))
 
 
 class Statement:
@@ -283,13 +285,13 @@ class Statement:
                     self.eval = lambda env: env.define(name, value.eval(env))
 
             case _:
-                if tokens.ahead == "=":
-                    name = tokens.get_name()
+                prefix = Prefix(tokens)
+                if prefix.is_var():
                     tokens.skip("=")
                     value = Expression(tokens)
-                    self.eval = lambda env: env.assign(name, value.eval(env))
+                    self.eval = lambda env: prefix.assign(env, value)
                 else:
-                    prefix = Prefix(tokens)
+                    # Function call
                     self.eval = prefix.eval
 
 
