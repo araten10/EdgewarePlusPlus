@@ -112,19 +112,19 @@ class Prefix:
             self.eval = exp.eval
         else:
             name = tokens.get_name()
-            self.assign = lambda env, value_exp, name=name: env.assign(name, value_exp.eval(env))
+            self.assign = lambda env, value, name=name: env.assign(name, value)
             self.eval = lambda env, name=name: env.get(name)  # noqa: E731
 
         while True:
             # Assign must be set before eval since it relies on the previous eval in the chain
             if tokens.skip_if("."):
                 name = tokens.get_name()
-                self.assign = lambda env, value_exp, eval=self.eval, name=name: eval(env).update({name: value_exp.eval(env)})
+                self.assign = lambda env, value, eval=self.eval, name=name: eval(env).update({name: value})
                 self.eval = lambda env, eval=self.eval, name=name: eval(env)[name]  # noqa: E731
             elif tokens.skip_if("["):
                 exp = Expression(tokens)
                 tokens.skip("]")
-                self.assign = lambda env, value_exp, eval=self.eval, exp=exp: eval(env).update({exp.eval(env): value_exp.eval(env)})
+                self.assign = lambda env, value, eval=self.eval, exp=exp: eval(env).update({exp.eval(env): value})
                 self.eval = lambda env, eval=self.eval, exp=exp: eval(env)[exp.eval(env)]  # noqa: E731
             elif tokens.skip_if("("):
                 args = []
@@ -201,6 +201,11 @@ class ExpressionList(list[Expression]):
         self.append(Expression(tokens))
         while tokens.skip_if(","):
             self.append(Expression(tokens))
+
+
+class NilExpression:
+    def eval(self, _env: Environment) -> None:
+        return
 
 
 class Statement:
@@ -287,19 +292,22 @@ class Statement:
             case _:
                 prefix = Prefix(tokens)
                 if prefix.is_var():
+                    vars = [prefix]
+                    while tokens.skip_if(","):
+                        prefix = Prefix(tokens)
+                        vars.append(prefix)
                     tokens.skip("=")
-                    value = Expression(tokens)
-                    self.eval = lambda env: prefix.assign(env, value)
+                    values = ExpressionList(tokens)
+
+                    def assign_eval(env: Environment) -> None:
+                        for i, var in enumerate(vars):
+                            value = values[i] if len(values) > i else NilExpression()
+                            var.assign(env, value.eval(env))
+
+                    self.eval = assign_eval
                 else:
                     # Function call
                     self.eval = prefix.eval
-
-
-class ReturnExpression:
-    """Dummy class to represent a return statement with no return value"""
-
-    def eval(self, _env: Environment) -> None:
-        return
 
 
 class Block:
@@ -313,12 +321,11 @@ class Block:
         # only one possibility is provided
         terminate_list = terminate if isinstance(terminate, list) else [terminate]
 
-        # Consume statements until a terminating token or a return statement is encountered
         while tokens.next not in terminate_list + ["return"]:
             self.statements.append(Statement(tokens))
 
         if tokens.skip_if("return"):
-            self.return_exp = Expression(tokens) if tokens.next not in terminate_list else ReturnExpression()
+            self.return_exp = Expression(tokens) if tokens.next not in terminate_list else NilExpression()
 
         # Don't skip the terminating token if multiple possibilities are
         # provided. The caller needs to know which token terminated the block
