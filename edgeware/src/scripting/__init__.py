@@ -349,9 +349,11 @@ class Block:
             self.statements.append(Statement(tokens))
 
         if tokens.skip_if("return"):
+            # TODO: retstat ::= return [explist] [‘;’]
             self.return_exp = Expression(tokens) if tokens.next not in terminate_list else NilExpression()
+            tokens.skip_if(";")
 
-        # Don't skip the terminating token if multiple possibilities are
+        # Don't skip the terminating token if multiple possibilities were
         # provided. The caller needs to know which token terminated the block
         # and will handle it accordingly.
         if not isinstance(terminate, list):
