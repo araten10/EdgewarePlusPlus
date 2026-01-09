@@ -50,6 +50,7 @@ class FunctionBody:
         tokens.skip("(")
         self.params = []
         if not tokens.skip_if(")"):
+            # TODO: parlist ::= namelist [‘,’ ‘...’] | ‘...’
             self.params = NameList(tokens)
             tokens.skip(")")
         self.block = Block(tokens, "end")
@@ -104,6 +105,8 @@ class TableConstructor:
 
 
 class Prefix:
+    """A variable or a function call"""
+
     def __init__(self, tokens: Tokens) -> None:
         if tokens.skip_if("("):
             exp = Expression(tokens)
@@ -115,6 +118,7 @@ class Prefix:
             self.assign = lambda env, value, name=name: env.assign(name, value)
             self.eval = lambda env, name=name: env.get(name)  # noqa: E731
 
+        # TODO: functioncall ::= prefixexp ‘:’ Name args
         while True:
             # Assign must be set before eval since it relies on the previous eval in the chain
             if tokens.skip_if("."):
@@ -156,6 +160,8 @@ class PrimaryExpression:
     """Expression that does not contain operators"""
 
     def __init__(self, tokens: Tokens) -> None:
+        # TODO: exp ::= ‘...’
+
         constants = {"nil": None, "false": False, "true": True}
 
         if tokens.next in constants:
@@ -210,6 +216,14 @@ class NilExpression:
 
 class Statement:
     def __init__(self, tokens: Tokens) -> None:
+        # TODO:
+        #  stat ::= label |
+        #           break |
+        #           goto Name |
+        #           repeat block until exp |
+        #           for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
+        #           for namelist in explist do block end
+        # label ::= ‘::’ Name ‘::’
         match tokens.next:
             case ";":
                 tokens.skip(";")
@@ -268,6 +282,7 @@ class Statement:
 
             case "function":
                 tokens.skip("function")
+                # TODO: funcname ::= Name {‘.’ Name} [‘:’ Name]
                 name = tokens.get_name()
                 body = FunctionBody(tokens)
                 self.eval = lambda env: env.assign(name, body.eval(env))
@@ -284,10 +299,19 @@ class Statement:
 
                     self.eval = local_function_eval
                 else:
-                    name = tokens.get_name()
+                    # TODO:
+                    #  attnamelist ::= Name attrib {‘,’ Name attrib}
+                    #  attrib ::= [‘<’ Name ‘>’]
+                    names = NameList(tokens)
                     tokens.skip("=")
-                    value = Expression(tokens)
-                    self.eval = lambda env: env.define(name, value.eval(env))
+                    values = ExpressionList(tokens)
+
+                    def local_define_eval(env: Environment) -> None:
+                        for i, name in enumerate(names):
+                            value = values[i] if len(values) > i else NilExpression()
+                            env.define(name, value.eval(env))
+
+                    self.eval = local_define_eval
 
             case _:
                 prefix = Prefix(tokens)
