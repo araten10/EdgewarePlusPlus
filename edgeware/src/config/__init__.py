@@ -55,4 +55,18 @@ def load_default_config() -> dict:
     with open(Assets.DEFAULT_CONFIG) as f:
         default_config = json.loads(f.read())
 
+    import platform
+    from pathlib import Path
+
+    if platform.system() != "Windows":
+        # Adjust defaults for non-Windows systems
+        if default_config.get("drivePath") == "C:/Users/":
+            default_config["drivePath"] = str(Path.home())
+        
+        if default_config.get("avoidList") == "edgeware>AppData":
+            # AppData is Windows-specific. On Linux/Unix, hidden folders start with .
+            # The app already filters folders starting with ., so we just need to avoid explicit sensitive ones if any.
+            # For now, just 'edgeware' is enough, or maybe standard XDG dirs if needed.
+            default_config["avoidList"] = "edgeware"
+
     return default_config
