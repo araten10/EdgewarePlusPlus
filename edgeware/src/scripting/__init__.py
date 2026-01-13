@@ -375,12 +375,7 @@ def run_script(root: Tk, settings: Settings, pack: Pack, state: State) -> None:
         return
 
     modules = get_modules(root, settings, pack, state)
-
-    def require(env: Environment, module: str) -> None:
-        for name, value in modules[module].items():
-            env.assign(name, value)
-
-    env = Environment({"require": require})
+    env = Environment({"require": lambda env, module: ReturnValue(modules[module](env))})
 
     with open(pack.paths.script, "r") as f:
         script = f.read()

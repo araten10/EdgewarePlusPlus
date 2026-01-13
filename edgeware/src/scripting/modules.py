@@ -43,10 +43,29 @@ def wrap(env: Environment, function: Callable | None) -> Callable | None:
     return (lambda: function(env)) if function else None
 
 
+def assign_globals(env: Environment, globals: dict[str, object]) -> None:
+    for name, value in globals.items():
+        env.assign(name, value)
+
+
 def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
     from scripting import ReturnValue
 
-    popups = {
+    def close_popups(_env: Environment) -> None:
+        for popup in state.popups.copy():
+            popup.close()
+
+    def set_popup_close_text(_env: Environment, text: str) -> None:
+        pack.index.default.popup_close = text
+
+    edgeware_v0_global = {
+        "print": lambda _env, *args: print(*args),
+        "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
+        "roll": lambda _env, chance: ReturnValue(roll(chance)),
+        "corrupt": lambda _env: update_corruption_level(settings, pack, state),
+        "panic": lambda _env: panic(root, settings, state, disable=False),
+        "close_popups": close_popups,
+        "set_popup_close_text": set_popup_close_text,
         "image": lambda _env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
         "video": lambda _env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
         "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, media(pack.paths.audio, audio), wrap(env, on_stop)),
@@ -56,22 +75,28 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "notification": lambda _env, notification: display_notification(settings, pack, notification),
     }
 
-    def close_popups(_env: Environment) -> None:
-        for popup in state.popups.copy():
-            popup.close()
+    basic_v1_global = {
+        "print": lambda _env, *args: print(*args),
+    }
 
-    def set_popup_close_text(_env: Environment, text: str) -> None:
-        pack.index.default.popup_close = text
+    edgeware_v1_local = {
+        "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
+        "roll": lambda _env, chance: ReturnValue(roll(chance)),
+        "corrupt": lambda _env: update_corruption_level(settings, pack, state),
+        "panic": lambda _env: panic(root, settings, state, disable=False),
+        "close_popups": close_popups,
+        "set_popup_close_text": set_popup_close_text,
+        "image": lambda env, args={}: ImagePopup(root, settings, pack, state, media(pack.paths.image, args.get("image")), wrap(env, args.get("on_close"))),
+        "video": lambda env, args={}: VideoPopup(root, settings, pack, state, media(pack.paths.video, args.get("video")), wrap(env, args.get("on_close"))),
+        "audio": lambda env, args={}: play_audio(root, settings, pack, state, media(pack.paths.audio, args.get("audio")), wrap(env, args.get("on_stop"))),
+        "prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("prompt"), wrap(env, args.get("on_close"))),
+        "web": lambda _env, args={}: open_web(pack, args.get("web")),
+        "subliminal": lambda _env, args={}: SubliminalPopup(settings, pack, args.get("subliminal")),
+        "notification": lambda _env, args={}: display_notification(settings, pack, args.get("notification")),
+    }
 
     return {
-        "edgeware_v0": {
-            "print": lambda _env, *args: print(*args),
-            "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
-            "roll": lambda _env, chance: ReturnValue(roll(chance)),
-            "corrupt": lambda _env: update_corruption_level(settings, pack, state),
-            "panic": lambda _env: panic(root, settings, state, disable=False),
-            "close_popups": close_popups,
-            "set_popup_close_text": set_popup_close_text,
-            **popups,
-        },
+        "edgeware_v0": lambda env: assign_globals(env, edgeware_v0_global),
+        "edgeware_v1": lambda _env: edgeware_v1_local,
+        "basic_v1": lambda env: assign_globals(env, basic_v1_global),
     }

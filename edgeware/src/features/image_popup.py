@@ -20,6 +20,7 @@ import logging
 from pathlib import Path
 from random import randint
 from tkinter import Label, Tk
+from typing import Callable
 
 import booru
 import requests
@@ -33,12 +34,12 @@ from state import State
 
 
 class ImagePopup(Popup):
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, media: Path | None = None) -> None:
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, media: Path | None = None, on_close: Callable[[], None] | None = None) -> None:
         self.media = media or pack.random_image()
         self.hypno = roll(settings.hypno_chance)
         if not self.should_init():
             return
-        super().__init__(root, settings, pack, state)
+        super().__init__(root, settings, pack, state, on_close)
 
         # TODO: Better booru integration
         if self.settings.booru_download and roll(50):

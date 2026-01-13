@@ -22,6 +22,7 @@ import time
 from pathlib import Path
 from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
+from typing import Callable
 
 import utils
 from config.settings import Settings
@@ -40,7 +41,7 @@ from state import State
 class Popup(Toplevel):
     media: Path  # Defined by subclasses
 
-    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State) -> None:
+    def __init__(self, root: Tk, settings: Settings, pack: Pack, state: State, on_close: Callable[[], None] | None = None) -> None:
         state.popup_number += 1
         state.popups.append(self)
         super().__init__(bg="black")
@@ -49,8 +50,9 @@ class Popup(Toplevel):
         self.settings = settings
         self.pack = pack
         self.state = state
-        self.theme = settings.theme
+        self.on_close = on_close
 
+        self.theme = settings.theme
         self.denial = roll(self.settings.denial_chance)
 
         self.bind("<KeyPress>", lambda event: panic(self.root, self.settings, self.state, condition=(event.keysym == self.settings.panic_key)))
@@ -284,3 +286,5 @@ class Popup(Toplevel):
         self.state.popups.remove(self)
         self.try_web_open()
         self.destroy()
+        if self.on_close:
+            self.on_close()
