@@ -27,6 +27,7 @@ from features.misc import display_notification, open_web
 from features.prompt import Prompt
 from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
+from os_utils import set_wallpaper
 from pack import Pack
 from panic import panic
 from roll import roll
@@ -35,11 +36,11 @@ from state import State
 from scripting.environment import Environment
 
 
-def media(dir: Path, file: str | None) -> Path | None:
+def resource(dir: Path, file: str | None) -> Path | None:
     return dir / file if file else None
 
 
-def wrap(env: Environment, function: Callable | None) -> Callable | None:
+def callback(env: Environment, function: Callable | None) -> Callable | None:
     return (lambda: function(env)) if function else None
 
 
@@ -66,10 +67,10 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "panic": lambda _env: panic(root, settings, state, disable=False),
         "close_popups": close_popups,
         "set_popup_close_text": set_popup_close_text,
-        "image": lambda _env, image: ImagePopup(root, settings, pack, state, media(pack.paths.image, image)),
-        "video": lambda _env, video: VideoPopup(root, settings, pack, state, media(pack.paths.video, video)),
-        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, media(pack.paths.audio, audio), wrap(env, on_stop)),
-        "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap(env, on_close)),
+        "image": lambda _env, image: ImagePopup(root, settings, pack, state, resource(pack.paths.image, image)),
+        "video": lambda _env, video: VideoPopup(root, settings, pack, state, resource(pack.paths.video, video)),
+        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, resource(pack.paths.audio, audio), callback(env, on_stop)),
+        "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, callback(env, on_close)),
         "web": lambda _env, web: open_web(pack, web),
         "subliminal": lambda _env, subliminal: SubliminalPopup(settings, pack, subliminal),
         "notification": lambda _env, notification: display_notification(settings, pack, notification),
@@ -86,10 +87,17 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "panic": lambda _env: panic(root, settings, state, disable=False),
         "close_popups": close_popups,
         "set_popup_close_text": set_popup_close_text,
-        "image": lambda env, args={}: ImagePopup(root, settings, pack, state, media(pack.paths.image, args.get("image")), wrap(env, args.get("on_close"))),
-        "video": lambda env, args={}: VideoPopup(root, settings, pack, state, media(pack.paths.video, args.get("video")), wrap(env, args.get("on_close"))),
-        "audio": lambda env, args={}: play_audio(root, settings, pack, state, media(pack.paths.audio, args.get("audio")), wrap(env, args.get("on_stop"))),
-        "prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("prompt"), wrap(env, args.get("on_close"))),
+        "set_wallpaper": lambda _env, wallpaper: set_wallpaper(resource(pack.paths.root, wallpaper)),
+        "image": lambda env, args={}: ImagePopup(
+            root, settings, pack, state, resource(pack.paths.image, args.get("image")), callback(env, args.get("on_close"))
+        ),
+        "video": lambda env, args={}: VideoPopup(
+            root, settings, pack, state, resource(pack.paths.video, args.get("video")), callback(env, args.get("on_close"))
+        ),
+        "audio": lambda env, args={}: play_audio(
+            root, settings, pack, state, resource(pack.paths.audio, args.get("audio")), callback(env, args.get("on_stop"))
+        ),
+        "prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("prompt"), callback(env, args.get("on_close"))),
         "web": lambda _env, args={}: open_web(pack, args.get("web")),
         "subliminal": lambda _env, args={}: SubliminalPopup(settings, pack, args.get("subliminal")),
         "notification": lambda _env, args={}: display_notification(settings, pack, args.get("notification")),
