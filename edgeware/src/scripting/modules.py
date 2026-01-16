@@ -49,15 +49,17 @@ def assign_globals(env: Environment, globals: dict[str, object]) -> None:
         env.assign(name, value)
 
 
-def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
+def close_popups(state: State) -> None:
+    for popup in state.popups.copy():
+        popup.close()
+
+
+def set_index_default(pack: Pack, attr: str, value: object) -> None:
+    pack.index.default.__setattr__(attr, value)
+
+
+def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
     from scripting import ReturnValue
-
-    def close_popups(_env: Environment) -> None:
-        for popup in state.popups.copy():
-            popup.close()
-
-    def set_index_default(attr: str, value: object) -> None:
-        pack.index.default.__setattr__(attr, value)
 
     edgeware_v0_global = {
         "print": lambda _env, *args: print(*args),
@@ -65,8 +67,8 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "roll": lambda _env, chance: ReturnValue(roll(chance)),
         "corrupt": lambda _env: update_corruption_level(settings, pack, state),
         "panic": lambda _env: panic(root, settings, state, disable=False),
-        "close_popups": close_popups,
-        "set_popup_close_text": lambda _env, text: set_index_default("popup_close", text),
+        "close_popups": lambda _env: close_popups(state),
+        "set_popup_close_text": lambda _env, text: set_index_default(pack, "popup_close", text),
         "image": lambda _env, image: ImagePopup(root, settings, pack, state, resource(pack.paths.image, image)),
         "video": lambda _env, video: VideoPopup(root, settings, pack, state, resource(pack.paths.video, video)),
         "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, resource(pack.paths.audio, audio), callback(env, on_stop)),
@@ -76,20 +78,22 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "notification": lambda _env, notification: display_notification(settings, pack, notification),
     }
 
-    basic_v1_global = {
-        "print": lambda _env, *args: print(*args),
-    }
+    return lambda env: assign_globals(env, edgeware_v0_global),
+
+
+def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
+    from scripting import ReturnValue
 
     edgeware_v1_local = {
         "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
         "roll": lambda _env, chance: ReturnValue(roll(chance)),
         "corrupt": lambda _env: update_corruption_level(settings, pack, state),
         "panic": lambda _env: panic(root, settings, state, disable=False),
-        "close_popups": close_popups,
-        "set_popup_close_text": lambda _env, text: set_index_default("popup_close", text),
-        "set_prompt_command_text": lambda _env, text: set_index_default("prompt_command", text),
-        "set_prompt_submit_text": lambda _env, text: set_index_default("popup_submit", text),
-        "set_prompt_length": lambda _env, min, max: set_index_default("prompt_min_length", min) or set_index_default("prompt_min_length", max),
+        "close_popups": lambda _env: close_popups(state),
+        "set_popup_close_text": lambda _env, text: set_index_default(pack, "popup_close", text),
+        "set_prompt_command_text": lambda _env, text: set_index_default(pack, "prompt_command", text),
+        "set_prompt_submit_text": lambda _env, text: set_index_default(pack, "popup_submit", text),
+        "set_prompt_length": lambda _env, min, max: set_index_default(pack, "prompt_min_length", min) or set_index_default(pack, "prompt_min_length", max),
         "set_wallpaper": lambda _env, wallpaper: set_wallpaper(resource(pack.paths.root, wallpaper)),
         "image": lambda env, args={}: ImagePopup(
             root, settings, pack, state, resource(pack.paths.image, args.get("image")), callback(env, args.get("on_close"))
@@ -106,8 +110,17 @@ def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
         "notification": lambda _env, args={}: display_notification(settings, pack, args.get("notification")),
     }
 
+    return lambda _env: edgeware_v1_local
+
+
+
+def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
+    basic_v1_global = {
+        "print": lambda _env, *args: print(*args),
+    }
+
     return {
-        "edgeware_v0": lambda env: assign_globals(env, edgeware_v0_global),
-        "edgeware_v1": lambda _env: edgeware_v1_local,
+        "edgeware_v0": edgeware_v0(root, settings, pack, state),
+        "edgeware_v1": edgeware_v1(root, settings, pack, state),
         "basic_v1": lambda env: assign_globals(env, basic_v1_global),
     }
