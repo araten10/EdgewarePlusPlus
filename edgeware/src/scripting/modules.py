@@ -93,7 +93,8 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "set_popup_close_text": lambda _env, text: set_index_default(pack, "popup_close", text),
         "set_prompt_command_text": lambda _env, text: set_index_default(pack, "prompt_command", text),
         "set_prompt_submit_text": lambda _env, text: set_index_default(pack, "popup_submit", text),
-        "set_prompt_length": lambda _env, min, max: set_index_default(pack, "prompt_min_length", min) or set_index_default(pack, "prompt_min_length", max),
+        "set_prompt_min_length": lambda _env, length: set_index_default(pack, "prompt_min_length", length),
+        "set_prompt_max_length": lambda _env, length: set_index_default(pack, "prompt_max_length", length),
         "set_wallpaper": lambda _env, wallpaper: set_wallpaper(resource(pack.paths.root, wallpaper)),
         "image": lambda env, args={}: ImagePopup(
             root, settings, pack, state, resource(pack.paths.image, args.get("image")), callback(env, args.get("on_close"))
