@@ -46,7 +46,18 @@ class Pack:
 
         # Data files
         self.active_moods = load_active_moods(self.info.mood_file)
+        self.allowed_moods = self.active_moods().copy()
         self.block_corruption_moods()
+        self.active_moods_dict = {
+            "current_level": MoodSet(),
+            "next_level": MoodSet()
+        }
+
+        # Custom Properties for scripting
+        self.scripted_moods = {
+            "added": MoodSet(),
+            "removed": MoodSet()
+        }
 
         # Media
         self.images = list_media(self.paths.image, filetype.is_image)
@@ -60,6 +71,32 @@ class Pack:
         self.startup_splash = next((path for path in self.paths.splash if path.is_file()), None) or CustomAssets.startup_splash()
 
         logging.info(f"Active moods: {self.active_moods()}")
+
+    # currently this refers to active moods for current corruption level(s)
+    def get_active_moods(self, use_next_level_moods: bool):
+        return self.active_moods_dict[
+           "next_level" if use_next_level_moods else "current_level"
+        ]
+
+    def update_moods(self, curr_level: int, next_level: int):
+        # print messages were for debugging, feel free to remove
+        print(f"CURR LEVEL MOODS: {self.corruption_levels[curr_level - 1].moods}")
+        print(f"NEXT LEVEL MOODS: {self.corruption_levels[next_level - 1].moods}")
+        print(f"ADDED SCRIPED MOODS: {self.scripted_moods["added"]}")
+        print(f"REMOVED SCRIPTED MOODS: {self.scripted_moods["removed"]}")
+
+        self.active_moods_dict["current_level"] = MoodSet(
+            self.corruption_levels[
+                curr_level - 1
+            ].moods | self.scripted_moods["added"] - self.scripted_moods["removed"]
+        )
+        print(f"CURR AFTER: {self.active_moods_dict["current_level"]}")
+        self.active_moods_dict["next_level"] = MoodSet(
+            self.corruption_levels[
+                next_level - 1
+            ].moods | self.scripted_moods["added"] - self.scripted_moods["removed"]
+        )
+        print(f"NEXT AFTER: {self.active_moods_dict["next_level"]}")
 
     def block_corruption_moods(self) -> None:
         active_moods = self.active_moods()
