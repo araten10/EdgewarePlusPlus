@@ -83,7 +83,8 @@ def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None
 
     pack.update_moods(
         state.corruption_level,
-        next_corruption_level(settings, pack, state)
+        next_corruption_level(settings, pack, state),
+        True
     )
 
     if settings.corruption_wallpaper and level.wallpaper:

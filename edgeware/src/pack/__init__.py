@@ -78,7 +78,23 @@ class Pack:
            "next_level" if use_next_level_moods else "current_level"
         ]
 
-    def update_moods(self, curr_level: int, next_level: int):
+    def update_moods(self, curr_level: int, next_level: int, is_level_update: bool = False):
+
+        # check what changes are introduced by the new level (if any) and override the changes that scripting made
+        if is_level_update:
+            added_level_moods = MoodSet(
+                self.corruption_levels[next_level - 1].moods - self.corruption_levels[curr_level - 1].moods
+            )
+            print(f"MOODS ADDED BY LEVEL: {added_level_moods}")
+            removed_level_moods = MoodSet(
+                self.corruption_levels[curr_level - 1].moods - self.corruption_levels[next_level - 1].moods
+            )
+            print(f"MOODS REMOVED BY LEVEL: {removed_level_moods}")
+
+            self.scripted_moods["added"].difference_update(removed_level_moods)
+            self.scripted_moods["removed"].difference_update(added_level_moods)
+
+
         # print messages were for debugging, feel free to remove
         print(f"CURR LEVEL MOODS: {self.corruption_levels[curr_level - 1].moods}")
         print(f"NEXT LEVEL MOODS: {self.corruption_levels[next_level - 1].moods}")
