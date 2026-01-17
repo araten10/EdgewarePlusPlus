@@ -27,14 +27,15 @@ from pack.load import list_media, load_active_moods, load_config, load_corruptio
 
 
 class Pack:
-    image_ranks = {}
-    video_ranks = {}
-    audio_ranks = {}
-
     def __init__(self, root: Path) -> None:
         logging.info(f"Loading pack at {root.relative_to(PATH)}.")
 
         self.paths = PackPaths(root)
+
+        # Weights for randomization
+        self.image_ranks = {}
+        self.video_ranks = {}
+        self.audio_ranks = {}
 
         # Pack files
         self.corruption_levels = load_corruption(self.paths)

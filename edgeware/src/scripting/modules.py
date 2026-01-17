@@ -29,6 +29,7 @@ from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
 from os_utils import set_wallpaper
 from pack import Pack
+from pack.data import MoodSet
 from panic import panic
 from roll import roll
 from state import State
@@ -54,10 +55,6 @@ def close_popups(state: State) -> None:
         popup.close()
 
 
-def set_index_default(pack: Pack, attr: str, value: object) -> None:
-    pack.index.default.__setattr__(attr, value)
-
-
 def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
     from scripting import ReturnValue
 
@@ -68,7 +65,7 @@ def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "corrupt": lambda _env: update_corruption_level(settings, pack, state),
         "panic": lambda _env: panic(root, settings, state, disable=False),
         "close_popups": lambda _env: close_popups(state),
-        "set_popup_close_text": lambda _env, text: set_index_default(pack, "popup_close", text),
+        "set_popup_close_text": lambda _env, text: pack.index.default.__setattr__("popup_close", text),
         "image": lambda _env, image: ImagePopup(root, settings, pack, state, resource(pack.paths.image, image)),
         "video": lambda _env, video: VideoPopup(root, settings, pack, state, resource(pack.paths.video, video)),
         "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, resource(pack.paths.audio, audio), callback(env, on_stop)),
@@ -78,23 +75,36 @@ def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "notification": lambda _env, notification: display_notification(settings, pack, notification),
     }
 
-    return lambda env: assign_globals(env, edgeware_v0_global),
+    return lambda env: assign_globals(env, edgeware_v0_global)
 
 
 def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
     from scripting import ReturnValue
 
+    def set_active_moods(_env: Environment, moods: dict) -> None:
+        # TODO: How are lists typically handled in Lua?
+        i = 1
+        mood_set = MoodSet()
+        while i in moods:
+            mood_set.add(moods[i])
+            i += 1
+        pack.active_moods = lambda: mood_set
+
     edgeware_v1_local = {
         "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
         "roll": lambda _env, chance: ReturnValue(roll(chance)),
-        "corrupt": lambda _env: update_corruption_level(settings, pack, state),
         "panic": lambda _env: panic(root, settings, state, disable=False),
         "close_popups": lambda _env: close_popups(state),
-        "set_popup_close_text": lambda _env, text: set_index_default(pack, "popup_close", text),
-        "set_prompt_command_text": lambda _env, text: set_index_default(pack, "prompt_command", text),
-        "set_prompt_submit_text": lambda _env, text: set_index_default(pack, "popup_submit", text),
-        "set_prompt_min_length": lambda _env, length: set_index_default(pack, "prompt_min_length", length),
-        "set_prompt_max_length": lambda _env, length: set_index_default(pack, "prompt_max_length", length),
+        "set_active_moods": set_active_moods,
+        # "enable_mood": lambda env, mood: TODO,
+        # "disable_mood": lambda env, mood: TODO,
+        "progress_corruption": lambda _env: update_corruption_level(settings, pack, state),
+        # "set_corruption_level": lambda _env, level: TODO,
+        "set_popup_close_text": lambda _env, text: pack.index.default.__setattr__("popup_close", text),
+        "set_prompt_command_text": lambda _env, text: pack.index.default.__setattr__("prompt_command", text),
+        "set_prompt_submit_text": lambda _env, text: pack.index.default.__setattr__("prompt_submit", text),
+        "set_prompt_min_length": lambda _env, length: pack.index.default.__setattr__("prompt_min_length", length),
+        "set_prompt_max_length": lambda _env, length: pack.index.default.__setattr__("prompt_max_length", length),
         "set_wallpaper": lambda _env, wallpaper: set_wallpaper(resource(pack.paths.root, wallpaper)),
         "image": lambda env, args={}: ImagePopup(
             root, settings, pack, state, resource(pack.paths.image, args.get("image")), callback(env, args.get("on_close"))
@@ -112,7 +122,6 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
     }
 
     return lambda _env: edgeware_v1_local
-
 
 
 def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
