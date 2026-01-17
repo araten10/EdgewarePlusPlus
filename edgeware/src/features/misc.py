@@ -47,7 +47,7 @@ def open_web(pack: Pack, web: str | None = None) -> None:
         Thread(target=lambda: webbrowser.open(web), daemon=True).start()
 
 
-def display_notification(settings: Settings, pack: Pack, notification: str | None = None) -> None:
+def send_notification(settings: Settings, pack: Pack, notification: str | None = None) -> None:
     notification = notification or pack.random_notification()
     if not notification:
         return

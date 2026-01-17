@@ -23,7 +23,7 @@ from config.settings import Settings
 from features.audio import play_audio
 from features.corruption import update_corruption_level
 from features.image_popup import ImagePopup
-from features.misc import display_notification, open_web
+from features.misc import open_web, send_notification
 from features.prompt import Prompt
 from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
@@ -72,7 +72,7 @@ def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, callback(env, on_close)),
         "web": lambda _env, web: open_web(pack, web),
         "subliminal": lambda _env, subliminal: SubliminalPopup(settings, pack, subliminal),
-        "notification": lambda _env, notification: display_notification(settings, pack, notification),
+        "notification": lambda _env, notification: send_notification(settings, pack, notification),
     }
 
     return lambda env: assign_globals(env, edgeware_v0_global)
@@ -90,6 +90,30 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
             i += 1
         pack.active_moods = lambda: mood_set
 
+    index = {
+        "set_popup_close_text": lambda _env, text: pack.index.default.__setattr__("popup_close", text),
+        "set_prompt_command_text": lambda _env, text: pack.index.default.__setattr__("prompt_command", text),
+        "set_prompt_submit_text": lambda _env, text: pack.index.default.__setattr__("prompt_submit", text),
+        "set_prompt_min_length": lambda _env, length: pack.index.default.__setattr__("prompt_min_length", length),
+        "set_prompt_max_length": lambda _env, length: pack.index.default.__setattr__("prompt_max_length", length),
+    }
+
+    popups = {
+        "open_image": lambda env, args={}: ImagePopup(
+            root, settings, pack, state, resource(pack.paths.image, args.get("image")), callback(env, args.get("on_close"))
+        ),
+        "open_video": lambda env, args={}: VideoPopup(
+            root, settings, pack, state, resource(pack.paths.video, args.get("video")), callback(env, args.get("on_close"))
+        ),
+        "play_audio": lambda env, args={}: play_audio(
+            root, settings, pack, state, resource(pack.paths.audio, args.get("audio")), callback(env, args.get("on_stop"))
+        ),
+        "open_prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("prompt"), callback(env, args.get("on_close"))),
+        "open_web": lambda _env, args={}: open_web(pack, args.get("web")),
+        "open_subliminal": lambda _env, args={}: SubliminalPopup(settings, pack, args.get("subliminal")),
+        "send_notification": lambda _env, args={}: send_notification(settings, pack, args.get("notification")),
+    }
+
     edgeware_v1_local = {
         "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
         "roll": lambda _env, chance: ReturnValue(roll(chance)),
@@ -100,25 +124,9 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         # "disable_mood": lambda env, mood: TODO,
         "progress_corruption": lambda _env: update_corruption_level(settings, pack, state),
         # "set_corruption_level": lambda _env, level: TODO,
-        "set_popup_close_text": lambda _env, text: pack.index.default.__setattr__("popup_close", text),
-        "set_prompt_command_text": lambda _env, text: pack.index.default.__setattr__("prompt_command", text),
-        "set_prompt_submit_text": lambda _env, text: pack.index.default.__setattr__("prompt_submit", text),
-        "set_prompt_min_length": lambda _env, length: pack.index.default.__setattr__("prompt_min_length", length),
-        "set_prompt_max_length": lambda _env, length: pack.index.default.__setattr__("prompt_max_length", length),
         "set_wallpaper": lambda _env, wallpaper: set_wallpaper(resource(pack.paths.root, wallpaper)),
-        "image": lambda env, args={}: ImagePopup(
-            root, settings, pack, state, resource(pack.paths.image, args.get("image")), callback(env, args.get("on_close"))
-        ),
-        "video": lambda env, args={}: VideoPopup(
-            root, settings, pack, state, resource(pack.paths.video, args.get("video")), callback(env, args.get("on_close"))
-        ),
-        "audio": lambda env, args={}: play_audio(
-            root, settings, pack, state, resource(pack.paths.audio, args.get("audio")), callback(env, args.get("on_stop"))
-        ),
-        "prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("prompt"), callback(env, args.get("on_close"))),
-        "web": lambda _env, args={}: open_web(pack, args.get("web")),
-        "subliminal": lambda _env, args={}: SubliminalPopup(settings, pack, args.get("subliminal")),
-        "notification": lambda _env, args={}: display_notification(settings, pack, args.get("notification")),
+        **index,
+        **popups,
     }
 
     return lambda _env: edgeware_v1_local

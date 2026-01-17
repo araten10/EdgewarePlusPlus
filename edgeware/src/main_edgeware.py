@@ -51,7 +51,6 @@ from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
 from features.image_popup import ImagePopup
 from features.misc import (
-    display_notification,
     handle_discord,
     handle_keyboard,
     handle_mitosis_mode,
@@ -60,6 +59,7 @@ from features.misc import (
     make_desktop_icons,
     make_tray_icon,
     open_web,
+    send_notification,
 )
 from features.prompt import Prompt
 from features.startup_splash import StartupSplash
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         RollTarget(lambda: Prompt(settings, pack, state), lambda: settings.prompt_chance),
         RollTarget(lambda: play_audio(root, settings, pack, state), lambda: settings.audio_chance),
         RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
-        RollTarget(lambda: display_notification(settings, pack), lambda: settings.notification_chance),
+        RollTarget(lambda: send_notification(settings, pack), lambda: settings.notification_chance),
     ]
 
     def start_main() -> None:
