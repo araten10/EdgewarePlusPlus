@@ -25,6 +25,21 @@ string = "Hello world!"
 boolean = true
 none = nil
 local var = "Local variable"
+a, b, c = 1, 2, 3
+local one, two = "first", 2
+```
+
+### Tables
+
+```lua
+empty_table = {}
+empty_table["key"] = "value"
+empty_table.key = "value"
+empty_table[1] = "value"
+
+struct_like = {name = "Table", another = true}
+array_like = {1, empty_table, "Third"}
+dict_like = {["key"] = "value", ["k"] = "v"}
 ```
 
 ### Operators
