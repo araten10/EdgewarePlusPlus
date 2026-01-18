@@ -13,6 +13,13 @@ if (( !($major == 3 && $minor >= 12) )); then
     echo "Python version 3.12 or higher recommended"
 fi
 
+python3 -c "import tkinter"
+if [ $? -ne 0 ]; then
+    echo "tkinter not found"
+    echo "Please install python3-tk (Debian), python3-tkinter (Fedora), or tk (Arch) and try again"
+    exit
+fi
+
 mpv --version
 if [ $? -ne 0 ]; then
     echo "mpv not found"
