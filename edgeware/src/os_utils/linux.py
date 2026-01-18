@@ -110,7 +110,7 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
 
     file.write_text("\n".join(content))
     if get_desktop_environment() == "gnome":
-        subprocess.run(f'gio set "{str(file.absolute())}" metadata::trusted true', shell=True)
+        subprocess.run(f"gio set {shlex.quote(str(file.absolute()))} metadata::trusted true", shell=True)
 
 
 def toggle_run_at_startup(state: bool) -> None:

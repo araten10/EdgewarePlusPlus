@@ -18,6 +18,7 @@
 import codecs
 import os
 import re
+import shlex
 import shutil
 import subprocess
 from collections.abc import Callable
@@ -59,53 +60,59 @@ def get_desktop_environment() -> str:
 
 
 def find_set_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
+    quoted = shlex.quote(str(wallpaper))
+    quoted_hyprland = shlex.quote(f",{wallpaper}")
+    quoted_gnome = shlex.quote(f"file://{wallpaper}")
+
     commands = {
         "xfce4": [
-            f'xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "{wallpaper}"',
+            f"xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s {quoted}",
             "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-style -s 3",
             "xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -s true",
         ],
-        "mate": [f'gsettings set org.mate.background picture-filename "{wallpaper}"'],
-        "icewm": [f'icewmbg "{wallpaper}"'],
-        "blackbox": [f'bsetbg -full "{wallpaper}"'],
-        "lxde": [f'pcmanfm --set-wallpaper "{wallpaper}" --wallpaper-mode=scaled'],
-        "lxqt": [f'pcmanfm-qt --set-wallpaper "{wallpaper}" --wallpaper-mode=scaled'],
-        "windowmaker": [f'wmsetbg -s -u "{wallpaper}"'],
-        "sway": [f'swaybg -o "*" -i "{wallpaper}" -m fill'],
-        "hyprland": [f'hyprctl hyprpaper preload "{wallpaper}"', f'hyprctl hyprpaper wallpaper ",{wallpaper}"'],
-        "kde": [f'plasma-apply-wallpaperimage "{wallpaper}"'],
-        "trinity": [f'dcop kdesktop KBackgroundIface setWallpaper 0 "{wallpaper}" 6'],
+        "mate": [f"gsettings set org.mate.background picture-filename {quoted}"],
+        "icewm": [f"icewmbg {quoted}"],
+        "blackbox": [f"bsetbg -full {quoted}"],
+        "lxde": [f"pcmanfm --set-wallpaper {quoted} --wallpaper-mode=scaled"],
+        "lxqt": [f"pcmanfm-qt --set-wallpaper {quoted} --wallpaper-mode=scaled"],
+        "windowmaker": [f"wmsetbg -s -u {quoted}"],
+        "sway": [f'swaybg -o "*" -i {quoted} -m fill'],
+        "hyprland": [f"hyprctl hyprpaper preload {quoted}", f"hyprctl hyprpaper wallpaper {quoted_hyprland}"],
+        "kde": [f"plasma-apply-wallpaperimage {quoted}"],
+        "trinity": [f"dcop kdesktop KBackgroundIface setWallpaper 0 {quoted} 6"],
         **dict.fromkeys(
             ["gnome", "unity", "cinnamon", "x-cinnamon"],
             [
-                f'gsettings set org.gnome.desktop.background picture-uri "file://{wallpaper}"',
-                f'gsettings set org.gnome.desktop.background picture-uri-dark "file://{wallpaper}"',
+                f"gsettings set org.gnome.desktop.background picture-uri {quoted_gnome}",
+                f"gsettings set org.gnome.desktop.background picture-uri-dark {quoted_gnome}",
             ],
         ),
-        **dict.fromkeys(["fluxbox", "jwm", "openbox", "afterstep"], [f'fbsetbg "{wallpaper}"']),
+        **dict.fromkeys(["fluxbox", "jwm", "openbox", "afterstep"], [f"fbsetbg {quoted}"]),
     }
 
     return commands.get(desktop) or (find_set_wm_wallpaper_commands() if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
 
 
 def find_set_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
+    quoted = shlex.quote(str(wallpaper))
     session = os.environ.get("XDG_SESSION_TYPE", "").lower()  # "x11" or "wayland"
+
     setters = {
         "x11": [
-            ("nitrogen", [f'nitrogen --set-zoom-fill "{wallpaper}"']),
-            ("feh", [f'feh --bg-scale "{wallpaper}"']),
-            ("habak", [f'habak -ms "{wallpaper}"']),
-            ("hsetroot", [f'hsetroot -fill "{wallpaper}"']),
-            ("chbg", [f'chbg -once -mode maximize "{wallpaper}"']),
-            ("qiv", [f'qiv --root_s "{wallpaper}"']),
-            ("xv", [f'xv -max -smooth -root -quit "{wallpaper}"']),
-            ("xsri", [f'xsri --center-x --center-y --scale-width=100 --scale-height=100 "{wallpaper}"']),
-            ("xli", [f'xli -fullscreen -onroot -quiet -border black "{wallpaper}"']),
-            ("xsetbg", [f'xsetbg -fullscreen -border black "{wallpaper}"']),
-            ("fvwm-root", [f'fvwm-root -r "{wallpaper}"']),
-            ("wmsetbg", [f'wmsetbg -s -S "{wallpaper}"']),
-            ("Esetroot", [f'Esetroot -scale "{wallpaper}"']),
-            ("display", [f'display -sample `xwininfo -root 2> /dev/null|awk "/geom/{{print $2}}"` -window root "{wallpaper}"']),
+            ("nitrogen", [f"nitrogen --set-zoom-fill {quoted}"]),
+            ("feh", [f"feh --bg-scale {quoted}"]),
+            ("habak", [f"habak -ms {quoted}"]),
+            ("hsetroot", [f"hsetroot -fill {quoted}"]),
+            ("chbg", [f"chbg -once -mode maximize {quoted}"]),
+            ("qiv", [f"qiv --root_s {quoted}"]),
+            ("xv", [f"xv -max -smooth -root -quit {quoted}"]),
+            ("xsri", [f"xsri --center-x --center-y --scale-width=100 --scale-height=100 {quoted}"]),
+            ("xli", [f"xli -fullscreen -onroot -quiet -border black {quoted}"]),
+            ("xsetbg", [f"xsetbg -fullscreen -border black {quoted}"]),
+            ("fvwm-root", [f"fvwm-root -r {quoted}"]),
+            ("wmsetbg", [f"wmsetbg -s -S {quoted}"]),
+            ("Esetroot", [f"Esetroot -scale {quoted}"]),
+            ("display", [f'display -sample `xwininfo -root 2> /dev/null|awk "/geom/{{print $2}}"` -window root {quoted}']),
         ],
         "wayland": [],
     }
