@@ -100,18 +100,18 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
 
     popups = {
         "open_image": lambda env, args={}: ImagePopup(
-            root, settings, pack, state, resource(pack.paths.image, args.get("image")), callback(env, args.get("on_close"))
+            root, settings, pack, state, resource(pack.paths.image, args.get("filename")), callback(env, args.get("on_close"))
         ),
         "open_video": lambda env, args={}: VideoPopup(
-            root, settings, pack, state, resource(pack.paths.video, args.get("video")), callback(env, args.get("on_close"))
+            root, settings, pack, state, resource(pack.paths.video, args.get("filename")), callback(env, args.get("on_close"))
         ),
         "play_audio": lambda env, args={}: play_audio(
-            root, settings, pack, state, resource(pack.paths.audio, args.get("audio")), callback(env, args.get("on_stop"))
+            root, settings, pack, state, resource(pack.paths.audio, args.get("filename")), callback(env, args.get("on_stop"))
         ),
-        "open_prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("prompt"), callback(env, args.get("on_close"))),
-        "open_web": lambda _env, args={}: open_web(pack, args.get("web")),
-        "open_subliminal": lambda _env, args={}: SubliminalPopup(settings, pack, args.get("subliminal")),
-        "send_notification": lambda _env, args={}: send_notification(settings, pack, args.get("notification")),
+        "open_prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("text"), callback(env, args.get("on_close"))),
+        "open_web": lambda _env, args={}: open_web(pack, args.get("url")),
+        "open_subliminal": lambda _env, args={}: SubliminalPopup(settings, pack, args.get("text")),
+        "send_notification": lambda _env, args={}: send_notification(settings, pack, args.get("text")),
     }
 
     edgeware_v1_local = {
@@ -124,7 +124,7 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         # "disable_mood": lambda env, mood: TODO,
         "progress_corruption": lambda _env: update_corruption_level(settings, pack, state),
         # "set_corruption_level": lambda _env, level: TODO,
-        "set_wallpaper": lambda _env, wallpaper: set_wallpaper(resource(pack.paths.root, wallpaper)),
+        "set_wallpaper": lambda _env, filename: set_wallpaper(resource(pack.paths.root, filename)),
         **index,
         **popups,
     }
