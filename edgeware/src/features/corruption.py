@@ -81,11 +81,7 @@ def next_corruption_level(settings: Settings, pack: Pack, state: State) -> int:
 def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     level = pack.corruption_levels[state.corruption_level - 1]
 
-    pack.update_moods(
-        state.corruption_level,
-        next_corruption_level(settings, pack, state),
-        True
-    )
+    pack.update_moods(state.corruption_level, next_corruption_level(settings, pack, state), True)
 
     if settings.corruption_wallpaper and level.wallpaper:
         os_utils.set_wallpaper(pack.paths.root / level.wallpaper)
@@ -189,9 +185,7 @@ def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) ->
     if settings.corruption_purity:
         state.corruption_level = len(pack.corruption_levels)
 
-    pack.active_moods = lambda: pack.get_active_moods(
-        roll(fade_chance(settings, state))
-    )
+    pack.active_moods = lambda: pack.get_active_moods(roll(fade_chance(settings, state)))
 
     match settings.corruption_trigger:
         case "Timed":

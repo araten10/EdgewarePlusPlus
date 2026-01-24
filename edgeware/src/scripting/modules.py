@@ -21,7 +21,7 @@ from typing import Callable
 
 from config.settings import Settings
 from features.audio import play_audio
-from features.corruption import update_corruption_level, next_corruption_level
+from features.corruption import next_corruption_level, update_corruption_level
 from features.image_popup import ImagePopup
 from features.misc import open_web, send_notification
 from features.prompt import Prompt
@@ -54,16 +54,15 @@ def close_popups(state: State) -> None:
     for popup in state.popups.copy():
         popup.close()
 
+
 # make sure that added_moods and removed_moods are mutually exclusive. Then update mood sets in use
-def clean_script_moods_and_update(settings: Settings, pack: Pack, state: State):
+def clean_script_moods_and_update(settings: Settings, pack: Pack, state: State) -> None:
     pack.scripted_moods["added"].difference_update(pack.scripted_moods["removed"])
     pack.scripted_moods["removed"].difference_update(pack.scripted_moods["added"])
-    pack.update_moods(
-        state.corruption_level,
-        next_corruption_level(settings, pack, state)
-    )
+    pack.update_moods(state.corruption_level, next_corruption_level(settings, pack, state))
 
-def add_script_mood(_env: Environment, settings: Settings, pack: Pack, state: State, mood_name: str):
+
+def add_script_mood(_env: Environment, settings: Settings, pack: Pack, state: State, mood_name: str) -> None:
     if not settings.corruption_mode:
         print(f"Not adding mood {mood_name}. Corruption is not enabled")
         return
@@ -73,9 +72,10 @@ def add_script_mood(_env: Environment, settings: Settings, pack: Pack, state: St
         pack.scripted_moods["added"].add(mood_name)
         clean_script_moods_and_update(settings, pack, state)
     else:
-        print(f"Mood \"{mood_name}\" is not a mood enabled for this pack")
+        print(f'Mood "{mood_name}" is not a mood enabled for this pack')
 
-def remove_script_mood(_env: Environment, settings: Settings, pack: Pack, state: State, mood_name: str):
+
+def remove_script_mood(_env: Environment, settings: Settings, pack: Pack, state: State, mood_name: str) -> None:
     if not settings.corruption_mode:
         print(f"Not removing mood {mood_name}. Corruption is not enabled")
         return
@@ -85,7 +85,8 @@ def remove_script_mood(_env: Environment, settings: Settings, pack: Pack, state:
         pack.scripted_moods["removed"].add(mood_name)
         clean_script_moods_and_update(settings, pack, state)
     else:
-        print(f"Mood \"{mood_name}\" is not a mood enabled for this pack")
+        print(f'Mood "{mood_name}" is not a mood enabled for this pack')
+
 
 def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
     from scripting import ReturnValue
@@ -107,6 +108,7 @@ def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "notification": lambda _env, notification: send_notification(settings, pack, notification),
     }
     return lambda env: assign_globals(env, edgeware_v0_global)
+
 
 def edgeware_v05(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
     from scripting import ReturnValue
@@ -130,14 +132,19 @@ def edgeware_v05(root: Tk, settings: Settings, pack: Pack, state: State) -> Call
     }
 
     edgeware_v05_global = edgeware_v0_global.copy()
-    
+
     # using the old "image" and "video" functions for testing because I was struggling to call the new ones in Lua (maybe tables related issue?)
-    edgeware_v05_global["image"] = lambda env, image, on_close=None:ImagePopup(root, settings, pack, state, resource(pack.paths.image, image), callback(env, on_close))
-    edgeware_v05_global["video"] = lambda env, video, on_close=None:VideoPopup(root, settings, pack, state, resource(pack.paths.image, video), callback(env, on_close))
+    edgeware_v05_global["image"] = lambda env, image, on_close=None: ImagePopup(
+        root, settings, pack, state, resource(pack.paths.image, image), callback(env, on_close)
+    )
+    edgeware_v05_global["video"] = lambda env, video, on_close=None: VideoPopup(
+        root, settings, pack, state, resource(pack.paths.image, video), callback(env, on_close)
+    )
     edgeware_v05_global["enable_mood"] = lambda _env, mood_name: add_script_mood(_env, settings, pack, state, mood_name)
     edgeware_v05_global["disable_mood"] = lambda _env, mood_name: remove_script_mood(_env, settings, pack, state, mood_name)
 
     return lambda env: assign_globals(env, edgeware_v05_global)
+
 
 def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
     from scripting import ReturnValue
