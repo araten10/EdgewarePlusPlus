@@ -147,14 +147,16 @@ class Popup(Toplevel):
             set_clickthrough(self)
 
     def try_denial_filter(self, mpv: bool) -> ImageFilter.Filter | str:
-        mpv_filters = [str(Assets.SHADER_GAUSSIAN_BLUR), str(Assets.SHADER_PIXELIZE)]
-        # mpv_filters = ["gblur=sigma=5", "gblur=sigma=10", "gblur=sigma=20"]
-        image_filters = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20), "resizeblur"]
-        # make resize blur the same probability as choosing a gaussian blur.
-        # if more censors are added, ensure the cum is the same thickness (probability) for all types by adding a new cum_filter list entry equal to (last list entry + number of ImageFilter.Filter entries)
-        cum_filter = [1, 2, 3, 6]
-        chosen_image_filter = random.choices(image_filters, cum_weights=cum_filter)
-        return random.choice(mpv_filters if mpv else image_filters) if self.denial else ""
+        if not self.denial:
+            return ""
+
+        if mpv:
+            mpv_filters = [str(Assets.SHADER_GAUSSIAN_BLUR), str(Assets.SHADER_PIXELIZE)]
+            return random.choice(mpv_filters)
+        else:
+            image_filters = [ImageFilter.GaussianBlur(5), ImageFilter.GaussianBlur(10), ImageFilter.GaussianBlur(20), "resizeblur"]
+            weights = [1, 1, 1, 3]  # Make resize blur the same probability as choosing a gaussian blur.
+            return random.choices(image_filters, weights=weights)[0]
 
     def try_denial_text(self) -> None:
         if self.denial:
