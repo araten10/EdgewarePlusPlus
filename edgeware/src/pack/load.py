@@ -222,14 +222,13 @@ def load_config(paths: PackPaths) -> dict:
     return try_load(paths.config, load) or {}
 
 
-def load_active_moods(mood_file: Path) -> Callable[[], set[str]]:
-    def load(content: str) -> Callable[[], set[str]]:
+def load_allowed_moods(mood_file: Path) -> MoodSet | UniversalSet:
+    def load(content: str) -> MoodSet:
         moods = json.loads(content)
         Schema({Required("active"): [str]})(moods)
-        mood_set = MoodSet(moods["active"])
-        return lambda: mood_set
+        return MoodSet(moods["active"])
 
-    return try_load(mood_file, load) or (lambda: UniversalSet())
+    return try_load(mood_file, load) or UniversalSet()
 
 
 def list_media(dir: Path, is_valid: Callable[[str], bool]) -> list[Path]:

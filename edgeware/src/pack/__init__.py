@@ -23,7 +23,7 @@ import filetype
 from paths import PATH, CustomAssets, PackPaths
 
 from pack.data import MoodBase, MoodSet
-from pack.load import list_media, load_active_moods, load_config, load_corruption, load_discord, load_index, load_info
+from pack.load import list_media, load_allowed_moods, load_config, load_corruption, load_discord, load_index, load_info
 
 
 class Pack:
@@ -45,8 +45,8 @@ class Pack:
         self.config = load_config(self.paths)
 
         # Data files
-        self.active_moods = load_active_moods(self.info.mood_file)
-        self.allowed_moods = self.active_moods().copy()
+        self.allowed_moods = load_allowed_moods(self.info.mood_file)
+        self.active_moods = lambda: self.allowed_moods
         self.block_corruption_moods()
         self.active_moods_dict = {"current_level": MoodSet(), "next_level": MoodSet()}
 
