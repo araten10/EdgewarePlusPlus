@@ -20,9 +20,12 @@ from pathlib import Path
 
 
 # "mood in set" additionally return True if "mood" is the default one
-class MoodSet(set):
+class MoodSet(set[str]):
     def __contains__(self, o: object) -> bool:
         return o is None or super().__contains__(o)
+
+    def copy(self) -> object:
+        return MoodSet(super().copy())
 
 
 @dataclass
