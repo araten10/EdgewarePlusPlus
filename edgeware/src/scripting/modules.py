@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
 from pathlib import Path
 from tkinter import Tk
 from typing import Callable
@@ -55,39 +56,6 @@ def close_popups(state: State) -> None:
         popup.close()
 
 
-# make sure that added_moods and removed_moods are mutually exclusive. Then update mood sets in use
-def clean_script_moods_and_update(settings: Settings, pack: Pack, state: State) -> None:
-    pack.scripted_moods["added"].difference_update(pack.scripted_moods["removed"])
-    pack.scripted_moods["removed"].difference_update(pack.scripted_moods["added"])
-    pack.update_moods(state.corruption_level, next_corruption_level(settings, pack, state))
-
-
-def add_script_mood(settings: Settings, pack: Pack, state: State, mood_name: str) -> None:
-    if not settings.corruption_mode:
-        print(f"Not adding mood {mood_name}. Corruption is not enabled")
-        return
-
-    if mood_name in pack.allowed_moods:
-        print(f"Added {mood_name}")
-        pack.scripted_moods["added"].add(mood_name)
-        clean_script_moods_and_update(settings, pack, state)
-    else:
-        print(f'Mood "{mood_name}" is not a mood enabled for this pack')
-
-
-def remove_script_mood(settings: Settings, pack: Pack, state: State, mood_name: str) -> None:
-    if not settings.corruption_mode:
-        print(f"Not removing mood {mood_name}. Corruption is not enabled")
-        return
-
-    if mood_name in pack.allowed_moods:
-        print(f"Removed {mood_name}")
-        pack.scripted_moods["removed"].add(mood_name)
-        clean_script_moods_and_update(settings, pack, state)
-    else:
-        print(f'Mood "{mood_name}" is not a mood enabled for this pack')
-
-
 def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
     from scripting import ReturnValue
 
@@ -122,6 +90,26 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
             i += 1
         pack.active_moods = lambda: mood_set
 
+    # make sure that added_moods and removed_moods are mutually exclusive. Then update mood sets in use
+    def clean_script_moods_and_update() -> None:
+        pack.scripted_moods["added"].difference_update(pack.scripted_moods["removed"])
+        pack.scripted_moods["removed"].difference_update(pack.scripted_moods["added"])
+        pack.update_moods(state.corruption_level, next_corruption_level(settings, pack, state))
+
+    def enable_mood(_env: Environment, mood_name: str) -> None:
+        if mood_name in pack.allowed_moods:
+            pack.scripted_moods["added"].add(mood_name)
+            clean_script_moods_and_update(settings, pack, state)
+        else:
+            logging.warning(f'Mood "{mood_name}" does not exist or is blocked by the user')
+
+    def disable_mood(_env: Environment, mood_name: str) -> None:
+        if mood_name in pack.allowed_moods:
+            pack.scripted_moods["removed"].add(mood_name)
+            clean_script_moods_and_update(settings, pack, state)
+        else:
+            logging.warning(f'Mood "{mood_name}" does not exist or is blocked by the user')
+
     index = {
         "set_popup_close_text": lambda _env, text: pack.index.default.__setattr__("popup_close", text),
         "set_prompt_command_text": lambda _env, text: pack.index.default.__setattr__("prompt_command", text),
@@ -152,8 +140,8 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "panic": lambda _env: panic(root, settings, state, disable=False),
         "close_popups": lambda _env: close_popups(state),
         "set_active_moods": set_active_moods,
-        "enable_mood": lambda _env, mood_name: add_script_mood(settings, pack, state, mood_name),
-        "disable_mood": lambda _env, mood_name: remove_script_mood(settings, pack, state, mood_name),
+        "enable_mood": enable_mood,
+        "disable_mood": disable_mood,
         "progress_corruption": lambda _env: update_corruption_level(settings, pack, state),
         "set_wallpaper": lambda _env, filename: set_wallpaper(resource(pack.paths.root, filename)),
         **index,
