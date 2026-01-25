@@ -32,7 +32,6 @@ from tkinter import (
 )
 
 from pack import Pack
-from pack.data import UniversalSet
 from paths import DEFAULT_PACK_PATH, CustomAssets, Data
 
 from config import load_default_config
@@ -68,8 +67,8 @@ pack = Pack(Data.PACKS / config["packPath"] if config["packPath"] else DEFAULT_P
 pil_logger = logging.getLogger("PIL")
 pil_logger.setLevel(logging.INFO)
 
-# Generate mood file if it doesn't exist or is invalid
-if not pack.info.mood_file.is_file() or isinstance(pack.active_moods, UniversalSet):
+# Generate mood file if it doesn't exist
+if not pack.info.mood_file.is_file():
     Data.MOODS.mkdir(parents=True, exist_ok=True)
     with open(pack.info.mood_file, "w+") as f:
         f.write(json.dumps({"active": list(map(lambda mood: mood.name, pack.index.moods))}))

@@ -24,6 +24,7 @@ import os_utils
 from config.items import CONFIG_DANGER, CORRUPTION_BLOCK, DangerLevel
 from config.settings import Settings
 from pack import Pack
+from pack.data import MoodSet
 from paths import Data
 from roll import roll
 from state import State
@@ -81,7 +82,8 @@ def next_corruption_level(settings: Settings, pack: Pack, state: State) -> int:
 def apply_corruption_level(settings: Settings, pack: Pack, state: State) -> None:
     level = pack.corruption_levels[state.corruption_level - 1]
 
-    pack.update_moods(state.corruption_level, next_corruption_level(settings, pack, state), True)
+    pack.active_moods.update(level.added_moods)
+    pack.active_moods.difference_update(level.removed_moods)
 
     if settings.corruption_wallpaper and level.wallpaper:
         os_utils.set_wallpaper(pack.paths.root / level.wallpaper)
@@ -105,18 +107,23 @@ def update_corruption_level(settings: Settings, pack: Pack, state: State) -> Non
     apply_corruption_level(settings, pack, state)
 
 
-def fade_chance(settings: Settings, state: State) -> float:
+def fade(settings: Settings, pack: Pack, state: State) -> MoodSet:
     match settings.corruption_fade:
         case "Normal":
             chance = corruption_level_progress(settings, state)
             if settings.corruption_dev_mode:
                 logging.info(f"Current next mood chance: {chance:.1%}")
-            return chance
         case "Abrupt":
-            return 0
+            chance = 0
         case _:
+            chance = 0
             logging.warning(f"Unknown corruption fade {settings.corruption_fade}.")
-            return 0
+
+    if not roll(chance):
+        return pack.active_moods
+
+    next_level = pack.corruption_levels[next_corruption_level(settings, pack, state)]
+    return pack.active_moods | next_level.added_moods - next_level.removed_moods
 
 
 def corruption_level_progress(settings: Settings, state: State) -> float:
@@ -185,7 +192,7 @@ def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) ->
     if settings.corruption_purity:
         state.corruption_level = len(pack.corruption_levels)
 
-    pack.active_moods = lambda: pack.get_active_moods(roll(fade_chance(settings, state)))
+    pack.get_active_moods = lambda: fade(settings, pack, state)
 
     match settings.corruption_trigger:
         case "Timed":

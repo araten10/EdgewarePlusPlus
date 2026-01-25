@@ -45,13 +45,10 @@ class Pack:
         self.config = load_config(self.paths)
 
         # Data files
-        self.allowed_moods = load_allowed_moods(self.info.mood_file)
-        self.active_moods = lambda: self.allowed_moods
+        self.allowed_moods = load_allowed_moods(self.info.mood_file) or MoodSet(self.index.moods)
+        self.active_moods = self.allowed_moods.copy()  # Should not be accessed directly except for modification
+        self.get_active_moods = lambda: self.active_moods
         self.block_corruption_moods()
-        self.active_moods_dict = {"current_level": MoodSet(), "next_level": MoodSet()}
-
-        # Custom Properties for scripting
-        self.scripted_moods = {"added": MoodSet(), "removed": MoodSet()}
 
         # Media
         self.images = list_media(self.paths.image, filetype.is_image)
@@ -66,34 +63,14 @@ class Pack:
 
         logging.info(f"Allowed moods: {self.allowed_moods}")
 
-    # currently this refers to active moods for current corruption level(s)
-    def get_active_moods(self, use_next_level_moods: bool) -> MoodSet:
-        return self.active_moods_dict["next_level" if use_next_level_moods else "current_level"]
-
-    def update_moods(self, curr_level: int, next_level: int, is_level_update: bool = False) -> None:
-        # check what changes are introduced by the new level (if any) and override the changes that scripting made
-        if is_level_update:
-            added_level_moods = MoodSet(self.corruption_levels[next_level - 1].moods - self.corruption_levels[curr_level - 1].moods)
-            removed_level_moods = MoodSet(self.corruption_levels[curr_level - 1].moods - self.corruption_levels[next_level - 1].moods)
-
-            self.scripted_moods["added"].difference_update(removed_level_moods)
-            self.scripted_moods["removed"].difference_update(added_level_moods)
-
-        self.active_moods_dict["current_level"] = MoodSet(
-            self.corruption_levels[curr_level - 1].moods | self.scripted_moods["added"] - self.scripted_moods["removed"]
-        )
-        self.active_moods_dict["next_level"] = MoodSet(
-            self.corruption_levels[next_level - 1].moods | self.scripted_moods["added"] - self.scripted_moods["removed"]
-        )
-
     def block_corruption_moods(self) -> None:
-        active_moods = self.active_moods()
+        # Remove moods that aren't enabled by the user from each corruption level
         for level in self.corruption_levels:
-            # Remove moods that aren't enabled by the user from each corruption level
-            level.moods = MoodSet([mood for mood in level.moods if mood in active_moods])
+            level.added_moods.intersection_update(self.allowed_moods)
+            level.removed_moods.intersection_update(self.allowed_moods)
 
     def filter_media(self, media_list: list[Path]) -> list[Path]:
-        active_moods = self.active_moods()
+        active_moods = self.get_active_moods()
         return list(filter(lambda media: self.index.media_moods.get(media.name) in active_moods, media_list))
 
     def random_media(self, media_list: list[Path], media_ranks: dict[Path, int]) -> Path | None:
@@ -129,7 +106,7 @@ class Pack:
         return random.choice(self.hypnos)  # Guaranteed to be non-empty
 
     def find_list(self, attr: str) -> list:
-        active_moods = self.active_moods()
+        active_moods = self.get_active_moods()
         moods = list(filter(lambda mood: mood.name in active_moods, self.index.moods))
         lists = [getattr(self.index.default, attr)] + list(map(lambda mood: getattr(mood, attr), moods))
         return [item for list in lists for item in list]

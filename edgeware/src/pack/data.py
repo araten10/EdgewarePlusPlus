@@ -25,15 +25,10 @@ class MoodSet(set):
         return o is None or super().__contains__(o)
 
 
-# "mood in set" always returns True, used when a mood file can't be used
-class UniversalSet(set):
-    def __contains__(self, o: object) -> bool:
-        return True
-
-
 @dataclass
 class CorruptionLevel:
-    moods: MoodSet[str]
+    added_moods: MoodSet
+    removed_moods: MoodSet
     wallpaper: str | None
     config: dict[str, str | int]
 

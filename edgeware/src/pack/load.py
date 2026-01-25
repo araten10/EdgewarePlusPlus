@@ -29,7 +29,7 @@ from paths import Data, PackPaths
 from voluptuous import ALLOW_EXTRA, PREVENT_EXTRA, All, Any, Equal, In, Length, Number, Optional, Range, Required, Schema, Url
 from voluptuous.error import Invalid
 
-from pack.data import CorruptionLevel, Default, Discord, Index, Info, Mood, MoodBase, MoodSet, UniversalSet, Web
+from pack.data import CorruptionLevel, Default, Discord, Index, Info, Mood, MoodBase, MoodSet, Web
 
 T = TypeVar("T")
 
@@ -78,16 +78,14 @@ def load_corruption(paths: PackPaths) -> list[CorruptionLevel]:
             wallpaper = wallpapers.get(n)
             config_change = configs.get(n, {})
 
-            if i == 0:
-                levels.append(CorruptionLevel(MoodSet(mood_change["add"]), wallpaper or wallpapers.get("default"), config_change))
-            else:
-                new_moods = levels[i - 1].moods.copy()
-                for mood in mood_change["add"]:
-                    new_moods.add(mood)
-                for mood in mood_change["remove"]:
-                    new_moods.remove(mood)
-
-                levels.append(CorruptionLevel(new_moods, wallpaper or levels[i - 1].wallpaper, config_change))
+            levels.append(
+                CorruptionLevel(
+                    MoodSet(mood_change["add"]),
+                    MoodSet(mood_change["remove"]),
+                    wallpaper or (wallpapers.get("default") if i == 0 else None),
+                    config_change,
+                )
+            )
 
         return levels
 
@@ -222,13 +220,13 @@ def load_config(paths: PackPaths) -> dict:
     return try_load(paths.config, load) or {}
 
 
-def load_allowed_moods(mood_file: Path) -> MoodSet | UniversalSet:
+def load_allowed_moods(mood_file: Path) -> MoodSet | None:
     def load(content: str) -> MoodSet:
         moods = json.loads(content)
         Schema({Required("active"): [str]})(moods)
         return MoodSet(moods["active"])
 
-    return try_load(mood_file, load) or UniversalSet()
+    return try_load(mood_file, load)
 
 
 def list_media(dir: Path, is_valid: Callable[[str], bool]) -> list[Path]:

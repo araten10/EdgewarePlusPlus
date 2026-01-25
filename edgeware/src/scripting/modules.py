@@ -22,7 +22,7 @@ from typing import Callable
 
 from config.settings import Settings
 from features.audio import play_audio
-from features.corruption import next_corruption_level, update_corruption_level
+from features.corruption import update_corruption_level
 from features.image_popup import ImagePopup
 from features.misc import open_web, send_notification
 from features.prompt import Prompt
@@ -88,25 +88,20 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         while i in moods:
             mood_set.add(moods[i])
             i += 1
-        pack.active_moods = lambda: mood_set
-
-    # make sure that added_moods and removed_moods are mutually exclusive. Then update mood sets in use
-    def clean_script_moods_and_update() -> None:
-        pack.scripted_moods["added"].difference_update(pack.scripted_moods["removed"])
-        pack.scripted_moods["removed"].difference_update(pack.scripted_moods["added"])
-        pack.update_moods(state.corruption_level, next_corruption_level(settings, pack, state))
+        pack.active_moods = mood_set
 
     def enable_mood(_env: Environment, mood_name: str) -> None:
         if mood_name in pack.allowed_moods:
-            pack.scripted_moods["added"].add(mood_name)
-            clean_script_moods_and_update(settings, pack, state)
+            pack.active_moods.add(mood_name)
         else:
             logging.warning(f'Mood "{mood_name}" does not exist or is blocked by the user')
 
     def disable_mood(_env: Environment, mood_name: str) -> None:
         if mood_name in pack.allowed_moods:
-            pack.scripted_moods["removed"].add(mood_name)
-            clean_script_moods_and_update(settings, pack, state)
+            if mood_name in pack.active_moods:
+                pack.active_moods.remove(mood_name)
+            else:
+                logging.warning(f'Mood "{mood_name}" is already disabled')
         else:
             logging.warning(f'Mood "{mood_name}" does not exist or is blocked by the user')
 
