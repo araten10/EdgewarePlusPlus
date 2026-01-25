@@ -192,6 +192,7 @@ def handle_corruption(root: Tk, settings: Settings, pack: Pack, state: State) ->
     if settings.corruption_purity:
         state.corruption_level = len(pack.corruption_levels)
 
+    pack.active_moods = MoodSet()
     pack.get_active_moods = lambda: fade(settings, pack, state)
 
     match settings.corruption_trigger:
