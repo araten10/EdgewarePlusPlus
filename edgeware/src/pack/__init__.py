@@ -45,7 +45,7 @@ class Pack:
         self.config = load_config(self.paths)
 
         # Data files
-        self.allowed_moods = load_allowed_moods(self.info.mood_file) or MoodSet(self.index.moods)
+        self.allowed_moods = load_allowed_moods(self.info.mood_file) or MoodSet(map(lambda mood: mood.name, self.index.moods))
         self.active_moods = self.allowed_moods.copy()  # Should not be accessed directly except for modification
         self.get_active_moods = lambda: self.active_moods
         self.block_corruption_moods()
