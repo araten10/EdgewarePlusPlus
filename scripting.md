@@ -105,7 +105,7 @@ print(is_two(3))
 
 ### Basic v1
 
-Provides basic Lua functions. Import with `require("basic_v1")`
+Provides basic Lua functions. Import with `require("basic_v1")`.
 
 ---
 
@@ -138,10 +138,18 @@ Provides the core functionality for interacting with Edgeware's features. Import
 
 ---
 
-**UNSTABLE** - The behavior of this function may change.
-
 `ew.set_active_moods(moods)`: Set the active moods.
 - `moods`: List of moods, e.g., `{"furry", "goon"}`.
+
+---
+
+`ew.enable_mood(mood)`: Enable a mood.
+- `mood`: The name of a mood.
+
+---
+
+`ew.disable_mood(mood)`: Disable a mood.
+- `mood`: The name of a mood.
 
 ---
 
@@ -222,3 +230,23 @@ Provides the core functionality for interacting with Edgeware's features. Import
 `ew.send_notification(args)`
 - `args`: Table with the following optional fields:
   - `text`: Notification text, if not provided, a random notification from the pack is used.
+
+### Edgeware v0
+
+Older version of the Edgeware module for reference of how early scripting packs worked. Import with `require("edgeware_v0")`.
+
+**For new packs, the latest version should be preferred!**
+
+- **print(...)** - Prints any number of arguments through Python's print function
+- **after(ms, callback)** - Calls the function `callback` after `ms` milliseconds
+- **roll(chance)** - Rolls a random integer between 1 and 100 and compares it against `chance`, if the random number is less than or equal to `chance`, returns true, otherwise returns false
+- **corrupt()** - Progress to the next corruption level
+- **close_popups()** - Close all currently open popups
+- **set_popup_close_text(text)** - Set the popup close button's text to `text`
+- **image(filename)** - Open an image popup with the image pointed to by `filename` or a random image if `filename` is nil
+- **video(filename)** - Open a video popup with the video pointed to by `filename` or a random video if `filename` is nil
+- **audio(filename, on_stop)** - Play an audio file pointed to by `filename` or a random audio if `filename` is nil, after the audio has finished playing, calls the function `on_stop` if it is not nil
+- **prompt(text, on_close)** - Open a prompt with the text `text` or a random prompt if `text` is nil, after the prompt has been completed, calls the function `on_close` if it is not nil
+- **web(link)** - Open the web page `link` or a random web page is `link` is nil
+- **subliminal(text)** - Show a subliminal message `text` or a random subliminal message if `text` is nil
+- **notification(text)** - Show a notification `text` or a random notification if `text` is nil
