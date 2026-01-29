@@ -86,7 +86,11 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         i = 1
         mood_set = MoodSet()
         while i in moods:
-            mood_set.add(moods[i])
+            mood = moods[i]
+            if mood in pack.allowed_moods:
+                mood_set.add(mood)
+            else:
+                logging.warning(f'Mood "{mood}" does not exist or is blocked by the user')
             i += 1
         pack.active_moods = mood_set
 
