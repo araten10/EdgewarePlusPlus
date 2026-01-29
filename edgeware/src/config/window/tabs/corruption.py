@@ -178,11 +178,13 @@ class CorruptionModeTab(ScrollFrame):
         path_tree_frame = Frame(corruption_path_frame)
         path_tree_frame.pack(fill="both", side="left", expand=1)
 
-        path_tree = ttk.Treeview(path_tree_frame, height=6, show="headings", columns=("level", "moods", "wallpaper", "config"))
+        path_tree = ttk.Treeview(path_tree_frame, height=6, show="headings", columns=("level", "add", "remove", "wallpaper", "config"))
         path_tree.heading("level", text="LEVEL")
         path_tree.column("level", anchor="center", stretch=False, width=40)
-        path_tree.heading("moods", text="MOODS")
-        path_tree.column("moods", anchor="w", stretch=True)
+        path_tree.heading("add", text="ADD MOODS")
+        path_tree.column("add", anchor="w", stretch=True)
+        path_tree.heading("remove", text="REMOVE MOODS")
+        path_tree.column("remove", anchor="w", stretch=True)
         path_tree.heading("wallpaper", text="WALLPAPER")
         path_tree.column("wallpaper", anchor="w", stretch=True)
         path_tree.heading("config", text="CONFIG", anchor="w")
@@ -199,7 +201,7 @@ class CorruptionModeTab(ScrollFrame):
         path_scrollbar_y.pack(side="left", fill="y")
 
         for i, level in enumerate(pack.corruption_levels):
-            path_tree.insert("", "end", values=[i + 1, str(list(level.moods)), level.wallpaper, level.config])
+            path_tree.insert("", "end", values=[i + 1, str(list(level.added_moods)), str(list(level.removed_moods)), level.wallpaper, level.config])
 
         def fade_helper(key: str) -> None:
             if key == "Normal":
