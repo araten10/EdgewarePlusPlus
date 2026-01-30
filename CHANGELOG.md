@@ -15,25 +15,25 @@ Major scripting mode additions by Marigold! I have been working on our new proje
 
 •*Added support for Lua tables (similar to lists/dicts/classes)*
 
-•*Lua variables can now be defined in varlists, e.g., var_1, var_2 = 1, 2*
+•*Lua variables can now be defined in varlists, e.g., `var_1, var_2 = 1, 2`*
 
 •*Added remaining missing Lua bitwise binary operators for completeness, unlikely to be useful but good to have them just in case*
 
 •*Fixed a shell injection vulnerability in Linux wallpaper commands*
 
-•*Added a wallpaper setting command for LXQt desktop environment*
+•*Added a wallpaper setting command for the LXQt desktop environment*
 
 •*Fixed a bug where blurring and pixelization chance were not equal in denial mode*
 
-Added new edgeware_v1 and basic_v1 modules to scripting. The old edgeware_v0 module is not going anywhere for compatability's sake but it will not get any new features and should not be used for new packs. The new modules include:
+Added new `edgeware_v1` and `basic_v1` modules to scripting. The old `edgeware_v0` module is not going anywhere for compatability's sake but it will not get any new features and should not be used for new packs. The new modules include:
 
-•*on_close triggers for image and video popups, allowing something to happen when you close a popup*
+•*`on_close` triggers for image and video popups, allowing something to happen when you close a popup*
 
 •*Ability to set the wallpaper using scripting mode*
 
 •*Ability to set the prompt command text, submit text, and min and max lengths*
 
-•*Ability to enable and disable moods (contributed by https://github.com/dabberoo)*
+•*Ability to enable and disable moods (contributed by @dabberoo)*
 
 **Version 19**
 
