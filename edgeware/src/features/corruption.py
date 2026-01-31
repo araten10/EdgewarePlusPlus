@@ -122,7 +122,7 @@ def fade(settings: Settings, pack: Pack, state: State) -> MoodSet:
     if not roll(chance):
         return pack.active_moods
 
-    next_level = pack.corruption_levels[next_corruption_level(settings, pack, state)]
+    next_level = pack.corruption_levels[next_corruption_level(settings, pack, state) - 1]
     return pack.active_moods | next_level.added_moods - next_level.removed_moods
 
 
