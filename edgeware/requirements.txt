@@ -11,6 +11,7 @@ pystray
 python-xlib; platform_system == 'Linux'
 pywin32; platform_system == 'Windows'
 requests
+ruff
 screeninfo
 sounddevice
 tkinter-tooltip

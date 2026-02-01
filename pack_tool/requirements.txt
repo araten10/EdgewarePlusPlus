@@ -2,4 +2,5 @@ filetype
 Pillow
 pyffmpeg
 pyyaml
+ruff
 voluptuous
