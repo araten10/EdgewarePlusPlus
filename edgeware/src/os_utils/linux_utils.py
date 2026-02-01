@@ -166,6 +166,7 @@ def find_get_wallpaper_command(desktop: str) -> str | None:
                 "gsettings get org.gnome.desktop.background $(if [ $(gsettings get org.gnome.desktop.interface color-scheme) == \"'default'\" ]; then echo picture-uri; else echo picture-uri-dark; fi)"
             ],
         ),
+        "kde": ["qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \"$(cat plasma_get_wp.js)\""]
     }
 
     return commands.get(desktop)

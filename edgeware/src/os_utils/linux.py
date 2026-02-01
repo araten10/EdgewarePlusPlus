@@ -60,7 +60,9 @@ def get_wallpaper() -> Path | None:
 
         if s.stdout:
             line = s.stdout.readline()
-            string = line.decode("utf-8").strip()[1:-1]
+            string = line.decode("utf-8").strip()
+            if desktop != "kde":
+                string = string[1:-1]
             return Path(urlparse(string).path)
     else:
         logging.info(f"Can't get wallpaper for desktop environment {desktop}")
