@@ -16,9 +16,10 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+import operator
 from pathlib import Path
 from tkinter import Tk
-from typing import Callable
+from typing import Callable, Tuple
 
 from config.settings import Settings
 from features.audio import play_audio
@@ -42,7 +43,7 @@ def resource(dir: Path, file: str | None) -> Path | None:
     return dir / file if file else None
 
 
-def callback(env: Environment, function: Callable | None) -> Callable | None:
+def wrap_optional_callback(env: Environment, function: Callable | None) -> Callable | None:
     return (lambda: function(env)) if function else None
 
 
@@ -69,8 +70,8 @@ def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "set_popup_close_text": lambda _env, text: pack.index.default.__setattr__("popup_close", text),
         "image": lambda _env, image: ImagePopup(root, settings, pack, state, resource(pack.paths.image, image)),
         "video": lambda _env, video: VideoPopup(root, settings, pack, state, resource(pack.paths.video, video)),
-        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, resource(pack.paths.audio, audio), callback(env, on_stop)),
-        "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, callback(env, on_close)),
+        "audio": lambda env, audio, on_stop: play_audio(root, settings, pack, state, resource(pack.paths.audio, audio), wrap_optional_callback(env, on_stop)),
+        "prompt": lambda env, prompt, on_close: Prompt(settings, pack, state, prompt, wrap_optional_callback(env, on_close)),
         "web": lambda _env, web: open_web(pack, web),
         "subliminal": lambda _env, subliminal: SubliminalPopup(settings, pack, subliminal),
         "notification": lambda _env, notification: send_notification(settings, pack, notification),
@@ -109,6 +110,17 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         else:
             logging.warning(f'Mood "{mood_name}" does not exist or is blocked by the user')
 
+    def observe_popup_number(comparison: Callable[Tuple[int, int], bool], callback: Callable) -> None:
+        previous_popup_number = state.popup_number
+
+        def observer() -> None:
+            nonlocal previous_popup_number
+            if comparison(state.popup_number, previous_popup_number):
+                callback()
+            previous_popup_number = state.popup_number
+
+        state._popup_number.attach(observer)
+
     index = {
         "set_popup_close_text": lambda _env, text: pack.index.default.__setattr__("popup_close", text),
         "set_prompt_command_text": lambda _env, text: pack.index.default.__setattr__("prompt_command", text),
@@ -119,15 +131,15 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
 
     popups = {
         "open_image": lambda env, args={}: ImagePopup(
-            root, settings, pack, state, resource(pack.paths.image, args.get("filename")), callback(env, args.get("on_close"))
+            root, settings, pack, state, resource(pack.paths.image, args.get("filename")), wrap_optional_callback(env, args.get("on_close"))
         ),
         "open_video": lambda env, args={}: VideoPopup(
-            root, settings, pack, state, resource(pack.paths.video, args.get("filename")), callback(env, args.get("on_close"))
+            root, settings, pack, state, resource(pack.paths.video, args.get("filename")), wrap_optional_callback(env, args.get("on_close"))
         ),
         "play_audio": lambda env, args={}: play_audio(
-            root, settings, pack, state, resource(pack.paths.audio, args.get("filename")), callback(env, args.get("on_stop"))
+            root, settings, pack, state, resource(pack.paths.audio, args.get("filename")), wrap_optional_callback(env, args.get("on_stop"))
         ),
-        "open_prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("text"), callback(env, args.get("on_close"))),
+        "open_prompt": lambda env, args={}: Prompt(settings, pack, state, args.get("text"), wrap_optional_callback(env, args.get("on_close"))),
         "open_web": lambda _env, args={}: open_web(pack, args.get("url")),
         "open_subliminal": lambda _env, args={}: SubliminalPopup(settings, pack, args.get("text")),
         "send_notification": lambda _env, args={}: send_notification(settings, pack, args.get("text")),
@@ -143,6 +155,8 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         "disable_mood": disable_mood,
         "progress_corruption": lambda _env: update_corruption_level(settings, pack, state),
         "set_wallpaper": lambda _env, filename: set_wallpaper(resource(pack.paths.root, filename)),
+        "connect_on_popup_open": lambda env, callback: observe_popup_number(operator.gt, lambda: callback(env)),
+        "connect_on_popup_close": lambda env, callback: observe_popup_number(operator.lt, lambda: callback(env)),
         **index,
         **popups,
     }

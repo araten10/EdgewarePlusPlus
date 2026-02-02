@@ -162,6 +162,16 @@ Provides the core functionality for interacting with Edgeware's features. Import
 
 ---
 
+`ew.connect_on_popup_open(callback)`: Connect a function to run when any image or video popup is opened.
+- `callback`: Function taking no arguments.
+
+---
+
+`ew.connect_on_popup_close(callback)`: Connect a function to run when any image or video popup is closed.
+- `callback`: Function taking no arguments.
+
+---
+
 `ew.set_popup_close_text(text)`: Set the text on the close button of popups.
 - `text`: New text.
 
