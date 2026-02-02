@@ -18,7 +18,6 @@
 # Lua 5.4 syntax: https://www.lua.org/manual/5.4/manual.html#9
 
 import logging
-from dataclasses import dataclass
 from tkinter import Tk
 
 from config.settings import Settings
@@ -28,7 +27,7 @@ from state import State
 from scripting.environment import Environment
 from scripting.modules import get_modules
 from scripting.tokens import Tokens
-from scripting.types import LuaError, LuaFunction, LuaTable, LuaValue
+from scripting.types import LuaError, LuaFunction, LuaTable, LuaValue, ReturnValue
 
 
 class NameList(list[str]):
@@ -37,11 +36,6 @@ class NameList(list[str]):
         self.append(tokens.get_name())
         while tokens.skip_if(","):
             self.append(tokens.get_name())
-
-
-@dataclass
-class ReturnValue:
-    value: object
 
 
 class FunctionBody:
@@ -135,24 +129,24 @@ class Prefix:
                     args = ExpressionList(tokens)
                     tokens.skip(")")
                 self.assign = None
-                self.eval = lambda env, eval=self.eval: self.return_value(eval(env)(env, *[arg.eval(env) for arg in args]))  # noqa: E731
+                self.eval = lambda env, eval=self.eval: self.get_return_value(eval(env)(env, *[arg.eval(env) for arg in args]))  # noqa: E731
             elif tokens.next == "{":
                 table = TableConstructor(tokens)
                 self.assign = None
-                self.eval = lambda env, eval=self.eval: self.return_value(eval(env)(env, table.eval(env)))  # noqa: E731
+                self.eval = lambda env, eval=self.eval: self.get_return_value(eval(env)(env, table.eval(env)))  # noqa: E731
             elif tokens.next[0] == '"':
                 string = PrimaryExpression(tokens)
                 self.assign = None
-                self.eval = lambda env, eval=self.eval: self.return_value(eval(env)(env, string.eval(env)))  # noqa: E731
+                self.eval = lambda env, eval=self.eval: self.get_return_value(eval(env)(env, string.eval(env)))  # noqa: E731
             else:
                 break
 
     def is_var(self) -> bool:
         return bool(self.assign)
 
-    def return_value(self, value: ReturnValue | None) -> LuaValue:
+    def get_return_value(self, value: ReturnValue | None) -> LuaValue:
         if isinstance(value, ReturnValue):
-            return value.value
+            return value.inner
 
 
 class PrimaryExpression:

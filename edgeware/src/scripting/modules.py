@@ -37,7 +37,7 @@ from roll import roll
 from state import State
 
 from scripting.environment import Environment
-from scripting.types import EvalFunction, LuaFunction, LuaTable, LuaValue
+from scripting.types import EvalFunction, LuaFunction, LuaTable, LuaValue, ReturnValue
 
 
 def resource(dir: Path, file: str | None) -> Path | None:
@@ -59,8 +59,6 @@ def close_popups(state: State) -> None:
 
 
 def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> EvalFunction:
-    from scripting import ReturnValue
-
     edgeware_v0_global = {
         "print": lambda _env, *args: print(*args),
         "after": lambda env, ms, callback: root.after(ms, lambda: callback(env)),
@@ -81,8 +79,6 @@ def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> EvalF
 
 
 def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> EvalFunction:
-    from scripting import ReturnValue
-
     def set_active_moods(_env: Environment, moods: LuaTable) -> None:
         # TODO: How are lists typically handled in Lua?
         i = 1

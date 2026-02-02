@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+from dataclasses import dataclass
 from typing import Callable, Protocol
 
 type LuaValue = int | float | bool | str | None | LuaFunction | LuaTable
@@ -26,9 +27,16 @@ class LuaError(Exception):
     pass
 
 
+# For type hints, full definition is in environment.py
 class Environment:
     pass
 
 
+# Created by return statements in blocks, extracted in function calls
+@dataclass
+class ReturnValue:
+    inner: LuaValue
+
+
 class LuaFunction(Protocol):
-    def __call__(self, env: Environment, *args: LuaValue) -> LuaValue: ...
+    def __call__(self, env: Environment, *args: LuaValue) -> ReturnValue | None: ...
