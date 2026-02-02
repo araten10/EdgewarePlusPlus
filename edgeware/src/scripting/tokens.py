@@ -17,7 +17,7 @@
 
 from collections.abc import Iterable
 
-from scripting.error import LuaError
+from scripting.types import LuaError
 
 KEYWORDS = [
     "and",

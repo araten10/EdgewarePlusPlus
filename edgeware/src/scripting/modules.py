@@ -37,17 +37,18 @@ from roll import roll
 from state import State
 
 from scripting.environment import Environment
+from scripting.types import EvalFunction, LuaFunction, LuaTable, LuaValue
 
 
 def resource(dir: Path, file: str | None) -> Path | None:
     return dir / file if file else None
 
 
-def wrap_optional_callback(env: Environment, function: Callable | None) -> Callable | None:
+def wrap_optional_callback(env: Environment, function: LuaFunction | None) -> Callable[[], None] | None:
     return (lambda: function(env)) if function else None
 
 
-def assign_globals(env: Environment, globals: dict[str, object]) -> None:
+def assign_globals(env: Environment, globals: dict[str, LuaValue]) -> None:
     for name, value in globals.items():
         env.assign(name, value)
 
@@ -57,7 +58,7 @@ def close_popups(state: State) -> None:
         popup.close()
 
 
-def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
+def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> EvalFunction:
     from scripting import ReturnValue
 
     edgeware_v0_global = {
@@ -79,10 +80,10 @@ def edgeware_v0(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
     return lambda env: assign_globals(env, edgeware_v0_global)
 
 
-def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Callable:
+def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> EvalFunction:
     from scripting import ReturnValue
 
-    def set_active_moods(_env: Environment, moods: dict) -> None:
+    def set_active_moods(_env: Environment, moods: LuaTable) -> None:
         # TODO: How are lists typically handled in Lua?
         i = 1
         mood_set = MoodSet()
@@ -110,7 +111,7 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
         else:
             logging.warning(f'Mood "{mood_name}" does not exist or is blocked by the user')
 
-    def observe_popup_number(comparison: Callable[Tuple[int, int], bool], callback: Callable) -> None:
+    def observe_popup_number(comparison: Callable[Tuple[int, int], bool], callback: Callable[[], None]) -> None:
         previous_popup_number = state.popup_number
 
         def observer() -> None:
@@ -164,7 +165,7 @@ def edgeware_v1(root: Tk, settings: Settings, pack: Pack, state: State) -> Calla
     return lambda _env: edgeware_v1_local
 
 
-def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict:
+def get_modules(root: Tk, settings: Settings, pack: Pack, state: State) -> dict[str, LuaValue]:
     basic_v1_global = {
         "print": lambda _env, *args: print(*args),
     }

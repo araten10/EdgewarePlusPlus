@@ -15,13 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-
-class Environment:
-    pass
+from scripting.types import Environment, LuaValue
 
 
 class Environment:
-    def __init__(self, scope: dict[str, object], external: Environment | None = None, closure: set[str] | None = None) -> None:
+    def __init__(self, scope: dict[str, LuaValue], external: Environment | None = None, closure: set[str] | None = None) -> None:
         self.scope = scope
         self.external = external
         self.closure = closure
@@ -29,7 +27,8 @@ class Environment:
     def is_global(self) -> bool:
         return self.external is None
 
-    def find(self, name: str, closure: set[str] | None = None) -> dict[str, object]:
+    # Find the scope in which a variable is defined
+    def find(self, name: str, closure: set[str] | None = None) -> dict[str, LuaValue]:
         if self.is_global():
             return self.scope
 
@@ -37,11 +36,11 @@ class Environment:
         next_closure = closure if closure is not None else self.closure
         return self.scope if in_scope else self.external.find(name, next_closure)
 
-    def get(self, name: str) -> object:
+    def get(self, name: str) -> LuaValue:
         return self.find(name).get(name)
 
-    def define(self, name: str, value: object) -> None:
+    def define(self, name: str, value: LuaValue) -> None:
         self.scope[name] = value
 
-    def assign(self, name: str, value: object) -> None:
+    def assign(self, name: str, value: LuaValue) -> None:
         self.find(name)[name] = value

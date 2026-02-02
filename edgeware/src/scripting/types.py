@@ -15,6 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Callable, Protocol
+
+type LuaValue = int | float | bool | str | None | LuaFunction | LuaTable
+type LuaTable = dict[str | int, LuaValue]
+type EvalFunction = Callable[[Environment], LuaValue]
+
 
 class LuaError(Exception):
     pass
+
+
+class Environment:
+    pass
+
+
+class LuaFunction(Protocol):
+    def __call__(self, env: Environment, *args: LuaValue) -> LuaValue: ...

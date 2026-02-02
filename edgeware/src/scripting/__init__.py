@@ -20,16 +20,15 @@
 import logging
 from dataclasses import dataclass
 from tkinter import Tk
-from typing import Callable
 
 from config.settings import Settings
 from pack import Pack
 from state import State
 
 from scripting.environment import Environment
-from scripting.error import LuaError
 from scripting.modules import get_modules
 from scripting.tokens import Tokens
+from scripting.types import LuaError, LuaFunction, LuaTable, LuaValue
 
 
 class NameList(list[str]):
@@ -55,7 +54,7 @@ class FunctionBody:
             tokens.skip(")")
         self.block = Block(tokens, "end")
 
-    def eval(self, env: Environment) -> Callable:
+    def eval(self, env: Environment) -> LuaFunction:
         closure = set()
         lexical = env
         while not lexical.is_global():
@@ -94,7 +93,7 @@ class TableConstructor:
 
         tokens.skip("}")
 
-    def eval(self, env: Environment) -> dict:
+    def eval(self, env: Environment) -> LuaTable:
         table = {}
         for key, value in self.entries:
             if isinstance(key, Expression):
@@ -151,7 +150,7 @@ class Prefix:
     def is_var(self) -> bool:
         return bool(self.assign)
 
-    def return_value(self, value: ReturnValue | None) -> object | None:
+    def return_value(self, value: ReturnValue | None) -> LuaValue:
         if isinstance(value, ReturnValue):
             return value.value
 

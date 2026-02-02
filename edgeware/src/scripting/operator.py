@@ -20,6 +20,9 @@ from typing import Callable
 
 from scripting import PrimaryExpression
 from scripting.tokens import Tokens
+from scripting.types import EvalFunction, LuaValue
+
+type UnaryFunction = Callable[[LuaValue], LuaValue]
 
 UN_OPS = {"-": operator.neg, "not": operator.not_, "#": len, "~": operator.inv}
 UN_PREC = 10
@@ -57,11 +60,11 @@ BIN_PREC = {token: data[1] for token, data in BINARY.items()}
 RIGHT_ASSOC = {token: data[2] for token, data in BINARY.items()}
 
 
-def identity(value: object) -> object:
+def identity(value: LuaValue) -> LuaValue:
     return value
 
 
-def unary_apply(tokens: Tokens) -> Callable:
+def unary_apply(tokens: Tokens) -> UnaryFunction:
     """Returns a function to apply a list of unary operators"""
     chain = identity
     while tokens.next in UN_OPS:
@@ -72,7 +75,7 @@ def unary_apply(tokens: Tokens) -> Callable:
 
 # Modified version of the precedence climbing algorithm from Wikipedia
 # https://en.wikipedia.org/wiki/Operator-precedence_parser#Pseudocode
-def binary_eval(tokens: Tokens, l_un: Callable, l_eval: Callable, min_precedence: int = 0) -> Callable:
+def binary_eval(tokens: Tokens, l_un: UnaryFunction, l_eval: EvalFunction, min_precedence: int = 0) -> EvalFunction:
     while tokens.next in BIN_OPS and (BIN_PREC[tokens.next] >= min_precedence):
         token = tokens.get()
         op = BIN_OPS[token]
@@ -93,7 +96,7 @@ def binary_eval(tokens: Tokens, l_un: Callable, l_eval: Callable, min_precedence
     return lambda env: l_un(l_eval(env))
 
 
-def operator_eval(tokens: Tokens) -> Callable:
+def operator_eval(tokens: Tokens) -> EvalFunction:
     l_un = unary_apply(tokens)
     left = PrimaryExpression(tokens)
     return binary_eval(tokens, l_un, left.eval)
