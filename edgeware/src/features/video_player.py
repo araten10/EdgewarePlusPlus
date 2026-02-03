@@ -15,20 +15,33 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-import io
 import logging
-import subprocess
-import sys
+import multiprocessing
 from pathlib import Path
-from threading import Thread
 from tkinter import Label, Misc
 
 import mpv
 import os_utils
 from config.settings import Settings
 from os_utils import close_mpv
-from paths import Process
 from PIL import Image
+
+
+def make_mpv_player(wid: int, properties: dict[str, str], overlay: Image.Image | None) -> mpv.MPV:
+    player = mpv.MPV(wid=wid)
+    for key, value in properties.items():
+        player[key] = value
+
+    if overlay:
+        player.create_image_overlay().update(overlay)
+
+    return player
+
+
+def mpv_subprocess(media: Path, wid: int, properties: dict[str, str], overlay: Image.Image | None) -> None:
+    player = make_mpv_player(wid, properties, overlay)
+    player.play(str(media))
+    player.wait_for_playback()
 
 
 class VideoPlayer(Label):
@@ -50,6 +63,7 @@ class VideoPlayer(Label):
                 try:
                     temp["gpu-context"] = context  # Check if context is supported
                     self.properties["gpu-context"] = context
+                    logging.info(f"Using mpv GPU context {context}")
                     break
                 except TypeError:
                     logging.warning(f"mpv GPU context {context} is not supported")
@@ -57,39 +71,15 @@ class VideoPlayer(Label):
     def play(self, media: Path, overlay: Image.Image | None = None) -> None:
         if not self.settings.mpv_subprocess:
             self.wait_visibility()  # Needs to be visible for mpv to draw on it
-
-            self.mpv = mpv.MPV(wid=self.winfo_id())
-            for key, value in self.properties.items():
-                self.mpv[key] = value
-
-            if overlay:
-                self.mpv.create_image_overlay().update(overlay)
-
-            self.mpv.play(str(media))
+            self.player = make_mpv_player(self.winfo_id(), self.properties, overlay)
+            self.player.play(str(media))
         else:
-            self.process = subprocess.Popen(
-                [
-                    sys.executable,
-                    Process.MPV,
-                    str(self.winfo_id()),
-                    str(self.properties),
-                    media,
-                    "1" if overlay else "0",
-                ],
-                stdin=subprocess.PIPE,
-            )
-
-            if overlay:
-
-                def send_overlay() -> None:
-                    bytes_io = io.BytesIO()
-                    overlay.save(bytes_io, format="PNG")
-                    self.process.communicate(input=bytes_io.getvalue())
-
-                Thread(target=send_overlay).start()
+            context = multiprocessing.get_context("spawn")  # Audio won't work unless this is used
+            self.process = context.Process(target=mpv_subprocess, args=(media, self.winfo_id(), self.properties, overlay))
+            self.process.start()
 
     def close(self) -> None:
         if not self.settings.mpv_subprocess:
-            close_mpv(self.mpv)
+            close_mpv(self.player)
         else:
-            self.process.kill()
+            self.process.terminate()

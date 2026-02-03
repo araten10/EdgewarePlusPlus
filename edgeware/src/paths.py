@@ -30,8 +30,6 @@ class Process:
     MAIN = ROOT / "main_edgeware.py"
     PANIC = ROOT / "panic.py"
 
-    MPV = ROOT / "features" / "mpv_subprocess.py"
-
 
 @dataclass
 class Assets:
