@@ -158,12 +158,12 @@ def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], N
 
 
 def find_get_wallpaper_command(desktop: str) -> str | None:
-    plasma_js = '''
+    plasma_js = """
 let desktop = desktops()[0];
 desktop.wallpaperPlugin = "org.kde.image";
 desktop.currentConfigGroup = Array("Wallpaper", "org.kde.image", "General");
 print(desktop.readConfig("Image"));
-'''
+"""
 
     commands = {
         "mate": ["gsettings get org.mate.background picture-filename"],
@@ -173,9 +173,7 @@ print(desktop.readConfig("Image"));
                 "gsettings get org.gnome.desktop.background $(if [ $(gsettings get org.gnome.desktop.interface color-scheme) == \"'default'\" ]; then echo picture-uri; else echo picture-uri-dark; fi)"
             ],
         ),
-        "kde": [f"qdbus6 org.kde.plasmashell "
-                f" /PlasmaShell org.kde.PlasmaShell.evaluateScript {shlex.quote(plasma_js)}"
-        ]
+        "kde": [f"qdbus6 org.kde.plasmashell  /PlasmaShell org.kde.PlasmaShell.evaluateScript {shlex.quote(plasma_js)}"],
     }
 
     return commands.get(desktop)

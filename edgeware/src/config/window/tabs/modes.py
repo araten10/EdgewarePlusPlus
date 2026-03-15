@@ -44,7 +44,7 @@ class BasicModesTab(ScrollFrame):
         ConfigToggle(lowkey_row, "Enable Lowkey Mode", variable=vars.lowkey_mode).pack()
         lowkey_corners = ["Top Right", "Top Left", "Bottom Left", "Bottom Right", "Random"]
         lowkey_corner_string = StringVar(self, lowkey_corners[vars.lowkey_corner.get()])
-        lowkey_dropdown = OptionMenu(lowkey_row, lowkey_corner_string, *lowkey_corners, command=lambda x: (vars.lowkey_corner.set(lowkey_corners.index(x))))
+        lowkey_dropdown = OptionMenu(lowkey_row, lowkey_corner_string, *lowkey_corners, command=lambda x: vars.lowkey_corner.set(lowkey_corners.index(x)))
         lowkey_dropdown.pack(padx=PAD, pady=PAD, side="left", fill="x", expand=True)
         set_enabled_when(lowkey_dropdown, enabled=(vars.lowkey_mode, True))
 
