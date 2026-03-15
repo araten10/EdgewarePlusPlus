@@ -71,7 +71,7 @@ def replace_images(settings: Settings, pack: Pack) -> None:
     if not settings.replace_images:
         return
 
-    backups = Data.BACKUPS / time.asctime()
+    backups = Data.BACKUPS / time.asctime().replace(":", "_")
     for path, dirs, files in os.walk(settings.drive_path):
         filter_avoid_list(settings, dirs)
 
