@@ -23,7 +23,7 @@ if not %errorlevel%==0 (
 
   echo Done downloading executable.
   echo Please complete installation through the installer before continuing, make sure "Add Python to PATH" is checked.
-  start %CD%\pyinstaller.exe
+  start "" "%~dp0\pyinstaller.exe"
   pause
 
   py --version
@@ -96,5 +96,5 @@ echo config.pyw: runs the config window which allows changing Edgeware++ setting
 echo edgeware.pyw: starts Edgeware++ with the config settings you have saved
 echo panic.pyw: kills Edgeware++ and all currently spawned popups
 pause
-start "Edgeware++ Config" "%CD%/config.pyw"
+start "Edgeware++ Config" "%~dp0config.pyw"
 exit
