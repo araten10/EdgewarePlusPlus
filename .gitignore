@@ -178,5 +178,6 @@ edgeware/data/presets/*
 !edgeware/data/presets/Default.txt
 !edgeware/data/presets/Sampler.cfg
 !edgeware/data/presets/Sampler.txt
+ruffruff.bat
 
 *.zip

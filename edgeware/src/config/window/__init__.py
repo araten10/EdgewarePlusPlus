@@ -47,6 +47,7 @@ from config.window.tabs.annoyance.wallpaper import WallpaperTab
 from config.window.tabs.corruption import CorruptionModeTab
 from config.window.tabs.general.default_file import DefaultFileTab
 from config.window.tabs.general.info import InfoTab
+from config.window.tabs.general.scheduling import SchedulingTab
 from config.window.tabs.general.start import StartTab
 from config.window.tabs.modes import BasicModesTab
 from config.window.tabs.troubleshooting import TroubleshootingTab
@@ -105,6 +106,7 @@ class ConfigWindow(Tk):
         general_notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")  # startup screen, info and presets
         general_notebook.add(InfoTab(pack), text="Pack Info")  # pack information
         general_notebook.add(DefaultFileTab(), text="Change Default Files")  # tab for changing default files
+        general_notebook.add(SchedulingTab(), text="Scheduling")  # tab for scheduling edgeware to run in the future
 
         annoyance_tab = ttk.Frame(notebook)
         notebook.add(annoyance_tab, text="Annoyance/Runtime")
