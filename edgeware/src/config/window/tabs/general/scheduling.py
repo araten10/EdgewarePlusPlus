@@ -20,6 +20,19 @@ from config.window.widgets.layout import (
     ConfigSection,
 )
 from config.window.widgets.scroll_frame import ScrollFrame
+from tkinter import (
+    GROOVE,
+    RAISED,
+    Button,
+    Checkbutton,
+    Frame,
+    Label,
+    OptionMenu,
+    Scale,
+    StringVar,
+    Text,
+)
+from config.window.utils import set_schedule
 
 INTRO_TEXT = 'Want to have Edgeware run at a specific time every day? What about letting it trigger you randomly every so often? These options should have you covered!\n\nSchedule will run Edgeware whenever a timer is reached, which can be set here. It differs from something like "Hibernate Mode" (Found in the "Modes" tab) by allowing Edgeware to do whatever it can normally do. It also supports much longer forms of waiting, such as hours, days, or even weeks!'
 
@@ -32,3 +45,8 @@ class SchedulingTab(ScrollFrame):
 
         schedule_section = ConfigSection(self.viewPort, "Scheduling", INTRO_TEXT)
         schedule_section.pack()
+
+        schedule_frame = Frame(schedule_section)
+        schedule_frame.pack(fill="both", side="left", expand=1)
+
+        Button(schedule_frame, text="Apply Schedule", command=lambda: set_schedule()).pack(fill="both", expand=1)
