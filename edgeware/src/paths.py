@@ -24,6 +24,7 @@ DEFAULT_PACK_PATH = PATH / "resource"
 
 @dataclass
 class Process:
+    RUN = PATH / "edgeware.pyw"
     ROOT = PATH / "src"
 
     CONFIG = ROOT / "main_config.py"

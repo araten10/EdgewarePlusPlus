@@ -32,7 +32,8 @@ from tkinter import (
     StringVar,
     Text,
 )
-from config.window.utils import set_schedule
+from config.window.utils import set_schedule, delete_schedule
+import subprocess
 
 INTRO_TEXT = 'Want to have Edgeware run at a specific time every day? What about letting it trigger you randomly every so often? These options should have you covered!\n\nSchedule will run Edgeware whenever a timer is reached, which can be set here. It differs from something like "Hibernate Mode" (Found in the "Modes" tab) by allowing Edgeware to do whatever it can normally do. It also supports much longer forms of waiting, such as hours, days, or even weeks!'
 
@@ -47,6 +48,8 @@ class SchedulingTab(ScrollFrame):
         schedule_section.pack()
 
         schedule_frame = Frame(schedule_section)
-        schedule_frame.pack(fill="both", side="left", expand=1)
+        schedule_frame.pack(fill="both", side="top", expand=1)
 
-        Button(schedule_frame, text="Apply Schedule", command=lambda: set_schedule()).pack(fill="both", expand=1)
+        Button(schedule_frame, text="Apply Schedule", height=2, command=lambda: set_schedule()).pack(fill="both", side="left", expand=1)
+        Button(schedule_frame, text="Delete Schedule", height=2, command=lambda: delete_schedule()).pack(fill="both", side="left", expand=1)
+        Button(schedule_frame, text="Open Task Scheduler (Windows Only)", height=2, command=lambda: subprocess.Popen("taskschd.msc", shell=True)).pack(fill="both", expand=1)

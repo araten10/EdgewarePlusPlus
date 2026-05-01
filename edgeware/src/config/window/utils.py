@@ -319,7 +319,7 @@ def set_schedule() -> None:
 
     # Create trigger
     # If we're adding "X hours from now", formula is datetime.datetime.now() + datetime.timedelta(minutes=5)
-    start_time = datetime.datetime.now() + datetime.timedelta(minutes=5)
+    start_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
     TASK_TRIGGER_TIME = 1
     trigger = task_def.Triggers.Create(TASK_TRIGGER_TIME)
     trigger.StartBoundary = start_time.isoformat()
@@ -328,7 +328,7 @@ def set_schedule() -> None:
     TASK_ACTION_EXEC = 0
     action = task_def.Actions.Create(TASK_ACTION_EXEC)
     action.ID = 'EDGEWARE'
-    action.Path = 'cmd.exe' # Process.MAIN does not seem to work? testing it out with this. might have to make bat file to run
+    action.Path = str(Process.RUN) # Process.MAIN does not seem to work? testing it out with this. might have to make bat file to run
     # action.Arguments = '/c "exit"'
 
     # Set parameters
@@ -347,3 +347,9 @@ def set_schedule() -> None:
         '',  # No user
         '',  # No password
         TASK_LOGON_NONE)
+
+def delete_schedule() -> None:
+    scheduler = win32com.client.Dispatch('Schedule.Service')
+    scheduler.Connect()
+    root_folder = scheduler.GetFolder('\\')
+    root_folder.DeleteTask('Edgeware++', 0)
