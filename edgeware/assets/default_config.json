@@ -93,5 +93,6 @@
   "clickthroughPopups": 0,
   "fadeInDuration": 0,
   "fadeOutDuration": 0,
-  "schedule": 0
+  "schedule": 0,
+  "scheduleType": "Relative"
 }

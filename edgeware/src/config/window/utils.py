@@ -328,8 +328,8 @@ def set_schedule() -> None:
     TASK_ACTION_EXEC = 0
     action = task_def.Actions.Create(TASK_ACTION_EXEC)
     action.ID = 'EDGEWARE'
-    action.Path = str(Process.RUN) # Process.MAIN does not seem to work? testing it out with this. might have to make bat file to run
-    # action.Arguments = '/c "exit"'
+    action.Path = str(Process.RUN)
+    # action.Arguments is to be used if cmdline is needed
 
     # Set parameters
     task_def.RegistrationInfo.Description = 'Edgeware++'

@@ -106,7 +106,7 @@ class ConfigWindow(Tk):
         general_notebook.add(StartTab(vars, local_version, live_version, pack), text="Start")  # startup screen, info and presets
         general_notebook.add(InfoTab(pack), text="Pack Info")  # pack information
         general_notebook.add(DefaultFileTab(), text="Change Default Files")  # tab for changing default files
-        general_notebook.add(SchedulingTab(), text="Scheduling")  # tab for scheduling edgeware to run in the future
+        general_notebook.add(SchedulingTab(vars), text="Scheduling")  # tab for scheduling edgeware to run in the future
 
         annoyance_tab = ttk.Frame(notebook)
         notebook.add(annoyance_tab, text="Annoyance/Runtime")

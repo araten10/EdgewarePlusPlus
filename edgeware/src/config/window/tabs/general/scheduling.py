@@ -18,6 +18,7 @@
 
 from config.window.widgets.layout import (
     ConfigSection,
+    ConfigToggle
 )
 from config.window.widgets.scroll_frame import ScrollFrame
 from tkinter import (
@@ -34,12 +35,14 @@ from tkinter import (
 )
 from config.window.utils import set_schedule, delete_schedule
 import subprocess
+from config.vars import Vars
+from config.window.widgets.tooltip import CreateToolTip
 
 INTRO_TEXT = 'Want to have Edgeware run at a specific time every day? What about letting it trigger you randomly every so often? These options should have you covered!\n\nSchedule will run Edgeware whenever a timer is reached, which can be set here. It differs from something like "Hibernate Mode" (Found in the "Modes" tab) by allowing Edgeware to do whatever it can normally do. It also supports much longer forms of waiting, such as hours, days, or even weeks!'
-
+TIMER_TEXT = 'asdfg'
 
 class SchedulingTab(ScrollFrame):
-    def __init__(self) -> None:
+    def __init__(self, vars: Vars) -> None:
         super().__init__()
 
         # Information
@@ -50,6 +53,37 @@ class SchedulingTab(ScrollFrame):
         schedule_frame = Frame(schedule_section)
         schedule_frame.pack(fill="both", side="top", expand=1)
 
-        Button(schedule_frame, text="Apply Schedule", height=2, command=lambda: set_schedule()).pack(fill="both", side="left", expand=1)
-        Button(schedule_frame, text="Delete Schedule", height=2, command=lambda: delete_schedule()).pack(fill="both", side="left", expand=1)
-        Button(schedule_frame, text="Open Task Scheduler (Windows Only)", height=2, command=lambda: subprocess.Popen("taskschd.msc", shell=True)).pack(fill="both", expand=1)
+        schedule_buttons_frame = Frame(schedule_frame)
+        schedule_buttons_frame.pack(fill="both", side="top", expand=1)
+
+        Button(schedule_frame, text="Open Task Scheduler (Windows Only)", height=1, command=lambda: subprocess.Popen("taskschd.msc", shell=True)).pack(fill="both", expand=1)
+
+        Button(schedule_buttons_frame, text="Apply Schedule", height=3, command=lambda: set_schedule()).pack(fill="both", side="left", expand=1)
+        Button(schedule_buttons_frame, text="Delete Schedule", height=3, command=lambda: delete_schedule()).pack(fill="both", side="left", expand=1)
+
+        schedule_time_section = ConfigSection(self.viewPort, "Schedule Timer", TIMER_TEXT)
+        schedule_time_section.pack()
+
+        schedule_types = ["Relative", "Absolute"]
+        # broken atm
+        # schedule_dropdown = OptionMenu(schedule_time_section, vars.scheduleType, *schedule_types, command=lambda key: theme_helper(key))
+        # schedule_dropdown.configure(width=12)
+        # schedule_dropdown.pack(fill="both", side="top", padx=5, pady=5)
+
+        schedule_options_frame = Frame(schedule_time_section)
+        schedule_options_frame.pack(fill="both", side="top", expand=1)
+
+        restart_toggle = ConfigToggle(schedule_options_frame, text="Restart On Panic", cursor="question_arrow").grid(0,0)
+        # CreateToolTip(
+        #     restart_toggle,
+        #     'Adds another task with the "same settings" when panic is initiated.\n\n'
+        #     'For example, a task scheduled for 3 hours from now would create\n'
+        #     'another task 3 hours from when panic was used. A task set for 2:00 AM\n'
+        #     'would be set for 2:00 AM the next day. This will also use random variance\n'
+        #     'if that setting is enabled!',
+        # )
+        surprise_toggle = ConfigToggle(schedule_options_frame, text="Surprise Me!", cursor="question_arrow").grid(0,1)
+        # CreateToolTip(
+        #     surprise_toggle,
+        #     'Randomly shuffles time settings to give you a completely unpredictable task!',
+        # )

@@ -202,6 +202,9 @@ CONFIG_ITEMS = {
     "mpv_subprocess": Item("mpvSubprocess", BOOLEAN, BooleanVar, bool, block=True),
     "video_hardware_acceleration": Item("videoHardwareAcceleration", BOOLEAN, BooleanVar, bool),
     "panic_key": Item("panicButton", STRING, StringVar, str, block=True),
+
+    # Scheduler
+    #"schedule_type": Item("scheduleType", Schema(Union("Relative", "Absolute")), StringVar, str),
 }
 # fmt: on
 
