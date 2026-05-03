@@ -204,7 +204,8 @@ CONFIG_ITEMS = {
     "panic_key": Item("panicButton", STRING, StringVar, str, block=True),
 
     # Scheduler
-    #"schedule_type": Item("scheduleType", Schema(Union("Relative", "Absolute")), StringVar, str),
+    "schedule_type": Item("scheduleType", Schema(Union("Relative", "Absolute")), StringVar, str),
+    "time_type": Item("timeType", Schema(Union("Minutes", "Hours", "Days")), StringVar, str),
 }
 # fmt: on
 

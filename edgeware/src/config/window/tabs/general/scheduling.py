@@ -66,14 +66,14 @@ class SchedulingTab(ScrollFrame):
 
         schedule_types = ["Relative", "Absolute"]
         # broken atm
-        # schedule_dropdown = OptionMenu(schedule_time_section, vars.scheduleType, *schedule_types, command=lambda key: theme_helper(key))
-        # schedule_dropdown.configure(width=12)
-        # schedule_dropdown.pack(fill="both", side="top", padx=5, pady=5)
+        schedule_dropdown = OptionMenu(schedule_time_section, vars.schedule_type, *schedule_types)
+        schedule_dropdown.configure(width=12)
+        schedule_dropdown.pack(fill="both", side="top", padx=5, pady=5)
 
         schedule_options_frame = Frame(schedule_time_section)
         schedule_options_frame.pack(fill="both", side="top", expand=1)
 
-        restart_toggle = ConfigToggle(schedule_options_frame, text="Restart On Panic", cursor="question_arrow").grid(0,0)
+        restart_toggle = ConfigToggle(schedule_options_frame, text="Redo Task On Panic", cursor="question_arrow").grid(0,0)
         # CreateToolTip(
         #     restart_toggle,
         #     'Adds another task with the "same settings" when panic is initiated.\n\n'
@@ -87,3 +87,25 @@ class SchedulingTab(ScrollFrame):
         #     surprise_toggle,
         #     'Randomly shuffles time settings to give you a completely unpredictable task!',
         # )
+
+        time_types = ["Minutes", "Hours", "Days"]
+
+        relative_frame = Frame(schedule_time_section)
+        relative_frame.pack(fill="both", side="top", expand=1)
+
+        Label(relative_frame, text="Run Edgeware++ in...", font="Default 8").pack(pady=2, side="left", fill="both")
+
+        relative_time_number = Text(relative_frame, width=5, height=1)
+        relative_time_number.pack(padx=5, pady=5, side="left", fill="x")
+
+        relative_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
+        relative_time_type.pack(padx=5, pady=5, side="left", fill="x")
+
+        Label(relative_frame, text="...with...", font="Default 8").pack(pady=2, side="left", fill="both")
+
+        Scale(relative_frame, orient="horizontal", from_=1, to=100, highlightthickness=0).pack(fill="both")
+
+        Label(relative_frame, text="% random variance", font="Default 8").pack(pady=2, side="left", fill="both")
+
+        absolute_frame = Frame(schedule_time_section)
+        absolute_frame.pack(fill="both", side="top", expand=1)
