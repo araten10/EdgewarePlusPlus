@@ -206,6 +206,9 @@ CONFIG_ITEMS = {
     # Scheduler
     "schedule_type": Item("scheduleType", Schema(Union("Relative", "Absolute")), StringVar, str),
     "time_type": Item("timeType", Schema(Union("Minutes", "Hours", "Days")), StringVar, str),
+    "schedule_time": Item("scheduleTime", NONNEGATIVE, IntVar, int),
+    "variance_time": Item("varianceTime", NONNEGATIVE, IntVar, int),
+    "variance_type": Item("varianceType", Schema(Union("Minutes", "Hours", "Days")), StringVar, str),
 }
 # fmt: on
 

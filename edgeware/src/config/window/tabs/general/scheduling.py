@@ -89,6 +89,7 @@ class SchedulingTab(ScrollFrame):
         # )
 
         time_types = ["Minutes", "Hours", "Days"]
+        variance_types = ["Minutes", "Hours"]
 
         relative_frame = Frame(schedule_time_section)
         relative_frame.pack(fill="both", side="top", expand=1)
@@ -103,9 +104,13 @@ class SchedulingTab(ScrollFrame):
 
         Label(relative_frame, text="...with...", font="Default 8").pack(pady=2, side="left", fill="both")
 
-        Scale(relative_frame, orient="horizontal", from_=1, to=100, highlightthickness=0).pack(fill="both")
+        variance_time_number = Text(relative_frame, width=5, height=1)
+        variance_time_number.pack(padx=5, pady=5, side="left", fill="x")
 
-        Label(relative_frame, text="% random variance", font="Default 8").pack(pady=2, side="left", fill="both")
+        variance_time_type = OptionMenu(relative_frame, vars.variance_type, *variance_types)
+        variance_time_type.pack(padx=5, pady=5, side="left", fill="x")
+
+        Label(relative_frame, text="of random variance", font="Default 8").pack(pady=2, side="left", fill="both")
 
         absolute_frame = Frame(schedule_time_section)
         absolute_frame.pack(fill="both", side="top", expand=1)

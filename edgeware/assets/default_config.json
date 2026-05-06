@@ -95,5 +95,8 @@
   "fadeOutDuration": 0,
   "schedule": 0,
   "scheduleType": "Relative",
-  "timeType": "Hours"
+  "timeType": "Hours",
+  "scheduleTime": 0,
+  "varianceTime": 0,
+  "varianceType": "Hours"
 }
