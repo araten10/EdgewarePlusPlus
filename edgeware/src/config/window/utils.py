@@ -311,7 +311,7 @@ def refresh() -> None:
     subprocess.Popen([sys.executable, Process.CONFIG])
     sys.exit()
 
-def set_schedule() -> None:
+def set_schedule(vars: Vars) -> None:
     scheduler = win32com.client.Dispatch('Schedule.Service')
     scheduler.Connect()
     root_folder = scheduler.GetFolder('\\')
@@ -319,7 +319,20 @@ def set_schedule() -> None:
 
     # Create trigger
     # If we're adding "X hours from now", formula is datetime.datetime.now() + datetime.timedelta(minutes=5)
-    start_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
+    if vars.variance_type.get() == "Minutes":
+        variance = datetime.timedelta(minutes=vars.variance_time.get())
+    elif vars.variance_type.get() == "Hours":
+        variance = datetime.timedelta(hours=vars.variance_time.get())
+    elif vars.variance_type.get() == "Days":
+        variance = datetime.timedelta(days=vars.variance_time.get())
+
+    if vars.time_type.get() == "Minutes":
+        start_time = datetime.datetime.now() + datetime.timedelta(minutes=vars.schedule_time.get()) + variance
+    elif vars.time_type.get() == "Hours":
+        start_time = datetime.datetime.now() + datetime.timedelta(hours=vars.schedule_time.get()) + variance
+    elif vars.time_type.get() == "Days":
+        start_time = datetime.datetime.now() + datetime.timedelta(days=vars.schedule_time.get()) + variance
+
     TASK_TRIGGER_TIME = 1
     trigger = task_def.Triggers.Create(TASK_TRIGGER_TIME)
     trigger.StartBoundary = start_time.isoformat()

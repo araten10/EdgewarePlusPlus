@@ -32,6 +32,7 @@ from tkinter import (
     Scale,
     StringVar,
     Text,
+    END,
 )
 from config.window.utils import set_schedule, delete_schedule
 import subprocess
@@ -58,7 +59,7 @@ class SchedulingTab(ScrollFrame):
 
         Button(schedule_frame, text="Open Task Scheduler (Windows Only)", height=1, command=lambda: subprocess.Popen("taskschd.msc", shell=True)).pack(fill="both", expand=1)
 
-        Button(schedule_buttons_frame, text="Apply Schedule", height=3, command=lambda: set_schedule()).pack(fill="both", side="left", expand=1)
+        Button(schedule_buttons_frame, text="Apply Schedule", height=3, command=lambda: set_schedule(vars)).pack(fill="both", side="left", expand=1)
         Button(schedule_buttons_frame, text="Delete Schedule", height=3, command=lambda: delete_schedule()).pack(fill="both", side="left", expand=1)
 
         schedule_time_section = ConfigSection(self.viewPort, "Schedule Timer", TIMER_TEXT)
@@ -98,6 +99,7 @@ class SchedulingTab(ScrollFrame):
 
         relative_time_number = Text(relative_frame, width=5, height=1)
         relative_time_number.pack(padx=5, pady=5, side="left", fill="x")
+        relative_time_number.insert(END, vars.schedule_time.get())
 
         relative_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
         relative_time_type.pack(padx=5, pady=5, side="left", fill="x")
@@ -106,6 +108,7 @@ class SchedulingTab(ScrollFrame):
 
         variance_time_number = Text(relative_frame, width=5, height=1)
         variance_time_number.pack(padx=5, pady=5, side="left", fill="x")
+        variance_time_number.insert(END, vars.variance_time.get())
 
         variance_time_type = OptionMenu(relative_frame, vars.variance_type, *variance_types)
         variance_time_type.pack(padx=5, pady=5, side="left", fill="x")

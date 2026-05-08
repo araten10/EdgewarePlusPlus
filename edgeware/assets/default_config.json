@@ -96,7 +96,7 @@
   "schedule": 0,
   "scheduleType": "Relative",
   "timeType": "Hours",
-  "scheduleTime": 0,
+  "scheduleTime": 1,
   "varianceTime": 0,
   "varianceType": "Hours"
 }
