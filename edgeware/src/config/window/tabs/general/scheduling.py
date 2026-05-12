@@ -38,6 +38,9 @@ from config.window.utils import set_schedule, delete_schedule
 import subprocess
 from config.vars import Vars
 from config.window.widgets.tooltip import CreateToolTip
+from tkcalendar import DateEntry
+from tktimepicker import constants as timep
+from tktimepicker import SpinTimePickerOld
 
 INTRO_TEXT = 'Want to have Edgeware run at a specific time every day? What about letting it trigger you randomly every so often? These options should have you covered!\n\nSchedule will run Edgeware whenever a timer is reached, which can be set here. It differs from something like "Hibernate Mode" (Found in the "Modes" tab) by allowing Edgeware to do whatever it can normally do. It also supports much longer forms of waiting, such as hours, days, or even weeks!'
 TIMER_TEXT = 'asdfg'
@@ -74,7 +77,7 @@ class SchedulingTab(ScrollFrame):
         schedule_options_frame = Frame(schedule_time_section)
         schedule_options_frame.pack(fill="both", side="top", expand=1)
 
-        restart_toggle = ConfigToggle(schedule_options_frame, text="Redo Task On Panic", cursor="question_arrow").grid(0,0)
+        restart_toggle = ConfigToggle(schedule_options_frame, text="Redo Task On Panic", cursor="question_arrow", variable=vars.repeat_schedule).grid(0,0)
         # CreateToolTip(
         #     restart_toggle,
         #     'Adds another task with the "same settings" when panic is initiated.\n\n'
@@ -83,16 +86,17 @@ class SchedulingTab(ScrollFrame):
         #     'would be set for 2:00 AM the next day. This will also use random variance\n'
         #     'if that setting is enabled!',
         # )
-        surprise_toggle = ConfigToggle(schedule_options_frame, text="Surprise Me!", cursor="question_arrow").grid(0,1)
+        surprise_toggle = ConfigToggle(schedule_options_frame, text="Random Time In Range", cursor="question_arrow", variable=vars.variance).grid(0,1)
         # CreateToolTip(
         #     surprise_toggle,
         #     'Randomly shuffles time settings to give you a completely unpredictable task!',
         # )
 
         time_types = ["Minutes", "Hours", "Days"]
-        variance_types = ["Minutes", "Hours"]
 
-        relative_frame = Frame(schedule_time_section)
+        # Relative Time
+
+        relative_frame = Frame(schedule_time_section, borderwidth=2, relief=GROOVE)
         relative_frame.pack(fill="both", side="top", expand=1)
 
         Label(relative_frame, text="Run Edgeware++ in...", font="Default 8").pack(pady=2, side="left", fill="both")
@@ -101,19 +105,29 @@ class SchedulingTab(ScrollFrame):
         relative_time_number.pack(padx=5, pady=5, side="left", fill="x")
         relative_time_number.insert(END, vars.schedule_time.get())
 
-        relative_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
-        relative_time_type.pack(padx=5, pady=5, side="left", fill="x")
-
-        Label(relative_frame, text="...with...", font="Default 8").pack(pady=2, side="left", fill="both")
+        Label(relative_frame, text="-", font="Default 8").pack(pady=2, side="left", fill="both")
 
         variance_time_number = Text(relative_frame, width=5, height=1)
         variance_time_number.pack(padx=5, pady=5, side="left", fill="x")
         variance_time_number.insert(END, vars.variance_time.get())
 
-        variance_time_type = OptionMenu(relative_frame, vars.variance_type, *variance_types)
-        variance_time_type.pack(padx=5, pady=5, side="left", fill="x")
+        relative_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
+        relative_time_type.pack(padx=5, pady=5, side="left", fill="x")
 
-        Label(relative_frame, text="of random variance", font="Default 8").pack(pady=2, side="left", fill="both")
+        # Absolute Time
 
-        absolute_frame = Frame(schedule_time_section)
+        absolute_frame = Frame(schedule_time_section, borderwidth=2, relief=GROOVE)
         absolute_frame.pack(fill="both", side="top", expand=1)
+
+        Label(absolute_frame, text="Run Edgeware++ on...", font="Default 8").pack(pady=2, side="left", fill="both")
+
+        absolute_calendar = DateEntry(absolute_frame, date_pattern='mm-dd-yyyy')
+        absolute_calendar.pack(padx=5, pady=5, side="left", fill="x")
+
+        Label(absolute_frame, text="at", font="Default 8").pack(pady=2, side="left", fill="both")
+
+        time_picker = SpinTimePickerOld(absolute_frame)
+        time_picker.addAll(timep.HOURS12)
+        time_picker.configureAll(width=5)
+        time_picker.configure_period(width=5)
+        time_picker.pack(padx=5, pady=5, side="left", fill="x")

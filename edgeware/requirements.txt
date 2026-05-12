@@ -18,3 +18,5 @@ tkinter-tooltip
 tkinterweb
 ttkwidgets
 voluptuous
+tkcalendar
+tktimepicker
