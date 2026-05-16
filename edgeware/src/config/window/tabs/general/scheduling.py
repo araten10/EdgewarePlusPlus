@@ -28,13 +28,14 @@ from tkinter import (
     Checkbutton,
     Frame,
     Label,
+    Entry,
     OptionMenu,
     Scale,
     StringVar,
     Text,
     END,
 )
-from config.window.utils import set_schedule, delete_schedule
+from config.window.utils import set_schedule, delete_schedule, write_save
 import subprocess
 from config.vars import Vars
 from config.window.widgets.tooltip import CreateToolTip
@@ -101,15 +102,13 @@ class SchedulingTab(ScrollFrame):
 
         Label(relative_frame, text="Run Edgeware++ in...", font="Default 8").pack(pady=2, side="left", fill="both")
 
-        relative_time_number = Text(relative_frame, width=5, height=1)
+        relative_time_number = Entry(relative_frame, textvariable=vars.schedule_time, width=5)
         relative_time_number.pack(padx=5, pady=5, side="left", fill="x")
-        relative_time_number.insert(END, vars.schedule_time.get())
 
         Label(relative_frame, text="-", font="Default 8").pack(pady=2, side="left", fill="both")
 
-        variance_time_number = Text(relative_frame, width=5, height=1)
+        variance_time_number = Entry(relative_frame, textvariable=vars.variance_time, width=5)
         variance_time_number.pack(padx=5, pady=5, side="left", fill="x")
-        variance_time_number.insert(END, vars.variance_time.get())
 
         relative_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
         relative_time_type.pack(padx=5, pady=5, side="left", fill="x")
@@ -131,3 +130,5 @@ class SchedulingTab(ScrollFrame):
         time_picker.configureAll(width=5)
         time_picker.configure_period(width=5)
         time_picker.pack(padx=5, pady=5, side="left", fill="x")
+
+        # def schedule_helper(vars: Vars) -> None:
