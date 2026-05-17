@@ -27,9 +27,9 @@ from tkinter import (
 )
 
 from config.vars import Vars
-from config.window.utils import delete_schedule, set_schedule
 from config.window.widgets.layout import ConfigSection, ConfigToggle
 from config.window.widgets.scroll_frame import ScrollFrame
+from os_utils import delete_schedule, set_schedule
 from tkcalendar import DateEntry
 from tktimepicker import SpinTimePickerOld
 from tktimepicker import constants as timep

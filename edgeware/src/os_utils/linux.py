@@ -123,3 +123,11 @@ def toggle_run_at_startup(state: bool) -> None:
         make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon(), autostart_path)
     else:
         (autostart_path / "Edgeware++.desktop").unlink(missing_ok=True)
+
+
+def set_schedule(vars) -> None:
+    pass
+
+
+def delete_schedule() -> None:
+    pass

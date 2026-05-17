@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-import datetime
 import json
 import logging
 import multiprocessing
@@ -31,7 +30,6 @@ from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar
 
 import os_utils
 import utils
-import win32com.client
 from paths import Data, Process
 from pynput import keyboard
 
@@ -310,62 +308,3 @@ def set_widget_states_with_colors(state: bool, widgets: list[Widget], color_on: 
 def refresh() -> None:
     subprocess.Popen([sys.executable, Process.CONFIG])
     sys.exit()
-
-
-def set_schedule(vars: Vars) -> None:
-    scheduler = win32com.client.Dispatch("Schedule.Service")
-    scheduler.Connect()
-    root_folder = scheduler.GetFolder("\\")
-    task_def = scheduler.NewTask(0)
-
-    # Create trigger
-    # If we're adding "X hours from now", formula is datetime.datetime.now() + datetime.timedelta(minutes=5)
-    if vars.variance_type.get() == "Minutes":
-        variance = datetime.timedelta(minutes=vars.variance_time.get())
-    elif vars.variance_type.get() == "Hours":
-        variance = datetime.timedelta(hours=vars.variance_time.get())
-    elif vars.variance_type.get() == "Days":
-        variance = datetime.timedelta(days=vars.variance_time.get())
-
-    if vars.time_type.get() == "Minutes":
-        start_time = datetime.datetime.now() + datetime.timedelta(minutes=vars.schedule_time.get()) + variance
-    elif vars.time_type.get() == "Hours":
-        start_time = datetime.datetime.now() + datetime.timedelta(hours=vars.schedule_time.get()) + variance
-    elif vars.time_type.get() == "Days":
-        start_time = datetime.datetime.now() + datetime.timedelta(days=vars.schedule_time.get()) + variance
-
-    TASK_TRIGGER_TIME = 1
-    trigger = task_def.Triggers.Create(TASK_TRIGGER_TIME)
-    trigger.StartBoundary = start_time.isoformat()
-
-    # Create action
-    TASK_ACTION_EXEC = 0
-    action = task_def.Actions.Create(TASK_ACTION_EXEC)
-    action.ID = "EDGEWARE"
-    action.Path = str(Process.RUN)
-    # action.Arguments is to be used if cmdline is needed
-
-    # Set parameters
-    task_def.RegistrationInfo.Description = "Edgeware++"
-    task_def.Settings.Enabled = True
-    task_def.Settings.StopIfGoingOnBatteries = False
-
-    # Register task
-    # If task already exists, it will be updated
-    TASK_CREATE_OR_UPDATE = 6
-    TASK_LOGON_NONE = 0
-    root_folder.RegisterTaskDefinition(
-        "Edgeware++",  # Task name
-        task_def,
-        TASK_CREATE_OR_UPDATE,
-        "",  # No user
-        "",  # No password
-        TASK_LOGON_NONE,
-    )
-
-
-def delete_schedule() -> None:
-    scheduler = win32com.client.Dispatch("Schedule.Service")
-    scheduler.Connect()
-    root_folder = scheduler.GetFolder("\\")
-    root_folder.DeleteTask("Edgeware++", 0)

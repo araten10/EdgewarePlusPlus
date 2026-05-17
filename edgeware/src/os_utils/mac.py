@@ -51,3 +51,11 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
 
 def toggle_run_at_startup(state: bool) -> None:
     pass
+
+
+def set_schedule(vars) -> None:
+    pass
+
+
+def delete_schedule() -> None:
+    pass
