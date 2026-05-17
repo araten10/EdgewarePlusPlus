@@ -36,10 +36,12 @@ def close_mpv(player: mpv.MPV) -> None:
 
 
 def set_borderless(window: Toplevel) -> None:
+
+    window.attributes("-type", "splash")
+
     if get_desktop_environment() == "kde":
+        # below needed to ensure popups remain on top in KDE Plasma
         window.overrideredirect(True)
-    else:
-        window.attributes("-type", "splash")
 
 
 def set_clickthrough(window: Toplevel) -> None:
