@@ -14,9 +14,9 @@ requests
 ruff
 screeninfo
 sounddevice
+tkcalendar
 tkinter-tooltip
 tkinterweb
+tktimepicker
 ttkwidgets
 voluptuous
-tkcalendar
-tktimepicker
