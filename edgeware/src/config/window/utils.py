@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import datetime
 import json
 import logging
 import multiprocessing
@@ -23,8 +24,6 @@ import shutil
 import subprocess
 import sys
 import urllib
-import datetime
-import win32com.client
 from multiprocessing.connection import Connection
 from pathlib import Path
 from threading import Thread
@@ -32,6 +31,7 @@ from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar
 
 import os_utils
 import utils
+import win32com.client
 from paths import Data, Process
 from pynput import keyboard
 
@@ -311,10 +311,11 @@ def refresh() -> None:
     subprocess.Popen([sys.executable, Process.CONFIG])
     sys.exit()
 
+
 def set_schedule(vars: Vars) -> None:
-    scheduler = win32com.client.Dispatch('Schedule.Service')
+    scheduler = win32com.client.Dispatch("Schedule.Service")
     scheduler.Connect()
-    root_folder = scheduler.GetFolder('\\')
+    root_folder = scheduler.GetFolder("\\")
     task_def = scheduler.NewTask(0)
 
     # Create trigger
@@ -340,12 +341,12 @@ def set_schedule(vars: Vars) -> None:
     # Create action
     TASK_ACTION_EXEC = 0
     action = task_def.Actions.Create(TASK_ACTION_EXEC)
-    action.ID = 'EDGEWARE'
+    action.ID = "EDGEWARE"
     action.Path = str(Process.RUN)
     # action.Arguments is to be used if cmdline is needed
 
     # Set parameters
-    task_def.RegistrationInfo.Description = 'Edgeware++'
+    task_def.RegistrationInfo.Description = "Edgeware++"
     task_def.Settings.Enabled = True
     task_def.Settings.StopIfGoingOnBatteries = False
 
@@ -354,15 +355,17 @@ def set_schedule(vars: Vars) -> None:
     TASK_CREATE_OR_UPDATE = 6
     TASK_LOGON_NONE = 0
     root_folder.RegisterTaskDefinition(
-        'Edgeware++',  # Task name
+        "Edgeware++",  # Task name
         task_def,
         TASK_CREATE_OR_UPDATE,
-        '',  # No user
-        '',  # No password
-        TASK_LOGON_NONE)
+        "",  # No user
+        "",  # No password
+        TASK_LOGON_NONE,
+    )
+
 
 def delete_schedule() -> None:
-    scheduler = win32com.client.Dispatch('Schedule.Service')
+    scheduler = win32com.client.Dispatch("Schedule.Service")
     scheduler.Connect()
-    root_folder = scheduler.GetFolder('\\')
-    root_folder.DeleteTask('Edgeware++', 0)
+    root_folder = scheduler.GetFolder("\\")
+    root_folder.DeleteTask("Edgeware++", 0)
