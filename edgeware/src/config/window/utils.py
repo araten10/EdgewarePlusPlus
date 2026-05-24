@@ -154,8 +154,8 @@ def write_save(vars: Vars, exit_at_end: bool = False) -> None:
             value = value if value != "default" else None
         temp[key] = (1 if value else 0) if type(value) is bool else value
 
-    if temp['varianceTime'] < temp['scheduleTime']:
-        temp['varianceTime'] = temp['scheduleTime']
+    if temp["varianceTime"] < temp["scheduleTime"]:
+        temp["varianceTime"] = temp["scheduleTime"]
 
     with open(Data.CONFIG, "w") as file:
         file.write(json.dumps(temp))
