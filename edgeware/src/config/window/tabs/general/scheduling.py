@@ -63,11 +63,11 @@ class SchedulingTab(ScrollFrame):
         schedule_time_section = ConfigSection(self.viewPort, "Schedule Timer", TIMER_TEXT)
         schedule_time_section.pack()
 
-        schedule_types = ["Relative", "Absolute"]
-        # broken atm
-        schedule_dropdown = OptionMenu(schedule_time_section, vars.schedule_type, *schedule_types)
-        schedule_dropdown.configure(width=12)
-        schedule_dropdown.pack(fill="both", side="top", padx=5, pady=5)
+        # schedule_types = ["Relative", "Absolute"]
+        # # broken atm
+        # schedule_dropdown = OptionMenu(schedule_time_section, vars.schedule_type, *schedule_types)
+        # schedule_dropdown.configure(width=12)
+        # schedule_dropdown.pack(fill="both", side="top", padx=5, pady=5)
 
         schedule_options_frame = Frame(schedule_time_section)
         schedule_options_frame.pack(fill="both", side="top", expand=1)
@@ -109,20 +109,18 @@ class SchedulingTab(ScrollFrame):
 
         # Absolute Time
 
-        absolute_frame = Frame(schedule_time_section, borderwidth=2, relief=GROOVE)
-        absolute_frame.pack(fill="both", side="top", expand=1)
-
-        Label(absolute_frame, text="Run Edgeware++ on...", font="Default 8").pack(pady=2, side="left", fill="both")
-
-        absolute_calendar = DateEntry(absolute_frame, date_pattern="mm-dd-yyyy")
-        absolute_calendar.pack(padx=5, pady=5, side="left", fill="x")
-
-        Label(absolute_frame, text="at", font="Default 8").pack(pady=2, side="left", fill="both")
-
-        time_picker = SpinTimePickerOld(absolute_frame)
-        time_picker.addAll(timep.HOURS12)
-        time_picker.configureAll(width=5)
-        time_picker.configure_period(width=5)
-        time_picker.pack(padx=5, pady=5, side="left", fill="x")
-
-        # def schedule_helper(vars: Vars) -> None:
+        # absolute_frame = Frame(schedule_time_section, borderwidth=2, relief=GROOVE)
+        # absolute_frame.pack(fill="both", side="top", expand=1)
+        #
+        # Label(absolute_frame, text="Run Edgeware++ on...", font="Default 8").pack(pady=2, side="left", fill="both")
+        #
+        # absolute_calendar = DateEntry(absolute_frame, date_pattern="mm-dd-yyyy")
+        # absolute_calendar.pack(padx=5, pady=5, side="left", fill="x")
+        #
+        # Label(absolute_frame, text="at", font="Default 8").pack(pady=2, side="left", fill="both")
+        #
+        # time_picker = SpinTimePickerOld(absolute_frame)
+        # time_picker.addAll(timep.HOURS12)
+        # time_picker.configureAll(width=5)
+        # time_picker.configure_period(width=5)
+        # time_picker.pack(padx=5, pady=5, side="left", fill="x")
