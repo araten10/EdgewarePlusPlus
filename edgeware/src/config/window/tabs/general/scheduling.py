@@ -35,7 +35,7 @@ from tktimepicker import SpinTimePickerOld
 from tktimepicker import constants as timep
 
 INTRO_TEXT = 'Want to have Edgeware run at a specific time every day? What about letting it trigger you randomly every so often? These options should have you covered!\n\nSchedule will run Edgeware whenever a timer is reached, which can be set here. It differs from something like "Hibernate Mode" (Found in the "Modes" tab) by allowing Edgeware to do whatever it can normally do. It also supports much longer forms of waiting, such as hours, days, or even weeks!'
-TIMER_TEXT = "asdfg"
+TIMER_TEXT = " "
 
 
 class SchedulingTab(ScrollFrame):
@@ -72,7 +72,7 @@ class SchedulingTab(ScrollFrame):
         schedule_options_frame = Frame(schedule_time_section)
         schedule_options_frame.pack(fill="both", side="top", expand=1)
 
-        restart_toggle = ConfigToggle(schedule_options_frame, text="Redo Task On Panic", cursor="question_arrow", variable=vars.repeat_schedule).grid(0, 0)
+        # restart_toggle = ConfigToggle(schedule_options_frame, text="Redo Task On Panic", cursor="question_arrow", variable=vars.repeat_schedule).grid(0, 0)
         # CreateToolTip(
         #     restart_toggle,
         #     'Adds another task with the "same settings" when panic is initiated.\n\n'
@@ -81,7 +81,7 @@ class SchedulingTab(ScrollFrame):
         #     'would be set for 2:00 AM the next day. This will also use random variance\n'
         #     'if that setting is enabled!',
         # )
-        surprise_toggle = ConfigToggle(schedule_options_frame, text="Random Time In Range", cursor="question_arrow", variable=vars.variance).grid(0, 1)
+        # surprise_toggle = ConfigToggle(schedule_options_frame, text="Random Time In Range", cursor="question_arrow", variable=vars.variance).grid(0, 1)
         # CreateToolTip(
         #     surprise_toggle,
         #     'Randomly shuffles time settings to give you a completely unpredictable task!',
@@ -99,10 +99,10 @@ class SchedulingTab(ScrollFrame):
         relative_time_number = Entry(relative_frame, textvariable=vars.schedule_time, width=5)
         relative_time_number.pack(padx=5, pady=5, side="left", fill="x")
 
-        Label(relative_frame, text="-", font="Default 8").pack(pady=2, side="left", fill="both")
-
-        variance_time_number = Entry(relative_frame, textvariable=vars.variance_time, width=5)
-        variance_time_number.pack(padx=5, pady=5, side="left", fill="x")
+        # Label(relative_frame, text="-", font="Default 8").pack(pady=2, side="left", fill="both")
+        #
+        # variance_time_number = Entry(relative_frame, textvariable=vars.variance_time, width=5)
+        # variance_time_number.pack(padx=5, pady=5, side="left", fill="x")
 
         relative_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
         relative_time_type.pack(padx=5, pady=5, side="left", fill="x")

@@ -122,19 +122,19 @@ def set_schedule(vars) -> None:
 
     # Create trigger
     # If we're adding "X hours from now", formula is datetime.datetime.now() + datetime.timedelta(minutes=5)
-    if vars.variance_type.get() == "Minutes":
-        variance = datetime.timedelta(minutes=vars.variance_time.get())
-    elif vars.variance_type.get() == "Hours":
-        variance = datetime.timedelta(hours=vars.variance_time.get())
-    elif vars.variance_type.get() == "Days":
-        variance = datetime.timedelta(days=vars.variance_time.get())
+    # if vars.variance_type.get() == "Minutes":
+    #     variance = datetime.timedelta(minutes=vars.variance_time.get())
+    # elif vars.variance_type.get() == "Hours":
+    #     variance = datetime.timedelta(hours=vars.variance_time.get())
+    # elif vars.variance_type.get() == "Days":
+    #     variance = datetime.timedelta(days=vars.variance_time.get())
 
     if vars.time_type.get() == "Minutes":
-        start_time = datetime.datetime.now() + datetime.timedelta(minutes=vars.schedule_time.get()) + variance
+        start_time = datetime.datetime.now() + datetime.timedelta(minutes=vars.schedule_time.get())
     elif vars.time_type.get() == "Hours":
-        start_time = datetime.datetime.now() + datetime.timedelta(hours=vars.schedule_time.get()) + variance
+        start_time = datetime.datetime.now() + datetime.timedelta(hours=vars.schedule_time.get())
     elif vars.time_type.get() == "Days":
-        start_time = datetime.datetime.now() + datetime.timedelta(days=vars.schedule_time.get()) + variance
+        start_time = datetime.datetime.now() + datetime.timedelta(days=vars.schedule_time.get())
 
     task_trigger_time = 1
     trigger = task_def.Triggers.Create(task_trigger_time)
