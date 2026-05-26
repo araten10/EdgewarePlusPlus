@@ -23,7 +23,7 @@ if not %errorlevel%==0 (
 
   echo Done downloading executable.
   echo Please complete installation through the installer before continuing, make sure "Add Python to PATH" is checked.
-  start %CD%\pyinstaller.exe
+  start "Python Installer" "%CD%\pyinstaller.exe"
   pause
 
   py --version
