@@ -210,6 +210,8 @@ CONFIG_ITEMS = {
     "variance_time": Item("varianceTime", NONNEGATIVE, IntVar, int),
     "variance": Item("variance", BOOLEAN, BooleanVar, bool),
     "repeat_schedule": Item("repeatSchedule", BOOLEAN, BooleanVar, bool),
+    "repeat_type": Item("repeatType", Schema(Union("Minutes", "Hours", "Days")), StringVar, str),
+    "repeat_time": Item("repeatTime", NONNEGATIVE, IntVar, int),
 }
 # fmt: on
 

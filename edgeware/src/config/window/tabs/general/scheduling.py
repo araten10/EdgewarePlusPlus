@@ -99,13 +99,19 @@ class SchedulingTab(ScrollFrame):
         relative_time_number = Entry(relative_frame, textvariable=vars.schedule_time, width=5)
         relative_time_number.pack(padx=5, pady=5, side="left", fill="x")
 
-        # Label(relative_frame, text="-", font="Default 8").pack(pady=2, side="left", fill="both")
-        #
         # variance_time_number = Entry(relative_frame, textvariable=vars.variance_time, width=5)
         # variance_time_number.pack(padx=5, pady=5, side="left", fill="x")
 
         relative_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
         relative_time_type.pack(padx=5, pady=5, side="left", fill="x")
+
+        Label(relative_frame, text="and repeat every...", font="Default 8").pack(pady=2, side="left", fill="both")
+
+        repeat_time_number = Entry(relative_frame, textvariable=vars.repeat_time, width=5)
+        repeat_time_number.pack(padx=5, pady=5, side="left", fill="x")
+
+        repeat_time_type = OptionMenu(relative_frame, vars.time_type, *time_types)
+        repeat_time_type.pack(padx=5, pady=5, side="left", fill="x")
 
         # Absolute Time
 

@@ -140,6 +140,19 @@ def set_schedule(vars) -> None:
     trigger = task_def.Triggers.Create(task_trigger_time)
     trigger.StartBoundary = start_time.isoformat()
 
+    # Repetition
+    # The repetition interval needs to be in ISO8601 format, so lets make that
+    if vars.repeat_type.get() == "Minutes":
+        repetition_time = f"PT{vars.repeat_time.get()}M"
+    elif vars.repeat_type.get() == "Hours":
+        repetition_time = f"PT{vars.repeat_time.get()}H"
+    elif vars.repeat_type.get() == "Days":
+        repetition_time = f"P{vars.repeat_time.get()}D"
+
+    print(repetition_time)
+
+    trigger.Repetition.Interval = repetition_time
+
     # Create action
     task_action_exec = 0
     action = task_def.Actions.Create(task_action_exec)
