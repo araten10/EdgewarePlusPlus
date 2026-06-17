@@ -27,12 +27,9 @@ from tkinter import (
 )
 
 from config.vars import Vars
-from config.window.widgets.layout import ConfigSection, ConfigToggle
+from config.window.widgets.layout import ConfigSection
 from config.window.widgets.scroll_frame import ScrollFrame
 from os_utils import delete_schedule, set_schedule
-from tkcalendar import DateEntry
-from tktimepicker import SpinTimePickerOld
-from tktimepicker import constants as timep
 
 INTRO_TEXT = 'Want to have Edgeware run at a specific time every day? What about letting it trigger you randomly every so often? These options should have you covered!\n\nSchedule will run Edgeware whenever a timer is reached, which can be set here. It differs from something like "Hibernate Mode" (Found in the "Modes" tab) by allowing Edgeware to do whatever it can normally do. It also supports much longer forms of waiting, such as hours, days, or even weeks!'
 TIMER_TEXT = " "

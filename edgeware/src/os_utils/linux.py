@@ -26,8 +26,8 @@ from urllib.parse import urlparse
 
 import mpv
 from config import load_default_config
-from paths import CustomAssets, Process
 from features.prompt import Prompt
+from paths import CustomAssets, Process
 
 from os_utils.linux_utils import find_get_wallpaper_command, find_set_wallpaper_commands, find_set_wallpaper_function, get_desktop_environment
 
@@ -35,13 +35,12 @@ from os_utils.linux_utils import find_get_wallpaper_command, find_set_wallpaper_
 def close_mpv(player: mpv.MPV) -> None:
     player.stop()
 
+
 def set_borderless(window: Toplevel) -> None:
     if get_desktop_environment() == "kde":
-
         # windows that use overrideredirect(true) can't take focus (https://core.tcl-lang.org/tk/artifact/7892c68f49012d2d71222ae0e312a1e7dc69a801?txt=1&ln=51-64)
         # so prompt windows need to be treated as a special case
         if isinstance(window, Prompt):
-
             window.title("PROMPT")
 
             # remove min, max and close buttons
@@ -58,7 +57,6 @@ def set_borderless(window: Toplevel) -> None:
         window.overrideredirect(True)
     else:
         window.attributes("-type", "splash")
-
 
 
 def set_clickthrough(window: Toplevel) -> None:
