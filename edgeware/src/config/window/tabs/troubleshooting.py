@@ -183,3 +183,21 @@ class TroubleshootingTab(ScrollFrame):
         )
 
         Button(directories_section, height=2, text="Open Pack Folder", command=lambda: os_utils.open_directory(pack.paths.root)).pack(fill="x", pady=2)
+
+        # Scheduling
+
+        schedule_section = ConfigSection(self.viewPort, "Scheduling")
+        schedule_section.pack()
+
+        schedule_frame = Frame(schedule_section)
+        schedule_frame.pack(fill="both", side="top", expand=1)
+
+        schedule_buttons_frame = Frame(schedule_frame)
+        schedule_buttons_frame.pack(fill="both", side="top", expand=1)
+
+        Button(schedule_frame, text="Open Task Scheduler (Windows Only)", height=1, command=lambda: subprocess.Popen("taskschd.msc", shell=True)).pack(
+            fill="both", expand=1
+        )
+
+        Button(schedule_buttons_frame, text="Apply Schedule", height=3, command=lambda: set_schedule(vars)).pack(fill="both", side="left", expand=1)
+        Button(schedule_buttons_frame, text="Delete Schedule", height=3, command=lambda: delete_schedule()).pack(fill="both", side="left", expand=1)

@@ -98,7 +98,7 @@
   "timeType": "Hours",
   "scheduleTime": 1,
   "varianceTime": 0,
-  "variance": 0,
+  "varianceType": "Hours",
   "repeatSchedule": 0,
   "repeatType": "Hours",
   "repeatTime": 0

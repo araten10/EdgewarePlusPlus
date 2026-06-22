@@ -204,11 +204,11 @@ CONFIG_ITEMS = {
     "panic_key": Item("panicButton", STRING, StringVar, str, block=True),
 
     # Scheduler
-    "schedule_type": Item("scheduleType", Schema(Union("Relative", "Absolute")), StringVar, str),
+    "schedule": Item("schedule", BOOLEAN, BooleanVar, bool),
     "time_type": Item("timeType", Schema(Union("Minutes", "Hours", "Days")), StringVar, str),
     "schedule_time": Item("scheduleTime", NONNEGATIVE, IntVar, int),
     "variance_time": Item("varianceTime", NONNEGATIVE, IntVar, int),
-    "variance": Item("variance", BOOLEAN, BooleanVar, bool),
+    "variance_type": Item("varianceType", Schema(Union("Minutes", "Hours", "Days")), StringVar, str),
     "repeat_schedule": Item("repeatSchedule", BOOLEAN, BooleanVar, bool),
     "repeat_type": Item("repeatType", Schema(Union("Minutes", "Hours", "Days")), StringVar, str),
     "repeat_time": Item("repeatTime", NONNEGATIVE, IntVar, int),

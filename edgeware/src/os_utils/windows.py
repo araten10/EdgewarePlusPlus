@@ -142,16 +142,25 @@ def set_schedule(vars) -> None:
 
     # Repetition
     # The repetition interval needs to be in ISO8601 format, so lets make that
-    if vars.repeat_type.get() == "Minutes":
-        repetition_time = f"PT{vars.repeat_time.get()}M"
-    elif vars.repeat_type.get() == "Hours":
-        repetition_time = f"PT{vars.repeat_time.get()}H"
-    elif vars.repeat_type.get() == "Days":
-        repetition_time = f"P{vars.repeat_time.get()}D"
+    if vars.repeat_schedule.get() == True:
+        if vars.repeat_type.get() == "Minutes":
+            repetition_time = f"PT{vars.repeat_time.get()}M"
+        elif vars.repeat_type.get() == "Hours":
+            repetition_time = f"PT{vars.repeat_time.get()}H"
+        elif vars.repeat_type.get() == "Days":
+            repetition_time = f"P{vars.repeat_time.get()}D"
 
-    print(repetition_time)
+        trigger.Repetition.Interval = repetition_time
+    # Variance
+    if vars.variance_time.get() > 0:
+        if vars.variance_type.get() == "Minutes":
+            variance_time = f"PT{vars.variance_time.get()}M"
+        elif vars.variance_type.get() == "Hours":
+            variance_time = f"PT{vars.variance_time.get()}H"
+        elif vars.variance_type.get() == "Days":
+            variance_time = f"P{vars.variance_time.get()}D"
 
-    trigger.Repetition.Interval = repetition_time
+        trigger.RandomDelay = variance_time
 
     # Create action
     task_action_exec = 0
