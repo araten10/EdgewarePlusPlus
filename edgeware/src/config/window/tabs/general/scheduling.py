@@ -16,10 +16,8 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import subprocess
 from tkinter import (
     GROOVE,
-    Button,
     Entry,
     Frame,
     Label,
@@ -27,9 +25,8 @@ from tkinter import (
 )
 
 from config.vars import Vars
-from config.window.widgets.layout import ConfigSection, ConfigRow, ConfigToggle, set_enabled_when
+from config.window.widgets.layout import ConfigRow, ConfigSection, ConfigToggle, set_enabled_when
 from config.window.widgets.scroll_frame import ScrollFrame
-from os_utils import delete_schedule, set_schedule
 
 INTRO_TEXT = 'Want to have Edgeware run at a specific time every day? What about letting it trigger you randomly every so often? These options should have you covered!\n\nSchedule will run Edgeware whenever a timer is reached, which can be set here. It differs from something like "Hibernate Mode" (Found in the "Modes" tab) by allowing Edgeware to do whatever it can normally do. It also supports much longer forms of waiting, such as hours, days, or even weeks! If you want to make sure your schedule is working, there are debug buttons for it found in the "Troubleshooting" tab.'
 TIMER_TEXT = " "
