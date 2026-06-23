@@ -37,6 +37,8 @@ from config import load_config
 from config.items import CONFIG_DANGER, DangerLevel
 from config.vars import Vars
 
+from os_utils.windows import set_schedule, delete_schedule
+
 # TODO: Don't load these here
 config = load_config()
 log_file = utils.init_logging("config")
@@ -154,8 +156,10 @@ def write_save(vars: Vars, exit_at_end: bool = False) -> None:
             value = value if value != "default" else None
         temp[key] = (1 if value else 0) if type(value) is bool else value
 
-    if temp["varianceTime"] < temp["scheduleTime"]:
-        temp["varianceTime"] = temp["scheduleTime"]
+    if temp["schedule"]:
+        set_schedule(vars)
+    else:
+        delete_schedule()
 
     with open(Data.CONFIG, "w") as file:
         file.write(json.dumps(temp))
