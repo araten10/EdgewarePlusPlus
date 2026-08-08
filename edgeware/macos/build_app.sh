@@ -146,6 +146,9 @@ fi
 # --- Clean previous build ---
 echo
 echo "Cleaning previous build..."
+# Finder creates .DS_Store files that rm -rf can't always remove (locked attrs),
+# which otherwise aborts the whole build under set -e. Strip them first.
+find "$DIST_DIR" "$BUILD_DIR" -name ".DS_Store" -delete 2>/dev/null || true
 rm -rf "$BUILD_DIR" "$DIST_DIR"
 
 # --- Build Edgeware (main app) ---

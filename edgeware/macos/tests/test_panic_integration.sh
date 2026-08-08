@@ -14,7 +14,7 @@
 #   --source   Test against src/main_edgeware.py directly
 #   Auto-detection is used if not specified.
 #
-# Usage: cd edgeware && bash macos/test_panic_integration.sh [app|keyboard|tray] [--bundle|--source]
+# Usage: cd edgeware && bash macos/tests/test_panic_integration.sh [app|keyboard|tray] [--bundle|--source]
 #   No method argument: tests all methods sequentially.
 #   One method argument: tests only that method.
 # Exit 0 = all methods clean shutdown, exit 1 = crash/hang/timeout
@@ -23,7 +23,7 @@
 
 set -euo pipefail
 
-EDGWARE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+EDGWARE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 SRC_DIR="$EDGWARE_DIR/src"
 DIST_DIR="$EDGWARE_DIR/dist"
 VENV_PYTHON="$EDGWARE_DIR/.venv/bin/python3"
@@ -184,7 +184,7 @@ print(f'Key {key_name} (VK 0x{vk:02X}) pressed and released', flush=True)
             "$VENV_PYTHON" -c "
 import sys
 sys.path.insert(0, '$SRC_DIR')
-from panic import send_panic_tray
+from os_utils.mac import send_panic_tray
 send_panic_tray()
 " 2>/dev/null && log "Panic signal (tray/IPC) sent" || log "Could not send tray panic (expected if app already exited)"
             ;;
