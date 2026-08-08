@@ -36,7 +36,6 @@ try_python() {
 try_python "/opt/homebrew/bin/python3.12" ||
 try_python "/usr/local/bin/python3.12" ||
 try_python "python3.12" ||
-
 if [ -z "$PYTHON" ]; then
     echo "Python 3.12+ not found. Attempting to install via Homebrew..."
     echo
@@ -71,7 +70,6 @@ if [ -z "$PYTHON" ]; then
     try_python "/opt/homebrew/bin/python3.12" ||
     try_python "/usr/local/bin/python3.12" ||
     try_python "python3.12" ||
-
     if [ -z "$PYTHON" ]; then
         echo "Error: Python 3.12+ still not found after installation."
         echo "Please check your Homebrew installation and try again."

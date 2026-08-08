@@ -38,7 +38,7 @@ import threading
 from collections.abc import Callable
 
 # macOS virtual key codes
-# https://developer.apple.com/documentation/kernel/hidvirtualkeycode
+# https://gist.github.com/eegrok/949034
 VK_ESCAPE = 0x35
 VK_A = 0x00
 VK_S = 0x01

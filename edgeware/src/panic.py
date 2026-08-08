@@ -179,15 +179,5 @@ def send_panic() -> None:
         connection.send(PANIC_MESSAGE)
 
 
-def send_panic_tray() -> None:
-    """Send a panic signal via IPC, mimicking tray menu click.
-
-    Used by the tray menu callback to avoid calling panic() directly
-    from pystray's Cocoa callback thread, which can cause threading issues.
-    """
-    with Client(address=ADDRESS, authkey=AUTHKEY) as connection:
-        connection.send("panic_tray")
-
-
 if __name__ == "__main__":
     send_panic()

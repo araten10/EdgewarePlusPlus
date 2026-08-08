@@ -18,10 +18,13 @@ import tempfile
 import threading
 import time
 
-EDGWARE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EDGWARE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC_DIR = os.path.join(EDGWARE_DIR, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
+
+if EDGWARE_DIR not in sys.path:
+    sys.path.insert(0, EDGWARE_DIR)
 
 
 def simulate_key_press(vk_code: int) -> None:
@@ -54,7 +57,7 @@ def test_cg_event_tap_listener():
             keycode = Quartz.CGEventGetIntegerValueField(
                 event, Quartz.kCGKeyboardEventKeycode
             )
-            from config.window.utils import _vk_to_key_name
+            from os_utils.mac import _vk_to_key_name
             key_name = _vk_to_key_name(keycode)
             if key_name is not None:
                 captured["key"] = key_name
@@ -105,7 +108,7 @@ def test_subprocess_keyboard_listener():
     print("=== Test: pynput keyboard listener subprocess ===")
 
     import multiprocessing
-    from config.window.utils import _config_keyboard_listener
+    from os_utils.keyboard_subprocess import _config_keyboard_listener
 
     ctx = multiprocessing.get_context("spawn")
     parent_conn, child_conn = ctx.Pipe()
@@ -167,7 +170,7 @@ def test_key_to_vk_mapping():
     """Test that VK codes map to key names correctly."""
     print("\n=== Test: VK code to key name mapping ===")
 
-    from config.window.utils import _vk_to_key_name
+    from os_utils.mac import _vk_to_key_name
 
     cases = [
         (0x31, "Key.space"),

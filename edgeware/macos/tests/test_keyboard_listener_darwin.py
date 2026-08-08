@@ -22,10 +22,13 @@ import os
 import sys
 import time
 
-EDGWARE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EDGWARE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC_DIR = os.path.join(EDGWARE_DIR, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
+
+if EDGWARE_DIR not in sys.path:
+    sys.path.insert(0, EDGWARE_DIR)
 
 
 def simulate_key(vk_code: int, hold_ms: float = 60) -> None:
@@ -44,7 +47,7 @@ def test_panic_key_capture() -> None:
     """The configured panic key (esc) must be captured and pollable."""
     print("=== Test: DarwinKeyboardListener captures panic key ===")
 
-    from features.keyboard_listener_darwin import DarwinKeyboardListener
+    from os_utils.keyboard_listener_darwin import DarwinKeyboardListener
 
     fired = []
     listener = DarwinKeyboardListener(target_key="Key.esc", on_panic=lambda: fired.append(True))
@@ -80,7 +83,7 @@ def test_alt_key_tracking() -> None:
     print("\n=== Test: DarwinKeyboardListener tracks alt key ===")
 
     import Quartz
-    from features.keyboard_listener_darwin import DarwinKeyboardListener
+    from os_utils.keyboard_listener_darwin import DarwinKeyboardListener
 
     changes = []
     listener = DarwinKeyboardListener(
@@ -122,7 +125,7 @@ def test_alt_key_tracking() -> None:
 def test_vk_mapping() -> None:
     """The panic key name resolves to the expected VK code."""
     print("\n=== Test: Key.esc -> VK mapping ===")
-    from features.keyboard_listener_darwin import KEY_NAME_TO_VK
+    from os_utils.keyboard_listener_darwin import KEY_NAME_TO_VK
 
     assert KEY_NAME_TO_VK["Key.esc"] == 0x35, "Key.esc should map to 0x35"
     assert KEY_NAME_TO_VK["a"] == 0x00, "'a' should map to 0x00"

@@ -14,7 +14,7 @@
 #   --source   Test against src/main_edgeware.py directly
 #   Auto-detection is used if not specified.
 #
-# Usage: cd edgeware && bash tests/test_panic_integration.sh [app|keyboard|tray] [--bundle|--source]
+# Usage: cd edgeware && bash macos/test_panic_integration.sh [app|keyboard|tray] [--bundle|--source]
 #   No method argument: tests all methods sequentially.
 #   One method argument: tests only that method.
 # Exit 0 = all methods clean shutdown, exit 1 = crash/hang/timeout

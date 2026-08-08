@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import sys
 import textwrap
 import webbrowser
 from tkinter import (
@@ -32,7 +33,7 @@ from tkinter import (
 
 from config.vars import Vars
 from config.window.preset import apply_preset, list_presets, load_preset, load_preset_description, save_preset
-from config.window.utils import all_children, request_global_panic_key, set_widget_states
+from config.window.utils import all_children, request_legacy_panic_key, set_widget_states
 from config.window.widgets.layout import (
     PAD,
     ConfigRow,
@@ -45,6 +46,11 @@ from pack import Pack
 from panic import send_panic
 from paths import CustomAssets
 from PIL import ImageTk
+
+if sys.platform == "darwin":
+    from os_utils import request_global_panic_key
+else:
+    from config.window.utils import request_global_panic_key
 
 INTRO_TEXT = 'Welcome to Edgeware++!\nYou can use the tabs at the top of this window to navigate the various config settings for the main program. Annoyance/Runtime is for how the program works while running, Modes is for more complicated and involved settings that change how Edgeware works drastically, and Troubleshooting and About are for learning this program better and fixing errors should anything go wrong.\n\nAside from these helper memos, there are also tooltips on several buttons and sliders. If you see your mouse cursor change to a "question mark", hover for a second or two to see more information on the setting.'
 THEME_TEXT = "You'll have to save and refresh the config window to get the theme to show up properly, but this tab will change to the currently selected theme so you can see what it looks like! None of the sliders or buttons in this section do anything, so feel free to play around with them to test it out!"

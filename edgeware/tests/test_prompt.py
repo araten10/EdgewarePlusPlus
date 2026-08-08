@@ -27,6 +27,9 @@ SRC_DIR = os.path.join(EDGWARE_DIR, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
+if sys.platform != "darwin":
+    raise NotImplementedError("test_prompt.py requires macOS (uses os_utils.focus_window / set_borderless Prompt special-case)")
+
 
 class _FakePynputListener:
     """Minimal pynput.Listener stand-in exposing is_alive() for the Prompt safety net."""

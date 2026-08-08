@@ -64,7 +64,6 @@ from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
 from features.image_popup import ImagePopup
 from features.misc import (
-    check_accessibility_permission,
     handle_discord,
     handle_keyboard,
     handle_mitosis_mode,
@@ -74,8 +73,8 @@ from features.misc import (
     make_tray_icon,
     open_web,
     send_notification,
-    show_accessibility_dialog,
 )
+from os_utils import check_accessibility_permission, init_notifications, show_accessibility_dialog
 from features.prompt import Prompt
 from features.startup_splash import StartupSplash
 from features.subliminal_popup import SubliminalPopup
@@ -130,6 +129,7 @@ if __name__ == "__main__":
         make_desktop_icons(settings)
         handle_keyboard(root, settings, state, accessibility_granted)
         start_panic_listener(root, settings, state)
+        init_notifications(root, settings)
         Thread(target=lambda: replace_images(settings, pack), daemon=True).start()  # Thread for performance reasons
         handle_corruption(root, settings, pack, state)
         handle_discord(settings, pack)

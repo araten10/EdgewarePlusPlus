@@ -6,27 +6,31 @@ The real signal for global keyboard event taps is not AXIsProcessTrusted()
 the separate Input Monitoring TCC grant.  These tests verify
 check_input_monitoring_permission() gates on the tap, not on Accessibility.
 
-NOTE: features.misc is imported once at module scope so its dependencies
+NOTE: os_utils.mac is imported once at module scope so its dependencies
 (pystray/pynput/etc.) see the real Quartz module.  The fake Quartz is swapped
 into sys.modules only around each individual check_input_monitoring_permission()
 call, because that helper imports Quartz lazily inside itself.
 
 Usage:
-    cd edgeware && python tests/test_misc_permissions.py
+    cd edgeware && python macos/tests/test_misc_permissions.py
 """
 
 import os
 import sys
 from unittest.mock import MagicMock, patch
 
-EDGWARE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EDGWARE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC_DIR = os.path.join(EDGWARE_DIR, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
+if EDGWARE_DIR not in sys.path:
+    sys.path.insert(0, EDGWARE_DIR)
+
+
 # Import the helper up front: this also imports pystray/pynput/etc., which must
 # resolve the *real* Quartz (not a mock).
-from features.misc import check_input_monitoring_permission
+from os_utils import check_input_monitoring_permission
 
 
 class FakeQuartz:
@@ -56,22 +60,16 @@ class FakeQuartz:
         return MagicMock()
 
 
-def _check(tap_created: bool, platform: str = "darwin"):
-    """Run check_input_monitoring_permission under a fake Quartz + platform."""
+def _check(tap_created: bool):
+    """Run check_input_monitoring_permission under a fake Quartz."""
     FakeQuartz.tap_created = tap_created
     FakeQuartz.create_calls = 0
     with patch.dict(sys.modules, {"Quartz": FakeQuartz}):
-        with patch("features.misc.sys.platform", platform):
-            return check_input_monitoring_permission()
+        return check_input_monitoring_permission()
 
 
 class TestInputMonitoringPermission:
     """check_input_monitoring_permission() gates on CGEventTapCreate success."""
-
-    def test_non_macos_returns_true(self):
-        """On non-macOS the helper must report granted without a tap."""
-        assert _check(tap_created=False, platform="linux") is True
-        assert FakeQuartz.create_calls == 0
 
     def test_tap_created_means_granted(self):
         """A valid CGEventTap means Input Monitoring is granted."""
@@ -94,8 +92,7 @@ class TestInputMonitoringPermission:
     def test_quartz_missing_means_not_granted(self):
         """If Quartz cannot be imported, assume not granted."""
         with patch.dict(sys.modules, {"Quartz": None}):
-            with patch("features.misc.sys.platform", "darwin"):
-                assert check_input_monitoring_permission() is False
+            assert check_input_monitoring_permission() is False
 
 
 def main():
