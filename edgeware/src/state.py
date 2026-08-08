@@ -68,9 +68,11 @@ class State:
     tray: pystray.Icon | None = None
 
     # pynput keyboard listener subprocess (runs on its own main thread
-    # so macOS TSM APIs work correctly)
+    # so macOS TSM APIs work correctly). Only used on non-macOS platforms.
     keyboard_process: multiprocessing.Process | None = None
     keyboard_receive_conn: Connection | None = None
+    # macOS: in-process Quartz CGEventTap listener (no subprocess).
+    keyboard_listener = None  # DarwinKeyboardListener | None
     _tick_pyglet_id: int | None = None
 
     # Flag set during panic; background threads check this to stop

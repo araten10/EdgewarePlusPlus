@@ -64,6 +64,11 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
                 return
 
         set_wallpaper(CustomAssets.panic_wallpaper())
+        if state.keyboard_listener:
+            try:
+                state.keyboard_listener.stop()
+            except Exception:
+                pass
         if state.keyboard_process:
             try:
                 state.keyboard_process.terminate()

@@ -22,6 +22,8 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
+import time
 import urllib
 from multiprocessing.connection import Connection
 from pathlib import Path
@@ -31,7 +33,6 @@ from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar
 import os_utils
 import utils
 from paths import Data, launch_app
-from pynput import keyboard
 
 from config import load_config
 from config.items import CONFIG_DANGER, DangerLevel
@@ -66,18 +67,314 @@ def request_legacy_panic_key(button: Button, var: StringVar) -> None:
     window.bind("<KeyPress>", assign_panic_key)
 
 
-def keyboard_listener(connection: Connection) -> None:
-    with keyboard.Listener(on_release=lambda key: connection.send(str(key))) as listener:
+def _check_accessibility_darwin() -> bool:
+    """Check and prompt for Accessibility permission on macOS."""
+    try:
+        import ctypes
+        import ctypes.util
+
+        framework_path = ctypes.util.find_library('ApplicationServices')
+        if not framework_path:
+            return True
+
+        app_services = ctypes.cdll.LoadLibrary(framework_path)
+        app_services.AXIsProcessTrusted.restype = ctypes.c_bool
+
+        if app_services.AXIsProcessTrusted():
+            return True
+
+        logging.info("Accessibility not granted — prompting user via AXIsProcessTrustedWithOptions")
+        # Trigger the macOS Accessibility permission prompt
+        app_services.AXIsProcessTrustedWithOptions.restype = ctypes.c_bool
+        opts = {str("AXTrustedCheckOptionPrompt"): True}
+        ctypes.cf = ctypes.CDLL(None)
+        trusted = app_services.AXIsProcessTrustedWithOptions(opts)
+        logging.info("Accessibility prompt shown, result: %s", trusted)
+        return trusted
+    except Exception as e:
+        logging.warning("Could not check Accessibility permission: %s", e)
+        return True  # Assume granted if check fails, let CGEventTapCreate decide
+
+
+def _request_global_panic_key_darwin(button: Button, var: StringVar, window: Toplevel) -> None:
+    """macOS implementation using CGEventTap directly."""
+    try:
+        import Quartz
+    except ImportError:
+        logging.error("PyObjC/Quartz not available — cannot use CGEventTap")
+        messagebox.showerror(
+            "Error",
+            "PyObjC/Quartz not available. Please use the Legacy Panic Key in the Troubleshooting tab."
+        )
+        window.destroy()
+        return
+
+    if not _check_accessibility_darwin():
+        logging.error("CGEventTap: Accessibility permission not granted")
+        messagebox.showerror(
+            "Accessibility Permission Required",
+            "The keyboard listener requires Accessibility permission.\n\n"
+            "To grant permission:\n"
+            "1. Open System Settings → Privacy & Security → Accessibility\n"
+            "2. Click the lock icon and enter your password\n"
+            "3. Enable the toggle next to Edgeware++ Config\n\n"
+            "You may need to restart the app after granting permission.\n\n"
+            "Alternatively, you can use the Legacy Panic Key in the Troubleshooting tab."
+        )
+        window.destroy()
+        return
+
+    # Thread-safe flag: CGEventTap callback sets it, main thread polls it
+    captured_key = [None]  # Use list to allow mutation in nested function
+    tap = [None]  # Use list to allow mutation in nested function
+    loop_ref = [None]
+    running = [True]
+
+    def callback(proxy, event_type, event, refcon):
+        """CGEventTap callback."""
+        try:
+            # Handle CGEventTap disabled by timeout
+            if event_type == Quartz.kCGEventTapDisabledByTimeout:
+                logging.warning("CGEventTap disabled by timeout — re-enabling")
+                if tap[0] is not None:
+                    Quartz.CGEventTapEnable(tap[0], True)
+                return event
+
+            # Only process key down events
+            if event_type == Quartz.kCGEventKeyDown:
+                keycode = Quartz.CGEventGetIntegerValueField(
+                    event, Quartz.kCGKeyboardEventKeycode
+                )
+                # Map keycode to key name
+                key_name = _vk_to_key_name(keycode)
+                if key_name is not None:
+                    captured_key[0] = key_name
+        except Exception as e:
+            logging.error(f"CGEventTap callback error: {e}")
+
+        return event
+
+    # Create the CGEventTap
+    tap_obj = Quartz.CGEventTapCreate(
+        Quartz.kCGSessionEventTap,
+        Quartz.kCGHeadInsertEventTap,
+        Quartz.kCGEventTapOptionListenOnly,
+        Quartz.CGEventMaskBit(Quartz.kCGEventKeyDown),
+        callback,
+        None,
+    )
+
+    if tap_obj is None:
+        logging.error(
+            "CGEventTap creation failed — Accessibility permission required. "
+            "Go to System Settings → Privacy & Security → Accessibility and add this app."
+        )
+        messagebox.showerror(
+            "Accessibility Permission Required",
+            "The keyboard listener requires Accessibility permission.\n\n"
+            "To grant permission:\n"
+            "1. Open System Preferences\n"
+            "2. Go to Privacy & Security > Accessibility\n"
+            "3. Click the lock icon and enter your password\n"
+            "4. Check the box next to Edgeware++ Config\n\n"
+            "Alternatively, you can use the Legacy Panic Key in the Troubleshooting tab."
+        )
+        window.destroy()
+        return
+
+    tap[0] = tap_obj
+
+    # Create run loop source from the tap
+    run_loop_source = Quartz.CFMachPortCreateRunLoopSource(None, tap_obj, 0)
+
+    def run_loop():
+        """Run the CFRunLoop in a daemon thread."""
+        try:
+            loop = Quartz.CFRunLoopGetCurrent()
+            loop_ref[0] = loop
+            Quartz.CFRunLoopAddSource(loop, run_loop_source, Quartz.kCFRunLoopCommonModes)
+            Quartz.CGEventTapEnable(tap_obj, True)
+            logging.info("CGEventTap keyboard listener started for config")
+            Quartz.CFRunLoopRun()
+        except Exception as e:
+            logging.error(f"CGEventTap run loop error: {e}")
+        finally:
+            running[0] = False
+
+    thread = threading.Thread(target=run_loop, daemon=True)
+    thread.start()
+
+    def poll_key() -> None:
+        """Poll the CGEventTap flag periodically."""
+        if not running[0]:
+            return
+        if captured_key[0] is not None:
+            key_name = captured_key[0]
+            captured_key[0] = None
+            # Assign the captured key
+            button.configure(text=f"Set Global\nPanic Key\n<{key_name}>")
+            var.set(key_name)
+            # Stop the listener and close the window
+            try:
+                if tap[0] is not None:
+                    Quartz.CGEventTapEnable(tap[0], False)
+                if loop_ref[0] is not None:
+                    Quartz.CFRunLoopStop(loop_ref[0])
+            except Exception:
+                pass
+            window.destroy()
+            return
+        window.after(50, poll_key)
+
+    # Start polling
+    window.after(50, poll_key)
+
+    def close() -> None:
+        """Clean up when the window is closed."""
+        running[0] = False
+        try:
+            if tap[0] is not None:
+                Quartz.CGEventTapEnable(tap[0], False)
+            if loop_ref[0] is not None:
+                Quartz.CFRunLoopStop(loop_ref[0])
+        except Exception:
+            pass
+        try:
+            window.destroy()
+        except Exception:
+            pass
+
+    def timeout_check() -> None:
+        """Close the dialog if no key is pressed within 10 seconds."""
+        if running[0] and captured_key[0] is None:
+            logging.warning("No key pressed within 10 seconds")
+            close()
+
+    # 10-second timeout
+    window.after(10000, timeout_check)
+
+    window.protocol("WM_DELETE_WINDOW", close)
+
+
+def _vk_to_key_name(vk: int) -> str | None:
+    """Convert a macOS virtual key code to a key name string."""
+    # Map virtual key codes to key names
+    VK_TO_KEY_NAME = {
+        0x35: "Key.esc",
+        0x24: "Key.enter",
+        0x4C: "Key.enter",
+        0x30: "Key.tab",
+        0x33: "Key.backspace",
+        0x75: "Key.delete",
+        0x7E: "Key.up",
+        0x7D: "Key.down",
+        0x7B: "Key.left",
+        0x7C: "Key.right",
+        0x73: "Key.home",
+        0x77: "Key.end",
+        0x74: "Key.pageup",
+        0x79: "Key.pagedown",
+        0x7A: "Key.f1",
+        0x78: "Key.f2",
+        0x63: "Key.f3",
+        0x76: "Key.f4",
+        0x60: "Key.f5",
+        0x61: "Key.f6",
+        0x62: "Key.f7",
+        0x64: "Key.f8",
+        0x65: "Key.f9",
+        0x6D: "Key.f10",
+        0x67: "Key.f11",
+        0x6F: "Key.f12",
+        0x37: "Key.cmd",
+        0x36: "Key.cmd_r",
+        0x38: "Key.shift",
+        0x3C: "Key.shift_r",
+        0x3B: "Key.ctrl",
+        0x3E: "Key.ctrl_r",
+        0x3A: "Key.alt",
+        0x3D: "Key.alt_r",
+        0x31: "Key.space",
+        # Letter keys
+        0x00: "a", 0x01: "s", 0x02: "d", 0x03: "f", 0x04: "h",
+        0x05: "g", 0x06: "z", 0x07: "x", 0x08: "c", 0x09: "v",
+        0x0B: "b", 0x0C: "q", 0x0D: "w", 0x0E: "e", 0x0F: "r",
+        0x10: "y", 0x11: "t", 0x1F: "o", 0x20: "u",
+        0x21: "[", 0x1E: "]", 0x22: "i", 0x23: "p",
+        0x25: "l", 0x26: "j", 0x27: "'", 0x28: "k",
+        0x29: ";", 0x2A: "\\", 0x2B: ",", 0x2C: "/",
+        0x2D: "n", 0x2E: "m", 0x2F: ".",
+        # Number keys
+        0x12: "1", 0x13: "2", 0x14: "3", 0x15: "4", 0x17: "5",
+        0x16: "6", 0x1A: "7", 0x1C: "8", 0x19: "9", 0x1D: "0",
+    }
+    return VK_TO_KEY_NAME.get(vk)
+
+
+def _config_keyboard_listener(connection: Connection) -> None:
+    """Pynput keyboard listener subprocess target.
+
+    Must be a top-level function so multiprocessing.spawn can pickle it.
+    Runs pynput in its own main thread via subprocess, which is required
+    because macOS TSM APIs (called by pynput) assert they run on the
+    main thread.
+    """
+    try:
+        from utils import init_logging
+        init_logging("keyboard_listener")
+        logging.info("Config keyboard listener subprocess started (PID %d)", __import__("os").getpid())
+    except Exception as e:
+        print(f"Failed to initialize config keyboard listener logging: {e}")
+
+    from pynput import keyboard
+
+    def on_release(key):
+        try:
+            logging.info("Key released: %s — sending via pipe", key)
+            connection.send(str(key))
+        except Exception as e:
+            logging.error("Failed to send key event: %s", e)
+            raise
+
+    try:
+        logging.info("Creating pynput keyboard Listener")
+        listener = keyboard.Listener(on_release=on_release)
+        logging.info("Starting pynput keyboard Listener")
+        listener.start()
+        logging.info("Pynput listener thread alive: %s", listener.is_alive())
+        logging.info("Sending 'focus' to parent")
         connection.send("focus")
+        logging.info("'focus' sent — joining listener thread")
         listener.join()
+        logging.info("Listener thread joined (exit code: %s)", listener.daemon)
+    except Exception as exc:
+        logging.error("Config keyboard listener subprocess crashed: %s", exc, exc_info=True)
+    finally:
+        logging.info("Config keyboard listener subprocess exiting")
+        try:
+            connection.close()
+        except Exception:
+            pass
 
 
 def request_global_panic_key(button: Button, var: StringVar) -> None:
+    if sys.platform == "darwin":
+        window = KeyListenerWindow()
+        _request_global_panic_key_darwin(button, var, window)
+        return
+
     window = KeyListenerWindow()
 
     def close() -> None:
-        window.destroy()
-        process.terminate()
+        try:
+            window.destroy()
+        except Exception:
+            pass
+        try:
+            if process.is_alive():
+                process.terminate()
+        except Exception:
+            pass
 
     def assign_panic_key(key: str) -> None:
         button.configure(text=f"Set Global\nPanic Key\n<{key}>")
@@ -86,21 +383,66 @@ def request_global_panic_key(button: Button, var: StringVar) -> None:
 
     def receive_panic_key() -> None:
         try:
+            logging.info("receive_panic_key: waiting for 'focus' from subprocess")
             assert parent_connection.recv() == "focus"
-            window.after(0, window.focus_force)  # Required on Windows, otherwise keyboard inputs don't work until something is focused
+            logging.info("receive_panic_key: got 'focus', focusing window")
+            window.after(0, window.focus_force)
 
+            logging.info("receive_panic_key: waiting for key event")
             key = parent_connection.recv()
+            logging.info("receive_panic_key: got key %s", key)
             window.after(0, lambda: assign_panic_key(key))
         except EOFError:
-            pass  # The window was closed before a key was pressed
+            logging.error("receive_panic_key: subprocess pipe closed (EOFError)")
+            window.after(0, lambda: messagebox.showerror(
+                "Keyboard Listener Error",
+                "The keyboard listener failed to start. This may be due to missing Accessibility permission.\n\n"
+                "To grant permission:\n"
+                "1. Open System Preferences\n"
+                "2. Go to Privacy & Security > Accessibility\n"
+                "3. Click the lock icon and enter your password\n"
+                "4. Check the box next to Edgeware++ Config\n\n"
+                "Alternatively, you can use the Legacy Panic Key in the Troubleshooting tab,\n"
+                "which doesn't require Accessibility permission but requires focusing on a popup."
+            ))
+            window.after(0, window.destroy)
         except AssertionError:
             logging.error("Did not receive focus message from keyboard listener process")
 
-    parent_connection, child_connection = multiprocessing.Pipe()
-    process = multiprocessing.Process(target=keyboard_listener, args=(child_connection,))
-    process.start()
+    def timeout_check() -> None:
+        """Close the dialog if no key is pressed within 10 seconds."""
+        try:
+            if process.is_alive():
+                process.terminate()
+                window.after(0, lambda: messagebox.showwarning(
+                    "Timeout",
+                    "No key pressed within 10 seconds. Dialog closing.\n\n"
+                    "Please try again or use the Legacy Panic Key in the Troubleshooting tab."
+                ))
+                window.after(0, window.destroy)
+        except Exception:
+            pass
+
+    try:
+        ctx = multiprocessing.get_context("spawn")
+        parent_connection, child_connection = ctx.Pipe()
+        process = ctx.Process(target=_config_keyboard_listener, args=(child_connection,), daemon=True)
+        process.start()
+        child_connection.close()
+    except Exception as e:
+        logging.error(f"Failed to start keyboard listener process: {e}")
+        messagebox.showerror(
+            "Error",
+            f"Failed to start keyboard listener: {e}\n\n"
+            "Please use the Legacy Panic Key in the Troubleshooting tab."
+        )
+        window.destroy()
+        return
 
     Thread(target=receive_panic_key).start()
+
+    # 10-second timeout
+    window.after(10000, timeout_check)
 
     window.protocol("WM_DELETE_WINDOW", close)
 

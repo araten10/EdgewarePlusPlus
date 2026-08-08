@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
-import atexit
 import logging
 import multiprocessing
+import os
 import random
 import sys
 import time
@@ -33,13 +33,165 @@ from desktop_notifier.common import Attachment, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 from os_utils import make_shortcut, set_wallpaper
 from pack import Pack
-from panic import panic
+from panic import panic, send_panic_tray
 from paths import CustomAssets, Process
 from PIL import Image
 from pynput import keyboard
 from pypresence import Presence
 from roll import roll
 from state import State
+
+
+def check_accessibility_permission() -> bool:
+    """Check if the app has Accessibility permission on macOS.
+    
+    Returns True if permission is granted or if not on macOS.
+    Returns False if permission is not granted or if check fails.
+    """
+    if sys.platform != "darwin":
+        return True
+    
+    try:
+        import ctypes
+        import ctypes.util
+        
+        # Load ApplicationServices framework
+        framework_path = ctypes.util.find_library('ApplicationServices')
+        if not framework_path:
+            logging.warning("Could not find ApplicationServices framework")
+            return False
+        
+        app_services = ctypes.cdll.LoadLibrary(framework_path)
+        
+        # AXIsProcessTrusted() -> Boolean
+        app_services.AXIsProcessTrusted.restype = ctypes.c_bool
+        trusted = app_services.AXIsProcessTrusted()
+        
+        logging.info(f"Accessibility permission check: {'granted' if trusted else 'not granted'}")
+        return trusted
+    except Exception as e:
+        logging.warning(f"Could not check Accessibility permission: {e}")
+        return False  # Assume not granted if check fails
+
+
+def show_accessibility_dialog(root: Tk) -> None:
+    """Show dialog explaining Accessibility permission requirement.
+
+    If the user opts to open System Preferences, warn that a restart is required
+    for the change to take effect, then quit the app so they can relaunch it.
+    If they decline, keep running (the tray / IPC panic path still works).
+    """
+    from tkinter import messagebox
+
+    message = (
+        "Edgeware++ needs Accessibility permission to listen for the global panic hotkey.\n\n"
+        "To grant permission:\n"
+        "1. Open System Preferences\n"
+        "2. Go to Privacy & Security > Accessibility\n"
+        "3. Click the lock icon and enter your password\n"
+        "4. Check the box next to Edgeware++\n\n"
+        "If you don't want to grant this permission, you can still use:\n"
+        "• The Panic.app (separate application)\n"
+        "• The tray icon menu\n"
+        "• The Legacy Panic Key (requires focusing on a popup)\n\n"
+        "Do you want to open System Preferences now?"
+    )
+
+    result = messagebox.askyesno("Accessibility Permission", message)
+    if result:
+        try:
+            import subprocess
+
+            subprocess.Popen(["open", "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"])
+        except Exception as e:
+            logging.error(f"Failed to open System Preferences: {e}")
+
+        # Accessibility (TCC) changes only take effect on relaunch.
+        messagebox.showinfo(
+            "Restart Required",
+            "Accessibility permission only takes effect after Edgeware++ is restarted.\n\n"
+            "Edgeware++ will now close.  Please reopen it once you have granted permission.",
+        )
+        root.after(100, root.destroy)
+
+
+def check_input_monitoring_permission() -> bool:
+    """Check if the app has Input Monitoring permission on macOS.
+
+    AXIsProcessTrusted() only proves Accessibility (which CGEventTap creation does
+    NOT require).  The reliable signal for a global keyboard event tap is whether
+    CGEventTapCreate itself returns a valid tap: if Input Monitoring has not been
+    granted to this app, it returns None immediately.
+
+    Returns True if permission is granted or if not on macOS.
+    Returns False if permission is not granted or if check fails.
+    """
+    if sys.platform != "darwin":
+        return True
+
+    try:
+        import Quartz
+
+        # Probe with a minimal listen-only keyboard CGEventTap.  We never enable
+        # it or attach it to a run loop; its creation is the permission signal.
+        tap = Quartz.CGEventTapCreate(
+            Quartz.kCGSessionEventTap,
+            Quartz.kCGHeadInsertEventTap,
+            Quartz.kCGEventTapOptionListenOnly,
+            Quartz.CGEventMaskBit(Quartz.kCGEventKeyDown),
+            lambda proxy, event_type, event, refcon: event,
+            None,
+        )
+        granted = tap is not None
+        logging.info(f"Input Monitoring permission check: {'granted' if granted else 'not granted'}")
+        return granted
+    except Exception as e:
+        logging.warning(f"Could not check Input Monitoring permission: {e}")
+        return False
+
+
+def show_input_monitoring_dialog(root: Tk) -> None:
+    """Show dialog explaining the Input Monitoring permission requirement.
+
+    If the user opts to open System Settings, warn that a restart is required for
+    the change to take effect, then quit the app so they can relaunch it.  If
+    they decline, keep running (the tray / IPC panic path still works).
+
+    The correct macOS pane for global keyboard event taps is the Input Monitoring
+    list under Privacy & Security, not Accessibility.
+    """
+    from tkinter import messagebox
+
+    message = (
+        "Edgeware++ needs Input Monitoring permission to listen for the global panic hotkey.\n\n"
+        "To grant permission:\n"
+        "1. Open System Settings\n"
+        "2. Go to Privacy & Security > Input Monitoring\n"
+        "3. Enable Edgeware++\n\n"
+        "If you don't want to grant this permission, you can still use:\n"
+        "• The Panic.app (separate application)\n"
+        "• The tray icon menu\n\n"
+        "Do you want to open System Settings now?"
+    )
+
+    result = messagebox.askyesno("Input Monitoring Permission", message)
+    if result:
+        try:
+            import subprocess
+
+            subprocess.Popen(
+                ["open", "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"]
+            )
+        except Exception as e:
+            logging.error(f"Failed to open System Settings: {e}")
+
+        # Input Monitoring (TCC) changes only take effect on relaunch.
+        messagebox.showinfo(
+            "Restart Required",
+            "Input Monitoring permission only takes effect after Edgeware++ is restarted.\n\n"
+            "Edgeware++ will now close.  Please reopen it once you have granted permission.",
+        )
+        root.after(100, root.destroy)
 
 
 def open_web(pack: Pack, web: str | None = None) -> None:
@@ -64,7 +216,15 @@ def send_notification(settings: Settings, pack: Pack, notification: str | None =
 
 
 def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hibernate_activity: Callable[[], None]) -> None:
-    menu = [pystray.MenuItem("Panic", lambda: panic(root, settings, state))]
+    def _tray_panic():
+        try:
+            logging.info("TRAY: panic callback entered")
+            send_panic_tray()
+            logging.info("TRAY: IPC message sent successfully")
+        except Exception as e:
+            logging.error(f"TRAY: exception in panic callback: {e}", exc_info=True)
+            raise
+    menu = [pystray.MenuItem("Panic", _tray_panic)]
     if settings.hibernate_mode:
 
         def skip_hibernate() -> None:
@@ -85,6 +245,7 @@ def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hiber
         state.tray.run_detached()
     else:
         state.tray = pystray.Icon("Edgeware++", Image.open(pack.icon), "Edgeware++", menu)
+        # state.tray.run()
         Thread(target=state.tray.run, daemon=True).start()
 
 
@@ -171,16 +332,20 @@ def _keyboard_listener_process(child_conn: Connection) -> None:
     required on macOS for TSM (Text Services Manager) APIs to work
     correctly.  Sends (type, key_str) tuples back via the pipe.
     """
+    from utils import init_logging
+    init_logging("keyboard_listener")
+    logging.info("Keyboard listener subprocess started (PID %d)", os.getpid())
+
     def callback(event_type: str) -> Callable:
         return lambda key: child_conn.send((event_type, str(key)))
 
     try:
-        with keyboard.Listener(
-                on_press=callback("press"), on_release=callback("release")
-        ) as listener:
+        logging.info("Creating pynput keyboard Listener")
+        with keyboard.Listener(on_press=callback("press"), on_release=callback("release")) as listener:
+            logging.info("Pynput listener thread alive: %s", listener.is_alive())
             listener.join()
     except Exception as exc:
-        logging.error(f"Keyboard listener subprocess crashed: {exc}")
+        logging.error("Keyboard listener subprocess crashed: %s", exc, exc_info=True)
     finally:
         try:
             child_conn.close()
@@ -188,42 +353,126 @@ def _keyboard_listener_process(child_conn: Connection) -> None:
             pass
 
 
-def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
-    alt = [str(keyboard.Key.alt), str(keyboard.Key.alt_gr),
-           str(keyboard.Key.alt_l), str(keyboard.Key.alt_r)]
+def stop_keyboard_listener(state: State) -> None:
+    """Stop any running keyboard listener.
+
+    On macOS this stops the in-process pynput listener; on other
+    platforms it terminates the pynput subprocess and closes the receive pipe.
+    """
+    if sys.platform == "darwin":
+        listener = getattr(state, "keyboard_listener", None)
+        if listener is not None:
+            try:
+                listener.stop()
+            except Exception:
+                pass
+            state.keyboard_listener = None
+        return
+
+    if state.keyboard_process and state.keyboard_process.is_alive():
+        try:
+            state.keyboard_process.terminate()
+            state.keyboard_process.join(timeout=2)
+        except Exception:
+            pass
+    if state.keyboard_receive_conn:
+        try:
+            state.keyboard_receive_conn.close()
+        except Exception:
+            pass
+        state.keyboard_receive_conn = None
+
+
+def handle_keyboard(root: Tk, settings: Settings, state: State, accessibility_granted: bool = True) -> None:
+    if not accessibility_granted:
+        logging.warning("Skipping keyboard listener: Accessibility permission not granted")
+        return
+
+    if sys.platform == "darwin":
+        _handle_keyboard_darwin(root, settings, state)
+        return
+
+    alt = [str(keyboard.Key.alt), str(keyboard.Key.alt_gr), str(keyboard.Key.alt_l), str(keyboard.Key.alt_r)]
 
     def receive() -> None:
-        try:
-            while True:
+        while True:
+            try:
                 event_type, key_str = parent_conn.recv()
-        except (EOFError, OSError):
-            return  # Subprocess terminated
+            except (EOFError, OSError):
+                return
 
-        if event_type == "press" and key_str in alt:
-            root.after(0, lambda: setattr(state, "alt_held", True))
-        if event_type == "release":
-            if key_str in alt:
-                root.after(0, lambda: setattr(state, "alt_held", False))
-            # Only dispatch panic when the panic key is actually released
-            if key_str == settings.global_panic_key:
-                root.after(0, lambda: panic(root, settings, state))
+            if event_type == "press" and key_str in alt:
+                root.after(0, lambda: setattr(state, "alt_held", True))
+            if event_type == "release":
+                if key_str in alt:
+                    root.after(0, lambda: setattr(state, "alt_held", False))
+                if key_str == settings.global_panic_key:
+                    _root, _settings = root, settings
+                    root.after(0, lambda: panic(_root, _settings, state))
 
     ctx = multiprocessing.get_context("spawn")
     parent_conn, child_conn = ctx.Pipe()
-    proc = ctx.Process(target=_keyboard_listener_process,
-                       args=(child_conn,), daemon=True)
-    proc.start()
+    state.keyboard_process = ctx.Process(target=_keyboard_listener_process, args=(child_conn,), daemon=True)
+    state.keyboard_process.start()
     child_conn.close()
-
-    state.keyboard_process = proc
+    state.keyboard_receive_conn = parent_conn
 
     Thread(target=receive, daemon=True).start()
 
-    def cleanup() -> None:
-        if state.keyboard_process and state.keyboard_process.is_alive():
-            try:
-                state.keyboard_process.terminate()
-                state.keyboard_process.join(timeout=2)
-            except Exception:
-                pass
-    atexit.register(cleanup)
+
+def _handle_keyboard_darwin(root: Tk, settings: Settings, state: State) -> None:
+    """macOS keyboard listener using a direct in-process Quartz CGEventTap.
+
+    A pynput subprocess does not reliably receive key events inside the bundled
+    .app (Input Monitoring trust is lost), and running pynput in-process crashes or
+    never receives physical keys in the frozen app. The raw Quartz CGEventTap runs
+    in-process on a daemon thread and is polled via Tk's after(), avoiding both
+    subprocess permission inheritance and pynput's macOS TSM main-thread crash.
+    """
+    from features.keyboard_listener_darwin import DarwinKeyboardListener
+
+    def on_panic() -> None:
+        if state.panic_shutdown:
+            return
+        _root, _settings = root, settings
+        try:
+            root.after(0, lambda: panic(_root, _settings, state))
+        except Exception as e:
+            logging.warning(f"CGEventTap on_panic scheduling failed: {e}")
+
+    def on_alt_change(held: bool) -> None:
+        if state.panic_shutdown:
+            return
+        root.after(0, lambda: setattr(state, "alt_held", held))
+
+    alt_names = [
+        str(keyboard.Key.alt), str(keyboard.Key.alt_gr),
+        str(keyboard.Key.alt_l), str(keyboard.Key.alt_r),
+    ]
+
+    listener = DarwinKeyboardListener(
+        target_key=settings.global_panic_key,
+        on_panic=on_panic,
+        alt_keys=alt_names,
+        on_alt_change=on_alt_change,
+    )
+
+    if not listener.start():
+        logging.error("Failed to start macOS CGEventTap keyboard listener (Input Monitoring permission likely missing)")
+        root.after(0, lambda: show_input_monitoring_dialog(root))
+        return
+
+    state.keyboard_listener = listener
+    logging.info(f"macOS CGEventTap keyboard listener started for key: {settings.global_panic_key}")
+
+    def poll_listener() -> None:
+        if state.panic_shutdown:
+            return
+        try:
+            listener.poll()
+        except Exception as e:
+            logging.warning(f"CGEventTap poll error: {e}")
+        root.after(listener._poll_interval_ms, poll_listener)
+
+    # Start polling from the main thread.
+    root.after(0, poll_listener)

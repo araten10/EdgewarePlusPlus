@@ -150,5 +150,6 @@ app = BUNDLE(
         'LSUIElement': True,
         'NSHighResolutionCapable': True,
         'NSRequiresAquaSystemAppearance': False,
+        'NSInputMonitoringUsageDescription': 'Edgeware++ listens for your global panic hotkey.',
     },
 )

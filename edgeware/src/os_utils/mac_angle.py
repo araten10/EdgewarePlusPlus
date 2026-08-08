@@ -256,6 +256,9 @@ class OffscreenRenderer:
 
         self._pixel_buffer = ctypes.create_string_buffer(width * height * 4)
 
+        # Set viewport once — it only changes when the FBO size changes.
+        self.viewport(0, 0, width, height)
+
         # Bound method usable directly as mpv's get_proc_address callback.
         self.get_proc_address = _GetProcAddrCB(self._get_proc_address)
 
@@ -308,6 +311,7 @@ class OffscreenRenderer:
             fn = getattr(self._egl.gles, name.decode())
             return ctypes.cast(fn, c_void_p).value or 0
         except (AttributeError, UnicodeDecodeError):
+            log.debug(f"ANGLE: unknown GL function requested: {name!r}")
             return 0
 
     def viewport(self, x: int, y: int, width: int, height: int) -> None:
@@ -407,9 +411,6 @@ class RenderVideoPlayer(Label):
             if self._render_ctx and self._render_ctx.update():
                 self._renderer.make_current()
                 
-                # Now correctly calls the localized ANGLE viewport instead of the missing _gl reference
-                self._renderer.viewport(0, 0, self._renderer.width, self._renderer.height)
-                
                 self._render_ctx.render(
                     opengl_fbo={"fbo": self._renderer._fbo, "w": self._renderer.width, "h": self._renderer.height},
                     flip_y=False,
@@ -420,6 +421,8 @@ class RenderVideoPlayer(Label):
                 if self._overlays:
                     try:
                         for overlay, pos in self._overlays:
+                            if overlay is None:
+                                continue
                             canvas = Image.new("RGBA", (img.width, img.height), (0, 0, 0, 0))
                             canvas.paste(overlay, pos, overlay)
                             img = Image.alpha_composite(img, canvas)

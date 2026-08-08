@@ -64,6 +64,7 @@ from features.drive import fill_drive, replace_images
 from features.hibernate import main_hibernate, start_main_hibernate
 from features.image_popup import ImagePopup
 from features.misc import (
+    check_accessibility_permission,
     handle_discord,
     handle_keyboard,
     handle_mitosis_mode,
@@ -73,6 +74,7 @@ from features.misc import (
     make_tray_icon,
     open_web,
     send_notification,
+    show_accessibility_dialog,
 )
 from features.prompt import Prompt
 from features.startup_splash import StartupSplash
@@ -117,9 +119,16 @@ if __name__ == "__main__":
     ]
 
     def start_main() -> None:
+        # Check Accessibility permission on macOS before starting keyboard listener
+        accessibility_granted = True
+        if sys.platform == "darwin":
+            accessibility_granted = check_accessibility_permission()
+            if not accessibility_granted:
+                show_accessibility_dialog(root)
+
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
         make_desktop_icons(settings)
-        handle_keyboard(root, settings, state)
+        handle_keyboard(root, settings, state, accessibility_granted)
         start_panic_listener(root, settings, state)
         Thread(target=lambda: replace_images(settings, pack), daemon=True).start()  # Thread for performance reasons
         handle_corruption(root, settings, pack, state)
@@ -143,8 +152,10 @@ if __name__ == "__main__":
         import pyglet
 
         def tick_pyglet() -> None:
+            if state._panic_shutdown:
+                return
             pyglet.app.platform_event_loop.dispatch_posted_events()
-            root.after(16, tick_pyglet)
+            state._tick_pyglet_id = root.after(16, tick_pyglet)
 
         tick_pyglet()
     else:
@@ -157,3 +168,9 @@ if __name__ == "__main__":
         Thread(target=pyglet_run, daemon=True).start()  # Required for pyglet events
 
     root.mainloop()
+
+    # On macOS panic shutdown, mainloop() returns after root.quit()
+    if sys.platform == "darwin" and state.panic_shutdown:
+        import os
+
+        os._exit(0)

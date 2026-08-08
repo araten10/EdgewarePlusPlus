@@ -31,7 +31,48 @@ def close_mpv(player: mpv.MPV) -> None:
 
 
 def set_borderless(window: Toplevel) -> None:
+    # overrideredirect(True) removes a window from macOS's Cocoa focus chain,
+    # so its Text widgets can never receive keyboard input. Prompt needs text
+    # entry, so keep it a normal (topmost) window — the same special case Linux
+    # KDE applies in os_utils/linux.py. Popups, splash and subliminals still
+    # want borderless transparency.
+    try:
+        from features.prompt import Prompt
+
+        if isinstance(window, Prompt):
+            window.title("PROMPT")
+            window.resizable(False, False)
+            # Stay above everything but participate in the focus chain.
+            window.attributes("-topmost", True)
+            return
+    except Exception:
+        pass  # Prompt not importable yet (circular init); fall through to borderless
+
     window.tk.call('wm', 'overrideredirect', window._w, True)
+
+
+def focus_window(window: Toplevel) -> None:
+    """Force the given borderless window to become key and receive keyboard input.
+
+    overrideredirect(True) windows on macOS are removed from the normal
+    Cocoa focus chain, so calling focus_set()/focus_force() alone is not
+    enough for a bundled .app.  We activate the app and make the window
+    key through AppKit so typed characters reach the focused widget.
+    """
+    try:
+        import AppKit
+        app = AppKit.NSApplication.sharedApplication()
+        app.activateIgnoringOtherApps_(True)
+    except Exception as e:
+        logging.warning(f"focus_window: could not activate app via AppKit: {e}")
+    # makekeyandorderfront must run on the main thread; it is, since this is
+    # called from a Tk callback.
+    window.update_idletasks()
+    window.lift()
+    try:
+        window.focus_force()
+    except Exception as e:
+        logging.warning(f"focus_window: focus_force failed: {e}")
 
 
 def set_clickthrough(window: Toplevel) -> None:

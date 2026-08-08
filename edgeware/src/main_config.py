@@ -16,6 +16,10 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 if __name__ == "__main__":
+    import multiprocessing
+    from multiprocessing.spawn import freeze_support
+    freeze_support()
+
     import os
 
     from paths import Data
