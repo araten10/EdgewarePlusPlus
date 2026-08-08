@@ -16,6 +16,18 @@ Save and extract it somewhere, then run `edgeware/EdgewareSetup.bat`. This will 
 
 **If you're using Linux**, first you need to install Python 3.12, pip, and mpv yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip mpv gcc python3-dev libmpv-dev python3-tk`. Once installed, download and extract Edgeware as a ZIP or clone the repository, then run `setup.sh` in a terminal window in the `edgeware` directory. This will create a Python virtual environment for Edgeware, install the dependencies, and create scripts for running Edgeware. `config.sh` allows you to configure Edgeware and `edgeware.sh` will start Edgeware itself.
 
+**If you're using macOS**, Edgeware++ ships as a native `.app` bundle with no external dependencies — ANGLE graphics libraries are pre-compiled and included. You can grab a pre-built release from the [Releases tab](https://github.com/araten10/EdgewarePlusPlus/releases) or build from source:
+
+1. Clone the repository and navigate to the `edgeware/` directory.
+2. Run `setup.sh` — this creates a Python virtual environment, installs dependencies, and sets up launcher scripts. You need Python 3.12+, tkinter, and mpv; `setup.sh` will tell you how to get them if they're missing.
+3. To build the `.app` bundles, navigate to `edgeware/macos/`, then run:
+   ```
+   chmod +x build_app.sh
+   ./build_app.sh
+   ```
+   The script auto-detects Python 3.12+ and will offer to install Homebrew and Python if needed. The resulting `.app` bundles appear in `edgeware/dist/`.
+4. User data (packs, config, logs) is stored in `~/Library/Application Support/EdgewarePlusPlusMacosPython/`.
+
 From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original Edgeware page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and there's a few more in the "Packs" section of the readme.
 
 Any time Edgeware has a major update, it might be a good idea to run `EdgewareSetup.bat` again, as this is the file that downloads dependencies for the program.
@@ -92,7 +104,7 @@ But also feel free to follow me on twitter, interact with me there, and other su
 
 >Q: Does Edgeware work on android/mac/ios?
 
-A: I only have plans to develop Edgeware for windows, and Marigold is currently only developing Edgeware for Linux.
+A: I only have plans to develop Edgeware for Windows, and Marigold is currently developing Edgeware for Linux. There is a macOS port made my blissfull-ignorance — see the instructions above for macOS setup.
 
 >Q: Are there other programs out there like Edgeware?
 

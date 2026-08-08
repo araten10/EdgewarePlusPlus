@@ -9,6 +9,44 @@
 
 **Since last version...**
 
+**Version 21**
+
+**blissfull-ignorance**: Full macOS support! Intrigued by [CaliaWare](https://mistresscalia.com/caliaware) and frustrated with running Edgeware through workarounds on Mac, I decided to do a proper port.
+
+This is a native macOS port — no Wine, no cross-platform hacks. Edgeware++ now builds as proper `.app` bundles for macOS (ARM and Intel) with its own tray icon, wallpaper management, and native video rendering.
+
+•*Added full macOS platform implementation in `os_utils/mac.py`: wallpaper management via osascript, shortcut creation, login items, and native system integration*
+
+•*Added offscreen ANGLE (EGL/GLES-on-Metal) renderer for mpv video playback. Hypno overlays, video popups, GIF playback, and denial mode shaders all render via GPU using ANGLE — Google's OpenGL-compatibility layer backed by Metal. This completely solves the painfully slow hypno overlay rendering that was a dealbreaker on macOS.*
+
+•*ANGLE libraries (`libEGL.dylib`, `libGLESv2.dylib`) are pre-compiled from source and shipped with the project for both ARM and Intel Macs. See `ANGLE_LICENSE` for licensing details.*
+
+•*Added PyInstaller-based `.app` bundling: three native app bundles (Edgeware++, Config, Panic) are built via `edgeware/macos/build_app.sh`. The build script auto-detects Python 3.12+ and can install Homebrew + Python automatically if needed.*
+
+•*Added freeze-aware path resolution: in bundled mode, user data (packs, config, logs) lives in `~/Library/Application Support/EdgewarePlusPlusMacosPython/` — avoiding permission issues, data loss on updates, and ensuring all three apps share the same data.*
+
+•*Added `launch_app()` helper for inter-app communication between the three bundled apps, replacing hardcoded `subprocess` calls with bundle-aware launching.*
+
+•*Fixed `overrideredirect` TclError on macOS by using raw `tk.call` to bypass tkinter's boolean parser*
+
+•*Fixed pystray tray icon crash on macOS by using `run_detached()` with the shared `NSApplication` singleton instead of a background event loop*
+
+•*Fixed pyglet audio event loop crash on macOS by driving pyglet through tkinter's `after()` on the main thread instead of a separate `pyglet.app.run()` thread*
+
+•*Fixed NSApplication singleton conflicts: Tk's `TKApplication` now claims the singleton before any other library (pyglet, pystray, pynput) can create a plain `NSApplication`*
+
+•*Converted keyboard listener (pynput) to a `spawn` subprocess for macOS TSM compatibility — isolating the CGEventTap from the main Tk thread to prevent input hangs*
+
+•*Refactored popup move/timeout from background threads to main-thread `after()` scheduling, fixing random freezes on popup click*
+
+•*Added `video_loop_inf` and `video_loop_count` settings with a new "Video Loop" section in the Popup Tweaks config tab, allowing videos to loop a set number of times instead of infinitely*
+
+•*Fixed `from os_utils.windows import set_schedule` hardcoded imports in `troubleshooting.py` and `config/window/utils.py` — these now use the platform-agnostic `from os_utils import` pattern*
+
+•*Updated `setup.sh` and `pack_tool/setup.sh` with Python 3.12+ version detection and macOS-specific error messages*
+
+>**macOS Setup:** Navigate to `edgeware/macos/` and run `./build_app.sh`. The script handles Python/Homebrew installation automatically. Pre-built releases are also available in the [Releases tab](https://github.com/araten10/EdgewarePlusPlus/releases).
+
 **Version 20**
 
 Major scripting mode additions by Marigold! I have been working on our new project [Steamy](https://github.com/araten10/Steamy), while she has been working hard at expanding the things you can do with scripting in Edgeware. For those daring pack creators that use scripting and understand Lua, these updates will allow you to do *much* more!

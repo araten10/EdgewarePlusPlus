@@ -1,17 +1,81 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+import subprocess
+from pathlib import Path
 
 # Spec lives in edgeware/macos/; project root is edgeware/
 EDGWARE_DIR = os.path.abspath(os.path.join(SPECPATH, '..'))
 
+# Locate the videoprops package to bundle its ffprobe binary
+import videoprops as _vp
+_VIDEOPROPS_DIR = str(Path(_vp.__file__).parent)
+
+
+def brew_prefix(formula):
+    try:
+        return subprocess.check_output(
+            ['brew', '--prefix', formula], text=True
+        ).strip()
+    except Exception:
+        return None
+
+
+def collect_dylibs(formula):
+    """Return (src, dest) pairs for every .dylib in a brewed formula's lib dir."""
+    prefix = brew_prefix(formula)
+    if not prefix:
+        print(f'[mpv-deps] WARNING: could not resolve brew prefix for {formula!r}')
+        return []
+    lib_dir = os.path.join(prefix, 'lib')
+    if not os.path.isdir(lib_dir):
+        return []
+    out = []
+    for fname in os.listdir(lib_dir):
+        if fname.endswith('.dylib'):
+            full = os.path.join(lib_dir, fname)
+            # resolve symlinks (e.g. libmpv.dylib -> libmpv.2.dylib) to the real file
+            out.append((os.path.realpath(full), '.'))
+    return out
+
+
+MPV_FORMULAS = [
+    'mpv',
+    'ffmpeg',
+    'jpeg-turbo',
+    'libarchive',
+    'libass',
+    'libbluray',
+    'libplacebo',
+    'little-cms2',
+    'luajit',
+    'mujs',
+    'rubberband',
+    'uchardet',
+    'vapoursynth',
+    'vulkan-loader',
+    'zimg',
+    'molten-vk',
+]
+
+mpv_binaries = []
+_seen = set()
+for formula in MPV_FORMULAS:
+    for src, dest in collect_dylibs(formula):
+        if src not in _seen and os.path.exists(src):
+            _seen.add(src)
+            mpv_binaries.append((src, dest))
+
+print(f'[mpv-deps] bundling {len(mpv_binaries)} dylibs from {len(MPV_FORMULAS)} formulas')
+
 a = Analysis(
     [os.path.join(EDGWARE_DIR, 'src/main_edgeware.py')],
     pathex=[EDGWARE_DIR],
-    binaries=[],
+    binaries=mpv_binaries,
     datas=[
         (os.path.join(EDGWARE_DIR, 'assets'), 'assets'),
         (os.path.join(EDGWARE_DIR, 'data/presets'), 'data/presets'),
         (os.path.join(EDGWARE_DIR, 'src/os_utils/angle_libs'), 'src/os_utils/angle_libs'),
+        (os.path.join(_VIDEOPROPS_DIR, 'binary_dependencies'), 'videoprops/binary_dependencies'),
     ],
     hiddenimports=[
         'tkinter', 'tkinter.ttk', 'tkinter.messagebox', 'tkinter.simpledialog',

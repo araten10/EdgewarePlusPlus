@@ -61,39 +61,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# --- Fetch ANGLE libraries from Chrome/Chromium (macOS only) ---
+# --- Verify ANGLE libraries (macOS only, shipped with the project) ---
 if [ "$(uname)" = "Darwin" ]; then
     ANGLE_DIR="src/os_utils/angle_libs"
-    mkdir -p "$ANGLE_DIR"
-
-    CHROME_APP="/Applications/Google Chrome.app"
-    CHROMIUM_APP="/Applications/Chromium.app"
-
-    ANGLE_SOURCE=""
-    if [ -d "$CHROME_APP" ]; then
-        ANGLE_SOURCE="$CHROME_APP/Contents/Frameworks/Google Chrome Framework.framework/Versions/Current/Libraries"
-    elif [ -d "$CHROMIUM_APP" ]; then
-        ANGLE_SOURCE="$CHROMIUM_APP/Contents/Frameworks/Chromium Framework.framework/Versions/Current/Libraries"
-    else
-        echo "ANGLE libraries not found."
-        echo "Google Chrome or Chromium is required for video playback on macOS."
-        echo "Please install Google Chrome: https://www.google.com/chrome/"
-        echo "Or install Chromium: https://www.chromium.org/getting-chromium/download/"
+    if [ ! -f "$ANGLE_DIR/libEGL.dylib" ] || [ ! -f "$ANGLE_DIR/libGLESv2.dylib" ]; then
+        echo "Error: ANGLE libraries missing from $ANGLE_DIR"
+        echo "These are compiled from source and should be shipped with the project."
+        echo "If you cloned the repository, check that the binary files were included."
         exit 1
     fi
-
-    for lib in libEGL.dylib libGLESv2.dylib; do
-        if [ -f "$ANGLE_SOURCE/$lib" ]; then
-            cp "$ANGLE_SOURCE/$lib" "$ANGLE_DIR/$lib"
-            echo "Copied $lib from $(basename "$ANGLE_SOURCE/../../../../../..")"
-        else
-            echo "Error: $lib not found in $ANGLE_SOURCE"
-            echo "Google Chrome or Chromium installation may be corrupted."
-            echo "Please reinstall Chrome or Chromium and try again."
-            exit 1
-        fi
-    done
-    echo "ANGLE libraries installed successfully."
 fi
 
 # --- Create venv ---

@@ -187,8 +187,9 @@ ruffruff.bat
 
 *.zip
 
-# ANGLE libraries (fetched from Chrome/Chromium during setup)
-edgeware/src/os_utils/angle_libs/*.dylib
+# ANGLE libraries (compiled from source, shipped with the project)
+# libEGL.dylib and libGLESv2.dylib are tracked; any other dylibs/dlls
+# placed in this directory should be ignored.
 edgeware/src/os_utils/angle_libs/*.dll
 
 # Build macos apps

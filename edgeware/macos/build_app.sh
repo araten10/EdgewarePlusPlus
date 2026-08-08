@@ -182,28 +182,28 @@ for app_bundle in "$DIST_DIR"/*.app; do
 
     RESOURCES="$app_bundle/Contents/Resources"
 
-    # .spec datas handles assets, presets, and ANGLE libs
+    # .spec datas handles assets, presets, ANGLE libs, and videoprops (ffprobe)
     # User data directories are now in ~/Library/Application Support/EdgewarePlusPlusMacosPython/
     # and are created at runtime by paths.py
+    # libmpv.dylib is collected by PyInstaller via the spec binaries list;
+    # the redundant manual copy previously at Resources/lib/ has been removed
+    # because it had un-rebased absolute Homebrew paths.
+done
 
-    # Copy libmpv.dylib into the main app bundle for video playback
-    if [ "$app_label" = "$APP_NAME" ]; then
-        mkdir -p "$RESOURCES/lib"
-        LIBMPV_SRC=""
-        # Search Homebrew first
-        if [ -f "/opt/homebrew/lib/libmpv.dylib" ]; then
-            LIBMPV_SRC="/opt/homebrew/lib/libmpv.dylib"
-        elif [ -f "/usr/local/lib/libmpv.dylib" ]; then
-            LIBMPV_SRC="/usr/local/lib/libmpv.dylib"
-        fi
-
-        if [ -n "$LIBMPV_SRC" ]; then
-            cp "$LIBMPV_SRC" "$RESOURCES/lib/libmpv.dylib"
-            echo "  Copied libmpv.dylib from $(dirname "$LIBMPV_SRC")"
-        else
-            echo "  Warning: libmpv.dylib not found. Video playback may not work."
-            echo "  Install mpv via Homebrew: brew install mpv"
-        fi
+# --- Copy ANGLE dylibs to Contents/Frameworks/ ---
+# The ANGLE dylibs have install_name @rpath/libEGL.dylib etc.
+# PyInstaller's built-in @rpath already includes Contents/Frameworks/.
+# Copying them there lets the dynamic linker resolve @rpath references.
+for app_bundle in "$DIST_DIR"/*.app; do
+    [ -d "$app_bundle" ] || continue
+    _angle_src="$app_bundle/Contents/Resources/src/os_utils/angle_libs"
+    if [ -d "$_angle_src" ]; then
+        mkdir -p "$app_bundle/Contents/Frameworks"
+        for _angle_dylib in libEGL.dylib libGLESv2.dylib; do
+            if [ -f "$_angle_src/$_angle_dylib" ]; then
+                cp -f "$_angle_src/$_angle_dylib" "$app_bundle/Contents/Frameworks/"
+            fi
+        done
     fi
 done
 
@@ -253,6 +253,32 @@ with open(plist_path, 'wb') as f:
     fi
 fi
 
+# --- Add LC_RPATH entries to executables (BEFORE codesign) ---
+echo
+echo "Adding rpath entries to executables..."
+for app_bundle in "$DIST_DIR"/*.app; do
+    [ -d "$app_bundle" ] || continue
+    _exe="$app_bundle/Contents/MacOS/$(basename "$app_bundle" .app)"
+    if [ -f "$_exe" ]; then
+        install_name_tool -add_rpath @executable_path/../Frameworks "$_exe" 2>/dev/null || true
+        install_name_tool -add_rpath @executable_path/../Resources "$_exe" 2>/dev/null || true
+        echo "  Added rpaths to $(basename "$app_bundle")"
+    fi
+done
+
+# --- Strip extended attributes (prevents codesign "resource fork" errors) ---
+# macOS extended attributes (com.apple.provenance, com.apple.FinderInfo, etc.)
+# are added during build by various tools and interfere with codesign on
+# newer macOS versions, causing "resource fork, Finder information, or
+# similar detritus not allowed" errors.  Strip them before signing.
+echo
+echo "Stripping extended attributes..."
+for app_bundle in "$DIST_DIR"/*.app; do
+    [ -d "$app_bundle" ] || continue
+    xattr -r -c "$app_bundle" 2>/dev/null || true
+    echo "  Stripped xattrs from $(basename "$app_bundle")"
+done
+
 # --- Fix library permissions ---
 echo
 echo "Fixing library permissions..."
@@ -263,13 +289,35 @@ for app_bundle in "$DIST_DIR"/*.app; do
 done
 
 # --- Ad-hoc code signing ---
+# Sign nested executables first, then the outer bundle.  Using --deep on
+# bundles with many Homebrew-sourced dylibs triggers "resource fork" errors
+# on newer macOS.  Individual signing avoids this.
+#
+# NOTE: macOS uses BSD find which doesn't support -executable. We use
+# -perm to find files with any execute bit set.
 echo
 echo "Ad-hoc code signing..."
 for app_bundle in "$DIST_DIR"/*.app; do
     [ -d "$app_bundle" ] || continue
-    codesign --deep --force --sign - "$app_bundle" 2>/dev/null \
-        && echo "  Signed $(basename "$app_bundle")" \
-        || echo "  Signing skipped for $(basename "$app_bundle") (non-fatal)"
+    app_label=$(basename "$app_bundle")
+
+    # Sign all nested frameworks
+    find "$app_bundle" -name "*.framework" -type d -exec codesign --force --sign - --timestamp=none {} \; 2>/dev/null || true
+
+    # Strip xattrs (PyInstaller's signing adds provenance attrs that break outer signing)
+    xattr -r -c "$app_bundle" 2>/dev/null || true
+
+    # Sign all executable files (must be done AFTER xattr strip)
+    # Also follow symlinks (-L) so bundled copies in both Resources/ and Frameworks/ are signed
+    find -L "$app_bundle" -type f \( -perm -0001 -o -perm -0010 -o -perm -0100 \) ! -path "*_CodeSignature*" -exec codesign --force --sign - --timestamp=none {} \; 2>/dev/null || true
+
+    # Strip xattrs one final time before signing the outer bundle
+    xattr -r -c "$app_bundle" 2>/dev/null || true
+
+    # Sign the outer bundle
+    codesign --force --sign - --timestamp=none "$app_bundle" 2>&1 \
+        && echo "  Signed $app_label" \
+        || echo "  Signing failed for $app_label"
 done
 
 # --- Done ---
@@ -292,6 +340,7 @@ echo "Notes:"
 echo "  - User data lives in ~/Library/Application Support/EdgewarePlusPlusMacosPython/"
 echo "  - Pack resources are imported to ~/Library/Application Support/EdgewarePlusPlusMacosPython/data/packs/"
 echo "  - ANGLE libraries are bundled at Contents/Resources/src/os_utils/angle_libs/"
-echo "  - libmpv.dylib is bundled at Contents/Resources/lib/ (requires Homebrew mpv)"
+echo "  - ANGLE libraries are also copied to Contents/Frameworks/ for @rpath resolution"
+echo "  - libmpv.dylib is collected by PyInstaller to Contents/Resources/ (with rebased @rpath install names)"
 echo "  - For first-time use, run the Config app to set up your preferences"
 echo

@@ -62,6 +62,8 @@ class VideoPlayer(Label):
 
         if sys.platform == "darwin":
             self._setup_macos(width, height)
+            # macOS RenderVideoPlayer packs itself into master directly;
+            # this VideoPlayer Label acts only as a container for the API.
         elif os_utils.is_linux():
             self._setup_linux()
             self.pack()

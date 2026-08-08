@@ -35,10 +35,19 @@ import mpv
 log = logging.getLogger(__name__)
 
 if getattr(sys, "frozen", False):
-    _FROZEN_ANGLE_DIR = str(
+    # Check Contents/Frameworks/ first (copy placed there by build script for
+    # @rpath resolution), then fall back to the original datas location.
+    _ANGLE_FW = (
+        Path(sys.executable).parent.parent / "Frameworks"
+    )
+    _ANGLE_DATA = (
         Path(sys.executable).parent.parent / "Resources"
         / "src" / "os_utils" / "angle_libs"
     )
+    if (_ANGLE_FW / "libEGL.dylib").is_file():
+        _FROZEN_ANGLE_DIR = str(_ANGLE_FW)
+    else:
+        _FROZEN_ANGLE_DIR = str(_ANGLE_DATA)
 else:
     _FROZEN_ANGLE_DIR = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "angle_libs"
@@ -125,7 +134,7 @@ class _EGL:
         self.egl.eglGetDisplay.argtypes = [c_void_p]
 
         self.egl.eglInitialize.restype = c_int
-        self.egl.eglInitialize.argtypes = [c_void_p, c_void_p, c_void_p]
+        self.egl.eglInitialize.argtypes = [c_void_p, ctypes.POINTER(c_int32), ctypes.POINTER(c_int32)]
 
         self.egl.eglBindAPI.restype = c_int
         self.egl.eglBindAPI.argtypes = [c_uint]
@@ -411,8 +420,9 @@ class RenderVideoPlayer(Label):
                 if self._overlays:
                     try:
                         for overlay, pos in self._overlays:
-                            # Switched from .paste() to .alpha_composite() for properly blended transparency
-                            img.alpha_composite(overlay, dest=pos)
+                            canvas = Image.new("RGBA", (img.width, img.height), (0, 0, 0, 0))
+                            canvas.paste(overlay, pos, overlay)
+                            img = Image.alpha_composite(img, canvas)
                     except Exception as e:
                         log.warning(f"Overlay compositing error, showing frame without overlays: {e}")
 
@@ -449,6 +459,6 @@ class RenderVideoPlayer(Label):
         if self._player:
             self._player.stop()
 
+        self._renderer = None
         self._player = None
         self._render_ctx = None
-        self._renderer = None
