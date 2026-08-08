@@ -16,6 +16,8 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import multiprocessing
+from multiprocessing.connection import Connection
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from tkinter import Toplevel
@@ -68,6 +70,17 @@ class State:
     # pynput keyboard listener subprocess (runs on its own main thread
     # so macOS TSM APIs work correctly)
     keyboard_process: multiprocessing.Process | None = None
+    keyboard_receive_conn: Connection | None = None
+    _tick_pyglet_id: int | None = None
+
+    # Flag set during panic; background threads check this to stop
+    # scheduling new root.after() callbacks before _exit() fires.
+    _panic_shutdown = False
+
+    @property
+    def panic_shutdown(self) -> bool:
+        return self._panic_shutdown
+
     alt_held = False
 
     @property

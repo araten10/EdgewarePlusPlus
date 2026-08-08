@@ -47,6 +47,11 @@ if __name__ == "__main__":
     _tk_init.withdraw()
     _tk_init.destroy()
 
+    # Explicit paths initialization: ensure user data dirs and run bundle
+    # migration at startup. This is idempotent with the import-time init.
+    from paths import init as _paths_init
+    _paths_init()
+
 from threading import Thread
 from tkinter import Tk
 

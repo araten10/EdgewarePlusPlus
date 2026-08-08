@@ -36,7 +36,7 @@ try_python() {
 try_python "/opt/homebrew/bin/python3.12" ||
 try_python "/usr/local/bin/python3.12" ||
 try_python "python3.12" ||
-try_python "python3"
+# try_python "python3"  # --> REMOVE
 
 if [ -z "$PYTHON" ]; then
     echo "Python 3.12+ not found. Attempting to install via Homebrew..."
@@ -72,13 +72,22 @@ if [ -z "$PYTHON" ]; then
     try_python "/opt/homebrew/bin/python3.12" ||
     try_python "/usr/local/bin/python3.12" ||
     try_python "python3.12" ||
-    try_python "python3"
+    # try_python "python3"  <-- REMOVE
 
     if [ -z "$PYTHON" ]; then
         echo "Error: Python 3.12+ still not found after installation."
         echo "Please check your Homebrew installation and try again."
         exit 1
     fi
+fi
+
+if ! command -v mpv &>/dev/null; then
+    echo "mpv not found. Attempting to install via Homebrew..."
+    ensure_homebrew
+    brew install mpv || {
+        echo "Failed to install mpv via Homebrew."
+        exit 1
+    }
 fi
 
 echo "Python version: $($PYTHON --version 2>&1)"
@@ -207,6 +216,124 @@ for app_bundle in "$DIST_DIR"/*.app; do
     fi
 done
 
+# --- Bundle Homebrew data files and verify self-containment ---
+# This replaces the former bundle_homebrew_deps.sh. The bundled app MUST
+# work without any links to the user's system or Homebrew packages.
+echo "Bundling Homebrew data files..."
+
+BREW_PREFIX="$(brew --prefix 2>/dev/null || echo "/opt/homebrew")"
+CELLAR="${BREW_PREFIX}/Cellar"
+
+_copy_tree() {
+    local src="$1" dst="$2"
+    if [ -d "$src" ]; then
+        mkdir -p "$(dirname "$dst")"
+        rsync -aL --delete "$src"/ "$dst"/ 2>/dev/null || cp -RfL "$src" "$dst" 2>/dev/null || true
+    fi
+}
+
+_copy_file() {
+    local src="$1" dst="$2"
+    if [ -f "$src" ] || [ -L "$src" ]; then
+        mkdir -p "$(dirname "$dst")"
+        cp -fL "$src" "$dst" 2>/dev/null || cp -f "$src" "$dst" 2>/dev/null || true
+    fi
+}
+
+_cellar_path() {
+    local formula="$1" subpath="$2"
+    local version_dir
+    version_dir="$(ls -d "${CELLAR}/${formula}"/*/ 2>/dev/null | sort -V | tail -1)"
+    [ -n "$version_dir" ] && echo "${version_dir}${subpath}"
+}
+
+for APP_BUNDLE in "$DIST_DIR"/*.app; do
+    [ -d "$APP_BUNDLE" ] || continue
+    APP_LABEL="$(basename "$APP_BUNDLE" .app)"
+    RESOURCES="$APP_BUNDLE/Contents/Resources"
+    HOMEBREW="$RESOURCES/bundle/homebrew"
+
+    # Only the main app bundles libmpv; skip Config and Panic
+    if [ ! -f "${RESOURCES}/libmpv.dylib" ] && [ ! -f "${RESOURCES}/libmpv.2.dylib" ]; then
+        echo "  ${APP_LABEL}.app — skipping (no libmpv)"
+        continue
+    fi
+
+    echo "  ${APP_LABEL}.app"
+
+    # 1. Fontconfig
+    echo "    fontconfig..."
+    _copy_tree "${BREW_PREFIX}/etc/fonts"                        "${HOMEBREW}/etc/fonts"
+    _copy_tree "$(_cellar_path fontconfig share/fontconfig)"     "${HOMEBREW}/share/fontconfig"
+    _fc_conf="${HOMEBREW}/etc/fonts/fonts.conf"
+    if [ -f "$_fc_conf" ]; then
+        sed -i '' '/<cachedir>\/opt\/homebrew\/var\/cache\/fontconfig<\/cachedir>/d' "$_fc_conf" 2>/dev/null || true
+    fi
+
+    # 2. OpenSSL
+    echo "    openssl..."
+    _copy_tree "${BREW_PREFIX}/etc/openssl@3"                    "${HOMEBREW}/etc/openssl@3"
+    # NOTE: we deliberately skip lib/engines-3 and lib/ossl-modules
+    # — these contain dylibs with hardcoded Cellar paths that can't be
+    # reliably rebased during bundling (rsync may re-copy over fixes).
+    # They are optional OpenSSL extensions and are not needed for normal
+    # certificate verification.
+    _ossl_cert="${HOMEBREW}/etc/openssl@3/cert.pem"
+    if [ -L "$_ossl_cert" ]; then
+        _ca_cert="${BREW_PREFIX}/etc/ca-certificates/cert.pem"
+        [ -f "$_ca_cert" ] && { rm -f "$_ossl_cert"; cp -fL "$_ca_cert" "$_ossl_cert"; }
+    fi
+
+    # 3. mpv binary + config
+    echo "    mpv..."
+    mkdir -p "${HOMEBREW}/etc/mpv"
+    _copy_file "${BREW_PREFIX}/bin/mpv"                     "${HOMEBREW}/bin/mpv"
+    if [ -L "${HOMEBREW}/bin/mpv" ]; then
+        _copy_file "$(readlink -f "${BREW_PREFIX}/bin/mpv" 2>/dev/null || \
+                      realpath "${BREW_PREFIX}/bin/mpv" 2>/dev/null || \
+                      echo "${BREW_PREFIX}/bin/mpv")"   "${HOMEBREW}/bin/mpv"
+    fi
+
+    # Fix mpv binary's hardcoded Homebrew paths
+    _mpv_bin="${HOMEBREW}/bin/mpv"
+    if [ -f "$_mpv_bin" ]; then
+        _brew_paths="$(otool -L "$_mpv_bin" 2>/dev/null | sed -n 's/^[[:space:]]*\(\/opt\/homebrew\/[^ ]*\).*/\1/p')"
+        for _old_path in $_brew_paths; do
+            _lib_name="${_old_path##*/}"
+            install_name_tool -change "$_old_path" "@rpath/${_lib_name}" "$_mpv_bin" 2>/dev/null || true
+        done
+        # mpv is at Contents/Resources/bundle/homebrew/bin/ — need 4 levels up to reach Contents/
+        install_name_tool -delete_rpath "@executable_path/../../Frameworks" "$_mpv_bin" 2>/dev/null || true
+        install_name_tool -delete_rpath "@executable_path/../../Resources"  "$_mpv_bin" 2>/dev/null || true
+        install_name_tool -add_rpath "@executable_path/../../../../Frameworks" "$_mpv_bin" 2>/dev/null || true
+        install_name_tool -add_rpath "@executable_path/../../../../Resources"  "$_mpv_bin" 2>/dev/null || true
+    fi
+
+    # 4. GLib & gettext locales
+    echo "    locales..."
+    _copy_tree "$(_cellar_path glib share/locale)"           "${HOMEBREW}/share/locale"
+    _gettext_ver="$(_cellar_path gettext "")"
+    [ -n "$_gettext_ver" ] && _copy_tree "${_gettext_ver}share/locale" "${HOMEBREW}/share/gettext-locale"
+
+    find "${HOMEBREW}" -type f -exec chmod 644 {} \; 2>/dev/null || true
+    find "${HOMEBREW}" -type d -exec chmod 755 {} \; 2>/dev/null || true
+    [ -f "${HOMEBREW}/bin/mpv" ] && chmod 755 "${HOMEBREW}/bin/mpv"
+
+    # 5. Rebase ALL bundled homebrew dylibs with hardcoded Cellar paths
+    echo "    rebasing bundled dylib paths..."
+    for _hb_dylib in $(find "${HOMEBREW}" -name "*.dylib" -type f 2>/dev/null); do
+        codesign --remove-signature "$_hb_dylib" 2>/dev/null || true
+        _brew_paths="$(otool -L "$_hb_dylib" 2>/dev/null | sed -n 's/^[[:space:]]*\(\/opt\/homebrew\/[^ ]*\).*/\1/p')"
+        for _old_path in $_brew_paths; do
+            _lib_name="${_old_path##*/}"
+            install_name_tool -change "$_old_path" "@rpath/${_lib_name}" "$_hb_dylib" 2>/dev/null || true
+        done
+    done
+
+    echo "    Done ($(du -sh "${HOMEBREW}" 2>/dev/null | cut -f1))"
+done
+echo "✓ Homebrew data bundling complete"
+
 # --- Remove leftover COLLECT directories ---
 echo
 echo "Cleaning up COLLECT directories..."
@@ -319,6 +446,34 @@ for app_bundle in "$DIST_DIR"/*.app; do
         && echo "  Signed $app_label" \
         || echo "  Signing failed for $app_label"
 done
+
+# --- CRITICAL: Verify self-containment AFTER all signing ---
+echo
+echo "Verifying app self-containment..."
+_brew_link_fail=0
+for APP_BUNDLE in "$DIST_DIR"/*.app; do
+    [ -d "$APP_BUNDLE" ] || continue
+    APP_LABEL="$(basename "$APP_BUNDLE" .app)"
+
+    for _binary in $(find -L "$APP_BUNDLE" \( -name "*.dylib" -o -name "*.so" -o -name "mpv" \) -type f 2>/dev/null); do
+        _bad_paths="$(otool -L "$_binary" 2>/dev/null | sed -n 's/^[[:space:]]*\(\/opt\/homebrew\/[^ ]*\).*/\1/p')"
+        if [ -n "$_bad_paths" ]; then
+            echo "  ERROR: ${APP_LABEL} — $_binary still has Homebrew paths:"
+            for _bp in $_bad_paths; do
+                echo "    $_bp"
+            done
+            _brew_link_fail=1
+        fi
+    done
+done
+
+if [ "$_brew_link_fail" -eq 1 ]; then
+    echo ""
+    echo "FATAL: Bundled binaries still link to Homebrew paths."
+    echo "The app will NOT work on a system without Homebrew. Aborting."
+    exit 1
+fi
+echo "  ✓ No hardcoded Homebrew paths found in any bundled binary"
 
 # --- Done ---
 echo

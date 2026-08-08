@@ -7,7 +7,7 @@ pillow
 pyglet
 pynput
 pypresence
-pystray
+pystray==0.19.5
 python-xlib; platform_system == 'Linux'
 pywin32; platform_system == 'Windows'
 requests

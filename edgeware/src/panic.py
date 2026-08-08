@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
 import logging
 import sys
+import threading
 from multiprocessing.connection import Client, Listener
 from threading import Thread
 from tkinter import Tk, simpledialog
@@ -50,7 +51,11 @@ PANIC_MESSAGE = "panic"
 
 def panic(root: Tk, settings: Settings, state: State, condition: bool = True, disable: bool = True) -> None:
     def do_panic() -> None:
+        logging.info(f"DO_PANIC: entered, disable={disable}, condition={condition}, "
+                     f"panic_disabled={settings.panic_disabled}, "
+                     f"thread={threading.current_thread().name}")
         if (disable and settings.panic_disabled) or not condition:
+            logging.info("DO_PANIC: early return (disabled/condition)")
             return
 
         if settings.panic_lockout and state.panic_lockout_active:
@@ -60,11 +65,17 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
 
         set_wallpaper(CustomAssets.panic_wallpaper())
         if state.keyboard_process:
-            state.keyboard_process.terminate()
-        if sys.platform == "darwin":
-            # On macOS, pystray uses run_detached() sharing tkinter's
-            # NSApplication, so calling tray.stop() would kill the
-            # entire event loop. Just remove the status bar item directly.
+            try:
+                state.keyboard_process.terminate()
+                state.keyboard_process.join(timeout=2)
+            except Exception:
+                pass
+        if state.tray and sys.platform == "darwin":
+            # pystray's public API (visible=False, stop()) only hides the
+            # button or stops the event loop — it does NOT fully remove the
+            # NSStatusItem from the status bar. The only way to do that is
+            # via the private _status_bar / _status_item attributes, which
+            # is why we pin pystray==0.19.5 in requirements.txt.
             try:
                 state.tray._status_bar.removeStatusItem_(state.tray._status_item)
             except Exception as e:
@@ -74,33 +85,68 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
             # event loop), so pyglet.app.exit() is not needed either.
 
             # Close all open popups so their video players / render loops
-            # are stopped BEFORE we touch the process. Each popup.close()
-            # must fully join its mpv/pyglet threads, not just signal them,
-            # or the mpv event thread can still be mid-callback when we
-            # exit and race with teardown.
-            for popup in list(state.popups):
+            # are stopped BEFORE we exit. Each popup.close() must fully
+            # join its mpv/pyglet threads, or the mpv event thread can
+            # race with teardown.
+            remaining = list(state.popups)
+            while remaining:
+                popup = remaining.pop(0)
                 try:
                     popup.close()
                 except Exception as e:
                     logging.debug(f"Error closing popup during panic: {e}")
+                # Remove from popups list to avoid double-close
+                if popup in state.popups:
+                    state.popups.remove(popup)
 
-            # Deliberately do NOT call root.destroy() here. Destroying the
-            # Tk root hands control back into Tk/Cocoa's own teardown path,
-            # which can release the GIL mid-destroy — and if any background
-            # thread (mpv event thread, pyglet worker) tries to reacquire
-            # it at that moment, CPython aborts with:
-            #   Fatal Python error: PyEval_RestoreThread: ...GIL is released
-            import os
-            os._exit(0)
+            # On macOS background threads (pyglet tick, keyboard receive
+            # handler, popup timers) call into Python via _tkinter C code,
+            # which calls PyEval_RestoreThread.  If the GIL is released by
+            # Tcl/Cocoa event polling during Tk or Python teardown a
+            # fatal Python error occurs:
+            #   Fatal Python error: PyEval_RestoreThread: NULL tstate
+            #
+            # Strategy:
+            # 1. Set a shutdown flag so new callbacks are not scheduled.
+            # 2. Close the keyboard receive connection so the receive
+            #    thread dies immediately (unblocks on recv()).
+            # 3. Cancel the tick_pyglet loop so it stops scheduling new
+            #    callbacks every 16ms.
+            # 4. Queue root.quit() to stop the Tk mainloop cleanly.
+            # 5. Use a threading.Event so os._exit(0) is only called
+            #    after mainloop() has returned — this avoids the race
+            #    where a Tk after() callback fires into Python via
+            #    _tkinter C code after the GIL state is corrupted.
+            state._panic_shutdown = True
+
+            # Close the keyboard receive pipe so the receive thread's
+            # parent_conn.recv() unblocks with EOFError/OSError.
+            if state.keyboard_receive_conn:
+                try:
+                    state.keyboard_receive_conn.close()
+                except Exception:
+                    pass
+
+            # Cancel the tick_pyglet callback chain
+            if state._tick_pyglet_id is not None:
+                try:
+                    root.after_cancel(state._tick_pyglet_id)
+                except Exception:
+                    pass
+
+            logging.info("DO_PANIC: scheduling root.quit()")
+            root.after(0, root.quit)
             return
         else:
-            state.tray.stop()
+            if state.tray:
+                state.tray.stop()
             pyglet.app.exit()
         root.destroy()
 
     # Make sure panic code is executed in the main thread, otherwise
     # simpledialog will not work from most panic sources
     root.after(0, do_panic)
+
 
 
 def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
@@ -110,8 +156,13 @@ def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
                 while True:
                     with listener.accept() as connection:
                         message = connection.recv()
+                        logging.info(f"PANIC_LISTENER: received message '{message}'")
                         if message == PANIC_MESSAGE:
+                            logging.info("PANIC_LISTENER: dispatching panic (disable=False)")
                             panic(root, settings, state, disable=False)
+                        elif message == "panic_tray":
+                            logging.info("PANIC_LISTENER: dispatching tray panic (disable=True)")
+                            panic(root, settings, state, disable=True)
         except OSError as e:
             logging.warning(f"Failed to start panic listener, some panic sources may not be functional. Reason: {e}")
 
@@ -121,6 +172,16 @@ def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
 def send_panic() -> None:
     with Client(address=ADDRESS, authkey=AUTHKEY) as connection:
         connection.send(PANIC_MESSAGE)
+
+
+def send_panic_tray() -> None:
+    """Send a panic signal via IPC, mimicking tray menu click.
+
+    Used by the tray menu callback to avoid calling panic() directly
+    from pystray's Cocoa callback thread, which can cause threading issues.
+    """
+    with Client(address=ADDRESS, authkey=AUTHKEY) as connection:
+        connection.send("panic_tray")
 
 
 if __name__ == "__main__":

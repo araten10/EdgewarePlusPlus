@@ -41,6 +41,10 @@ if __name__ == "__main__":
     _tk_init.withdraw()
     _tk_init.destroy()
 
+    # Explicit paths initialization at startup
+    from paths import init as _paths_init
+    _paths_init()
+
     import logging
     import traceback
     from tkinter import messagebox

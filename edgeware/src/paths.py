@@ -114,9 +114,21 @@ def _migrate_bundle_data() -> None:
         pass  # Not writable — that's fine, the bundle may be read-only
 
 
-# Run initialization at import time
+# Run initialization at import time (for backwards compatibility).
+# For explicit control, call paths.init() at app startup instead.
 _ensure_user_data_dirs()
 _migrate_bundle_data()
+
+
+def init() -> None:
+    """Explicit initialization: create user data dirs and run bundle migration.
+
+    This is equivalent to the import-time initialization but allows callers
+    to defer the filesystem operations until app startup is more convenient.
+    Safe to call multiple times — all operations are idempotent.
+    """
+    _ensure_user_data_dirs()
+    _migrate_bundle_data()
 
 
 # ---------------------------------------------------------------------------
