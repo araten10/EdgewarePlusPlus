@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import atexit
 import logging
 import multiprocessing
 import random
+import sys
 import time
 import webbrowser
 from collections.abc import Callable
@@ -74,8 +76,16 @@ def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hiber
 
         menu.append(pystray.MenuItem("Skip to Hibernate", skip_hibernate))
 
-    state.tray = pystray.Icon("Edgeware++", Image.open(pack.icon), "Edgeware++", menu)
-    Thread(target=state.tray.run, daemon=True).start()
+    if sys.platform == "darwin":
+        import AppKit
+        state.tray = pystray.Icon(
+            "Edgeware++", Image.open(pack.icon), "Edgeware++", menu,
+            darwin_nsapplication=AppKit.NSApplication.sharedApplication(),
+        )
+        state.tray.run_detached()
+    else:
+        state.tray = pystray.Icon("Edgeware++", Image.open(pack.icon), "Edgeware++", menu)
+        Thread(target=state.tray.run, daemon=True).start()
 
 
 def make_desktop_icons(settings: Settings) -> None:
@@ -154,33 +164,66 @@ def handle_mitosis_mode(root: Tk, settings: Settings, pack: Pack, state: State) 
         mitosis_popup(root, settings, pack, state)
 
 
-def keyboard_listener(connection: Connection) -> None:
-    def callback(type: str) -> None:
-        return lambda key: connection.send((type, str(key)))
+def _keyboard_listener_process(child_conn: Connection) -> None:
+    """Target for the keyboard listener subprocess.
 
-    with keyboard.Listener(on_press=callback("press"), on_release=callback("release")) as listener:
-        listener.join()
+    Runs pynput's CGEventTap on the subprocess's main thread, which is
+    required on macOS for TSM (Text Services Manager) APIs to work
+    correctly.  Sends (type, key_str) tuples back via the pipe.
+    """
+    def callback(event_type: str) -> Callable:
+        return lambda key: child_conn.send((event_type, str(key)))
+
+    try:
+        with keyboard.Listener(
+                on_press=callback("press"), on_release=callback("release")
+        ) as listener:
+            listener.join()
+    except Exception as exc:
+        logging.error(f"Keyboard listener subprocess crashed: {exc}")
+    finally:
+        try:
+            child_conn.close()
+        except Exception:
+            pass
 
 
 def handle_keyboard(root: Tk, settings: Settings, state: State) -> None:
-    alt = [str(keyboard.Key.alt), str(keyboard.Key.alt_gr), str(keyboard.Key.alt_l), str(keyboard.Key.alt_r)]
+    alt = [str(keyboard.Key.alt), str(keyboard.Key.alt_gr),
+           str(keyboard.Key.alt_l), str(keyboard.Key.alt_r)]
 
     def receive() -> None:
-        while True:
+        try:
+            while True:
+                event_type, key_str = parent_conn.recv()
+        except (EOFError, OSError):
+            return  # Subprocess terminated
+
+        if event_type == "press" and key_str in alt:
+            root.after(0, lambda: setattr(state, "alt_held", True))
+        if event_type == "release":
+            if key_str in alt:
+                root.after(0, lambda: setattr(state, "alt_held", False))
+            # Only dispatch panic when the panic key is actually released
+            if key_str == settings.global_panic_key:
+                root.after(0, lambda: panic(root, settings, state))
+
+    ctx = multiprocessing.get_context("spawn")
+    parent_conn, child_conn = ctx.Pipe()
+    proc = ctx.Process(target=_keyboard_listener_process,
+                       args=(child_conn,), daemon=True)
+    proc.start()
+    child_conn.close()
+
+    state.keyboard_process = proc
+
+    Thread(target=receive, daemon=True).start()
+
+    def cleanup() -> None:
+        if state.keyboard_process and state.keyboard_process.is_alive():
             try:
-                type, key = parent_connection.recv()
-            except EOFError:
-                break  # Panic
-
-            if type == "press" and key in alt:
-                state.alt_held = True
-            if type == "release":
-                if key in alt:
-                    state.alt_held = False
-                panic(root, settings, state, condition=(key == settings.global_panic_key))
-
-    parent_connection, child_connection = multiprocessing.Pipe()
-    state.keyboard_process = multiprocessing.Process(target=keyboard_listener, args=(child_connection,))
-    state.keyboard_process.start()
-
-    Thread(target=receive).start()
+                state.keyboard_process.terminate()
+                state.keyboard_process.join(timeout=2)
+            except Exception:
+                pass
+    atexit.register(cleanup)

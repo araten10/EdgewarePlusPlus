@@ -21,7 +21,7 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ ! -f "pack_tool.sh" ]; then
-    echo "#!/bin/bash" >> pack_tool.sh
+    echo "#!/bin/bash" > pack_tool.sh
     echo ".venv/bin/python3 src/main.py \"\$@\"" >> pack_tool.sh
     chmod +x pack_tool.sh
 fi

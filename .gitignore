@@ -31,6 +31,11 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+!edgeware/macos/edgeware.spec
+!edgeware/macos/config.spec
+!edgeware/macos/panic.spec
+edgeware/build/
+edgeware/dist/
 
 # Installer logs
 pip-log.txt
@@ -181,3 +186,15 @@ edgeware/data/presets/*
 ruffruff.bat
 
 *.zip
+
+# ANGLE libraries (fetched from Chrome/Chromium during setup)
+edgeware/src/os_utils/angle_libs/*.dylib
+edgeware/src/os_utils/angle_libs/*.dll
+
+# Build macos apps
+*.app
+
+# Opencode
+opencode.jsonc
+.prompts/*
+.plans/*

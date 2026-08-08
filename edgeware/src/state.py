@@ -65,6 +65,8 @@ class State:
 
     tray: pystray.Icon | None = None
 
+    # pynput keyboard listener subprocess (runs on its own main thread
+    # so macOS TSM APIs work correctly)
     keyboard_process: multiprocessing.Process | None = None
     alt_held = False
 

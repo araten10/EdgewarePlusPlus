@@ -32,6 +32,7 @@ if __name__ == "__main__":
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
 import logging
+import sys
 from multiprocessing.connection import Client, Listener
 from threading import Thread
 from tkinter import Tk, simpledialog
@@ -58,9 +59,43 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
                 return
 
         set_wallpaper(CustomAssets.panic_wallpaper())
-        state.keyboard_process.terminate()
-        state.tray.stop()
-        pyglet.app.exit()
+        if state.keyboard_process:
+            state.keyboard_process.terminate()
+        if sys.platform == "darwin":
+            # On macOS, pystray uses run_detached() sharing tkinter's
+            # NSApplication, so calling tray.stop() would kill the
+            # entire event loop. Just remove the status bar item directly.
+            try:
+                state.tray._status_bar.removeStatusItem_(state.tray._status_item)
+            except Exception as e:
+                logging.debug(f"Error removing status item during panic: {e}")
+
+            # pyglet.app.run() is not used on macOS (tkinter drives the
+            # event loop), so pyglet.app.exit() is not needed either.
+
+            # Close all open popups so their video players / render loops
+            # are stopped BEFORE we touch the process. Each popup.close()
+            # must fully join its mpv/pyglet threads, not just signal them,
+            # or the mpv event thread can still be mid-callback when we
+            # exit and race with teardown.
+            for popup in list(state.popups):
+                try:
+                    popup.close()
+                except Exception as e:
+                    logging.debug(f"Error closing popup during panic: {e}")
+
+            # Deliberately do NOT call root.destroy() here. Destroying the
+            # Tk root hands control back into Tk/Cocoa's own teardown path,
+            # which can release the GIL mid-destroy — and if any background
+            # thread (mpv event thread, pyglet worker) tries to reacquire
+            # it at that moment, CPython aborts with:
+            #   Fatal Python error: PyEval_RestoreThread: ...GIL is released
+            import os
+            os._exit(0)
+            return
+        else:
+            state.tray.stop()
+            pyglet.app.exit()
         root.destroy()
 
     # Make sure panic code is executed in the main thread, otherwise
