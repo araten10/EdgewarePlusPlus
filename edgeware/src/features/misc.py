@@ -307,7 +307,12 @@ def _handle_keyboard_darwin(root: Tk, settings: Settings, state: State) -> None:
 
     if not listener.start():
         logging.error("Failed to start macOS CGEventTap keyboard listener (Input Monitoring permission likely missing)")
-        root.after(0, lambda: show_input_monitoring_dialog(root))
+        # The listener is restarted from Prompt.destroy as a safety net, which
+        # would otherwise re-open this dialog on every prompt close. Only prompt the
+        # user once per app session; the tray / IPC panic paths still work.
+        if not getattr(state, "_input_monitoring_dialog_shown", False):
+            state._input_monitoring_dialog_shown = True
+            root.after(0, lambda: show_input_monitoring_dialog(root))
         return
 
     state.keyboard_listener = listener

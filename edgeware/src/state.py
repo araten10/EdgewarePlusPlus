@@ -75,6 +75,10 @@ class State:
     keyboard_listener = None  # DarwinKeyboardListener | None
     _tick_pyglet_id: int | None = None
 
+    # Set once the Input Monitoring permission dialog has been shown this session,
+    # so repeated keyboard-listener restarts do not keep re-prompting the user.
+    _input_monitoring_dialog_shown = False
+
     # Flag set during panic; background threads check this to stop
     # scheduling new root.after() callbacks before _exit() fires.
     _panic_shutdown = False
