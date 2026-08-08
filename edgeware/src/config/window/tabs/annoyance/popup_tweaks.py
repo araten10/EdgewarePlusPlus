@@ -31,6 +31,7 @@ MONITORS_TEXT = "Here you can choose what monitors Edgeware++ will spawn popups 
 MOVEMENT_TEXT = 'Gives each popup a chance to move around the screen instead of staying still. The popup will have the "Buttonless" property (see "Misc Tweaks" above for more information), so it is easier to click.\n\nNOTE: Having many of these popups at once may impact performance. Try a lower movement chance or higher popup delay to start!'
 MISC_TEXT = '•"Buttonless Closing Popups" removes the "close" button on every image and video popup, allowing you to click anywhere on the popup to close it. This makes closing popups much easier, but certain packs may have custom buttons that will no longer be seen.\n•"Multi Click Popups" is a setting that needs to be supported by the pack, and makes popups under certain moods take more clicks to close.\n•"Popup Opacity" affects the opacity/transparency of all popups.'
 TIMEOUT_TEXT = "After a certain time, popups will fade out and delete themselves. This is a great setting to use with the clickthrough setting and Lowkey Mode, or to keep a steady stream of porn flowing with little need for user interaction."
+LOOP_TEXT = 'Controls how many times video popups loop before stopping. Enable "Loop Infinitely" for videos to loop endlessly until closed.'
 CLICKTHROUGH_TEXT = "Want to run Edgeware++ while doing other things? Clickthrough popups might be what you're looking for! When this setting is turned on, all popups will have their buttons removed, and you will be unable to click on them. Instead, you can continue to interact with the programs behind them without them interrupting you! (mostly)\n\nIt is crucial that you turn down the opacity of the popups before using this setting... it would be pretty pointless otherwise! Additionally, you might want to enable timeout so they properly despawn. Without timeout, there are very few ways you can get the popups to disappear- but maybe that's what you're looking for! Lastly, if you're using legacy panic (the panic alternative found in the troubleshooting tab) you should be aware that you cannot panic with your set hotkey, as there's no way to click on the popups to focus them. The global panic hotkey should still work fine!\n\nNOTE: This feature is currently in \"beta\". Popups can still steal focus briefly when spawned, which can cause issues in high intensity games. Linux support also isn't developed yet. We hope to fix these at some point!"
 
 
@@ -131,6 +132,16 @@ class PopupTweaksTab(ScrollFrame):
 
         timeout_scale = ConfigScale(timeout_row_2, label="Time (sec)", from_=1, to=120, variable=vars.timeout, enabled=(vars.timeout_enabled, True))
         timeout_scale.pack()
+
+        # Video Loop
+        loop_section = ConfigSection(self.viewPort, "Video Loop", LOOP_TEXT)
+        loop_section.pack()
+
+        loop_row = ConfigRow(loop_section)
+        loop_row.pack()
+
+        ConfigToggle(loop_row, "Loop Infinitely", variable=vars.video_loop_inf).pack()
+        ConfigScale(loop_row, label="Loop Count", from_=1, to=50, variable=vars.video_loop_count, enabled=(vars.video_loop_inf, False)).pack()
 
         # Monitors
         monitors_section = ConfigSection(self.viewPort, "Monitors", MONITORS_TEXT)

@@ -52,6 +52,7 @@ class SubliminalPopup(Toplevel):
         y = monitor.y + (monitor.height - label.winfo_reqheight()) // 2
 
         self.geometry(f"+{x}+{y}")
+        self.lift()
         self.after(settings.subliminal_timeout, self.destroy)
 
     def should_init(self) -> bool:

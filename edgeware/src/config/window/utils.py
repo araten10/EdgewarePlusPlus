@@ -30,14 +30,14 @@ from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar
 
 import os_utils
 import utils
-from paths import Data, Process
+from paths import Data, launch_app
 from pynput import keyboard
 
 from config import load_config
 from config.items import CONFIG_DANGER, DangerLevel
 from config.vars import Vars
 
-from os_utils.windows import set_schedule, delete_schedule
+from os_utils import set_schedule, delete_schedule
 
 # TODO: Don't load these here
 config = load_config()
@@ -166,7 +166,7 @@ def write_save(vars: Vars, exit_at_end: bool = False) -> None:
         logging.info(f"wrote config file: {json.dumps(temp)}")
 
     if not (len(sys.argv) > 1 and sys.argv[1] == "--first-launch-configure") and vars.run_on_save_quit.get() and exit_at_end:
-        subprocess.Popen([sys.executable, Process.MAIN])
+        launch_app("Edgeware++")
 
     if exit_at_end:
         logging.info("exiting config")
@@ -313,5 +313,5 @@ def set_widget_states_with_colors(state: bool, widgets: list[Widget], color_on: 
 
 
 def refresh() -> None:
-    subprocess.Popen([sys.executable, Process.CONFIG])
+    launch_app("Edgeware++ Config")
     sys.exit()

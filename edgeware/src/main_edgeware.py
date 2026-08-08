@@ -16,7 +16,12 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 if __name__ == "__main__":
+    import multiprocessing
+    from multiprocessing.spawn import freeze_support
+    freeze_support()
+
     import os
+    import sys
     from threading import Thread
 
     from paths import Data
@@ -32,12 +37,15 @@ if __name__ == "__main__":
     # Add mpv to PATH
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
-    def pyglet_run() -> None:
-        import pyglet
+    # Initialize Tk's TKApplication (NSApplication subclass) singleton
+    # before any module-level imports can create a plain NSApplication.
+    # Without this, pyglet/pystray/pynput create the NSApplication singleton
+    # first, and Tk crashes trying to cast it to TKApplication.
+    from tkinter import Tk
 
-        pyglet.app.run()
-
-    Thread(target=pyglet_run, daemon=True).start()  # Required for pyglet events
+    _tk_init = Tk()
+    _tk_init.withdraw()
+    _tk_init.destroy()
 
 from threading import Thread
 from tkinter import Tk
@@ -125,5 +133,22 @@ if __name__ == "__main__":
         StartupSplash(settings, pack, start_main)
     else:
         start_main()
+
+    if sys.platform == "darwin":
+        import pyglet
+
+        def tick_pyglet() -> None:
+            pyglet.app.platform_event_loop.dispatch_posted_events()
+            root.after(16, tick_pyglet)
+
+        tick_pyglet()
+    else:
+
+        def pyglet_run() -> None:
+            import pyglet
+
+            pyglet.app.run()
+
+        Thread(target=pyglet_run, daemon=True).start()  # Required for pyglet events
 
     root.mainloop()

@@ -38,6 +38,9 @@ class VideoPopup(Popup):
         self.compute_geometry(properties["width"], properties["height"])
 
         self.player = VideoPlayer(self, self.settings, self.width, self.height)
+        self.player.properties["loop"] = "inf" if self.settings.video_loop_inf else str(self.settings.video_loop_count)
+        if not self.settings.video_loop_inf:
+            self.player.on_eof = self.close
         self.player.properties["volume"] = self.settings.video_volume
         self.player.properties["glsl-shaders"] = self.try_denial_filter(True)
         self.player.play(self.media)

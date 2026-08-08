@@ -15,13 +15,119 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
+import shutil
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-PATH = Path(__file__).parent.parent
+# ---------------------------------------------------------------------------
+# Path resolution
+# ---------------------------------------------------------------------------
+# In frozen (PyInstaller) builds, read-only assets stay inside the .app
+# bundle, while all user-writable data lives in
+# ~/Library/Application Support/EdgewarePlusPlusMacosPython/.  This avoids permission
+# problems (the bundle is in /Applications/ and owned by root), prevents
+# data loss on app updates, and ensures all three apps (main, config, panic)
+# share the same data regardless of where each .app is placed.
+
+if getattr(sys, "frozen", False):
+    # sys.executable → .../Edgeware++.app/Contents/MacOS/Edgeware++
+    _bundle_dir = Path(sys.executable).parent.parent.parent  # the .app directory
+    _BUNDLE_RESOURCES = _bundle_dir / "Contents" / "Resources"
+    _USER_DATA = Path.home() / "Library" / "Application Support" / "EdgewarePlusPlusMacosPython"
+else:
+    _BUNDLE_RESOURCES = None  # Only valid in frozen builds
+    _USER_DATA = None  # Only valid in frozen builds
+
+# The legacy PATH variable is kept for backwards compatibility with code
+# that references it directly (e.g., pack loading log messages).
+if getattr(sys, "frozen", False):
+    PATH = _USER_DATA
+else:
+    PATH = Path(__file__).parent.parent
+
+
+def _ensure_user_data_dirs() -> None:
+    """Create the user data directory structure on first run."""
+    if not getattr(sys, "frozen", False):
+        return
+    for subdir in ["data", "data/packs", "data/backups", "data/logs",
+                    "data/moods", "data/blacklist", "data/presets",
+                    "resource"]:
+        (_USER_DATA / subdir).mkdir(parents=True, exist_ok=True)
+
+
+def _migrate_bundle_data() -> None:
+    """One-shot migration: move data out of the .app bundle into user dir.
+
+    When users have already run a bundled build that stored data inside the
+    .app, this copies everything to the new Application Support location
+    and removes the old data from the bundle so future updates don't
+    silently overwrite user packs.
+    """
+    if not getattr(sys, "frozen", False):
+        return
+
+    # Look for old data inside whichever .app bundle we're currently in
+    # (the main bundle is the canonical location, but we also check the
+    # sibling Edgeware++.app in case we were called from Config or Panic).
+    old_data_src = _BUNDLE_RESOURCES / "data"
+    if not old_data_src.exists():
+        # Try the sibling main bundle
+        sibling = _bundle_dir.parent / "Edgeware++.app"
+        if sibling.exists():
+            old_data_src = sibling / "Contents" / "Resources" / "data"
+        else:
+            return  # No old data to migrate
+
+    if not (old_data_src / "config.json").is_file():
+        return  # Old data dir exists but has no config — skip
+
+    import logging
+    import sys as _sys
+    logging.info("Migrating bundle data from %s to %s", old_data_src, _USER_DATA)
+    print(f"Edgeware++: migrating data from {old_data_src} to {_USER_DATA}",
+          file=_sys.stderr)
+
+    for item in old_data_src.iterdir():
+        dest = _USER_DATA / item.name
+        if dest.exists():
+            if dest.is_dir() and item.is_dir():
+                # Deep-merge directory contents (handles nested subdirectories)
+                shutil.copytree(item, dest, dirs_exist_ok=True)
+            # If dest already exists and isn't a directory merge, leave user data intact
+        else:
+            if item.is_dir():
+                shutil.copytree(item, dest, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, dest)
+
+    # Clear the old data directory so updates don't re-bundle stale data
+    try:
+        for item in old_data_src.iterdir():
+            if item.is_dir():
+                shutil.rmtree(item)
+            else:
+                item.unlink()
+    except OSError:
+        pass  # Not writable — that's fine, the bundle may be read-only
+
+
+# Run initialization at import time
+_ensure_user_data_dirs()
+_migrate_bundle_data()
+
+
+# ---------------------------------------------------------------------------
+# Default pack path
+# ---------------------------------------------------------------------------
 DEFAULT_PACK_PATH = PATH / "resource"
 
 
+# ---------------------------------------------------------------------------
+# Process entry-points (source-only — .py files don't exist in a bundle)
+# ---------------------------------------------------------------------------
 @dataclass
 class Process:
     ROOT = PATH / "src"
@@ -31,9 +137,12 @@ class Process:
     PANIC = ROOT / "panic.py"
 
 
+# ---------------------------------------------------------------------------
+# Read-only assets (bundled with the app, or in source tree when dev)
+# ---------------------------------------------------------------------------
 @dataclass
 class Assets:
-    ROOT = PATH / "assets"
+    ROOT = _BUNDLE_RESOURCES / "assets" if getattr(sys, "frozen", False) else PATH / "assets"
 
     CORRUPTION_ABRUPT = ROOT / "corruption_abruptfade.png"
     CORRUPTION_DEFAULT = ROOT / "corruption_defaultfade.png"
@@ -65,6 +174,9 @@ class Assets:
     TUTORIAL_QUICKGUIDE = TUTORIAL / "quickstart.html"
 
 
+# ---------------------------------------------------------------------------
+# User-writable data (Application Support in frozen mode)
+# ---------------------------------------------------------------------------
 @dataclass
 class Data:
     ROOT = PATH / "data"
@@ -143,3 +255,74 @@ class PackPaths:
         self.media = self.root / "media.json"
         self.prompt = self.root / "prompt.json"
         self.web = self.root / "web.json"
+
+
+_APP_BUNDLES = {
+    "Edgeware++": "Edgeware++",
+    "Edgeware++ Config": "Edgeware++ Config",
+    "Edgeware++ Panic": "Edgeware++ Panic",
+}
+
+
+def _find_app_bundle(app_name: str) -> Path | None:
+    """Locate a sibling .app bundle.
+
+    Searches the directory containing the current bundle first, then
+    /Applications/ and ~/Applications/ as fallbacks.
+    Returns None when not in a frozen environment.
+    """
+    if not getattr(sys, "frozen", False):
+        return None
+
+    targets = [f"{app_name}.app"]
+
+    # Directory containing the current .app bundle
+    current_dir = _bundle_dir.parent
+    for target in targets:
+        candidate = current_dir / target
+        if candidate.is_dir():
+            return candidate
+
+    # Common install locations
+    for base in [Path("/Applications"), Path.home() / "Applications"]:
+        for target in targets:
+            candidate = base / target
+            if candidate.is_dir():
+                return candidate
+
+    return None
+
+
+def launch_app(app_name: str, block: bool = False, args: list[str] | None = None) -> None:
+    """Launch another Edgeware app by name.
+
+    In a bundle, opens the .app via its executable so we can wait for it.
+    From source, runs the Python script directly.
+    """
+    import subprocess
+    import sys
+
+    if args is None:
+        args = []
+
+    if getattr(sys, "frozen", False):
+        bundle = _find_app_bundle(_APP_BUNDLES[app_name])
+        if bundle:
+            exe = bundle / "Contents" / "MacOS" / _APP_BUNDLES[app_name]
+        else:
+            # Fallback: assume siblings in the same directory
+            exe = _bundle_dir.parent / f"{_APP_BUNDLES[app_name]}.app" / "Contents" / "MacOS" / _APP_BUNDLES[app_name]
+        if block:
+            subprocess.run([str(exe)] + args)
+        else:
+            subprocess.Popen([str(exe)] + args)
+    else:
+        script = {
+            "Edgeware++": Process.MAIN,
+            "Edgeware++ Config": Process.CONFIG,
+            "Edgeware++ Panic": Process.PANIC,
+        }[app_name]
+        if block:
+            subprocess.run([sys.executable, script] + args)
+        else:
+            subprocess.Popen([sys.executable, script] + args)

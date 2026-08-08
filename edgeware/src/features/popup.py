@@ -18,9 +18,8 @@
 import os
 import random
 import shutil
-import time
+import sys
 from pathlib import Path
-from threading import Thread
 from tkinter import Button, Label, TclError, Tk, Toplevel
 from typing import Callable
 
@@ -214,34 +213,32 @@ class Popup(Toplevel):
 
     def try_move(self) -> None:
         def move() -> None:
-            speed_x = 0 if self.settings.moving_chance else self.settings.moving_speed
-            speed_y = 0 if self.settings.moving_chance else self.settings.moving_speed
-            while speed_x == 0 and speed_y == 0:
-                speed_x = random.randint(-self.settings.moving_speed, self.settings.moving_speed)
-                speed_y = random.randint(-self.settings.moving_speed, self.settings.moving_speed)
-
             try:
-                while True:
-                    self.x += speed_x
-                    self.y += speed_y
+                self.x += self.move_speed_x
+                self.y += self.move_speed_y
 
-                    left = self.x <= self.monitor.x
-                    right = self.x + self.width >= self.monitor.x + self.monitor.width
-                    if left or right:
-                        speed_x = -speed_x
+                left = self.x <= self.monitor.x
+                right = self.x + self.width >= self.monitor.x + self.monitor.width
+                if left or right:
+                    self.move_speed_x = -self.move_speed_x
 
-                    top = self.y <= self.monitor.y
-                    bottom = self.y + self.height >= self.monitor.y + self.monitor.height
-                    if top or bottom:
-                        speed_y = -speed_y
+                top = self.y <= self.monitor.y
+                bottom = self.y + self.height >= self.monitor.y + self.monitor.height
+                if top or bottom:
+                    self.move_speed_y = -self.move_speed_y
 
-                    self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
-                    time.sleep(0.01)
+                self.geometry(f"{self.width}x{self.height}+{self.x}+{self.y}")
+                self.after(10, move)
             except TclError:
                 pass  # Exception thrown when closing
 
         if roll(self.settings.moving_chance):
-            Thread(target=move, daemon=True).start()
+            self.move_speed_x = 0 if self.settings.moving_chance else self.settings.moving_speed
+            self.move_speed_y = 0 if self.settings.moving_chance else self.settings.moving_speed
+            while self.move_speed_x == 0 and self.move_speed_y == 0:
+                self.move_speed_x = random.randint(-self.settings.moving_speed, self.settings.moving_speed)
+                self.move_speed_y = random.randint(-self.settings.moving_speed, self.settings.moving_speed)
+            self.after(10, move)
 
     def try_multi_click(self) -> None:
         self.clicks_to_close = self.pack.random_clicks_to_close(self.media) if self.settings.multi_click_popups else 1
@@ -249,16 +246,17 @@ class Popup(Toplevel):
     def try_timeout(self) -> None:
         def fade_out() -> None:
             try:
-                while self.opacity > 0:
+                if self.opacity > 0:
                     self.opacity -= 0.01
                     self.attributes("-alpha", self.opacity)
-                    time.sleep(0.015)
-                self.close()
+                    self.after(15, fade_out)
+                else:
+                    self.close()
             except TclError:
                 pass  # Exception thrown when manually closed during fade out
 
         if self.settings.timeout_enabled and not self.state.pump_scare:
-            self.after(self.settings.timeout, Thread(target=fade_out, daemon=True).start)
+            self.after(self.settings.timeout, fade_out)
 
     def try_pump_scare(self) -> None:
         if self.state.pump_scare:
@@ -294,6 +292,9 @@ class Popup(Toplevel):
         self.state.popup_number -= 1
         self.state.popups.remove(self)
         self.try_web_open()
-        self.destroy()
+        if sys.platform == "darwin" and hasattr(self, "player"):
+            self.tk.call("destroy", self._w)  # Bypass Tcl command cleanup
+        else:
+            self.destroy()
         if self.on_close:
             self.on_close()

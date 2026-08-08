@@ -17,15 +17,13 @@
 
 import json
 import shutil
-import subprocess
-import sys
 
-from paths import Assets, Data, Process
+from paths import Assets, Data, launch_app
 
 
 def first_launch_configure() -> None:
     if not Data.CONFIG.is_file():
-        subprocess.run([sys.executable, Process.CONFIG, "--first-launch-configure"])
+        launch_app("Edgeware++ Config", block=True, args=["--first-launch-configure"])
 
 
 def load_config() -> dict:

@@ -44,6 +44,8 @@
   "lkScaling": 100,
   "lkToggle": 0,
   "videoVolume": 25,
+  "videoLoopInf": 1,
+  "videoLoopCount": 1,
   "denialChance": 0,
   "drivePath": "C:/Users/",
   "wallpaperDat": "{'default': 'wallpaper.png'}",

@@ -37,7 +37,7 @@ from config.window.widgets.layout import (
 )
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
-from os_utils.windows import set_schedule, delete_schedule
+from os_utils import set_schedule, delete_schedule
 from pack import Pack
 from paths import Data
 

@@ -119,6 +119,8 @@ CONFIG_ITEMS = {
     "video_chance": Item("vidMod", PERCENTAGE, IntVar, int),
     "max_video": Item("maxVideos", NONNEGATIVE, IntVar, int),
     "video_volume": Item("videoVolume", PERCENTAGE, IntVar, int),
+    "video_loop_inf": Item("videoLoopInf", BOOLEAN, BooleanVar, bool),
+    "video_loop_count": Item("videoLoopCount", NONNEGATIVE, IntVar, int),
     "web_chance": Item("webMod", PERCENTAGE, IntVar, int),
     "web_on_popup_close": Item("webPopup", BOOLEAN, BooleanVar, bool),
     "prompt_chance": Item("promptMod", PERCENTAGE, IntVar, int),

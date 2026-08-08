@@ -31,13 +31,22 @@ if __name__ == "__main__":
     # Add mpv to PATH
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
-import logging
-import traceback
-from tkinter import messagebox
+    # Initialize Tk's TKApplication (NSApplication subclass) singleton
+    # before any module-level imports can create a plain NSApplication.
+    # Without this, pyglet/pystray/pynput create the NSApplication singleton
+    # first, and Tk crashes trying to cast it to TKApplication.
+    from tkinter import Tk
 
-from config.window import ConfigWindow
+    _tk_init = Tk()
+    _tk_init.withdraw()
+    _tk_init.destroy()
 
-if __name__ == "__main__":
+    import logging
+    import traceback
+    from tkinter import messagebox
+
+    from config.window import ConfigWindow
+
     try:
         ConfigWindow()
     except Exception as e:
