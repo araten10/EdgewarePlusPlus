@@ -65,13 +65,20 @@ def send_notification(settings: Settings, pack: Pack, notification: str | None =
 
 def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hibernate_activity: Callable[[], None]) -> None:
     def _tray_panic():
-        try:
-            logging.info("TRAY: panic callback entered")
-            send_panic_tray()
-            logging.info("TRAY: IPC message sent successfully")
-        except Exception as e:
-            logging.error(f"TRAY: exception in panic callback: {e}", exc_info=True)
-            raise
+        # This callback runs on pystray's Cocoa callback thread. Doing the IPC
+        # here synchronously would stall the NSMenu (the dropdown freezes), so send
+        # it on a background thread and return immediately.
+        def _do_send():
+            try:
+                logging.info("TRAY: panic callback entered")
+                send_panic_tray()
+                logging.info("TRAY: IPC message sent successfully")
+            except Exception as e:
+                # Never re-raise out of pystray's Cocoa thread — doing so
+                # kills the tray's event loop and leaves it permanently frozen.
+                logging.error(f"TRAY: exception in panic callback: {e}", exc_info=True)
+
+        Thread(target=_do_send, daemon=True).start()
     menu = [pystray.MenuItem("Panic", _tray_panic)]
     if settings.hibernate_mode:
 

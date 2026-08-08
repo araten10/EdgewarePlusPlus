@@ -181,8 +181,9 @@ def send_panic_tray() -> None:
     """Send a panic signal via IPC (tray menu callback path).
 
     Imported lazily to avoid a circular import with panic.py (which imports
-    from os_utils). The tray callback runs on pystray's Cocoa callback thread,
-    so we send a message via IPC instead of calling panic() directly.
+    from os_utils). The caller is responsible for not doing this on a UI thread;
+    see make_tray_icon in features.misc, which offloads it onto a background
+    thread so the pystray Cocoa callback never blocks.
     """
     from multiprocessing.connection import Client
     from panic import ADDRESS, AUTHKEY
