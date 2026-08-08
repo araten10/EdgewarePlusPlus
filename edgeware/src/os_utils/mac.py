@@ -23,7 +23,8 @@ from pathlib import Path
 from tkinter import Toplevel, Tk, Button, StringVar
 
 import mpv
-from paths import Process, _APP_BUNDLES, _find_app_bundle
+from os_utils.keyboard_listener_darwin import CGEventTapListener, vk_to_key_name
+from paths import APP_BUNDLES, Process, find_app_bundle
 
 
 def close_mpv(player: mpv.MPV) -> None:
@@ -124,12 +125,12 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
         file = Path(os.path.expanduser("~/Desktop")) / filename
 
     if getattr(sys, "frozen", False):
-        bundle = _find_app_bundle(_APP_BUNDLES[title])
+        bundle = find_app_bundle(APP_BUNDLES[title])
         if bundle:
             app_path = bundle
         else:
             # Fallback: assume siblings in the same directory
-            app_path = Path(sys.executable).parent.parent.parent.parent / f"{_APP_BUNDLES[title]}.app"
+            app_path = Path(sys.executable).parent.parent.parent.parent / f"{APP_BUNDLES[title]}.app"
         content = [
             "#!/bin/bash",
             f'open "{app_path}"',
@@ -147,7 +148,7 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
 def toggle_run_at_startup(state: bool) -> None:
     if getattr(sys, "frozen", False):
         # In frozen mode, register the .app bundle as a login item
-        bundle = _find_app_bundle("Edgeware++")
+        bundle = find_app_bundle("Edgeware++")
         if bundle:
             script_path = str(bundle)
         else:
@@ -390,57 +391,8 @@ class KeyListenerWindow(Toplevel):
 
 
 def _vk_to_key_name(vk: int) -> str | None:
-    """Convert a macOS virtual key code to a key name string."""
-    VK_TO_KEY_NAME = {
-        0x35: "Key.esc",
-        0x24: "Key.enter",
-        0x4C: "Key.enter",
-        0x30: "Key.tab",
-        0x33: "Key.backspace",
-        0x75: "Key.delete",
-        0x7E: "Key.up",
-        0x7D: "Key.down",
-        0x7B: "Key.left",
-        0x7C: "Key.right",
-        0x73: "Key.home",
-        0x77: "Key.end",
-        0x74: "Key.pageup",
-        0x79: "Key.pagedown",
-        0x7A: "Key.f1",
-        0x78: "Key.f2",
-        0x63: "Key.f3",
-        0x76: "Key.f4",
-        0x60: "Key.f5",
-        0x61: "Key.f6",
-        0x62: "Key.f7",
-        0x64: "Key.f8",
-        0x65: "Key.f9",
-        0x6D: "Key.f10",
-        0x67: "Key.f11",
-        0x6F: "Key.f12",
-        0x37: "Key.cmd",
-        0x36: "Key.cmd_r",
-        0x38: "Key.shift",
-        0x3C: "Key.shift_r",
-        0x3B: "Key.ctrl",
-        0x3E: "Key.ctrl_r",
-        0x3A: "Key.alt",
-        0x3D: "Key.alt_r",
-        0x31: "Key.space",
-        # Letter keys
-        0x00: "a", 0x01: "s", 0x02: "d", 0x03: "f", 0x04: "h",
-        0x05: "g", 0x06: "z", 0x07: "x", 0x08: "c", 0x09: "v",
-        0x0B: "b", 0x0C: "q", 0x0D: "w", 0x0E: "e", 0x0F: "r",
-        0x10: "y", 0x11: "t", 0x1F: "o", 0x20: "u",
-        0x21: "[", 0x1E: "]", 0x22: "i", 0x23: "p",
-        0x25: "l", 0x26: "j", 0x27: "'", 0x28: "k",
-        0x29: ";", 0x2A: "\\", 0x2B: ",", 0x2C: "/",
-        0x2D: "n", 0x2E: "m", 0x2F: ".",
-        # Number keys
-        0x12: "1", 0x13: "2", 0x14: "3", 0x15: "4", 0x17: "5",
-        0x16: "6", 0x1A: "7", 0x1C: "8", 0x19: "9", 0x1D: "0",
-    }
-    return VK_TO_KEY_NAME.get(vk)
+    """Convert a macOS virtual key code to a pynput-style key name."""
+    return vk_to_key_name(vk)
 
 
 def _request_global_panic_key_darwin(button: Button, var: StringVar, window: Toplevel) -> None:
@@ -473,43 +425,13 @@ def _request_global_panic_key_darwin(button: Button, var: StringVar, window: Top
         window.destroy()
         return
 
-    # Thread-safe flag: CGEventTap callback sets it, main thread polls it
     captured_key = [None]
-    tap = [None]
-    loop_ref = [None]
-    running = [True]
 
-    def callback(proxy, event_type, event, refcon):
-        """CGEventTap callback."""
-        try:
-            if event_type == Quartz.kCGEventTapDisabledByTimeout:
-                logging.warning("CGEventTap disabled by timeout — re-enabling")
-                if tap[0] is not None:
-                    Quartz.CGEventTapEnable(tap[0], True)
-                return event
+    def on_capture(key_name: str) -> None:
+        captured_key[0] = key_name
 
-            if event_type == Quartz.kCGEventKeyDown:
-                keycode = Quartz.CGEventGetIntegerValueField(
-                    event, Quartz.kCGKeyboardEventKeycode
-                )
-                key_name = _vk_to_key_name(keycode)
-                if key_name is not None:
-                    captured_key[0] = key_name
-        except Exception as e:
-            logging.error(f"CGEventTap callback error: {e}")
-
-        return event
-
-    tap_obj = Quartz.CGEventTapCreate(
-        Quartz.kCGSessionEventTap,
-        Quartz.kCGHeadInsertEventTap,
-        Quartz.kCGEventTapOptionListenOnly,
-        Quartz.CGEventMaskBit(Quartz.kCGEventKeyDown),
-        callback,
-        None,
-    )
-
-    if tap_obj is None:
+    listener = _CaptureTap(on_capture)
+    if not listener.start():
         logging.error(
             "CGEventTap creation failed — Accessibility permission required. "
             "Go to System Settings → Privacy & Security → Accessibility and add this app."
@@ -528,41 +450,15 @@ def _request_global_panic_key_darwin(button: Button, var: StringVar, window: Top
         window.destroy()
         return
 
-    tap[0] = tap_obj
-    run_loop_source = Quartz.CFMachPortCreateRunLoopSource(None, tap_obj, 0)
-
-    def run_loop():
-        """Run the CFRunLoop in a daemon thread."""
-        try:
-            loop = Quartz.CFRunLoopGetCurrent()
-            loop_ref[0] = loop
-            Quartz.CFRunLoopAddSource(loop, run_loop_source, Quartz.kCFRunLoopCommonModes)
-            Quartz.CGEventTapEnable(tap_obj, True)
-            logging.info("CGEventTap keyboard listener started for config")
-            Quartz.CFRunLoopRun()
-        except Exception as e:
-            logging.error(f"CGEventTap run loop error: {e}")
-        finally:
-            running[0] = False
-
-    import threading
-    thread = threading.Thread(target=run_loop, daemon=True)
-    thread.start()
-
     def poll_key() -> None:
         """Poll the CGEventTap flag periodically."""
-        if not running[0]:
-            return
         if captured_key[0] is not None:
             key_name = captured_key[0]
             captured_key[0] = None
             button.configure(text=f"Set Global\nPanic Key\n<{key_name}>")
             var.set(key_name)
             try:
-                if tap[0] is not None:
-                    Quartz.CGEventTapEnable(tap[0], False)
-                if loop_ref[0] is not None:
-                    Quartz.CFRunLoopStop(loop_ref[0])
+                listener.stop()
             except Exception:
                 pass
             window.destroy()
@@ -573,12 +469,8 @@ def _request_global_panic_key_darwin(button: Button, var: StringVar, window: Top
 
     def close() -> None:
         """Clean up when the window is closed."""
-        running[0] = False
         try:
-            if tap[0] is not None:
-                Quartz.CGEventTapEnable(tap[0], False)
-            if loop_ref[0] is not None:
-                Quartz.CFRunLoopStop(loop_ref[0])
+            listener.stop()
         except Exception:
             pass
         try:
@@ -588,12 +480,28 @@ def _request_global_panic_key_darwin(button: Button, var: StringVar, window: Top
 
     def timeout_check() -> None:
         """Close the dialog if no key is pressed within 10 seconds."""
-        if running[0] and captured_key[0] is None:
-            logging.warning("No key pressed within 10 seconds")
-            close()
+        logging.warning("No key pressed within 10 seconds")
+        close()
 
     window.after(10000, timeout_check)
     window.protocol("WM_DELETE_WINDOW", close)
+
+
+class _CaptureTap(CGEventTapListener):
+    """CGEventTap for the config window that captures any single key press."""
+
+    def __init__(self, on_capture) -> None:
+        super().__init__()
+        self._on_capture = on_capture
+
+    def _build_mask(self) -> int:
+        import Quartz
+        return Quartz.CGEventMaskBit(Quartz.kCGEventKeyDown)
+
+    def _on_key_event(self, keycode: int, is_down: bool) -> None:
+        name = vk_to_key_name(keycode)
+        if name is not None and self._on_capture:
+            self._on_capture(name)
 
 
 def request_global_panic_key(button: Button, var: StringVar) -> None:

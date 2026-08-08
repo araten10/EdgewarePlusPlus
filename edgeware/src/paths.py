@@ -269,14 +269,14 @@ class PackPaths:
         self.web = self.root / "web.json"
 
 
-_APP_BUNDLES = {
+APP_BUNDLES = {
     "Edgeware++": "Edgeware++",
     "Edgeware++ Config": "Edgeware++ Config",
     "Edgeware++ Panic": "Edgeware++ Panic",
 }
 
 
-def _find_app_bundle(app_name: str) -> Path | None:
+def find_app_bundle(app_name: str) -> Path | None:
     """Locate a sibling .app bundle.
 
     Searches the directory containing the current bundle first, then
@@ -318,12 +318,12 @@ def launch_app(app_name: str, block: bool = False, args: list[str] | None = None
         args = []
 
     if getattr(sys, "frozen", False):
-        bundle = _find_app_bundle(_APP_BUNDLES[app_name])
+        bundle = find_app_bundle(APP_BUNDLES[app_name])
         if bundle:
-            exe = bundle / "Contents" / "MacOS" / _APP_BUNDLES[app_name]
+            exe = bundle / "Contents" / "MacOS" / APP_BUNDLES[app_name]
         else:
             # Fallback: assume siblings in the same directory
-            exe = _bundle_dir.parent / f"{_APP_BUNDLES[app_name]}.app" / "Contents" / "MacOS" / _APP_BUNDLES[app_name]
+            exe = _bundle_dir.parent / f"{APP_BUNDLES[app_name]}.app" / "Contents" / "MacOS" / APP_BUNDLES[app_name]
         if block:
             subprocess.run([str(exe)] + args)
         else:

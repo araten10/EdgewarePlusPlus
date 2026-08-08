@@ -92,6 +92,7 @@ VK_SPACE = 0x31
 VK_TILDE = 0x32
 VK_DELETE = 0x33
 VK_COMMAND = 0x37
+VK_COMMAND_R = 0x36
 VK_SHIFT = 0x38
 VK_CAPSLOCK = 0x39
 VK_OPTION = 0x3A
@@ -100,8 +101,30 @@ VK_RSHIFT = 0x3C
 VK_ROPTION = 0x3D
 VK_RCONTROL = 0x3E
 VK_FUNCTION = 0x3F
+# Arrow / navigation keys
+VK_UP = 0x7E
+VK_DOWN = 0x7D
+VK_LEFT = 0x7B
+VK_RIGHT = 0x7C
+VK_HOME = 0x73
+VK_END = 0x77
+VK_PAGEUP = 0x74
+VK_PAGEDOWN = 0x79
+# Function keys
+VK_F1 = 0x7A
+VK_F2 = 0x78
+VK_F3 = 0x63
+VK_F4 = 0x76
+VK_F5 = 0x60
+VK_F6 = 0x61
+VK_F7 = 0x62
+VK_F8 = 0x64
+VK_F9 = 0x65
+VK_F10 = 0x6D
+VK_F11 = 0x67
+VK_F12 = 0x6F
 
-# Map key names to virtual key codes (pynput-style names)
+# Map key names to virtual key codes (pynput-style names).
 KEY_NAME_TO_VK = {
     "Key.esc": VK_ESCAPE,
     "Key.escape": VK_ESCAPE,
@@ -113,6 +136,7 @@ KEY_NAME_TO_VK = {
     "Key.delete": VK_DELETE,
     "Key.cmd": VK_COMMAND,
     "Key.cmd_l": VK_COMMAND,
+    "Key.cmd_r": VK_COMMAND_R,
     "Key.shift": VK_SHIFT,
     "Key.shift_l": VK_SHIFT,
     "Key.shift_r": VK_RSHIFT,
@@ -122,6 +146,28 @@ KEY_NAME_TO_VK = {
     "Key.alt": VK_OPTION,
     "Key.alt_l": VK_OPTION,
     "Key.alt_r": VK_ROPTION,
+    # Arrow / navigation keys
+    "Key.up": VK_UP,
+    "Key.down": VK_DOWN,
+    "Key.left": VK_LEFT,
+    "Key.right": VK_RIGHT,
+    "Key.home": VK_HOME,
+    "Key.end": VK_END,
+    "Key.pageup": VK_PAGEUP,
+    "Key.pagedown": VK_PAGEDOWN,
+    # Function keys
+    "Key.f1": VK_F1,
+    "Key.f2": VK_F2,
+    "Key.f3": VK_F3,
+    "Key.f4": VK_F4,
+    "Key.f5": VK_F5,
+    "Key.f6": VK_F6,
+    "Key.f7": VK_F7,
+    "Key.f8": VK_F8,
+    "Key.f9": VK_F9,
+    "Key.f10": VK_F10,
+    "Key.f11": VK_F11,
+    "Key.f12": VK_F12,
     # Letter keys
     "a": VK_A, "b": VK_B, "c": VK_C, "d": VK_D, "e": VK_E,
     "f": VK_F, "g": VK_G, "h": VK_H, "i": VK_I, "j": VK_J,
@@ -132,10 +178,180 @@ KEY_NAME_TO_VK = {
     # Number keys
     "0": VK_0, "1": VK_1, "2": VK_2, "3": VK_3, "4": VK_4,
     "5": VK_5, "6": VK_6, "7": VK_7, "8": VK_8, "9": VK_9,
+    # Punctuation
+    "[": VK_LBRACKET, "]": VK_RBRACKET, "'": VK_QUOTE,
+    ";": VK_SEMICOLON, "\\": VK_BACKSLASH, ",": VK_COMMA,
+    "/": VK_SLASH, ".": VK_PERIOD, "-": VK_MINUS,
+    "=": VK_EQUAL, "`": VK_TILDE,
 }
 
+# Reverse lookup (virtual key code -> name). Derived from KEY_NAME_TO_VK so the
+# two maps can never drift apart. When several names share a keycode, the first one
+# wins (e.g. 0x33 -> "Key.backspace", not "Key.delete").
+VK_TO_KEY_NAME: dict[int, str] = {}
+for _name, _vk in KEY_NAME_TO_VK.items():
+    VK_TO_KEY_NAME.setdefault(_vk, _name)
 
-class DarwinKeyboardListener:
+
+def vk_to_key_name(vk: int) -> str | None:
+    """Convert a macOS virtual key code to a pynput-style key name.
+
+    Returns ``None`` for key codes that are not mapped.
+    """
+    return VK_TO_KEY_NAME.get(vk)
+
+
+class CGEventTapListener:
+    """Reusable Quartz CGEventTap running on its own CFRunLoop thread.
+
+    Encapsulates the shared plumbing behind every global keyboard event tap on
+    macOS: creating the tap, enabling it on a daemon-thread CFRunLoop,
+    re-enabling it when macOS disables it after a timeout, and stopping it
+    cleanly. Subclasses only need to:
+
+    * optionally override :meth:`_build_mask` to choose which event types to
+      listen for (default: key down + key up), and
+    * implement :meth:`_on_key_event`.
+
+    The callback runs on the tap thread; any UI work must be marshalled back to
+    the Tk main thread by the caller.
+    """
+
+    def __init__(self) -> None:
+        self._tap = None
+        self._loop_ref = None
+        self._thread = None
+        self._running = False
+
+    @property
+    def is_running(self) -> bool:
+        """True while the CFRunLoop thread is alive and the tap is enabled."""
+        return self._running
+
+    def is_alive(self) -> bool:
+        """Duck-typed alias for :attr:`is_running` (used by Prompt's restart check)."""
+        return self._running
+
+    def _build_mask(self) -> int:
+        """Return the CGEventMaskBit combination this listener subscribes to."""
+        import Quartz
+
+        return (
+            Quartz.CGEventMaskBit(Quartz.kCGEventKeyDown)
+            | Quartz.CGEventMaskBit(Quartz.kCGEventKeyUp)
+        )
+
+    def start(self) -> bool:
+        """Create the CGEventTap and start its CFRunLoop thread.
+
+        Returns:
+            True if the tap was created and enabled, False otherwise.
+        """
+        if self._running:
+            return True
+
+        try:
+            import Quartz
+        except ImportError:
+            logging.error("PyObjC/Quartz not available — cannot start CGEventTap")
+            return False
+
+        tap = Quartz.CGEventTapCreate(
+            Quartz.kCGSessionEventTap,
+            Quartz.kCGHeadInsertEventTap,
+            Quartz.kCGEventTapOptionListenOnly,
+            self._build_mask(),
+            self._callback,
+            None,
+        )
+        if tap is None:
+            logging.error(
+                "CGEventTap creation failed — Accessibility permission required. "
+                "Go to System Settings → Privacy & Security → Accessibility and add this app."
+            )
+            return False
+
+        self._tap = tap
+        run_loop_source = Quartz.CFMachPortCreateRunLoopSource(None, tap, 0)
+
+        def run_loop():
+            try:
+                loop = Quartz.CFRunLoopGetCurrent()
+                self._loop_ref = loop
+                Quartz.CFRunLoopAddSource(loop, run_loop_source, Quartz.kCFRunLoopCommonModes)
+                Quartz.CGEventTapEnable(tap, True)
+                self._running = True
+                logging.info("CGEventTap enabled on CFRunLoop")
+                Quartz.CFRunLoopRun()
+            except Exception as e:
+                logging.error(f"CGEventTap run loop error: {e}")
+            finally:
+                self._running = False
+
+        self._thread = threading.Thread(target=run_loop, daemon=True)
+        self._thread.start()
+
+        return True
+
+    def stop(self) -> None:
+        """Stop the CGEventTap and join its CFRunLoop thread."""
+        if not self._running:
+            return
+
+        self._running = False
+
+        if self._loop_ref is not None:
+            try:
+                import Quartz
+                Quartz.CFRunLoopStop(self._loop_ref)
+            except Exception as e:
+                logging.error(f"Error stopping CGEventTap run loop: {e}")
+            self._loop_ref = None
+
+        if self._tap is not None:
+            try:
+                import Quartz
+                Quartz.CGEventTapEnable(self._tap, False)
+            except Exception:
+                pass
+            self._tap = None
+
+        if self._thread is not None:
+            self._thread.join(timeout=1.0)
+            self._thread = None
+
+        logging.info("CGEventTap stopped")
+
+    def _callback(self, proxy, event_type, event, refcon):
+        """CGEventTap callback.
+
+        Runs on the tap thread. Handles the disabled-by-timeout re-enable and
+        dispatches key events to :meth:`_on_key_event`.
+        """
+        try:
+            import Quartz
+
+            if event_type == Quartz.kCGEventTapDisabledByTimeout:
+                logging.warning("CGEventTap disabled by timeout — re-enabling")
+                Quartz.CGEventTapEnable(self._tap, True)
+                return event
+
+            keycode = Quartz.CGEventGetIntegerValueField(
+                event, Quartz.kCGKeyboardEventKeycode
+            )
+            is_down = event_type == Quartz.kCGEventKeyDown
+            self._on_key_event(keycode, is_down)
+        except Exception as e:
+            logging.error(f"CGEventTap callback error: {e}")
+
+        return event
+
+    def _on_key_event(self, keycode: int, is_down: bool) -> None:
+        """Handle a key down/up event. Runs on the tap thread."""
+        raise NotImplementedError
+
+
+class DarwinKeyboardListener(CGEventTapListener):
     """macOS keyboard listener using CGEventTap directly.
 
     This listener runs in the main process (not a subprocess) to avoid
@@ -160,6 +376,7 @@ class DarwinKeyboardListener:
         on_alt_change: Callable[[bool], None] | None = None,
         poll_interval_ms: int = 50,
     ) -> None:
+        super().__init__()
         self._target_key = target_key
         self._on_panic = on_panic
         self._alt_keys = {KEY_NAME_TO_VK[k] for k in (alt_keys or []) if k in KEY_NAME_TO_VK}
@@ -172,12 +389,6 @@ class DarwinKeyboardListener:
         self._pressed_alts: set[int] = set()
         self._lock = threading.Lock()
 
-        # CGEventTap state
-        self._tap = None
-        self._loop_ref = None
-        self._thread = None
-        self._running = False
-
         # Resolve target key code
         self._target_vk = KEY_NAME_TO_VK.get(target_key)
         if self._target_vk is None:
@@ -189,91 +400,16 @@ class DarwinKeyboardListener:
         Returns:
             True if the listener started successfully, False otherwise.
         """
-        if self._running:
-            return True
-
-        try:
-            import Quartz
-        except ImportError:
-            logging.error("PyObjC/Quartz not available — cannot start macOS keyboard listener")
-            return False
-
-        # Create the CGEventTap
-        tap = Quartz.CGEventTapCreate(
-            Quartz.kCGSessionEventTap,
-            Quartz.kCGHeadInsertEventTap,
-            Quartz.kCGEventTapOptionListenOnly,
-            Quartz.CGEventMaskBit(Quartz.kCGEventKeyDown) | Quartz.CGEventMaskBit(Quartz.kCGEventKeyUp),
-            self._callback,
-            None,
-        )
-
-        if tap is None:
-            logging.error(
-                "CGEventTap creation failed — Accessibility permission required. "
-                "Go to System Settings → Privacy & Security → Accessibility and add this app."
+        ok = super().start()
+        if ok:
+            logging.info(
+                "CGEventTap keyboard listener started: %s (keycode 0x%02X)",
+                self._target_key,
+                self._target_vk,
             )
-            return False
-
-        self._tap = tap
-        self._running = True
-
-        # Create run loop source from the tap
-        run_loop_source = Quartz.CFMachPortCreateRunLoopSource(None, tap, 0)
-
-        def run_loop():
-            """Run the CFRunLoop in a daemon thread."""
-            try:
-                loop = Quartz.CFRunLoopGetCurrent()
-                self._loop_ref = loop
-                Quartz.CFRunLoopAddSource(loop, run_loop_source, Quartz.kCFRunLoopCommonModes)
-                Quartz.CGEventTapEnable(tap, True)
-                logging.info(
-                    "CGEventTap keyboard listener started: %s (keycode 0x%02X)",
-                    self._target_key,
-                    self._target_vk,
-                )
-                Quartz.CFRunLoopRun()
-            except Exception as e:
-                logging.error(f"CGEventTap run loop error: {e}")
-            finally:
-                self._running = False
-
-        self._thread = threading.Thread(target=run_loop, daemon=True)
-        self._thread.start()
-
-        return True
-
-    def stop(self) -> None:
-        """Stop the keyboard listener."""
-        if not self._running:
-            return
-
-        self._running = False
-
-        if self._loop_ref is not None:
-            try:
-                import Quartz
-
-                Quartz.CFRunLoopStop(self._loop_ref)
-            except Exception as e:
-                logging.error(f"Error stopping CGEventTap run loop: {e}")
-            self._loop_ref = None
-
-        if self._tap is not None:
-            try:
-                import Quartz
-
-                Quartz.CGEventTapEnable(self._tap, False)
-            except Exception:
-                pass
-            self._tap = None
-
-        if self._thread is not None:
-            self._thread.join(timeout=1.0)
-            self._thread = None
-
-        logging.info("CGEventTap keyboard listener stopped")
+        else:
+            logging.error("Failed to start macOS CGEventTap keyboard listener")
+        return ok
 
     def poll(self) -> bool:
         """Consume a pending panic-key press and fire the callback.
@@ -304,49 +440,31 @@ class DarwinKeyboardListener:
         with self._lock:
             return self._alt_held
 
-    def _callback(self, proxy, event_type, event, refcon):
-        """CGEventTap callback.
+    def _on_key_event(self, keycode: int, is_down: bool) -> None:
+        """CGEventTap key event handler.
 
         Runs in the CGEventTap thread. Sets thread-safe flags for the target
         key and any tracked alt keys.
         """
-        try:
-            import Quartz
+        # Panic key: trigger on press (key down).
+        if is_down and keycode == self._target_vk:
+            with self._lock:
+                self._panic_pending = True
 
-            # Handle CGEventTap disabled by timeout
-            if event_type == Quartz.kCGEventTapDisabledByTimeout:
-                logging.warning("CGEventTap disabled by timeout — re-enabling")
-                Quartz.CGEventTapEnable(self._tap, True)
-                return event
-
-            keycode = Quartz.CGEventGetIntegerValueField(
-                event, Quartz.kCGKeyboardEventKeycode
-            )
-            is_down = event_type == Quartz.kCGEventKeyDown
-
-            # Panic key: trigger on press (key down).
-            if is_down and keycode == self._target_vk:
-                with self._lock:
-                    self._panic_pending = True
-
-            # Alt tracking (used for popup blacklist-on-alt). Maintain a set of
-            # currently-pressed alt keys so release events for one alt while another is
-            # still held do not clear the state prematurely.
-            if keycode in self._alt_keys:
-                with self._lock:
-                    if is_down:
-                        self._pressed_alts.add(keycode)
-                    else:
-                        self._pressed_alts.discard(keycode)
-                    new_state = bool(self._pressed_alts)
-                    changed = new_state != self._alt_held
-                    self._alt_held = new_state
-                if changed and self._on_alt_change:
-                    self._on_alt_change(new_state)
-        except Exception as e:
-            logging.error(f"CGEventTap callback error: {e}")
-
-        return event
+        # Alt tracking (used for popup blacklist-on-alt). Maintain a set of
+        # currently-pressed alt keys so release events for one alt while another is
+        # still held do not clear the state prematurely.
+        if keycode in self._alt_keys:
+            with self._lock:
+                if is_down:
+                    self._pressed_alts.add(keycode)
+                else:
+                    self._pressed_alts.discard(keycode)
+                new_state = bool(self._pressed_alts)
+                changed = new_state != self._alt_held
+                self._alt_held = new_state
+            if changed and self._on_alt_change:
+                self._on_alt_change(new_state)
 
 
 def get_available_keys() -> list[str]:
