@@ -189,7 +189,10 @@ def set_schedule(vars) -> None:  # noqa: ANN001
 
 
 def delete_schedule() -> None:
-    scheduler = win32com.client.Dispatch("Schedule.Service")
-    scheduler.Connect()
-    root_folder = scheduler.GetFolder("\\")
-    root_folder.DeleteTask("Edgeware++", 0)
+    try:
+        scheduler = win32com.client.Dispatch("Schedule.Service")
+        scheduler.Connect()
+        root_folder = scheduler.GetFolder("\\")
+        root_folder.DeleteTask("Edgeware++", 0)
+    except Exception:
+        pass
