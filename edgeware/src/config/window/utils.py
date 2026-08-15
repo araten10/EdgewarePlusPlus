@@ -30,14 +30,13 @@ from tkinter import BooleanVar, Button, Event, IntVar, Label, Listbox, StringVar
 
 import os_utils
 import utils
+from os_utils import delete_schedule, set_schedule
 from paths import Data, Process
 from pynput import keyboard
 
 from config import load_config
 from config.items import CONFIG_DANGER, DangerLevel
 from config.vars import Vars
-
-from os_utils.windows import set_schedule, delete_schedule
 
 # TODO: Don't load these here
 config = load_config()

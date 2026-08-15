@@ -17,6 +17,7 @@
 
 import logging
 import os
+import subprocess
 from tkinter import (
     GROOVE,
     Button,
@@ -27,7 +28,6 @@ from tkinter import (
 
 import os_utils
 import utils
-import subprocess
 from config.vars import Vars
 from config.window.utils import log_file, request_legacy_panic_key
 from config.window.widgets.layout import (
@@ -37,7 +37,7 @@ from config.window.widgets.layout import (
 )
 from config.window.widgets.scroll_frame import ScrollFrame
 from config.window.widgets.tooltip import CreateToolTip
-from os_utils.windows import set_schedule, delete_schedule
+from os_utils import delete_schedule, set_schedule
 from pack import Pack
 from paths import Data
 

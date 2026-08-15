@@ -53,7 +53,7 @@ def toggle_run_at_startup(state: bool) -> None:
     pass
 
 
-def set_schedule(vars) -> None:
+def set_schedule(vars) -> None:  # noqa: ANN001
     pass
 
 

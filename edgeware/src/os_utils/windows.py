@@ -114,7 +114,7 @@ def toggle_run_at_startup(state: bool) -> None:
         (startup_path / "Edgeware++.lnk").unlink(missing_ok=True)
 
 
-def set_schedule(vars) -> None:
+def set_schedule(vars) -> None:  # noqa: ANN001
     scheduler = win32com.client.Dispatch("Schedule.Service")
     scheduler.Connect()
     root_folder = scheduler.GetFolder("\\")
@@ -142,7 +142,7 @@ def set_schedule(vars) -> None:
 
     # Repetition
     # The repetition interval needs to be in ISO8601 format, so lets make that
-    if vars.repeat_schedule.get() == True:
+    if vars.repeat_schedule.get():
         if vars.repeat_type.get() == "Minutes":
             repetition_time = f"PT{vars.repeat_time.get()}M"
         elif vars.repeat_type.get() == "Hours":
