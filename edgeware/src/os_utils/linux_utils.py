@@ -143,7 +143,7 @@ def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], N
     def razor_qt() -> None:
         desktop_conf = ConfigParser()
 
-        config_home = os.environ.get("XDG_CONFIG_HOME") or os.environ.get("XDG_HOME_CONFIG", os.path.expanduser(".config"))
+        config_home = os.environ.get("XDG_CONFIG_HOME") or os.environ.get("XDG_HOME_CONFIG", os.path.expanduser("~/.config"))
         config_dir = os.path.join(config_home, "razor")
 
         # Development version
@@ -151,7 +151,7 @@ def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], N
         if os.path.isfile(desktop_conf_file):
             config_option = r"screens\1\desktops\1\wallpaper"
         else:
-            desktop_conf_file = os.path.expanduser(".razor/desktop.conf")
+            desktop_conf_file = os.path.expanduser("~/.razor/desktop.conf")
             config_option = r"desktops\1\wallpaper"
         desktop_conf.read(os.path.join(desktop_conf_file))
         try:
