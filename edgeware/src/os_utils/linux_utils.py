@@ -24,6 +24,21 @@ import subprocess
 from collections.abc import Callable
 from configparser import ConfigParser
 from pathlib import Path
+from typing import Literal
+
+type UserDirectory = Literal["DESKTOP", "DOCUMENTS", "DOWNLOAD", "MUSIC", "PICTURES", "PUBLICSHARE", "TEMPLATES", "VIDEOS", "PROJECTS"]
+
+
+def get_user_data_dir(kind: UserDirectory, fallback: Path | str | None = None) -> Path:
+    if shutil.which("xdg-user-dir"):
+        result = subprocess.run(["xdg-user-dir", kind], capture_output=True, text=True)
+        if result.returncode == 0:
+            return Path(result.stdout[:-1])  # strip terminating newline
+    if fallback is not None:
+        return Path(fallback)
+    if kind == "PUBLICSHARE":
+        return Path.home() / "Public"
+    return Path.home() / kind.title()
 
 
 # Modified from https://stackoverflow.com/a/21213358

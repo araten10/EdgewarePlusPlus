@@ -29,7 +29,13 @@ from config import load_default_config
 from features.prompt import Prompt
 from paths import CustomAssets, Process
 
-from os_utils.linux_utils import find_get_wallpaper_command, find_set_wallpaper_commands, find_set_wallpaper_function, get_desktop_environment
+from os_utils.linux_utils import (
+    find_get_wallpaper_command,
+    find_set_wallpaper_commands,
+    find_set_wallpaper_function,
+    get_desktop_environment,
+    get_user_data_dir,
+)
 
 
 def close_mpv(player: mpv.MPV) -> None:
@@ -115,7 +121,7 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
     default_config = load_default_config()
 
     filename = f"{title}.desktop"
-    file = (location if location else Path(os.path.expanduser("~/Desktop"))) / filename
+    file = (location or get_user_data_dir("DESKTOP")) / filename
     content = [
         "[Desktop Entry]",
         f"Version={default_config['versionplusplus']}",
