@@ -90,7 +90,7 @@ def find_set_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
         **dict.fromkeys(["fluxbox", "jwm", "openbox", "afterstep"], [f"fbsetbg {quoted}"]),
     }
 
-    return commands.get(desktop) or (find_set_wm_wallpaper_commands() if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
+    return commands.get(desktop) or (find_set_wm_wallpaper_commands(wallpaper) if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
 
 
 def find_set_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
@@ -157,7 +157,7 @@ def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], N
     return functions.get(desktop)
 
 
-def find_get_wallpaper_command(desktop: str) -> str | None:
+def find_get_wallpaper_command(desktop: str) -> list[str] | None:
     plasma_js = """
 let desktop = desktops()[0];
 desktop.wallpaperPlugin = "org.kde.image";
