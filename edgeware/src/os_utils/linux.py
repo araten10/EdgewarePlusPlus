@@ -16,7 +16,6 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import os
 import shlex
 import subprocess
 import sys
@@ -33,6 +32,7 @@ from os_utils.linux_utils import (
     find_get_wallpaper_command,
     find_set_wallpaper_commands,
     find_set_wallpaper_function,
+    get_config_home,
     get_desktop_environment,
     get_user_data_dir,
 )
@@ -139,7 +139,7 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
 
 
 def toggle_run_at_startup(state: bool) -> None:
-    autostart_path = Path(os.path.expanduser("~/.config/autostart"))
+    autostart_path = get_config_home() / "autostart"
     if state:
         make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon(), autostart_path)
     else:

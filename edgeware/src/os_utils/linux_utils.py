@@ -41,6 +41,10 @@ def get_user_data_dir(kind: UserDirectory, fallback: Path | str | None = None) -
     return Path.home() / kind.title()
 
 
+def get_config_home() -> Path:
+    return Path(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"))
+
+
 # Modified from https://stackoverflow.com/a/21213358
 def get_desktop_environment() -> str:
     desktop = os.environ.get("XDG_CURRENT_DESKTOP") or os.environ.get("DESKTOP_SESSION")
@@ -143,8 +147,7 @@ def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], N
     def razor_qt() -> None:
         desktop_conf = ConfigParser()
 
-        config_home = os.environ.get("XDG_CONFIG_HOME") or os.environ.get("XDG_HOME_CONFIG", os.path.expanduser("~/.config"))
-        config_dir = os.path.join(config_home, "razor")
+        config_dir = os.path.join(get_config_home(), "razor")
 
         # Development version
         desktop_conf_file = os.path.join(config_dir, "desktop.conf")
