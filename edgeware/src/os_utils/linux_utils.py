@@ -122,10 +122,10 @@ def find_set_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
                 f"gsettings set org.gnome.desktop.background picture-uri-dark {quoted_gnome}",
             ],
         ),
-        **dict.fromkeys(["fluxbox", "jwm", "openbox", "afterstep"], [f"fbsetbg {quoted}"]),
+        **dict.fromkeys(["fluxbox", "jwm", "afterstep"], [f"fbsetbg {quoted}"]),
     }
 
-    return commands.get(desktop) or (find_set_wm_wallpaper_commands(wallpaper) if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
+    return commands.get(desktop) or (find_set_wm_wallpaper_commands(wallpaper) if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm", "openbox"] else [])
 
 
 def find_set_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
