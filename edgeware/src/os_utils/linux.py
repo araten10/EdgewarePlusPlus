@@ -133,6 +133,8 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
         "Categories=Application;",
     ]
 
+    if not file.parent.exists():
+        file.parent.mkdir(parents=True)  # On a fresh install or newly-created user account, it is possible that the desktop directory does not exist
     file.write_text("\n".join(content))
     if get_desktop_environment() == "gnome":
         subprocess.run(f"gio set {shlex.quote(str(file.absolute()))} metadata::trusted true", shell=True)
