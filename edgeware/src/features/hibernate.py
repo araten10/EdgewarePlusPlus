@@ -21,12 +21,11 @@ from collections.abc import Callable
 from threading import Thread
 from tkinter import Tk
 
-import os_utils
 from config.settings import Settings
 from features.drive import fill_drive
 from features.misc import handle_wallpaper
 from pack import Pack
-from paths import CustomAssets
+from panic import restore_panic_wallpaper
 from roll import RollTarget, roll_targets
 from state import State
 
@@ -35,7 +34,7 @@ def reset_wallpaper(settings: Settings, state: State) -> None:
     if not (settings.hibernate_fix_wallpaper and state.popup_number == 0 and not state.hibernate_active):
         return
 
-    os_utils.set_wallpaper(CustomAssets.panic_wallpaper())
+    restore_panic_wallpaper(settings.replace_images)
 
 
 def spaced(root: Tk, settings: Settings, targets: list[RollTarget], run: Callable[[], bool]) -> None:

@@ -89,6 +89,7 @@ class Data:
     ICON = ROOT / "icon.ico"
     PANIC_ICON = ROOT / "panic_icon.ico"
     PANIC_WALLPAPER = ROOT / "panic_wallpaper.png"
+    PANIC_WALLPAPER_LINK = ROOT / "panic_wallpaper.url"
     STARTUP_SPLASH = ROOT / "loading_splash.png"
     THEME_DEMO = ROOT / "theme_demo.png"
 
