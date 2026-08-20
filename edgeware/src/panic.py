@@ -60,6 +60,8 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
         set_wallpaper(CustomAssets.panic_wallpaper())
         state.keyboard_process.terminate()
         state.tray.stop()
+        for popup in state.popups.copy():
+            popup.close()
         pyglet.app.exit()
         root.destroy()
 

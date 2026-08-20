@@ -16,6 +16,7 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import codecs
+import logging
 import os
 import re
 import shlex
@@ -24,6 +25,25 @@ import subprocess
 from collections.abc import Callable
 from configparser import ConfigParser
 from pathlib import Path
+from typing import Literal
+
+type UserDirectory = Literal["DESKTOP", "DOCUMENTS", "DOWNLOAD", "MUSIC", "PICTURES", "PUBLICSHARE", "TEMPLATES", "VIDEOS", "PROJECTS"]
+
+
+def get_user_data_dir(kind: UserDirectory, fallback: Path | str | None = None) -> Path:
+    if shutil.which("xdg-user-dir"):
+        result = subprocess.run(["xdg-user-dir", kind], capture_output=True, text=True)
+        if result.returncode == 0:
+            return Path(result.stdout[:-1])  # strip terminating newline
+    if fallback is not None:
+        return Path(fallback)
+    if kind == "PUBLICSHARE":
+        return Path.home() / "Public"
+    return Path.home() / kind.title()
+
+
+def get_config_home() -> Path:
+    return Path(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"))
 
 
 # Modified from https://stackoverflow.com/a/21213358
@@ -55,8 +75,23 @@ def get_desktop_environment() -> str:
         return "xfce4"
     if is_running("ksmserver"):
         return "kde"
+    if is_running("xmonad"):  # xmonad does not set _NET_SUPPORTING_WM_CHECK
+        return "xmonad"
 
-    return "unknown"
+    # Window managers started via startx(1)/xinit(1) will not set $XDG_CURRENT_DESKTOP or
+    # $DESKTOP_SESSION by default. The following method is adapted from https://askubuntu.com/a/466153,
+    # and relies on the freedesktop.org Extended Window Manager Hints specification
+    # (https://specifications.freedesktop.org/wm/latest/index.html).
+    # Tested to work with bspwm & i3.
+    if not desktop and shutil.which("xprop"):
+        try:
+            window_id = subprocess.check_output(["xprop", "-root", "_NET_SUPPORTING_WM_CHECK"], text=True).split(" ")[-1].strip()
+            wm = subprocess.check_output(["xprop", "-id", window_id.strip(), "-f", "_NET_WM_NAME", "8t", "_NET_WM_NAME"], text=True)
+            desktop = wm.split(" = ", 1)[1].replace('"', "").strip().lower()
+        except Exception as e:
+            logging.warning(f"Failed to find window manager via _NET_WM_NAME: {e}")
+
+    return desktop or "unknown"
 
 
 def find_set_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
@@ -87,15 +122,17 @@ def find_set_wallpaper_commands(wallpaper: Path, desktop: str) -> list[str]:
                 f"gsettings set org.gnome.desktop.background picture-uri-dark {quoted_gnome}",
             ],
         ),
-        **dict.fromkeys(["fluxbox", "jwm", "openbox", "afterstep"], [f"fbsetbg {quoted}"]),
+        **dict.fromkeys(["fluxbox", "jwm", "afterstep"], [f"fbsetbg {quoted}"]),
     }
 
-    return commands.get(desktop) or (find_set_wm_wallpaper_commands() if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm"] else [])
+    return commands.get(desktop) or (find_set_wm_wallpaper_commands(wallpaper) if desktop in ["i3", "awesome", "dwm", "xmonad", "bspwm", "openbox"] else [])
 
 
 def find_set_wm_wallpaper_commands(wallpaper: Path) -> list[str]:
     quoted = shlex.quote(str(wallpaper))
     session = os.environ.get("XDG_SESSION_TYPE", "").lower()  # "x11" or "wayland"
+    if session == "tty":  # $XDG_SESSION_TYPE may be "tty" if the WM is started directly from a TTY using `startx`/`xinit`
+        session = "x11"
 
     setters = {
         "x11": [
@@ -128,15 +165,14 @@ def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], N
     def razor_qt() -> None:
         desktop_conf = ConfigParser()
 
-        config_home = os.environ.get("XDG_CONFIG_HOME") or os.environ.get("XDG_HOME_CONFIG", os.path.expanduser(".config"))
-        config_dir = os.path.join(config_home, "razor")
+        config_dir = os.path.join(get_config_home(), "razor")
 
         # Development version
         desktop_conf_file = os.path.join(config_dir, "desktop.conf")
         if os.path.isfile(desktop_conf_file):
             config_option = r"screens\1\desktops\1\wallpaper"
         else:
-            desktop_conf_file = os.path.expanduser(".razor/desktop.conf")
+            desktop_conf_file = os.path.expanduser("~/.razor/desktop.conf")
             config_option = r"desktops\1\wallpaper"
         desktop_conf.read(os.path.join(desktop_conf_file))
         try:
@@ -157,7 +193,7 @@ def find_set_wallpaper_function(wallpaper: Path, desktop: str) -> Callable[[], N
     return functions.get(desktop)
 
 
-def find_get_wallpaper_command(desktop: str) -> str | None:
+def find_get_wallpaper_command(desktop: str) -> list[str] | None:
     plasma_js = """
 let desktop = desktops()[0];
 desktop.wallpaperPlugin = "org.kde.image";

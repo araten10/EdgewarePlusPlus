@@ -16,7 +16,6 @@
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import os
 import shlex
 import subprocess
 import sys
@@ -29,7 +28,14 @@ from config import load_default_config
 from features.prompt import Prompt
 from paths import CustomAssets, Process
 
-from os_utils.linux_utils import find_get_wallpaper_command, find_set_wallpaper_commands, find_set_wallpaper_function, get_desktop_environment
+from os_utils.linux_utils import (
+    find_get_wallpaper_command,
+    find_set_wallpaper_commands,
+    find_set_wallpaper_function,
+    get_config_home,
+    get_desktop_environment,
+    get_user_data_dir,
+)
 
 
 def close_mpv(player: mpv.MPV) -> None:
@@ -115,7 +121,7 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
     default_config = load_default_config()
 
     filename = f"{title}.desktop"
-    file = (location if location else Path(os.path.expanduser("~/Desktop"))) / filename
+    file = (location or get_user_data_dir("DESKTOP")) / filename
     content = [
         "[Desktop Entry]",
         f"Version={default_config['versionplusplus']}",
@@ -127,13 +133,16 @@ def make_shortcut(title: str, process: Path, icon: Path, location: Path | None =
         "Categories=Application;",
     ]
 
+    if not file.parent.exists():
+        file.parent.mkdir(parents=True)  # On a fresh install or newly-created user account, it is possible that the desktop directory does not exist
     file.write_text("\n".join(content))
+    file.chmod(0o744)  # mark as "trusted" on KDE Plasma
     if get_desktop_environment() == "gnome":
         subprocess.run(f"gio set {shlex.quote(str(file.absolute()))} metadata::trusted true", shell=True)
 
 
 def toggle_run_at_startup(state: bool) -> None:
-    autostart_path = Path(os.path.expanduser("~/.config/autostart"))
+    autostart_path = get_config_home() / "autostart"
     if state:
         make_shortcut("Edgeware++", Process.MAIN, CustomAssets.icon(), autostart_path)
     else:

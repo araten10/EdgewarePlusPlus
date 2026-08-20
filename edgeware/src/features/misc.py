@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Edgeware++.  If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
 import logging
 import multiprocessing
 import random
@@ -27,8 +28,8 @@ from tkinter import Tk
 
 import pystray
 from config.settings import Settings
+from desktop_notifier import DesktopNotifier
 from desktop_notifier.common import Attachment, Icon
-from desktop_notifier.sync import DesktopNotifierSync
 from os_utils import make_shortcut, set_wallpaper
 from pack import Pack
 from panic import panic
@@ -53,12 +54,19 @@ def send_notification(settings: Settings, pack: Pack, notification: str | None =
         return
 
     image = pack.random_image()
-    notifier = DesktopNotifierSync(app_name="Edgeware++", app_icon=Icon(pack.icon))
-    notifier.send(
+    notifier = DesktopNotifier(app_name="Edgeware++", app_icon=Icon(pack.icon))
+    task = notifier.send(
         title=pack.info.name,
         message=notification,
         attachment=Attachment(image) if roll(settings.notification_image_chance) and image else None,
     )
+
+    # This feels like the wrong way to do things, but it /is/ functionally what we were doing
+    # previously in instantiating a new DesktopNotifierSync with each call.
+    try:
+        asyncio.run(asyncio.wait_for(task, timeout=0.5))
+    except asyncio.TimeoutError:
+        logging.error("Notification request timed out! Is a notification daemon running?")
 
 
 def make_tray_icon(root: Tk, settings: Settings, pack: Pack, state: State, hibernate_activity: Callable[[], None]) -> None:

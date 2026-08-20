@@ -46,9 +46,12 @@ shortcut() {
     script=${2:-$1}
 
     if [ ! -f "$script.sh" ]; then
-        echo "#!/bin/bash" >> $script.sh
-        echo ".venv/bin/python3 src/${source}.py" >> $script.sh
-        chmod +x $script.sh
+		{
+			echo "#!/bin/bash"
+			echo 'cd "$(dirname "$(realpath -- "$0")")"'
+			echo ".venv/bin/python3 src/${source}.py"
+		} >> "$script.sh"
+        chmod +x "$script.sh"
     fi
 }
 
