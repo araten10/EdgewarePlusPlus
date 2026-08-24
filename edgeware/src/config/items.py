@@ -167,6 +167,7 @@ CONFIG_ITEMS = {
     "drive_path": Item("drivePath", STRING, StringVar, str, block=True),  # We can't know what paths exist and they look different on Linux and Windows
     "panic_disabled": Item("panicDisabled", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.MINOR, Schema(1), PANIC_DISABLED_DANGER)),
     "run_at_startup": Item("start_on_logon", BOOLEAN, BooleanVar, None, danger=Danger(DangerLevel.MAJOR, Schema(1), RUN_AT_STARTUP_DANGER), block=True),
+    "startup_chance": Item("startupChance", PERCENTAGE, IntVar, int, block=True),
     "show_on_discord": Item("showDiscord", BOOLEAN, BooleanVar, bool, danger=Danger(DangerLevel.MEDIUM, Schema(1), SHOW_ON_DISCORD_DANGER), block=BROKEN),
 
     # Modes
@@ -181,6 +182,7 @@ CONFIG_ITEMS = {
     "hibernate_activity": Item("wakeupActivity", NONNEGATIVE, IntVar, int, danger=Danger(DangerLevel.MEDIUM, Schema(Range(min=36)))),
     "hibernate_activity_length": Item("hibernateLength", NONNEGATIVE, IntVar, s_to_ms),
     "hibernate_fix_wallpaper": Item("fixWallpaper", BOOLEAN, BooleanVar, bool),
+    "hibernate_chance": Item("hibernateChance", PERCENTAGE, IntVar, int),
 
     # Corruption
     "corruption_mode": Item("corruptionMode", BOOLEAN, BooleanVar, bool, block=True),  # if you're turning off corruption mode with corruption just make it the final level lmao

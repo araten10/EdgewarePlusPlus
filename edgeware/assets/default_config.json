@@ -101,5 +101,7 @@
   "varianceType": "Hours",
   "repeatSchedule": 0,
   "repeatType": "Hours",
-  "repeatTime": 0
+  "repeatTime": 0,
+  "hibernateChance": 100,
+  "startupChance": 100
 }
