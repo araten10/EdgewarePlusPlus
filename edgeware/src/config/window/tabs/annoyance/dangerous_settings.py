@@ -173,7 +173,3 @@ class DangerousSettingsTab(ScrollFrame):
         discord_toggle = ConfigToggle(misc_row, "Show on Discord", variable=vars.show_on_discord, cursor="question_arrow")
         discord_toggle.pack()
         CreateToolTip(discord_toggle, "Displays a lewd status on discord (if your discord is open), which can be set per-pack by the pack creator.")
-
-        misc_row_2 = ConfigRow(misc_section)
-        misc_row_2.pack()
-        ConfigScale(misc_row_2, "Launch on PC Startup Chance", vars.startup_chance, 1, 100, enabled=(vars.run_at_startup, True)).pack()
