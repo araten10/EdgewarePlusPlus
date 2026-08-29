@@ -16,6 +16,8 @@ Save and extract it somewhere, then run `edgeware/EdgewareSetup.bat`. This will 
 
 **If you're using Linux**, first you need to install Python 3.12, pip, and mpv yourself, if you don't already have them installed already. Your distribution should contain packages for them. For example, on Debian and its derivatives, you can install them by running `sudo apt install python3 python3-pip mpv gcc python3-dev libmpv-dev python3-tk`. Once installed, download and extract Edgeware as a ZIP or clone the repository, then run `setup.sh` in a terminal window in the `edgeware` directory. This will create a Python virtual environment for Edgeware, install the dependencies, and create scripts for running Edgeware. `config.sh` allows you to configure Edgeware and `edgeware.sh` will start Edgeware itself.
 
+**If you're using MacOS**, we do not personally support it, however [there is a fork that does](https://github.com/blissfull-ignorance/EdgewarePlusPlus-ReactElectron). For more information as to what is different and why it isn't merged into our branch, you can read the [archived pull request](https://github.com/araten10/EdgewarePlusPlus/pull/294)!
+
 From there you'll need an actual pack, which can be downloaded online or made yourself. Unfortunately at the time of writing there's really no congregated directory of packs everyone's made, they're all scattered to the four winds... but for a start [the original Edgeware page](https://github.com/PetitTournesol/Edgeware) has a few sample packs, and there's a few more in the "Packs" section of the readme.
 
 Any time Edgeware has a major update, it might be a good idea to run `EdgewareSetup.bat` again, as this is the file that downloads dependencies for the program.
@@ -90,9 +92,9 @@ A: I am a creature by night, and keep to the shadows. (this is an edgy way of sa
 
 But also feel free to follow me on twitter, interact with me there, and other such things! I don't bite!
 
->Q: Does Edgeware work on android/mac/ios?
+>Q: Does Edgeware work on android/ios?
 
-A: I only have plans to develop Edgeware for windows, and Marigold is currently only developing Edgeware for Linux.
+A: I only have plans to develop Edgeware for windows, and Marigold is currently only developing Edgeware for Linux. There is a fork that supports MacOS, however it is not maintained by us!
 
 >Q: Are there other programs out there like Edgeware?
 
