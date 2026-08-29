@@ -9,6 +9,22 @@
 
 **Since last version...**
 
+**Version 21**
+
+Once again, it's been a while! Another new feature, some small changes, and an important announcement.
+
+Firstly, we should probably start with the announcement. Over the past few years we've updated Edgeware with new features, fixed old bugs, completely refactored the code, rewrote the tutorial, made new packs... but we think we're going to officially take a break for a bit. We realize that updates have gotten increasingly sporadic and spaced out, and I apologize to anyone who was looking forward to new Edgeware changes! We've sort of implemented most of the ideas we had when I initially set out on this journey. While there is plenty left still undone (and a ton of bugs as well), the program itself has become quite bloated and unwieldly to work in. I was talking with Marigold and we both kind of came to the conclusion that we'd honestly feel more passionate rewriting the entire program from the ground up, ditching Tkinter and learning something else, than continuing to try and shove more and more into Edgeware already (probably wouldn't happen anytime soon, it would be a massive undertaking!). I don't really want to get to a place where I feel stressed and like i'm "forced" to work on Edgeware, as I think the entire project hinges on the... unhinged horniness and passion of its creators!
+
+So what's next? I definitely won't just disappear completely and just ghost everyone, I enjoy the horny community and have had fun meeting people and working on random projects. The creative spark inside of me refuses to go out, and Marigold is happy to help assist me from self destructing with my very sub-mediocre coding skills. We will probably be working on more stuff together, and post it when we do. You can follow my [Twitter](https://x.com/ara10ten), or bookmark my [website](https://araten.neocities.org/)! Steamy went well, there's a few bugs but I'm happy with what came out of it.
+
+So now that we're done with that doom and gloom (well, I don't think it was *that* depressing), what's new in version 21? The biggest change is **Scheduling**, which should be available on Windows! Scheduling allows you to use the **Task Scheduler** to set Edgeware to run at a specific time. What makes this different than Hibernate? The fact that Edgeware *will not run* until then- allowing you to keep it running for long periods of time, guilt free! Want to run Edgeware at 3 AM every night, to remind you that you should be pumping instead of sleeping? What about having it run at a random time every day? You can do that! When you're done with Edgeware you can freely use panic to close it, it will come back the next day to remind you of your porn addiction <3
+
+On top of that we have some news for people using MacOS, there is now a [fork](https://github.com/blissfull-ignorance/EdgewarePlusPlus-ReactElectron) available that supports it! It rewrites major parts of the code, so we [didn't end up accepting it as a pull request](https://github.com/araten10/EdgewarePlusPlus/pull/294), but we have linked to it in the README!
+
+•*Added Scheduling, allowing the user to use the Windows Task Scheduler to set up reoccurring Edgeware runs. Windows only*
+
+•*Cleaned up the README, removing some redundant questions, and added links to the MacOS fork*
+
 **Version 20**
 
 Major scripting mode additions by Marigold! I have been working on our new project [Steamy](https://github.com/araten10/Steamy), while she has been working hard at expanding the things you can do with scripting in Edgeware. For those daring pack creators that use scripting and understand Lua, these updates will allow you to do *much* more!
