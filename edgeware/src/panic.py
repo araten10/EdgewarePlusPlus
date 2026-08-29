@@ -31,15 +31,18 @@ if __name__ == "__main__":
     # Add mpv to PATH
     os.environ["PATH"] += os.pathsep + str(Data.ROOT)
 
+import hashlib
 import logging
+import shutil
 from multiprocessing.connection import Client, Listener
+from pathlib import Path
 from threading import Thread
 from tkinter import Tk, simpledialog
 
 import pyglet
 from config.settings import Settings
 from os_utils import set_wallpaper
-from paths import CustomAssets
+from paths import CustomAssets, Data
 from state import State
 
 ADDRESS = ("localhost", 6000)
@@ -57,7 +60,7 @@ def panic(root: Tk, settings: Settings, state: State, condition: bool = True, di
             if password != settings.panic_lockout_password:
                 return
 
-        set_wallpaper(CustomAssets.panic_wallpaper())
+        restore_panic_wallpaper(settings.replace_images)
         state.keyboard_process.terminate()
         state.tray.stop()
         for popup in state.popups.copy():
@@ -88,6 +91,26 @@ def start_panic_listener(root: Tk, settings: Settings, state: State) -> None:
 def send_panic() -> None:
     with Client(address=ADDRESS, authkey=AUTHKEY) as connection:
         connection.send(PANIC_MESSAGE)
+
+
+def restore_panic_wallpaper(check_for_replacement: bool) -> None:
+    saved = CustomAssets.panic_wallpaper()
+
+    try:
+        # We restore from the original wallpaper file rather than Edgeware's copy to avoid issues
+        # when installed on a USB drive or after uninstalling.
+        original = Path(Data.PANIC_WALLPAPER_LINK.read_text()).resolve()
+        was_overwritten = False
+        # When `settings.replace_images` is enabled, the original wallpaper file may be overwritten.
+        if check_for_replacement:
+            with original.open("rb") as of, saved.open("rb") as sf:
+                was_overwritten = hashlib.file_digest(of, "sha256") != hashlib.file_digest(sf, "sha256")
+        if was_overwritten:
+            shutil.copy2(saved, original)
+    except OSError, AssertionError:
+        set_wallpaper(saved)
+    else:
+        set_wallpaper(original)
 
 
 if __name__ == "__main__":

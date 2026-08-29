@@ -164,6 +164,7 @@ class WallpaperTab(ScrollFrame):
         try:
             image = Image.open(file.name).convert("RGB")
             image.save(Data.PANIC_WALLPAPER)
+            Data.PANIC_WALLPAPER_LINK.write_text(file.name)
             self.load_panic_wallpaper()
         except Exception as e:
             logging.warning(f"Failed to set panic wallpaper\n{e}")
@@ -171,8 +172,12 @@ class WallpaperTab(ScrollFrame):
 
     def auto_import_panic_wallpaper(self) -> None:
         try:
-            image = Image.open(get_wallpaper()).convert("RGB")
+            path = get_wallpaper()
+            assert path is not None, "Auto-import not supported for your desktop environment"
+            assert path.is_file(), "Auto-import returned a nonexistent file"
+            image = Image.open(path).convert("RGB")
             image.save(Data.PANIC_WALLPAPER)
+            Data.PANIC_WALLPAPER_LINK.write_text(str(path))
             self.load_panic_wallpaper()
         except Exception as e:
             logging.warning(f"Failed to auto import panic wallpaper\n{e}")
