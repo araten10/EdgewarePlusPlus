@@ -68,9 +68,7 @@ There are a few places you can start, however. PetitTournesol's original github 
 
 >Q: I found a bug!
 
-A: Fantastic! (well, not really.) The best place to post something like this is the [issues page](https://github.com/araten10/EdgewarePlusPlus/issues), where it can be properly filed and looked at/addressed by us or other people/pull requests. If it is something that seems like it might be a personal issue or relating to your specific setup, feel free to drop me a line on twitter. Just know that I might not be able to personally fix the issue, especially if I can't replicate it on any of my machines!
-
-To help make the issue easier for us to solve, [here](https://twitter.com/ara10ten/status/1789414192702730718) is a short (NSFW!) guide on how to properly report bugs!
+A: Fantastic! (well, not really.) The best place to post something like this is the [issues page](https://github.com/araten10/EdgewarePlusPlus/issues), where it can be properly filed and looked at/addressed by us or other people/pull requests. As of 2026 we've decided to take breaks from actively developing Edgeware, so we apologize if things go by the wayside. All the more reason to use the issues page- people can use the info to make forks and pull requests!
 
 >Q: I'm having a problem running Edgeware, should I run it as administrator?
 
@@ -82,19 +80,13 @@ A: You can go into the resource folder of the pack you got, extract everything i
 
 If you know that the pack creator set specific config settings for their Edgeware installation pack, you can also create a "config.json" file inside your newly created pack zip, and copy all of the contents of their "config.cfg" into it. This will allow you to import their config settings in the *Pack Info* tab, near the bottom.
 
->Q: Can you give me more info on upcoming features?
-
-A: I personally like to reveal things once they're at the point where i'm not going to turn back or change my mind on them, as I think sometimes revealing things too early kills motivation and adds a lot of stress. I also get easily distracted and absentminded (don't we all...) so I can't guarantee that anything I announce early will actually happen anytime soon. Because of this I don't like to give out information on upcoming features to people, but I do post general updates/ideas on my [bsky account](https://bsky.app/profile/araten.bsky.social) and [twitter account](https://twitter.com/ara10ten), which also serves as a point of contact/a place for me to ramble about horny things! You can also view planned features on the issues page!
-
->Q: Can we be friends/talk more/can I dom you?
-
-A: I am a creature by night, and keep to the shadows. (this is an edgy way of saying i'm quiet and autistic, I generally have a low social battery)
-
-But also feel free to follow me on twitter, interact with me there, and other such things! I don't bite!
-
 >Q: Does Edgeware work on android/ios?
 
 A: I only have plans to develop Edgeware for windows, and Marigold is currently only developing Edgeware for Linux. There is a fork that supports MacOS, however it is not maintained by us!
+
+>Q: Do you make anything else besides Edgeware?
+
+A: As of 2026, we've decided to take breaks from actively developing Edgeware. Who knows what the future might hold, but I have [a website](https://araten.neocities.org/) with social media links, other projects we've done, and some other fun stuff as well!
 
 >Q: Are there other programs out there like Edgeware?
 
