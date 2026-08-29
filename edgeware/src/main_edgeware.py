@@ -65,6 +65,8 @@ from features.prompt import Prompt
 from features.startup_splash import StartupSplash
 from features.subliminal_popup import SubliminalPopup
 from features.video_popup import VideoPopup
+from os_utils import is_linux
+from os_utils.linux_utils import get_desktop_environment
 from pack import Pack
 from panic import start_panic_listener
 from roll import RollTarget, roll_targets
@@ -102,6 +104,11 @@ if __name__ == "__main__":
         RollTarget(lambda: open_web(pack), lambda: settings.web_chance),
         RollTarget(lambda: send_notification(settings, pack), lambda: settings.notification_chance),
     ]
+
+    # For some reason, when two windows are spawned very quickly, some WMs will place the most
+    # recent one /below/ the other rather than on top. This can cause subliminals to be occluded.
+    if is_linux() and get_desktop_environment() in ("i3", "dwm", "bspwm", "xmonad", "openbox"):
+        targets = targets[::-1]
 
     def start_main() -> None:
         make_tray_icon(root, settings, pack, state, lambda: main_hibernate(root, settings, pack, state, targets))
