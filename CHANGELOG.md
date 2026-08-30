@@ -22,8 +22,29 @@ So now that we're done with that doom and gloom (well, I don't think it was *tha
 On top of that we have some news for people using MacOS, there is now a [fork](https://github.com/blissfull-ignorance/EdgewarePlusPlus-ReactElectron) available that supports it! It rewrites major parts of the code, so we [didn't end up accepting it as a pull request](https://github.com/araten10/EdgewarePlusPlus/pull/294), but we have linked to it in the README!
 
 •*Added Scheduling, allowing the user to use the Windows Task Scheduler to set up reoccurring Edgeware runs. Windows only*
+> This can be found in the new "Scheduling" tab,
 
 •*Cleaned up the README, removing some redundant questions, and added links to the MacOS fork*
+
+•*Fixed corruption fade progressing by two levels instead of one (contributed by @dabberoo)*
+
+•*Fixed corruption dev mode errors (contributed by @dabberoo)*
+
+•*Panic wallpaper can be auto imported on KDE (contributed by @nuttinspace)*
+
+•*Fixed popup opacity on KDE (contributed by @dabberoo)*
+
+•*Fixed prompts on KDE (contributed by @dabberoo)*
+
+•*Added open and close callbacks for popups in scripting*
+
+•*Removed invalid characters from image replace backups*
+
+•*Fixed video and GIF playback problems for some users*
+
+•*Fixed various minor bugs and edge cases on Linux (contributed by @princessposer, full list in #298)*
+
+•*Prefer original path of panic wallpaper over copy in Edgeware (contributed by @princessposer)*
 
 **Version 20**
 
