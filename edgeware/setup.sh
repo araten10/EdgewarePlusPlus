@@ -9,8 +9,8 @@ fi
 
 IFS=" " read -r p version <<< "$version_string"
 IFS="." read -r major minor patch <<< "$version"
-if (( !($major == 3 && $minor >= 12) )); then
-    echo "Python version 3.12 or higher recommended"
+if (( !($major == 3 && $minor >= 14) )); then
+    echo "Python version 3.14 or higher recommended"
 fi
 
 python3 -c "import tkinter"
