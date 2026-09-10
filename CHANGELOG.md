@@ -9,6 +9,10 @@
 
 **Since last version...**
 
+**Version 21.1**
+
+•*Fixed an issue that made Edgeware unable to run on certain supported versions of Python*
+
 **Version 21**
 
 Once again, it's been a while! Another new feature, some small changes, and an important announcement.
@@ -22,7 +26,7 @@ So now that we're done with that doom and gloom (well, I don't think it was *tha
 On top of that we have some news for people using MacOS, there is now a [fork](https://github.com/blissfull-ignorance/EdgewarePlusPlus-ReactElectron) available that supports it! It rewrites major parts of the code, so we [didn't end up accepting it as a pull request](https://github.com/araten10/EdgewarePlusPlus/pull/294), but we have linked to it in the README!
 
 •*Added Scheduling, allowing the user to use the Windows Task Scheduler to set up reoccurring Edgeware runs. Windows only*
-> This can be found in the new "Scheduling" tab,
+> This can be found in the new "Scheduling" tab, under General!
 
 •*Cleaned up the README, removing some redundant questions, and added links to the MacOS fork*
 
