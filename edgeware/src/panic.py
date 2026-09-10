@@ -107,7 +107,7 @@ def restore_panic_wallpaper(check_for_replacement: bool) -> None:
                 was_overwritten = hashlib.file_digest(of, "sha256") != hashlib.file_digest(sf, "sha256")
         if was_overwritten:
             shutil.copy2(saved, original)
-    except OSError, AssertionError:
+    except (OSError, AssertionError):
         set_wallpaper(saved)
     else:
         set_wallpaper(original)
