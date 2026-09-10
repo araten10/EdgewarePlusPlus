@@ -11,7 +11,7 @@
 
 **Version 21.1**
 
-•*Fixed an issue that made Edgeware unable to run on certain supported versions of Python*
+•*Fixed an issue that made Edgeware unable to run on certain versions of Python*
 
 **Version 21**
 
