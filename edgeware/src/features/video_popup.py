@@ -35,7 +35,21 @@ class VideoPopup(Popup):
         super().__init__(root, settings, pack, state, on_close)
 
         properties = get_video_properties(self.media)
-        self.compute_geometry(properties["width"], properties["height"])
+        width, height = properties["width"], properties["height"]
+        
+        # Detect video rotation metadata
+        rotation = properties.get("tags", {}).get("rotate", 0)
+        
+        for data in properties.get("side_data_list", []):
+            if data.get("side_data_type") == "Display Matrix" and "rotation" in data:
+                rotation = data["rotation"]
+                break
+        
+        # Swap dimensions for portrait rotation
+        if round(float(rotation)) % 180 == 90:
+            width, height = height, width
+        
+        self.compute_geometry(width, height)
 
         self.player = VideoPlayer(self, self.settings, self.width, self.height)
         self.player.properties["volume"] = self.settings.video_volume
