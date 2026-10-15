@@ -55,9 +55,9 @@ class VideoPlayer(Label):
                     logging.warning(f"mpv GPU context {context} is not supported")
 
     def play(self, media: Path, overlay: Image.Image | None = None) -> None:
+        self.wait_visibility()
+        
         if not self.settings.mpv_subprocess:
-            self.wait_visibility()  # Needs to be visible for mpv to draw on it
-
             self.mpv = mpv.MPV(wid=self.winfo_id())
             for key, value in self.properties.items():
                 self.mpv[key] = value
