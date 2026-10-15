@@ -24,7 +24,7 @@ from features.popup import Popup
 from features.video_player import VideoPlayer
 from pack import Pack
 from state import State
-from videoprops import get_video_properties
+from features.video_metadata import get_video_properties
 
 
 class VideoPopup(Popup):
