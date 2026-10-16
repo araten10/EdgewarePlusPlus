@@ -1,0 +1,41 @@
+--- a/edgeware/src/paths.py	2026-01-30 01:13:44.000000000 +0100
++++ b/edgeware/src/paths.py	2026-08-22 00:13:09.892192674 +0200
+@@ -21,6 +21,9 @@
+ PATH = Path(__file__).parent.parent
+ DEFAULT_PACK_PATH = PATH / "resource"
+ 
++import os
++xdg_data_dir = os.environ.get("XDG_DATA_HOME")
++XDG_PATH = Path(xdg_data_dir) if xdg_data_dir else False
+ 
+ @dataclass
+ class Process:
+@@ -69,7 +72,7 @@
+ 
+ @dataclass
+ class Data:
+-    ROOT = PATH / "data"
++    ROOT = (XDG_PATH / "edgeware") if XDG_PATH else (PATH / "data")
+ 
+     # Directories
+     BACKUPS = ROOT / "backups"
+--- a/edgeware/src/pack/__init__.py	2026-01-30 01:13:44.000000000 +0100
++++ b/edgeware/src/pack/__init__.py	2026-08-22 02:20:58.001653364 +0200
+@@ -20,7 +20,7 @@
+ from pathlib import Path
+ 
+ import filetype
+-from paths import PATH, CustomAssets, PackPaths
++from paths import XDG_PATH, CustomAssets, PackPaths
+ 
+ from pack.data import MoodBase, MoodSet
+ from pack.load import list_media, load_allowed_moods, load_config, load_corruption, load_discord, load_index, load_info
+@@ -28,7 +28,7 @@
+ 
+ class Pack:
+     def __init__(self, root: Path) -> None:
+-        logging.info(f"Loading pack at {root.relative_to(PATH)}.")
++        logging.info(f"Loading pack at {root.relative_to(XDG_PATH)}.")
+ 
+         self.paths = PackPaths(root)
+ 

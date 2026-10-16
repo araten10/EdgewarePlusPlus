@@ -1,0 +1,55 @@
+app-id: io.github.araten10.EdgewarePlusPlus
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: start.sh
+
+finish-args:
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --socket=pulseaudio
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --socket=system-bus
+  - --share=network
+  - --filesystem=host
+
+modules:
+  - mpv.yml
+
+  - python-deps.json
+  - python3-tkinter.yml
+
+  - name: EdgewarePlusPlus
+    buildsystem: simple
+    build-commands:
+      - cp -r edgeware /app/share/
+
+      - install -Dm755 start.sh /app/bin/start.sh
+      - install -Dm644 -t /app/share/applications/ *.desktop
+
+      - mkdir -p /app/share/icons/hicolor/128x128/apps/
+      - python3 -c "from PIL import Image; Image.open('edgeware/assets/default_icon.ico').save('/app/share/icons/hicolor/128x128/apps/io.github.araten10.EdgewarePlusPlus.png')"
+      - python3 -c "from PIL import Image; Image.open('edgeware/assets/default_config_icon.ico').save('/app/share/icons/hicolor/128x128/apps/io.github.araten10.EdgewarePlusPlus.config.png')"
+      - python3 -c "from PIL import Image; Image.open('edgeware/assets/default_panic_icon.ico').save('/app/share/icons/hicolor/128x128/apps/io.github.araten10.EdgewarePlusPlus.panic.png')"
+
+    sources:
+      - type: archive
+        url: https://github.com/araten10/EdgewarePlusPlus/archive/v21.1.tar.gz
+        sha256: e4d56f09fd4c4068960afc6a1dae6402be7fe63d21b2e55b32751cf6ea9d1515
+
+      - type: patch
+        path: use-xdg-dirs.patch
+
+      - type: file
+        path: start.sh
+
+      - type: file
+        path: io.github.araten10.EdgewarePlusPlus.desktop
+
+      - type: file
+        path: io.github.araten10.EdgewarePlusPlus.config.desktop
+
+      - type: file
+        path: io.github.araten10.EdgewarePlusPlus.panic.desktop

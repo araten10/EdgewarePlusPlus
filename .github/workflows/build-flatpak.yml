@@ -1,0 +1,42 @@
+name: Build and Upload Flatpak
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build Flatpak (${{ matrix.variant.arch }})
+    runs-on: ${{ matrix.variant.runner }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+
+    strategy:
+      matrix:
+        variant:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-latest-arm
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Flatpak and flatpak-builder
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: EdgewarePlusPlus-${{ matrix.variant.arch }}.flatpak
+          manifest-path: flatpak/io.github.araten10.EdgewarePlusPlus.yml
+          arch: ${{ matrix.variant.arch }}
+
+      - name: Upload Flatpak to release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: EdgewarePlusPlus-${{ matrix.variant.arch }}.flatpak
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

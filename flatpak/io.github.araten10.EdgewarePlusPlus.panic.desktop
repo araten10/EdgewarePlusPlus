@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Edgeware++ Panic
+Exec=start.sh panic
+Icon=io.github.araten10.EdgewarePlusPlus.panic
+Categories=Utility;

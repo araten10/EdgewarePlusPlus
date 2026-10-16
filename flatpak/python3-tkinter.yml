@@ -1,0 +1,49 @@
+name: tkinter
+buildsystem: simple
+build-commands:
+  - pip3 install --prefix=${FLATPAK_DEST} --no-build-isolation .
+sources:
+  - type: git
+    url: https://github.com/iwalton3/tkinter-standalone
+    commit: 8e78e38ef0cceb44a3a0062e1c314a4ff3f981db
+modules:
+  - name: tcl
+    buildsystem: autotools
+    config-opts:
+      - --disable-zipfs
+    subdir: unix
+    post-install:
+      - chmod 755 /app/lib/libtcl*.so
+    cleanup:
+      - /bin
+      - /lib/pkgconfig
+      - /man
+    sources:
+      - type: archive
+        url: https://prdownloads.sourceforge.net/tcl/tcl9.0.3-src.tar.gz
+        sha256: 2537ba0c86112c8c953f7c09d33f134dd45c0fb3a71f2d7f7691fd301d2c33a6
+        x-checker-data:
+          type: anitya
+          project-id: 4941
+          stable-only: true
+          url-template: https://prdownloads.sourceforge.net/tcl/tcl$version-src.tar.gz
+  - name: tk
+    buildsystem: autotools
+    config-opts:
+      - --disable-zipfs
+    subdir: unix
+    post-install:
+      - chmod 755 /app/lib/libtcl*tk*.so
+    cleanup:
+      - /bin
+      - /lib/pkgconfig
+      - /man
+    sources:
+      - type: archive
+        url: https://prdownloads.sourceforge.net/tcl/tk9.0.3-src.tar.gz
+        sha256: bf344efadb618babb7933f69275620f72454d1c8220130da93e3f7feb0efbf9b
+        x-checker-data:
+          type: anitya
+          project-id: 11426
+          stable-only: true
+          url-template: https://prdownloads.sourceforge.net/tcl/tk$version-src.tar.gz

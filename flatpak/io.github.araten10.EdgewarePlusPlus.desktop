@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Edgeware++
+Exec=start.sh main_edgeware
+Icon=io.github.araten10.EdgewarePlusPlus
+Categories=Utility;
